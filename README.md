@@ -1,6 +1,6 @@
 # RacquetAI
 
-Record your racquet-sport matches (tennis / pickleball / badminton) and let AI keep the score.
+Record your racquet-sport matches (squash / tennis / pickleball / badminton) and let AI keep the score.
 iOS-first React Native app built on Expo SDK 57.
 
 ## Quickstart

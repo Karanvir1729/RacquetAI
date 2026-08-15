@@ -369,7 +369,7 @@ reflex:
 | **The whole store/dropshipping domain** — catalog, orders, payouts, storefronts, suppliers, AI store generation | Different product. Nothing from it appears in RacquetAI's code, copy, or assets. |
 | **Branding: mascot, palette, icon, splash, name** | RacquetAI has its own identity (`feat/branding`). The *token architecture* is inherited; the *values* are not. |
 | **The auth stack** — email/password, Google OAuth, Sign in with Apple, SecureStore JWT, session store, dev auto-login | v0 has no accounts. Recording happens on-device with nothing to log into. Adding auth later means re-deriving guideline 4.8 (offer Sign in with Apple if you offer another third-party login) and 5.1.1(v) (account deletion must actually delete) — both are pre-loaded in [07-app-store-prep.md](07-app-store-prep.md). |
-| **Push notifications** (`expo-notifications`, device-token registration, APNs credentials) | Nothing to notify about yet. It also drags in an APNs key, a backend endpoint, an App Privacy "Device ID" declaration, and a permission prompt — all cost, no v0 benefit. A `notification-icon.png` placeholder exists but is deliberately unreferenced in `app.json`. |
+| **Push notifications** (`expo-notifications`, device-token registration, APNs credentials) | Nothing to notify about yet. It also drags in an APNs key, a backend endpoint, an App Privacy "Device ID" declaration, and a permission prompt — all cost, no v0 benefit. A white-on-transparent `notification-icon.png` exists and is wired via the legacy `expo.notification` key (which needs no `expo-notifications` dependency — see docs/04 §"app.json wiring"); the *library*, its APNs credentials, and device-token registration remain uncopied. |
 | **The SSE-over-POST streaming client** and its hand-rolled parser | Exists solely to stream a server-side AI build. No RacquetAI surface streams. If AI scoring ever runs server-side and streams progress, that parser is a good reference — but write it against our own contract. |
 | **TanStack Query** | Server-state library with no server. `zustand` covers on-device state; Query arrives with the first backend, not before. |
 | **AsyncStorage draft persistence** | daybot needed it because a stateless intake conversation lived only in memory and a stray "+" destroyed it. Our recordings are files on disk — the persistence problem is different in kind. |
@@ -386,8 +386,9 @@ reflex:
 generated `ios/` directory. Verified against the source repo: it did not — `mobile/.gitignore`
 lists `/ios` and `/android` under "generated native folders" and `git ls-files mobile/ios`
 returns zero entries. **ADR-004's decision (CNG, native folders gitignored) is correct and
-unaffected**; only that one context sentence needs a fix from the file's owner. Noted here
-rather than edited because `06-decisions.md` belongs to the baseline lane.
+unaffected**; only that one context sentence needed fixing. *(Resolved: the post-merge audit
+corrected ADR-004's context paragraph on 2026-08-15; this note stays as the verification
+record.)*
 
 ---
 

@@ -310,7 +310,7 @@ Two things to know about the pipeline:
   root element pushes it out of that window and the file becomes "unsupported
   image format" with no hint as to why. The generator asserts this.
 
-`scripts/generate-placeholder-assets.js` is the baseline's solid-colour
-placeholder generator. It is **superseded** by this pipeline and still writes
-the old provisional palette and a now-retired `splash-icon.png`. Do not run it;
-it should be deleted by whoever owns `scripts/` on `main`.
+`scripts/generate-placeholder-assets.js` was the baseline's solid-colour
+placeholder generator, superseded by this pipeline. It was deleted on `main`
+(post-merge audit, 2026-08-15) because running it would have overwritten the
+real brand PNGs with the old provisional palette.
