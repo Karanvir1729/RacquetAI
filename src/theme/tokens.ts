@@ -1,7 +1,7 @@
 /**
  * RacquetAI design tokens — PROVISIONAL palette.
  *
- * The pattern is inherited from the daybot mobile app's ADR-010: every colour
+ * The pattern is inherited from a prior App-Store-shipped app (see docs/02): every colour
  * is a dark/light `DynamicColorIOS` pair, so iOS resolves the theme natively.
  * Module-scope `StyleSheet.create` keeps working, no hooks are needed, and
  * flipping the system setting restyles the app instantly
