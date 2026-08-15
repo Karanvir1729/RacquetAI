@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="RacquetAI">
+  <title>RacquetAI</title>
+  <!--
+    RacquetAI — monochrome mark.
+
+    One flat colour, no string bed: survives Android's monochrome tinting, the
+    Android notification silhouette, embroidery, laser etch and 1-bit print.
+    Grid, transform and ink box (287 x 400 on 512) are identical to mark.svg —
+    only the bed is dropped and every fill/stroke collapses to one colour, so
+    the two marks are interchangeable at any size.
+
+    Recolour by swapping the four #FFFFFF values: Chalk on dark surfaces,
+    Court Ink #06130E on light surfaces. See docs/04-branding.md.
+  -->
+  <!-- @mark-geometry:start -->
+  <g transform="translate(277.5 261.5) rotate(-30) scale(0.855) translate(0 -6)">
+    <ellipse cx="0" cy="-96" rx="116" ry="136" fill="none" stroke="#FFFFFF" stroke-width="40" />
+    <path d="M -61 19 L -20 128 M 61 19 L 20 128" fill="none" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round" />
+    <rect x="-26" y="112" width="52" height="152" rx="26" fill="#FFFFFF" />
+    <path transform="translate(0 -96) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#FFFFFF" />
+  </g>
+  <!-- @mark-geometry:end -->
+</svg>

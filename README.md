@@ -51,8 +51,9 @@ All three must be green before a commit lands on main.
   and iPad layout caps.
 - `src/lib/` — pure helpers (formatting, haptics, keyboard inset) with unit tests.
 - `docs/` — architecture, testing, ADRs, and plans.
-- `assets/brand/` — placeholder solid-colour art until real branding lands
-  (`node scripts/generate-placeholder-assets.js` regenerates them).
+- `assets/brand/` — icon, splash and adaptive-icon PNGs, generated from the SVG
+  masters in `assets/brand/src/` by `npm run assets` (see `docs/04-branding.md`).
+  Never hand-edit the PNGs; edit a master and re-run.
 
 ## Docs
 

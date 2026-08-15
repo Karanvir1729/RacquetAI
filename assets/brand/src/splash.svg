@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512" role="img" aria-label="RacquetAI">
+  <title>RacquetAI</title>
+  <!--
+    RacquetAI — splash composition.
+
+    Transparent background on purpose: expo-splash-screen paints Court Ink
+    (#06130E) behind this image, so one PNG covers every device size and can
+    never show a seam or a mismatched letterbox. The only addition over
+    mark.svg is a soft Optic halo behind the sweet spot; its gradient reaches
+    alpha 0 inside the canvas, so no hard square edge is ever visible.
+
+    Sizing: the mark is set at scale 0.700 (vs 0.855 in mark.svg) so its ink box
+    is 235 x 327 — 64% of the canvas height. At app.json `imageWidth: 180` that
+    puts the mark at ~115pt tall on device, which is the size Apple's launch
+    screen guidance and expo-splash-screen's centred layout both suit.
+    The outer translate is re-derived for the smaller scale so the ink box stays
+    centred on (256,256) exactly as it is in mark.svg.
+
+    Geometry between the @mark-geometry markers is a copy of mark.svg. Keep in sync.
+  -->
+  <defs>
+    <clipPath id="racquetai-bed">
+      <ellipse cx="0" cy="-96" rx="96" ry="116" />
+    </clipPath>
+    <radialGradient id="racquetai-halo">
+      <stop offset="0" stop-color="#D8FA3C" stop-opacity="0.22" />
+      <stop offset="0.45" stop-color="#D8FA3C" stop-opacity="0.08" />
+      <stop offset="1" stop-color="#D8FA3C" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <!-- @mark-geometry:start -->
+  <g transform="translate(273.6 260.5) rotate(-30) scale(0.7) translate(0 -6)">
+    <circle cx="0" cy="-96" r="300" fill="url(#racquetai-halo)" />
+    <g clip-path="url(#racquetai-bed)" stroke="#FFFFFF" stroke-opacity="0.24" stroke-width="8" stroke-linecap="round">
+      <path d="M -56 -240 V 40 M 0 -240 V 40 M 56 -240 V 40" />
+      <path d="M -130 -160 H 130 M -130 -96 H 130 M -130 -32 H 130" />
+    </g>
+    <ellipse cx="0" cy="-96" rx="116" ry="136" fill="none" stroke="#FFFFFF" stroke-width="40" />
+    <path d="M -61 19 L -20 128 M 61 19 L 20 128" fill="none" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round" />
+    <rect x="-26" y="112" width="52" height="152" rx="26" fill="#D8FA3C" />
+    <path transform="translate(0 -96) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#D8FA3C" />
+  </g>
+  <!-- @mark-geometry:end -->
+</svg>

@@ -7,7 +7,11 @@
     "icon": "./assets/brand/app-icon.png",
     "scheme": "racquetai",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#081711",
+    "backgroundColor": "#06130E",
+    "notification": {
+      "icon": "./assets/brand/notification-icon.png",
+      "color": "#D8FA3C"
+    },
     "ios": {
       "bundleIdentifier": "com.racquetai.app",
       "supportsTablet": true,
@@ -24,7 +28,7 @@
     "android": {
       "package": "com.racquetai.app",
       "adaptiveIcon": {
-        "backgroundColor": "#081711",
+        "backgroundColor": "#06130E",
         "foregroundImage": "./assets/brand/android-foreground.png",
         "monochromeImage": "./assets/brand/android-monochrome.png"
       },
@@ -40,8 +44,8 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#081711",
-          "image": "./assets/brand/splash-icon.png",
+          "backgroundColor": "#06130E",
+          "image": "./assets/brand/splash.png",
           "imageWidth": 180
         }
       ],
