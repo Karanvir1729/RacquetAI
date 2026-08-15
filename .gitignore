@@ -1,0 +1,23 @@
+# deps / build output
+node_modules/
+.expo/
+dist/
+web-build/
+ios/
+android/
+*.log
+
+# secrets — never commit these (lesson from daybot: keep credential files out of git)
+.env*
+credentials.json
+google-services.json
+play-service-account.json
+*.p8
+*.keystore
+*.jks
+
+# worktrees live inside the repo dir but are not content
+.worktrees/
+
+# os
+.DS_Store
