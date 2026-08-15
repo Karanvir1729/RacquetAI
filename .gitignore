@@ -19,5 +19,17 @@ play-service-account.json
 # worktrees live inside the repo dir but are not content
 .worktrees/
 
+# generated
+expo-env.d.ts
+.metro-health-check*
+*.tsbuildinfo
+npm-debug.*
+
+# more credential-class files
+*.p12
+*.pem
+*.mobileprovision
+*.key
+
 # os
 .DS_Store

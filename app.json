@@ -1,0 +1,68 @@
+{
+  "expo": {
+    "name": "RacquetAI",
+    "slug": "racquetai",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/brand/app-icon.png",
+    "scheme": "racquetai",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#081711",
+    "ios": {
+      "bundleIdentifier": "com.racquetai.app",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ]
+      }
+    },
+    "android": {
+      "package": "com.racquetai.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#081711",
+        "foregroundImage": "./assets/brand/android-foreground.png",
+        "monochromeImage": "./assets/brand/android-monochrome.png"
+      },
+      "userInterfaceStyle": "dark",
+      "softwareKeyboardLayoutMode": "resize"
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/brand/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#081711",
+          "image": "./assets/brand/splash-icon.png",
+          "imageWidth": 180
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "RacquetAI uses the camera to record your matches so you can review them and, later, have them scored automatically.",
+          "microphonePermission": "RacquetAI records match audio along with the video so playback includes the sound of the rally."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "RacquetAI saves finished match recordings to your photo library so your footage stays yours outside the app."
+        }
+      ],
+      "expo-video"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
