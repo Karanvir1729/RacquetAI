@@ -1,13 +1,17 @@
 /**
  * Scoring domain model — the contract between the future AI pipeline and the
  * app. The pipeline (docs/03-ai-scoring-plan.md) emits `ScoreEvent`s; the pure
- * per-sport state machines (tennis.ts today, pickleball/badminton later) fold
- * them into a `MatchScore`. Nothing in this file touches React Native, the
- * network, or any model runtime — it is plain data + types so the same code
- * runs in the app, in tests, and in the server-side results assembler.
+ * per-sport state machines (squash.ts and tennis.ts today, pickleball and
+ * badminton later) fold them into a `MatchScore`. Nothing in this file touches
+ * React Native, the network, or any model runtime — it is plain data + types
+ * so the same code runs in the app, in tests, and in the server-side results
+ * assembler.
+ *
+ * Squash is the primary sport (fixed-camera club courts, box leagues,
+ * let/stroke video review), so it is modelled first and most completely.
  */
 
-export type Sport = "tennis" | "pickleball" | "badminton";
+export type Sport = "squash" | "tennis" | "pickleball" | "badminton";
 
 /** The two opposing sides. Doubles is still two sides; players hang off the side. */
 export type Side = "A" | "B";
@@ -17,18 +21,11 @@ export const OTHER_SIDE: Record<Side, Side> = { A: "B", B: "A" };
 /** Where a score event came from — the correction UX depends on this. */
 export type ScoreEventSource = "ai" | "human";
 
-/**
- * One point, attributed to a side, anchored to a moment in the match video.
- * This is the pipeline's unit of output: everything downstream (game/set/match
- * score, timeline scrubbing, highlights) derives from an ordered list of these.
- */
-export interface ScoreEvent {
+interface ScoreEventBase {
   id: string;
-  /** Which side won the point/rally. */
-  winner: Side;
-  /** Seconds into the source video where the point ended (rally end). */
+  /** Seconds into the source video where the event happened (rally end / stoppage). */
   tSec: number;
-  /** Model confidence in the attribution, 0..1. Human corrections carry 1. */
+  /** Model confidence, 0..1. Human events carry 1. */
   confidence: number;
   source: ScoreEventSource;
   /**
@@ -38,8 +35,46 @@ export interface ScoreEvent {
   corrects?: string;
 }
 
-/** Below this confidence the app queues the point for human review. */
+/**
+ * One completed rally, attributed to a side. This is the pipeline's main unit
+ * of output: everything downstream (game/set/match score, timeline scrubbing,
+ * highlights) derives from an ordered list of these.
+ */
+export interface RallyEndEvent extends ScoreEventBase {
+  kind: "rally";
+  /** Which side won the rally. */
+  winner: Side;
+}
+
+/**
+ * Outcome of an interference appeal ("Let, please"):
+ * - "let"     → rally replayed, nobody scores;
+ * - "stroke"  → rally awarded to the appealing side;
+ * - "no-let"  → appeal denied, rally awarded to the other side.
+ */
+export type LetRuling = "let" | "stroke" | "no-let";
+
+/**
+ * A let/stroke decision — first-class because reviewing interference calls on
+ * video is the single most valuable refereeing use case in squash. The AI only
+ * DETECTS the stoppage and bookmarks it; the ruling itself always comes from a
+ * human (player, marker, or referee) via the review UX.
+ */
+export interface LetDecisionEvent extends ScoreEventBase {
+  kind: "let-decision";
+  /** The side that appealed for the let. */
+  appealer: Side;
+  ruling: LetRuling;
+}
+
+export type ScoreEvent = RallyEndEvent | LetDecisionEvent;
+
+/** Below this confidence the app queues an AI event for human review. */
 export const REVIEW_CONFIDENCE_THRESHOLD = 0.75;
+
+export function needsReview(event: ScoreEvent): boolean {
+  return event.source === "ai" && event.confidence < REVIEW_CONFIDENCE_THRESHOLD;
+}
 
 export type MatchStatus =
   | "recorded" // video exists, no analysis attempted
@@ -65,7 +100,52 @@ export interface Match {
 }
 
 // ---------------------------------------------------------------------------
-// Per-sport score state shapes
+// Squash (PRIMARY) — PAR-11: point-a-rally, first to 11, win by 2, best of 5
+// ---------------------------------------------------------------------------
+
+/** The service box the next serve is struck from. */
+export type ServeBox = "left" | "right";
+
+export interface SquashConfig {
+  /** Points to win a game (11 in PAR-11); always win by 2, no cap. */
+  pointsPerGame: number;
+  /** Games to win the match (3 = best of 5). */
+  gamesToWin: number;
+}
+
+export const DEFAULT_SQUASH_CONFIG: SquashConfig = {
+  pointsPerGame: 11,
+  gamesToWin: 3,
+};
+
+export interface SquashScore {
+  sport: "squash";
+  config: SquashConfig;
+  /** Current-game points (every rally scores — point-a-rally). */
+  points: Record<Side, number>;
+  /** Games won so far. */
+  games: Record<Side, number>;
+  /** Completed games as final point counts, oldest first (e.g. [{A:11,B:7}]). */
+  gameHistory: Record<Side, number>[];
+  /**
+   * The serving side ("hand-in") for the next rally; the receiver is
+   * `OTHER_SIDE[server]`. Rally winner always serves next: a retained serve
+   * alternates boxes, losing the rally hands the serve out.
+   */
+  server: Side;
+  serveBox: ServeBox;
+  /**
+   * True at game start and right after a handout: the (new) server may pick
+   * either box (`chooseSquashServeBox`). While retaining serve the box
+   * alternates automatically and no choice is open.
+   */
+  serverMayChooseBox: boolean;
+  /** Set once a side has won `config.gamesToWin` games. */
+  winner: Side | null;
+}
+
+// ---------------------------------------------------------------------------
+// Tennis (SECONDARY)
 // ---------------------------------------------------------------------------
 
 /** Tennis point score within a standard (non-tiebreak) game. */
@@ -103,6 +183,10 @@ export interface TennisScore {
   winner: Side | null;
 }
 
+// ---------------------------------------------------------------------------
+// Later sports — shapes reserved so the UI can switch exhaustively
+// ---------------------------------------------------------------------------
+
 /** Pickleball: traditional side-out scoring to 11, win by 2. */
 export interface PickleballScore {
   sport: "pickleball";
@@ -125,4 +209,33 @@ export interface BadmintonScore {
 }
 
 /** Discriminated on `sport`, so UI can switch exhaustively. */
-export type MatchScore = TennisScore | PickleballScore | BadmintonScore;
+export type MatchScore = SquashScore | TennisScore | PickleballScore | BadmintonScore;
+
+// ---------------------------------------------------------------------------
+// The one shared interface every sport sits behind
+// ---------------------------------------------------------------------------
+
+/**
+ * A pure score state machine for one sport. Callers (scoreboard UI, review
+ * UX, server-side assembler) only ever talk to this interface via
+ * `getScoreEngine(sport)` — adding pickleball/badminton later means writing a
+ * new engine, not touching callers.
+ *
+ * Laws every engine must obey (enforced by the shared engine tests):
+ * - `apply` never mutates its input and is total: events after the match is
+ *   decided are no-ops, so trailing AI events stay harmless when a human
+ *   correction shortens the match;
+ * - `reduce(events)` === events folded over `apply` from `initial()` —
+ *   corrections are just "edit the list and re-fold".
+ */
+export interface ScoreEngine<S extends MatchScore = MatchScore> {
+  readonly sport: Sport;
+  /** Fresh pre-first-rally state. */
+  initial(): S;
+  /** Fold one event into the state. */
+  apply(state: S, event: ScoreEvent): S;
+  /** Fold an ordered event stream from scratch. */
+  reduce(events: readonly ScoreEvent[]): S;
+  /** One-line scoreboard string for the current state. */
+  summary(state: S): string;
+}

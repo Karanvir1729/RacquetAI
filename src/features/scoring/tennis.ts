@@ -13,11 +13,16 @@
  * sets with a tiebreak at gamesPerSet-all, and best-of-N match completion are
  * implemented. Not yet modelled: serve tracking, match tiebreaks in lieu of a
  * final set, and no-ad scoring — see docs/03-ai-scoring-plan.md.
+ *
+ * Let/stroke decision events are a squash concept; tennis treats every
+ * `let-decision` as a replayed point (a let), i.e. a score no-op. Hindrance
+ * calls, if we ever model them, get their own event kind.
  */
 
 import {
   DEFAULT_TENNIS_CONFIG,
   OTHER_SIDE,
+  ScoreEngine,
   ScoreEvent,
   Side,
   TennisConfig,
@@ -41,13 +46,23 @@ export function createTennisScore(config: TennisConfig = DEFAULT_TENNIS_CONFIG):
 
 /** Fold an ordered event stream into a score. Events after match point are ignored. */
 export function reduceTennisEvents(
-  events: readonly Pick<ScoreEvent, "winner">[],
+  events: readonly ScoreEvent[],
   config: TennisConfig = DEFAULT_TENNIS_CONFIG,
 ): TennisScore {
   return events.reduce<TennisScore>(
-    (score, e) => applyTennisPoint(score, e.winner),
+    (score, e) => applyTennisEvent(score, e),
     createTennisScore(config),
   );
+}
+
+/** Fold one pipeline event. Decision events are score no-ops in tennis. */
+export function applyTennisEvent(score: TennisScore, event: ScoreEvent): TennisScore {
+  switch (event.kind) {
+    case "rally":
+      return applyTennisPoint(score, event.winner);
+    case "let-decision":
+      return score;
+  }
 }
 
 /**
@@ -155,3 +170,25 @@ export function formatTennisGame(score: TennisScore): string {
   if (B === "AD") return "Ad B";
   return `${A}-${B}`;
 }
+
+/** One-line scoreboard: "sets 1-0 · games 3-2 · 40-15" / "B wins 2-1". */
+export function formatTennisScore(score: TennisScore): string {
+  if (score.winner) {
+    const w = score.winner;
+    return `${w} wins ${score.sets[w]}-${score.sets[OTHER_SIDE[w]]}`;
+  }
+  return (
+    `sets ${score.sets.A}-${score.sets.B}` +
+    ` · games ${score.games.A}-${score.games.B}` +
+    ` · ${formatTennisGame(score)}`
+  );
+}
+
+/** The tennis engine behind the shared per-sport interface. */
+export const tennisEngine: ScoreEngine<TennisScore> = {
+  sport: "tennis",
+  initial: () => createTennisScore(),
+  apply: applyTennisEvent,
+  reduce: (events) => reduceTennisEvents(events),
+  summary: formatTennisScore,
+};

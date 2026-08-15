@@ -1,10 +1,12 @@
 import {
+  applyTennisEvent,
   applyTennisPoint,
   createTennisScore,
   formatTennisGame,
   reduceTennisEvents,
 } from "../tennis";
 import { Side, TennisScore } from "../types";
+import { decision, rally } from "./fixtures";
 
 /** Apply `n` consecutive points for `side`. */
 function winPoints(score: TennisScore, side: Side, n: number): TennisScore {
@@ -169,11 +171,17 @@ describe("match completion", () => {
 
 describe("reduceTennisEvents", () => {
   it("folds an ordered event stream into the same state as manual application", () => {
-    const events = Array.from({ length: 8 }, (_, i) => ({ winner: (i % 2 ? "B" : "A") as Side }));
+    const events = Array.from({ length: 8 }, (_, i) => rally(i % 2 ? "B" : "A"));
     const folded = reduceTennisEvents(events);
     const manual = events.reduce((s, e) => applyTennisPoint(s, e.winner), createTennisScore());
     expect(folded).toEqual(manual);
     expect(folded.games).toEqual({ A: 0, B: 0 });
     expect(folded.points).toEqual({ A: "40", B: "40" });
+  });
+
+  it("treats let-decision events (a squash concept) as replayed points", () => {
+    const mid = applyTennisPoint(createTennisScore(), "A");
+    expect(applyTennisEvent(mid, decision("B", "stroke"))).toBe(mid);
+    expect(applyTennisEvent(mid, decision("B", "no-let"))).toBe(mid);
   });
 });

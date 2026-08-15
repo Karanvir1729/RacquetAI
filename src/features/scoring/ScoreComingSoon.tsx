@@ -12,8 +12,8 @@ import { colors, radius, spacing, type } from "@/theme/tokens";
  * The honest pre-AI Score tab. Nothing here pretends to work: the copy says
  * scoring is in development, the walkthrough explains what will happen, and
  * the CTA is visibly disabled. The real pipeline is specced in
- * docs/03-ai-scoring-plan.md; its on-device contract (ScoreEvent → state
- * machine) already exists in ./types.ts and ./tennis.ts.
+ * docs/03-ai-scoring-plan.md; its on-device contract (ScoreEvent → per-sport
+ * state machine) already exists in ./types.ts, ./squash.ts, and ./tennis.ts.
  */
 export function ScoreComingSoon() {
   return (
@@ -27,8 +27,8 @@ export function ScoreComingSoon() {
           <Text style={styles.badgeText}>In development</Text>
         </View>
         <Text style={styles.heroNote}>
-          Soon RacquetAI will watch your match videos and keep score for you — tennis first,
-          pickleball and badminton after. Nothing to set up now: every match you record is ready
+          Soon RacquetAI will watch your match videos and keep score for you — squash first, then
+          tennis, pickleball, and badminton. Nothing to set up now: every match you record is ready
           for scoring the day it ships.
         </Text>
       </View>
@@ -39,19 +39,19 @@ export function ScoreComingSoon() {
           n={1}
           icon="videocam-outline"
           title="Record a match"
-          caption="Film from the Record tab — a phone on a tripod behind the baseline is enough."
+          caption="Film from the Record tab — your club's fixed camera behind the glass, or a phone on a tripod, is enough."
         />
         <Step
           n={2}
           icon="eye-outline"
           title="AI watches the video"
-          caption="It finds the court, follows the players and the ball, and works out who won each point."
+          caption="It finds the court, follows both players rally by rally, and works out who won each point."
         />
         <Step
           n={3}
           icon="analytics-outline"
           title="Point-by-point timeline"
-          caption="Get the full score, jump the video to any point, and fix anything the AI got wrong."
+          caption="Get the full score, jump the video to any rally — let and stroke calls included — and fix anything the AI got wrong."
         />
       </Card>
 
@@ -62,7 +62,9 @@ export function ScoreComingSoon() {
           icon="podium-outline"
         />
         <Button label="Analyze a match" onPress={noop} disabled />
-        <Text style={styles.ctaNote}>Not available yet — this button unlocks with the AI update.</Text>
+        <Text style={styles.ctaNote}>
+          Not available yet — this button unlocks with the AI update.
+        </Text>
       </Card>
     </Screen>
   );
