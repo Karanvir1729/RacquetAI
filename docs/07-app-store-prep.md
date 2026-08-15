@@ -19,7 +19,7 @@ Verify these are still true before submitting; do not redo them.
 
 - [x] Bundle identifier `com.racquetai.app`, scheme `racquetai://`, portrait-primary
 - [x] `ios.supportsTablet: true` with the full `UISupportedInterfaceOrientations~ipad` array
-      (ADR-002) — **this makes an iPad screenshot set mandatory, see §7**
+      (ADR-002) — **this makes an iPad screenshot set mandatory, see §6**
 - [x] `ITSAppUsesNonExemptEncryption: false` — standard HTTPS only, so **export compliance
       needs no uploaded documentation** and no per-build questionnaire answer
 - [x] Permission purpose strings for camera, microphone, and photo-library-add, declared
@@ -35,7 +35,22 @@ Verify these are still true before submitting; do not redo them.
 
 ## 2. Apple Developer & App Store Connect — setup order
 
-Order matters. Each step below is blocked by the one above it.
+Order matters. Each step below is blocked by the one above it. The dependency chain, so it is
+obvious what a skipped step costs:
+
+| # | Step | Blocks |
+|---|---|---|
+| 1 | Developer Program membership active | everything |
+| 2 | Agreements accepted | submission |
+| 3 | App ID registered | signing, EAS credentials |
+| 4 | App Store Connect app record created | build upload, listing, App Privacy |
+| 5 | `eas init` — EAS project linked | any build; anything project-id-gated |
+| 6 | Signing credentials | production build |
+| 7 | Production build (§4) | screenshots, TestFlight, upload |
+| 8 | Screenshots from *that* build (§6) | listing completeness |
+| 9 | Listing + the four §7 blockers | the Submit button |
+
+**Do not capture screenshots before step 7** — they must come from a release build.
 
 - [ ] **[operator] Apple Developer Program membership active.** Confirm it is not within a
       renewal window — an expired membership silently breaks signing.
@@ -129,6 +144,8 @@ a submission gate.
 - [ ] **iPad 13"** — 2064×2752. **Mandatory because `supportsTablet` is true (ADR-002).**
       **An 11" iPad set is NOT an accepted substitute** — daybot learned this while fixing the
       iPad rejection, and it is the kind of thing that fails an upload at the last minute.
+      Note that App Store Connect's device key for this slot still carries a legacy 12.9" name;
+      the display size Apple actually wants is 13". Match the pixel dimensions, not the label.
 - [ ] Screenshots must match what the app actually does on first launch. A shot of a state the
       reviewer cannot reach is its own 2.3.3 rejection.
 - [ ] Suggested set for v0: (1) the record screen framed on a court; (2) mid-recording with the
@@ -225,9 +242,19 @@ sidesteps them — which is exactly why they are easy to walk into later.
 - [ ] **Guideline 4 — iPad layout.** Already answered by ADR-002 and `layout.ts`. Keep every
       new screen on `Screen` / `column()`, and give each UI change an iPad simulator pass.
       This is the one that actually rejected daybot.
-- [ ] **Guideline 5.1.1 — permission purpose strings** must describe the real use. Ours do;
-      re-read them if the feature set changes. Requesting a permission the app does not
-      visibly need is a rejection.
+- [ ] **Guideline 5.1.1 — permissions.** This is RacquetAI's largest review surface and the one
+      with no inherited experience behind it: daybot used no permission APIs at all, so nothing
+      in its history covers this. Four rules:
+      - **Purpose strings describe the real use, in the user's terms.** Generic phrasing
+        ("This app needs camera access") is a rejection. Ours are set through the config-plugin
+        blocks in `app.json` — never by hand-editing a plist, because `ios/` is regenerated
+        (ADR-004) and a hand edit vanishes at the next prebuild.
+      - **Ask in context**, at the moment the user taps record — not at cold launch.
+      - **Denial is a real state.** A clear explanation plus a route to Settings, never a frozen
+        or blank screen. A reviewer who denies the prompt and hits a dead end files a 2.1.
+      - **Keep photo-library access add-only.** Do not request read access unless a feature
+        genuinely reads the library; add-only is a weaker prompt *and* a weaker privacy answer.
+        Requesting a permission the app does not visibly need is itself a rejection.
 - [ ] **Guideline 5.1.1(v) — account deletion.** *Only when accounts exist:* the app must offer
       in-app deletion that genuinely deletes. daybot's "deletion" left the account restorable
       via OAuth, left public content live, and orphaned device tokens. If Sign in with Apple is
@@ -309,3 +336,25 @@ forced** — daybot's 1.1 stalled for weeks by discovering it out of order.
 - [ ] Delete any throwaway accounts created during debugging.
 - [ ] Write the retro into [06-decisions.md](06-decisions.md) as an ADR if anything here turned
       out to be wrong — that is exactly how this document came to exist.
+
+---
+
+## 14. If it gets rejected
+
+It happened to daybot on its first submission and it is a normal cost, not a catastrophe. What
+matters is not burning a second cycle.
+
+- [ ] **Read the cited guideline itself**, not the summary in the notification. The number is
+      the only precise part of the message.
+- [ ] **Assume the citation is a lower bound.** Reviewers stop at the first blocker, so a
+      one-line rejection can be hiding several violations. daybot's second attempt bundled a
+      full guideline audit alongside the actual fix and turned up unrelated problems that would
+      have caused a third round-trip — including a promo-code surface that unlocked a paid tier
+      without StoreKit.
+- [ ] **"The last reviewer did not flag it" is not a clearance.** Nothing is grandfathered.
+- [ ] Reproduce the reviewer's exact conditions before believing you have fixed it — the right
+      device class, a clean install, permissions in their initial state, no developer tooling
+      attached.
+- [ ] Fix in the binary, then **update the review notes** to say what changed and where to look.
+- [ ] Reply in Resolution Center the same day. Review turnaround is the scarce resource here,
+      not engineering time.
