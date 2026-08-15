@@ -1,5 +1,5 @@
 /**
- * RacquetAI design tokens — PROVISIONAL palette.
+ * RacquetAI design tokens — final palette. See docs/04-branding.md.
  *
  * The pattern is inherited from a prior App-Store-shipped app (see docs/02): every colour
  * is a dark/light `DynamicColorIOS` pair, so iOS resolves the theme natively.
@@ -9,10 +9,11 @@
  * of DynamicColorIOS, so it pins the dark palette until an Appearance-listener
  * pass is done (app.json android.userInterfaceStyle matches).
  *
- * The palette itself is a placeholder: deep court green canvas, high-contrast
- * text, optic-yellow accent (the tennis-ball colour). The feat/branding
- * worktree finalises exact hex values — which only works if every colour in
- * the app is read from a token. NEVER hardcode a colour in a component.
+ * The palette is Court Ink (#06130E) canvas, Chalk text, and one electric
+ * accent — Optic (#D8FA3C), the tennis-ball colour. These hex values are the
+ * same ones the brand SVGs in assets/brand/src/ are drawn with; changing a
+ * colour here means regenerating the assets. NEVER hardcode a colour in a
+ * component — every colour in the app is read from this file.
  *
  * Rules that matter:
  * - Accent fills always carry `onAccent` (ink) text.
@@ -28,37 +29,37 @@ function dyn(dark: string, light: string): ColorValue {
 }
 
 export const colors = {
-  // canvas & surfaces
-  bg: dyn("#081711", "#f2f6f1"),
-  panel: dyn("#0c1f17", "#ffffff"),
-  card: dyn("rgba(255,255,255,0.03)", "#ffffff"),
-  cardRaised: dyn("rgba(255,255,255,0.05)", "rgba(8,23,17,0.04)"),
-  chip: dyn("rgba(16,32,24,0.72)", "rgba(255,255,255,0.86)"),
+  // canvas & surfaces — Court Ink / Chalk Wash
+  bg: dyn("#06130E", "#F4F7F3"),
+  panel: dyn("#0B2119", "#FFFFFF"),
+  card: dyn("rgba(255,255,255,0.03)", "#FFFFFF"),
+  cardRaised: dyn("rgba(255,255,255,0.05)", "rgba(6,19,14,0.04)"),
+  chip: dyn("rgba(12,42,30,0.72)", "rgba(255,255,255,0.86)"),
 
   // hairlines
-  line: dyn("rgba(255,255,255,0.09)", "rgba(8,23,17,0.10)"),
-  line2: dyn("rgba(255,255,255,0.16)", "rgba(8,23,17,0.18)"),
+  line: dyn("rgba(255,255,255,0.09)", "rgba(6,19,14,0.10)"),
+  line2: dyn("rgba(255,255,255,0.16)", "rgba(6,19,14,0.18)"),
 
   // text
-  text: dyn("rgba(255,255,255,0.92)", "#0b1a13"),
-  textDim: dyn("rgba(255,255,255,0.62)", "rgba(11,26,19,0.62)"),
-  textFaint: dyn("rgba(255,255,255,0.45)", "rgba(11,26,19,0.42)"),
-  watermark: dyn("rgba(255,255,255,0.06)", "rgba(8,23,17,0.08)"),
+  text: dyn("rgba(255,255,255,0.92)", "#08160F"),
+  textDim: dyn("rgba(255,255,255,0.62)", "rgba(8,22,15,0.62)"),
+  textFaint: dyn("rgba(255,255,255,0.45)", "rgba(8,22,15,0.42)"),
+  watermark: dyn("rgba(255,255,255,0.06)", "rgba(6,19,14,0.08)"),
 
-  // brand accent (optic yellow — the fill is constant; accent TEXT deepens on light)
-  accent: dyn("#d7f651", "#d7f651"),
-  accentText: dyn("#e2f97a", "#3f7d20"),
-  accentSoft: dyn("rgba(215,246,81,0.12)", "rgba(63,125,32,0.12)"),
-  onAccent: dyn("#081711", "#0b140a"),
-  glow: dyn("rgba(215,246,81,0.35)", "rgba(63,125,32,0.25)"),
+  // brand accent (Optic — the fill is constant; accent TEXT deepens on light)
+  accent: dyn("#D8FA3C", "#D8FA3C"),
+  accentText: dyn("#EBFF8C", "#1F6B4A"),
+  accentSoft: dyn("rgba(216,250,60,0.12)", "rgba(31,107,74,0.12)"),
+  onAccent: dyn("#06130E", "#06130E"),
+  glow: dyn("rgba(216,250,60,0.35)", "rgba(31,107,74,0.22)"),
 
   // recording indicator + status
-  danger: dyn("#ff7a7a", "#d3392f"),
-  dangerSoft: dyn("rgba(255,122,122,0.12)", "rgba(211,57,47,0.10)"),
+  danger: dyn("#FF6B6B", "#C62F26"),
+  dangerSoft: dyn("rgba(255,107,107,0.12)", "rgba(198,47,38,0.10)"),
 
   // literal white surfaces that must NOT flip with the theme (switch thumbs)
-  surfaceWhite: "#ffffff" as ColorValue,
-  inkOnWhite: "#081711" as ColorValue,
+  surfaceWhite: "#FFFFFF" as ColorValue,
+  inkOnWhite: "#06130E" as ColorValue,
 } as const;
 
 export const spacing = {
@@ -77,7 +78,8 @@ export const radius = {
   pill: 999,
 } as const;
 
-/** Provisional type scale — weights 400 / 600 / 800 until branding lands. */
+/** Type scale — the platform UI face (SF on iOS, Roboto on Android) at weights
+ *  400 / 600 / 800. RacquetAI ships no custom font; see docs/04-branding.md. */
 export const type = {
   display: { fontSize: 34, fontWeight: "800" as const, letterSpacing: -1.2, lineHeight: 36 },
   title: { fontSize: 26, fontWeight: "800" as const, letterSpacing: -0.8 },
@@ -105,12 +107,13 @@ export const cardShadow = {
  * Accent halo (offset-0 glow). iOS `shadow*` props don't render on Android and
  * `elevation` cannot produce a centered glow, so Android uses the RN 0.76+
  * `boxShadow` string — iOS keeps its original shadow rendering untouched.
- * The rgb is the optic-yellow accent (#d7f651); a boxShadow string can't read
- * a token, so feat/branding must update this literal with the palette.
+ * The rgb below is Optic #D8FA3C spelled out in decimal: a boxShadow string
+ * cannot read a `DynamicColorIOS` token, so this literal is the one place the
+ * accent is duplicated. Change it whenever `colors.accent` changes.
  */
 export function accentGlow(opacity: number, radiusPx: number, offsetY = 0) {
   return Platform.OS === "android"
-    ? { boxShadow: `0 ${offsetY}px ${radiusPx}px rgba(215,246,81,${opacity})` }
+    ? { boxShadow: `0 ${offsetY}px ${radiusPx}px rgba(216,250,60,${opacity})` }
     : {
         shadowColor: colors.accent,
         shadowOpacity: opacity,
