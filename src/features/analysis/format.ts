@@ -47,5 +47,8 @@ export function prettyPattern(pattern: string): string {
  */
 export function heatOpacity(value: number): number {
   const safe = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
-  return 0.06 + 0.94 * safe;
+  // sqrt lifts the mid-range: most cells sit at 5-30% of the max cell, and a
+  // linear ramp left the whole map nearly invisible on the light theme.
+  if (safe === 0) return 0.05;
+  return 0.15 + 0.85 * Math.sqrt(safe);
 }

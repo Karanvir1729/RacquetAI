@@ -33,6 +33,8 @@ export function CoverageGrid({ heatmap }: CoverageGridProps) {
             ))}
           </View>
         ))}
+        {/* Short line at 5.44m of the 9.75m court, front wall at the top. */}
+        <View pointerEvents="none" style={styles.shortLine} />
       </View>
       <Text style={styles.legend}>Brighter = more time spent there</Text>
     </View>
@@ -46,5 +48,13 @@ const styles = StyleSheet.create({
   grid: { width: "100%", maxWidth: 220, alignSelf: "center", gap: 2 },
   row: { flexDirection: "row", gap: 2 },
   cell: { flex: 1, aspectRatio: 1, borderRadius: 3, backgroundColor: colors.accent },
+  shortLine: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: "55.8%",
+    height: 1,
+    backgroundColor: colors.line2,
+  },
   legend: { ...type.caption, color: colors.textFaint, textAlign: "center" },
 });

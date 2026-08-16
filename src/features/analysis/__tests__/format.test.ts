@@ -53,14 +53,14 @@ describe("prettyPattern", () => {
 
 describe("heatOpacity", () => {
   it("maps 0..1 coverage onto the visible opacity ramp", () => {
-    expect(heatOpacity(0)).toBeCloseTo(0.06);
-    expect(heatOpacity(0.5)).toBeCloseTo(0.53);
+    expect(heatOpacity(0)).toBeCloseTo(0.05);
+    expect(heatOpacity(0.5)).toBeCloseTo(0.15 + 0.85 * Math.sqrt(0.5));
     expect(heatOpacity(1)).toBeCloseTo(1);
   });
 
   it("clamps garbage to the floor and ceiling", () => {
-    expect(heatOpacity(-1)).toBeCloseTo(0.06);
+    expect(heatOpacity(-1)).toBeCloseTo(0.05);
     expect(heatOpacity(2)).toBeCloseTo(1);
-    expect(heatOpacity(Number.NaN)).toBeCloseTo(0.06);
+    expect(heatOpacity(Number.NaN)).toBeCloseTo(0.05);
   });
 });
