@@ -33,3 +33,7 @@ npm-debug.*
 
 # os
 .DS_Store
+
+# analysis pipeline artifacts
+analysis/samples/
+analysis/.venv/

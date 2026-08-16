@@ -1,0 +1,8 @@
+rtmlib
+onnxruntime
+opencv-python
+librosa
+numpy
+soundfile
+matplotlib
+scipy

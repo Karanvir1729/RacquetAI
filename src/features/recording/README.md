@@ -10,8 +10,9 @@ main.
 
 ```
 <documents>/recordings/
-  rec-20260815-142312-x7k2.mov    the video (extension from the camera: .mov iOS, .mp4 Android)
-  rec-20260815-142312-x7k2.json   sidecar (schema v1): { v, id, createdAt, durationSec, sport, videoName }
+  rec-20260815-142312-x7k2.mov            the video (extension from the camera: .mov iOS, .mp4 Android)
+  rec-20260815-142312-x7k2.json           sidecar (schema v1): { v, id, createdAt, durationSec, sport, videoName }
+  rec-20260815-142312-x7k2.analysis.json  optional — analysis pipeline output (features/analysis contract)
 ```
 
 The directory listing **is** the database. Each take is a video + sidecar pair sharing an id
@@ -41,8 +42,14 @@ source of truth to reconcile.
 | `RecordControls.tsx` | Record button (white ring, red core, circle ↔ square morph), flip button, elapsed badge. |
 | `SportChips.tsx` | Optional sport tag over the preview; squash leads, default stays "unspecified". |
 | `PermissionGate.tsx` | First-use explainer → system prompts; hard denial → "Open Settings" (expo-linking); plus the no-camera state. |
-| `LibraryScreen.tsx` | Newest-first list, tap → player, swipe-left or trash → confirmed delete, empty/loading/error states. |
+| `LibraryScreen.tsx` | Newest-first list, tap → player, swipe-left or trash → confirmed delete, empty/loading/error states; View-analysis affordance on analyzed takes. |
 | `PlayerModal.tsx` | Full-screen expo-video playback (`useVideoPlayer` + `VideoView`), save-to-Photos behind an explicit button. |
+| `DemoAnalysisCard.tsx` | Persistent "Sample" teaser above the list — opens `/analysis?source=demo` (navigates by route; no cross-feature import). |
+
+Since the Match Analysis feature landed, `recordingsDirectory` lives in `src/lib/recordingsDir`
+(promoted so `features/analysis` can locate `<id>.analysis.json` sidecars via
+`src/lib/analysisSidecar` without importing this feature's internals); `storage.ts` imports it
+from there.
 
 ## Behaviour notes
 

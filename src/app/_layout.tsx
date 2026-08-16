@@ -55,6 +55,9 @@ export default function RootLayout() {
               name="settings"
               options={{ title: "Settings", tabBarIcon: tabIcon("settings") }}
             />
+            {/* Match analysis — reached from Library cards, never the tab bar
+                (href: null hides it there); see features/analysis. */}
+            <Tabs.Screen name="analysis" options={{ href: null }} />
           </Tabs>
           {/* iOS: "auto" = light icons on the dark theme, dark icons on the
               light one. Android pins the dark palette (tokens.ts dyn()), so

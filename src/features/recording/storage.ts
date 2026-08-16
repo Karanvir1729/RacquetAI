@@ -2,17 +2,22 @@
  * On-disk recording store, built on the expo-file-system object API.
  *
  * Layout: `<documents>/recordings/<id>.<ext>` + `<id>.json` sidecar (schema in
- * types.ts). The documents directory is the sandbox location iOS never purges,
- * unlike the cache directory expo-camera records into. There is no central
- * index — the directory listing IS the database — so the store can never
- * disagree with the files that actually exist.
+ * types.ts). The analysis pipeline may add a third file per take,
+ * `<id>.analysis.json` (read via src/lib/analysisSidecar — the directory
+ * location itself is promoted to src/lib/recordingsDir so features/analysis
+ * can share it). The documents directory is the sandbox location iOS never
+ * purges, unlike the cache directory expo-camera records into. There is no
+ * central index — the directory listing IS the database — so the store can
+ * never disagree with the files that actually exist.
  *
  * Everything here is synchronous on purpose: the new FileSystem API is
  * sync-first, sidecars are a few hundred bytes, and moving the finished video
  * out of the camera cache is a same-volume rename, not a copy. Callers wrap
  * calls in try/catch — disk errors throw.
  */
-import { Directory, File, Paths } from "expo-file-system";
+import { File, type Directory } from "expo-file-system";
+
+import { recordingsDirectory } from "@/lib/recordingsDir";
 
 import { parseMetadata, serializeMetadata } from "./metadata";
 import {
@@ -23,10 +28,6 @@ import {
   videoFileName,
 } from "./naming";
 import type { RecordingEntry, RecordingMetadata, Sport } from "./types";
-
-export function recordingsDirectory(): Directory {
-  return new Directory(Paths.document, "recordings");
-}
 
 function ensureDirectory(): Directory {
   const dir = recordingsDirectory();
