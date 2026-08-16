@@ -88,3 +88,28 @@ orientation, bundle identifiers, splash, icons.
 config plugin or an `app.json` key. If a change genuinely can't be expressed that way, that's
 the trigger to write a custom config plugin, not to commit `ios/`. `npx expo prebuild --clean`
 is always safe to run.
+
+---
+
+## ADR-005: Patch-bump the matrix to Expo's blessed SDK 57 versions
+
+**Date:** 2026-08-15 · **Status:** accepted · **Amends:** ADR-001
+
+**Context.** First simulator run in Expo Go segfaulted natively (`EXC_BAD_ACCESS` in
+`worklets::JSIWorkletsModuleProxy` via Hermes) on every launch. Expo Go for SDK 57 embeds
+the *native* side of reanimated 4.5.1 / worklets 0.10.1; our JS side was pinned at
+4.5.0 / 0.10.0 per ADR-001. Worklets requires its JS and native halves to match exactly —
+a patch-level skew is enough to crash. The predecessor never hit this because it only ran
+as a native dev-client build, never inside Expo Go.
+
+**Decision.** Align to what `npx expo install --check` blesses for SDK 57 today:
+react-native 0.86.2, react-native-reanimated 4.5.1, react-native-worklets 0.10.1,
+jest-expo ^57.0.4 (+ explicit `@react-native/jest-preset` ^0.86.2 devDependency to satisfy
+its peer), @types/jest 29.5.14. This also dissolves ADR-001's jest-expo 57.0.2 divergence:
+that pin existed only because of RN 0.86.0's peerOptional conflict, which 0.86.2 resolves.
+
+**Consequences.** ADR-001's matrix-not-package upgrade policy stands — this was one
+coordinated bump, verified with the full check suite (tsc, lint, 89/89 jest, expo export)
+plus a live Expo Go simulator pass of all four tabs in light and dark mode. When a native
+dev-client build ships, Expo Go alignment stops being a constraint, but staying on the
+`expo install --check` versions remains the default.
