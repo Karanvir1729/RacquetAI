@@ -2,50 +2,55 @@
   <title>RacquetAI</title>
   <!--
     RacquetAI — app icon composition.
-
+    
     The background is part of the master, not something the script paints, so
-    that what you open in a browser is exactly what ships to the App Store.
-    It is a Court Ink field lit from the top (the deep green of a glass-backed
-    show court under lights) with one Optic bloom sitting behind the sweet
-    spot. No text, no rounded corners, no drop shadow: iOS and Android both
-    apply their own mask, and anything baked in fights it.
-
-    Sizing: the mark is set at scale 0.788 so its ink box is 72% of the canvas
-    height. Apple's grid wants the artwork to breathe inside the squircle —
-    at 72% the grip clears the corner radius at every rendered size, and the
-    icon still reads at 40px in Spotlight.
-    The outer translate is re-derived for this scale so the ink box stays
-    centred on (256,256) exactly as it is in mark.svg.
-
-    Geometry between the @mark-geometry markers is a copy of mark.svg. Keep in sync.
+    what you open in a browser is exactly what ships to the App Store. A Court
+    Ink field lit from the top (a glass backed show court under lights) with
+    one Optic bloom behind the sweet spot. No text, no rounded corners, no drop
+    shadow: iOS and Android apply their own mask and anything baked in fights
+    it. The gradients live outside the @mark-geometry markers so the block
+    stays byte identical to mark.svg.
+    
+    FRAMING: this is the one file that crops the mark. A whole racquet is a
+    long thin object, so fitting all of it inside a square leaves the head at
+    about 40% of the canvas and the icon reads small and spindly. Here the
+    head is set at 62% and the grip runs off the bottom edge instead, which is
+    what makes the icon read at 40px in Spotlight. It exits at x 165 or so,
+    well clear of the corner radius, and the head keeps a 10% margin at the
+    top, so nothing essential is anywhere near the squircle's corners.
+    mark.svg keeps the whole racquet for every other consumer.
   -->
   <defs>
     <clipPath id="racquetai-bed">
-      <ellipse cx="0" cy="-96" rx="96" ry="116" />
+      <path d="M 0 -166 C 33.69 -166 61 -130.63 61 -87 C 61 -43.37 33.69 -8 0 -8 C -33.69 -8 -61 -43.37 -61 -87 C -61 -130.63 -33.69 -166 0 -166 Z" />
     </clipPath>
-    <linearGradient id="racquetai-field" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="racquetai-field" x1="0.12" y1="0" x2="0.6" y2="1">
       <stop offset="0" stop-color="#0C2A1E" />
+      <stop offset="0.55" stop-color="#08190F" />
       <stop offset="1" stop-color="#06130E" />
     </linearGradient>
     <radialGradient id="racquetai-bloom">
-      <stop offset="0" stop-color="#D8FA3C" stop-opacity="0.16" />
+      <stop offset="0" stop-color="#D8FA3C" stop-opacity="0.24" />
+      <stop offset="0.5" stop-color="#D8FA3C" stop-opacity="0.07" />
+      <stop offset="1" stop-color="#D8FA3C" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="racquetai-sweetspot">
+      <stop offset="0" stop-color="#EBFF8C" stop-opacity="0.22" />
       <stop offset="1" stop-color="#D8FA3C" stop-opacity="0" />
     </radialGradient>
   </defs>
-
   <rect width="512" height="512" fill="url(#racquetai-field)" />
-  <circle cx="232" cy="214" r="230" fill="url(#racquetai-bloom)" />
-
+  <circle cx="270.0" cy="222.0" r="300" fill="url(#racquetai-bloom)" />
+  <circle cx="270.0" cy="222.0" r="150" fill="url(#racquetai-sweetspot)" />
   <!-- @mark-geometry:start -->
-  <g transform="translate(275.8 261.1) rotate(-30) scale(0.788) translate(0 -6)">
-    <g clip-path="url(#racquetai-bed)" stroke="#FFFFFF" stroke-opacity="0.24" stroke-width="8" stroke-linecap="round">
-      <path d="M -56 -240 V 40 M 0 -240 V 40 M 56 -240 V 40" />
-      <path d="M -130 -160 H 130 M -130 -96 H 130 M -130 -32 H 130" />
+  <g transform="translate(225.37 344.63) rotate(20) scale(1.5000)">
+    <ellipse cx="0" cy="-87" rx="78" ry="96" fill="none" stroke="#D8FA3C" stroke-width="34" />
+    <path d="M 66.24 -6 C 28.94 37.16 26 68.4 26 118 L 26 180 C 26 191.05 17.05 200 6 200 L -6 200 C -17.05 200 -26 191.05 -26 180 L -26 118 C -26 68.4 -28.94 37.16 -66.24 -6 Z" fill="#D8FA3C" />
+    <g clip-path="url(#racquetai-bed)" opacity="0.18" stroke="#D8FA3C" stroke-width="2.8" stroke-linecap="round">
+      <path d="M -58.5 -183 V 9 M -45.5 -183 V 9 M -32.5 -183 V 9 M -19.5 -183 V 9 M -6.5 -183 V 9 M 6.5 -183 V 9 M 19.5 -183 V 9 M 32.5 -183 V 9 M 45.5 -183 V 9 M 58.5 -183 V 9" />
+      <path d="M -78 -158.5 H 78 M -78 -145.5 H 78 M -78 -132.5 H 78 M -78 -119.5 H 78 M -78 -106.5 H 78 M -78 -93.5 H 78 M -78 -80.5 H 78 M -78 -67.5 H 78 M -78 -54.5 H 78 M -78 -41.5 H 78 M -78 -28.5 H 78 M -78 -15.5 H 78" />
     </g>
-    <ellipse cx="0" cy="-96" rx="116" ry="136" fill="none" stroke="#FFFFFF" stroke-width="40" />
-    <path d="M -61 19 L -20 128 M 61 19 L 20 128" fill="none" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round" />
-    <rect x="-26" y="112" width="52" height="152" rx="26" fill="#D8FA3C" />
-    <path transform="translate(0 -96) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#D8FA3C" />
+    <path d="M -14.36 -126.47 C 0.14 -106.27 14.67 -99.49 39.47 -101.36 C 19.27 -86.86 12.49 -72.33 14.36 -47.53 C -0.14 -67.73 -14.67 -74.51 -39.47 -72.64 C -19.27 -87.14 -12.49 -101.67 -14.36 -126.47 Z" fill="#FFFFFF" />
   </g>
   <!-- @mark-geometry:end -->
 </svg>

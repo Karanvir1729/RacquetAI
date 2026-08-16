@@ -43,7 +43,7 @@ Three rules fall out of that and everything else is detail:
 | **Optic** | `#D8FA3C` | The ball under floodlight. The one accent. |
 | **Optic Bright** | `#EBFF8C` | Optic pulled up for *text* on dark, where full Optic vibrates. |
 | **Court Green** | `#1F6B4A` | Optic's stand-in for accent text on light surfaces, where Optic is illegible. |
-| **Chalk** | `#FFFFFF` | Court lines, the logo's frame, primary text on dark. |
+| **Chalk** | `#FFFFFF` | Court lines, the spark at the mark's sweet spot, primary text on dark. |
 | **Chalk Wash** | `#F4F7F3` | The light-theme canvas. White with a breath of court green. |
 | **Fault** | `#FF6B6B` dark / `#C62F26` light | Recording indicator and destructive actions. The only other colour allowed to be saturated. |
 
@@ -116,24 +116,25 @@ is what `textDim` is for.
 
 A geometric racquet seen head-on and tilted, with a four-point AI spark sitting
 at the sweet spot where the strings cross. The racquet says which sport; the
-spark says the software is watching. Optic appears exactly twice — the grip and
-the spark — so the eye travels the diagonal between them.
+spark says the software is watching. The frame carries **Optic** — the loudest
+value in the palette on the largest shape, which is what makes the icon findable
+on a home screen — and the spark is **Chalk**, the one value bright enough to
+out-rank Optic, so the eye lands on the sweet spot and nowhere else.
 
 ### Construction
 
-Drawn on a **512 × 512** grid. Ink box is **287 × 400** (78% of the grid tall),
+Drawn on a **512 × 512** grid. Ink box is **224 × 400** (78% of the grid tall),
 centred on (256, 256) to the pixel.
 
 | Element | Geometry |
 | --- | --- |
-| Head | ellipse, centre (0,−96), rx 116, ry 136, stroke 40, Chalk |
-| String bed | 3 × 3 lines, stroke 8 at 24% Chalk, clipped to the head's inner ellipse (rx 96, ry 116) |
-| Throat | two struts leaving the head at ±32°, stroke 32, round caps, Chalk |
-| Grip | 52 × 152 pill, radius 26, **Optic** |
-| Spark | 4-point star, r 76, **Optic**, counter-rotated +30° so it stays upright |
-| Whole mark | rotated **−30°**, uniform scale 0.855 |
+| Frame | ellipse, centre (0,−87), rx 78, ry 96, stroke 34, **Optic** |
+| Throat + grip | **one** closed path from the frame's shoulders to the grip butt, leaving the frame tangentially — head and handle are a single line, no separate grip pill to sit off axis. **Optic** |
+| String bed | 10 mains × 12 crosses, 13-unit pitch, stroke 2.8, Optic at 18% **group** opacity (stroke opacity would double-darken every crossing into noise), clipped inside the frame |
+| Spark | 4-point star, r 42, **Chalk**, on the sweet spot, counter-rotated −20° so it stays upright |
+| Whole mark | rotated **+20°** (head to the upper right), uniform scale 1.0416 |
 
-The outer translate in the SVG is `277.5 261.5`, not `256 256`. That is
+The outer translate in the SVG is `235.25 256.85`, not `256 256`. That is
 deliberate: the racquet is a diagonal shape, so its tight ink box is not
 centred on its own rotation origin. The offset makes the ink box land dead
 centre, which is what lets every downstream asset scale the file about its
@@ -160,9 +161,10 @@ lockup feels like one object rather than two.
 
 ### On light surfaces
 
-The mark's frame is Chalk, so it **disappears on a light background**. Use
-`mark-mono.svg` recoloured to Court Ink, or place the full-colour mark on a
-Court Ink tile. Never outline the Chalk mark to rescue it.
+The mark's frame is Optic, which is **illegible on a light background**
+(1.1:1 against Chalk Wash). Use `mark-mono.svg` recoloured to Court Ink, or
+place the full-colour mark on a Court Ink tile. Never outline the mark to
+rescue it.
 
 ---
 
@@ -265,8 +267,8 @@ config plugin and delete the block.
 **Don't**
 
 - Don't put Optic text on a light surface (1.1:1).
-- Don't recolour the mark's frame to Optic — the frame is Chalk, the accent is
-  the grip and the spark.
+- Don't recolour the mark's frame to Chalk — the frame carries Optic, and
+  Chalk is reserved for the spark. One focal point.
 - Don't rotate, skew, stretch, outline, or add a shadow to the mark; scale it
   uniformly and leave it alone.
 - Don't bake rounded corners or a drop shadow into the app icon — iOS and

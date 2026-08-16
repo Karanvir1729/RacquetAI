@@ -1,53 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1161" height="369" viewBox="0 0 1161 369" role="img" aria-label="RacquetAI">
+<svg xmlns="http://www.w3.org/2000/svg" width="1123" height="369" viewBox="0 0 1123 369" role="img" aria-label="RacquetAI">
   <title>RacquetAI</title>
   <!--
     RacquetAI — horizontal lockup (mark + wordmark).
-
+    
     Every number below is derived from the mark, not eyeballed. The mark is
-    nested at 288 units, so its ink box is 161 x 225 (56% x 78% of its grid).
-
-      clear space   72 units on all four sides = the height of the AI spark at
-                    this scale. Nothing — type, edge, photo, UI chrome — may
-                    enter it. This is the whole spacing system for the lockup.
-      mark ink      x 72..233, y 72..297
-      gap to type   72 units (one clear-space unit)
-      cap height    120 units (font-size 168 x 0.717 cap ratio)
-      baseline      y 227, so the type's optical box (cap top 107 to descender
-                    262) shares its centre line with the mark's ink box.
-
-    TYPE: the wordmark is set in the platform UI face — SF Pro Display Bold on
-    Apple platforms, Helvetica Neue / Arial elsewhere — tracked -6 so
-    "RacquetAI" sets as one word. "Racquet" is Chalk, "AI" is Optic; the colour
-    break is the only separation (no space, no gap, no second capital).
-
+    nested at 288 units, so its ink box is 126 x 225.
+    
+      clear space   72 units on all four sides, the height of the spark at this
+                    scale. Nothing enters it: no type, no edge, no photo, no UI
+                    chrome. This is the whole spacing system for the lockup.
+      mark ink      x 72..198, y 72..297
+      gap to type   72 units, one clear space unit
+      baseline      y 227, so the type's optical box shares its centre line with
+                    the mark's ink box
+    
+    TYPE: the platform UI face, SF Pro Display Bold on Apple platforms,
+    Helvetica Neue / Arial elsewhere, tracked -6 so “RacquetAI” sets as one
+    word. “Racquet” is Chalk, “AI” is Optic; the colour break is the only
+    separation, no space and no second capital.
+    
     This file depends on a system font, so it is deliberately NOT part of the
-    generated pipeline — scripts/generate-assets.mjs renders only font-free
-    deliverables, which keeps the app icon byte-identical on any machine.
-    Before using the lockup in print, on the web, or in a store screenshot,
-    convert the <text> element to outlines in a vector editor.
-
-    Geometry between the @mark-geometry markers is a copy of mark.svg. Keep in sync.
+    generated pipeline: the script renders only font free deliverables, which
+    keeps the app icon byte identical on any machine. Convert the text to
+    outlines before using the lockup in print, on the web, or in a screenshot.
+    
+    Geometry between the @mark-geometry markers is a copy of mark.svg.
   -->
   <defs>
     <clipPath id="racquetai-bed">
-      <ellipse cx="0" cy="-96" rx="96" ry="116" />
+      <path d="M 0 -166 C 33.69 -166 61 -130.63 61 -87 C 61 -43.37 33.69 -8 0 -8 C -33.69 -8 -61 -43.37 -61 -87 C -61 -130.63 -33.69 -166 0 -166 Z" />
     </clipPath>
   </defs>
-
-  <svg x="8.5" y="40.5" width="288" height="288" viewBox="0 0 512 512">
+  <svg x="-9.2" y="40.5" width="288" height="288" viewBox="0 0 512 512">
     <!-- @mark-geometry:start -->
-    <g transform="translate(277.5 261.5) rotate(-30) scale(0.855) translate(0 -6)">
-      <g clip-path="url(#racquetai-bed)" stroke="#FFFFFF" stroke-opacity="0.24" stroke-width="8" stroke-linecap="round">
-        <path d="M -56 -240 V 40 M 0 -240 V 40 M 56 -240 V 40" />
-        <path d="M -130 -160 H 130 M -130 -96 H 130 M -130 -32 H 130" />
+    <g transform="translate(235.25 256.85) rotate(20) scale(1.0416)">
+      <ellipse cx="0" cy="-87" rx="78" ry="96" fill="none" stroke="#D8FA3C" stroke-width="34" />
+      <path d="M 66.24 -6 C 28.94 37.16 26 68.4 26 118 L 26 180 C 26 191.05 17.05 200 6 200 L -6 200 C -17.05 200 -26 191.05 -26 180 L -26 118 C -26 68.4 -28.94 37.16 -66.24 -6 Z" fill="#D8FA3C" />
+      <g clip-path="url(#racquetai-bed)" opacity="0.18" stroke="#D8FA3C" stroke-width="2.8" stroke-linecap="round">
+        <path d="M -58.5 -183 V 9 M -45.5 -183 V 9 M -32.5 -183 V 9 M -19.5 -183 V 9 M -6.5 -183 V 9 M 6.5 -183 V 9 M 19.5 -183 V 9 M 32.5 -183 V 9 M 45.5 -183 V 9 M 58.5 -183 V 9" />
+        <path d="M -78 -158.5 H 78 M -78 -145.5 H 78 M -78 -132.5 H 78 M -78 -119.5 H 78 M -78 -106.5 H 78 M -78 -93.5 H 78 M -78 -80.5 H 78 M -78 -67.5 H 78 M -78 -54.5 H 78 M -78 -41.5 H 78 M -78 -28.5 H 78 M -78 -15.5 H 78" />
       </g>
-      <ellipse cx="0" cy="-96" rx="116" ry="136" fill="none" stroke="#FFFFFF" stroke-width="40" />
-      <path d="M -61 19 L -20 128 M 61 19 L 20 128" fill="none" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round" />
-      <rect x="-26" y="112" width="52" height="152" rx="26" fill="#D8FA3C" />
-      <path transform="translate(0 -96) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#D8FA3C" />
+      <path d="M -14.36 -126.47 C 0.14 -106.27 14.67 -99.49 39.47 -101.36 C 19.27 -86.86 12.49 -72.33 14.36 -47.53 C -0.14 -67.73 -14.67 -74.51 -39.47 -72.64 C -19.27 -87.14 -12.49 -101.67 -14.36 -126.47 Z" fill="#FFFFFF" />
     </g>
     <!-- @mark-geometry:end -->
   </svg>
-
-  <text x="305" y="227" font-family="-apple-system, SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif" font-size="168" font-weight="700" letter-spacing="-6" fill="#FFFFFF">Racquet<tspan fill="#D8FA3C">AI</tspan></text>
+  <text x="270" y="227" font-family="-apple-system, SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif" font-size="168" font-weight="700" letter-spacing="-6" fill="#FFFFFF">Racquet<tspan fill="#D8FA3C">AI</tspan></text>
 </svg>
