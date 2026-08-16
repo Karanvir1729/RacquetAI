@@ -5,19 +5,25 @@
 
     One flat colour, no string bed: survives Android's monochrome tinting, the
     Android notification silhouette, embroidery, laser etch and 1-bit print.
-    Grid, transform and ink box (287 x 400 on 512) are identical to mark.svg —
+    Grid, transform and ink box (270 x 400 on 512) are identical to mark.svg —
     only the bed is dropped and every fill/stroke collapses to one colour, so
     the two marks are interchangeable at any size.
 
-    Recolour by swapping the four #FFFFFF values: Chalk on dark surfaces,
+    Dropping the bed costs this variant nothing, because what names the sport
+    is the outline: teardrop head, long thin shaft, small stringing area. That
+    silhouette still reads as squash at 20px in one colour, which is the whole
+    job of this file.
+
+    Recolour by swapping the five #FFFFFF values: Chalk on dark surfaces,
     Court Ink #06130E on light surfaces. See docs/04-branding.md.
   -->
   <!-- @mark-geometry:start -->
-  <g transform="translate(277.5 261.5) rotate(-30) scale(0.855) translate(0 -6)">
-    <ellipse cx="0" cy="-96" rx="116" ry="136" fill="none" stroke="#FFFFFF" stroke-width="40" />
-    <path d="M -61 19 L -20 128 M 61 19 L 20 128" fill="none" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round" />
-    <rect x="-26" y="112" width="52" height="152" rx="26" fill="#FFFFFF" />
-    <path transform="translate(0 -96) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#FFFFFF" />
+  <g transform="translate(243.3 211.2) rotate(-30) scale(0.637)">
+    <path d="M 0 -244 C 52 -244 100 -206 100 -150 C 100 -92 70 -28 38 20 C 26 40 -26 40 -38 20 C -70 -28 -100 -92 -100 -150 C -100 -206 -52 -244 0 -244 Z" fill="none" stroke="#FFFFFF" stroke-width="36" />
+    <path d="M -44 6 L -5 134 M 44 6 L 5 134" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" />
+    <rect x="-16" y="126" width="32" height="136" rx="16" fill="#FFFFFF" />
+    <rect x="-24" y="252" width="48" height="188" rx="24" fill="#FFFFFF" />
+    <path transform="translate(0 -130) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#FFFFFF" />
   </g>
   <!-- @mark-geometry:end -->
 </svg>

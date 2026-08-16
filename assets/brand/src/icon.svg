@@ -10,18 +10,23 @@
     spot. No text, no rounded corners, no drop shadow: iOS and Android both
     apply their own mask, and anything baked in fights it.
 
-    Sizing: the mark is set at scale 0.788 so its ink box is 72% of the canvas
+    Sizing: the mark is set at scale 0.587 so its ink box is 72% of the canvas
     height. Apple's grid wants the artwork to breathe inside the squircle —
     at 72% the grip clears the corner radius at every rendered size, and the
     icon still reads at 40px in Spotlight.
     The outer translate is re-derived for this scale so the ink box stays
     centred on (256,256) exactly as it is in mark.svg.
 
+    The bloom follows the sweet spot. On the squash mark that landed at
+    (206,149) rather than (232,214) — a teardrop head puts the stringing area
+    higher up the racquet — so the bloom moved with it and the icon is still
+    lit from behind the strings rather than behind the shaft.
+
     Geometry between the @mark-geometry markers is a copy of mark.svg. Keep in sync.
   -->
   <defs>
     <clipPath id="racquetai-bed">
-      <ellipse cx="0" cy="-96" rx="96" ry="116" />
+      <path d="M 0 -227 C 47 -227 85 -195 85 -150 C 85 -97 58 -35 28 12 C 18 27 -18 27 -28 12 C -58 -35 -85 -97 -85 -150 C -85 -195 -47 -227 0 -227 Z" />
     </clipPath>
     <linearGradient id="racquetai-field" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#0C2A1E" />
@@ -34,18 +39,19 @@
   </defs>
 
   <rect width="512" height="512" fill="url(#racquetai-field)" />
-  <circle cx="232" cy="214" r="230" fill="url(#racquetai-bloom)" />
+  <circle cx="206" cy="149" r="230" fill="url(#racquetai-bloom)" />
 
   <!-- @mark-geometry:start -->
-  <g transform="translate(275.8 261.1) rotate(-30) scale(0.788) translate(0 -6)">
+  <g transform="translate(244.3 214.7) rotate(-30) scale(0.587)">
     <g clip-path="url(#racquetai-bed)" stroke="#FFFFFF" stroke-opacity="0.24" stroke-width="8" stroke-linecap="round">
-      <path d="M -56 -240 V 40 M 0 -240 V 40 M 56 -240 V 40" />
-      <path d="M -130 -160 H 130 M -130 -96 H 130 M -130 -32 H 130" />
+      <path d="M -50 -252 V 40 M 0 -252 V 40 M 50 -252 V 40" />
+      <path d="M -110 -194 H 110 M -110 -130 H 110 M -110 -66 H 110 M -110 -2 H 110" />
     </g>
-    <ellipse cx="0" cy="-96" rx="116" ry="136" fill="none" stroke="#FFFFFF" stroke-width="40" />
-    <path d="M -61 19 L -20 128 M 61 19 L 20 128" fill="none" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round" />
-    <rect x="-26" y="112" width="52" height="152" rx="26" fill="#D8FA3C" />
-    <path transform="translate(0 -96) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#D8FA3C" />
+    <path d="M 0 -244 C 52 -244 100 -206 100 -150 C 100 -92 70 -28 38 20 C 26 40 -26 40 -38 20 C -70 -28 -100 -92 -100 -150 C -100 -206 -52 -244 0 -244 Z" fill="none" stroke="#FFFFFF" stroke-width="36" />
+    <path d="M -44 6 L -5 134 M 44 6 L 5 134" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" />
+    <rect x="-16" y="126" width="32" height="136" rx="16" fill="#FFFFFF" />
+    <rect x="-24" y="252" width="48" height="188" rx="24" fill="#D8FA3C" />
+    <path transform="translate(0 -130) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#D8FA3C" />
   </g>
   <!-- @mark-geometry:end -->
 </svg>

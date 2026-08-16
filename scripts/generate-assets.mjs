@@ -3,7 +3,8 @@
  * RacquetAI brand asset pipeline.
  *
  *   node scripts/generate-assets.mjs           render every PNG, then verify it
- *   node scripts/generate-assets.mjs --check    verify sources only, write nothing
+ *   node scripts/generate-assets.mjs --check    verify masters and the committed
+ *                                               PNGs, write nothing
  *
  * Every deliverable in assets/brand/ is rendered from a master SVG in
  * assets/brand/src/. Do not hand-edit the PNGs — they are build output that
@@ -330,7 +331,27 @@ if (problems.length) {
 console.log(`sources ok  (${GEOMETRY_SOURCES.length} masters, geometry in sync)`);
 
 if (CHECK_ONLY) {
-  console.log("--check: no files written");
+  // Verify what is committed rather than stopping at the masters. A --check
+  // that only read the SVGs would pass on a tree whose PNGs are stale, hand
+  // edited, or re-saved with an alpha channel — which is precisely what the
+  // size and colour-type assertions exist to catch, and the alpha one is a
+  // silent App Store rejection.
+  for (const d of DELIVERABLES) {
+    let summary;
+    try {
+      summary = await verify(d.file, d);
+    } catch (err) {
+      fail(`${d.file}: cannot be read — ${err.message.split("\n")[0]}`);
+      summary = "MISSING";
+    }
+    console.log(`  ${d.file.padEnd(24)} ${summary.padEnd(28)} ${d.note}`);
+  }
+  if (problems.length) {
+    console.error("Deliverable checks failed:");
+    for (const p of problems) console.error(`  - ${p}`);
+    process.exit(1);
+  }
+  console.log("--check: committed deliverables verified, no files written");
   process.exit(0);
 }
 

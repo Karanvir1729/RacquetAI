@@ -7,39 +7,64 @@
     between the @mark-geometry markers; mark-mono.svg is the flattened variant.
     Change geometry here first, then mirror it. See docs/04-branding.md.
 
-    Construction grid 512 x 512. Ink box measures 287 x 400 (78% of the grid
+    THE RACQUET IS A SQUASH RACQUET. Squash is the beachhead sport, so the
+    silhouette has to name it from across a home screen. Three things do that,
+    and none of them is a detail:
+      - a teardrop head, widest a third of the way down from the apex and
+        tapering to a narrow throat, not a symmetric tennis oval;
+      - a head that is 45% of the racquet's length rather than 60%;
+      - a long thin shaft between throat and grip, which is the single
+        strongest cue at small sizes because it survives when the string bed
+        has already turned to mush.
+    A wide round head reads as tennis no matter what the app is called.
+
+    Construction grid 512 x 512. Ink box measures 270 x 400 (78% of the grid
     tall) and is centred on (256,256) to the pixel — the outer translate is
-    277.5/261.5 rather than 256/256 precisely because the racquet is a diagonal
+    243.3/211.2 rather than 256/256 precisely because the racquet is a diagonal
     shape, so its tight ink box is not centred on its own rotation origin.
     Every consumer (icon, adaptive foreground, splash, favicon) can therefore
-    scale this file about its centre and trust the result.
+    scale this file about its centre and trust the result. Both numbers are
+    measured, not guessed: render the geometry at scale 1, trim, and solve.
 
     Local space, before the transform:
-      head    centre (0,-96), rx 116, ry 136, stroke 40
-      bed     3 x 3 strings at 24% alpha, clipped to the inside of the head
-      throat  struts leave the head at +/-32 deg, converge on the grip
-      grip    52 x 152 pill, Optic
-      spark   4-point star, r 76, counter-rotated +30 so it stays upright
-    Tilt -30 deg, uniform scale 0.855.
+      head    teardrop: apex (0,-244), widest +/-100 at y -150, narrowing to
+              +/-38 at y 20 and closing across a rounded bottom, stroke 36
+      bed     3 columns x 4 rows at 24% alpha, clipped to the head's inner
+              outline; the fourth row is what the tennis mark did not need —
+              a teardrop keeps stringing all the way down into the taper, and
+              without it the lower third of the head reads as empty
+      throat  struts leave the head flanks at +/-44 and converge on the shaft
+      shaft   32 x 136 pill, Chalk — the long thin section squash has and
+              tennis does not
+      grip    48 x 188 pill, Optic
+      spark   4-point star, r 76, on the sweet spot (0,-130), counter-rotated
+              +30 so it stays upright
+    Tilt -30 deg, uniform scale 0.637.
 
-    Colours: Chalk #FFFFFF frame, Optic #D8FA3C grip + spark. The frame is
-    Chalk, so on light surfaces use mark-mono.svg filled Court Ink instead.
+    The sweet spot sits at y -130 rather than at the head's mid-point: a
+    teardrop's stringing area is widest above centre, which is exactly where a
+    squash player's contact point is, and it is the only place the spark clears
+    the frame at r 76.
+
+    Colours: Chalk #FFFFFF frame, throat and shaft; Optic #D8FA3C grip + spark.
+    The frame is Chalk, so on light surfaces use mark-mono.svg filled Court Ink.
   -->
   <defs>
     <clipPath id="racquetai-bed">
-      <ellipse cx="0" cy="-96" rx="96" ry="116" />
+      <path d="M 0 -227 C 47 -227 85 -195 85 -150 C 85 -97 58 -35 28 12 C 18 27 -18 27 -28 12 C -58 -35 -85 -97 -85 -150 C -85 -195 -47 -227 0 -227 Z" />
     </clipPath>
   </defs>
   <!-- @mark-geometry:start -->
-  <g transform="translate(277.5 261.5) rotate(-30) scale(0.855) translate(0 -6)">
+  <g transform="translate(243.3 211.2) rotate(-30) scale(0.637)">
     <g clip-path="url(#racquetai-bed)" stroke="#FFFFFF" stroke-opacity="0.24" stroke-width="8" stroke-linecap="round">
-      <path d="M -56 -240 V 40 M 0 -240 V 40 M 56 -240 V 40" />
-      <path d="M -130 -160 H 130 M -130 -96 H 130 M -130 -32 H 130" />
+      <path d="M -50 -252 V 40 M 0 -252 V 40 M 50 -252 V 40" />
+      <path d="M -110 -194 H 110 M -110 -130 H 110 M -110 -66 H 110 M -110 -2 H 110" />
     </g>
-    <ellipse cx="0" cy="-96" rx="116" ry="136" fill="none" stroke="#FFFFFF" stroke-width="40" />
-    <path d="M -61 19 L -20 128 M 61 19 L 20 128" fill="none" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round" />
-    <rect x="-26" y="112" width="52" height="152" rx="26" fill="#D8FA3C" />
-    <path transform="translate(0 -96) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#D8FA3C" />
+    <path d="M 0 -244 C 52 -244 100 -206 100 -150 C 100 -92 70 -28 38 20 C 26 40 -26 40 -38 20 C -70 -28 -100 -92 -100 -150 C -100 -206 -52 -244 0 -244 Z" fill="none" stroke="#FFFFFF" stroke-width="36" />
+    <path d="M -44 6 L -5 134 M 44 6 L 5 134" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" />
+    <rect x="-16" y="126" width="32" height="136" rx="16" fill="#FFFFFF" />
+    <rect x="-24" y="252" width="48" height="188" rx="24" fill="#D8FA3C" />
+    <path transform="translate(0 -130) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#D8FA3C" />
   </g>
   <!-- @mark-geometry:end -->
 </svg>

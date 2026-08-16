@@ -75,9 +75,9 @@ by `DynamicColorIOS`. Android pins the dark column (see the note in that file).
 | `surfaceWhite` | `#FFFFFF` (both) | |
 | `inkOnWhite` | `#06130E` (both) | |
 
-`accent` is the one token that does **not** flip: a tennis ball is the same
-colour in both themes, and Optic holds up as a *fill* on either canvas. It is
-only as text that it breaks, which is what `accentText` exists for.
+`accent` is the one token that does **not** flip: the ball under floodlight is
+the same colour in both themes, and Optic holds up as a *fill* on either canvas.
+It is only as text that it breaks, which is what `accentText` exists for.
 
 ### Contrast
 
@@ -114,30 +114,58 @@ is what `textDim` is for.
 
 ## 3. The mark — "Ace Spark"
 
-A geometric racquet seen head-on and tilted, with a four-point AI spark sitting
-at the sweet spot where the strings cross. The racquet says which sport; the
-spark says the software is watching. Optic appears exactly twice — the grip and
-the spark — so the eye travels the diagonal between them.
+A geometric **squash** racquet seen head-on and tilted, with a four-point AI
+spark sitting at the sweet spot where the strings cross. The racquet says which
+sport; the spark says the software is watching. Optic appears exactly twice —
+the grip and the spark — so the eye travels the diagonal between them.
+
+### Why the head is a teardrop
+
+Squash clubs are the beachhead, so the silhouette has to name the sport before
+anyone reads the app's name. A wide round head reads as tennis no matter what
+is written under it, and that is what the mark used to be. Three changes fix
+it, and none of them is a detail:
+
+1. **A teardrop head**, widest about a third of the way down from the apex and
+   tapering into a narrow throat — not a symmetric oval.
+2. **A smaller head relative to the racquet**: 45% of the total length, where
+   the tennis head was 60%. This is the proportion the eye actually reads.
+3. **A long thin shaft** between throat and grip. This is the strongest cue at
+   small sizes, because it survives long after the string bed has mushed.
+
+The stringing area shrank with the head, which is also true of the real thing.
 
 ### Construction
 
-Drawn on a **512 × 512** grid. Ink box is **287 × 400** (78% of the grid tall),
+Drawn on a **512 × 512** grid. Ink box is **270 × 400** (78% of the grid tall),
 centred on (256, 256) to the pixel.
 
 | Element | Geometry |
 | --- | --- |
-| Head | ellipse, centre (0,−96), rx 116, ry 136, stroke 40, Chalk |
-| String bed | 3 × 3 lines, stroke 8 at 24% Chalk, clipped to the head's inner ellipse (rx 96, ry 116) |
-| Throat | two struts leaving the head at ±32°, stroke 32, round caps, Chalk |
-| Grip | 52 × 152 pill, radius 26, **Optic** |
-| Spark | 4-point star, r 76, **Optic**, counter-rotated +30° so it stays upright |
-| Whole mark | rotated **−30°**, uniform scale 0.855 |
+| Head | teardrop path: apex (0,−244), widest ±100 at y −150, narrowing to ±38 at y 20 and closing across a rounded bottom, stroke 36, Chalk |
+| String bed | 3 columns × 4 rows, stroke 8 at 24% Chalk, clipped to the head's inner outline |
+| Throat | two struts leaving the head flanks at (±44, 6) and converging on (±5, 134), stroke 24, round caps, Chalk |
+| Shaft | 32 × 136 pill, radius 16, Chalk |
+| Grip | 48 × 188 pill, radius 24, **Optic** |
+| Spark | 4-point star, r 76, on the sweet spot (0,−130), **Optic**, counter-rotated +30° so it stays upright |
+| Whole mark | rotated **−30°**, uniform scale 0.637 |
 
-The outer translate in the SVG is `277.5 261.5`, not `256 256`. That is
+The outer translate in the SVG is `243.3 211.2`, not `256 256`. That is
 deliberate: the racquet is a diagonal shape, so its tight ink box is not
 centred on its own rotation origin. The offset makes the ink box land dead
 centre, which is what lets every downstream asset scale the file about its
-centre and trust the result.
+centre and trust the result. Both the scale and the translate are *measured* —
+render the geometry at scale 1, trim, and solve for the pair that puts a
+400-tall ink box on centre — so changing the geometry means re-deriving them,
+not nudging them.
+
+The **fourth string row** is new with the teardrop. Three rows left the lower
+third of the head visibly empty, because a teardrop keeps stringing down into
+the taper where an ellipse has already closed.
+
+The **sweet spot sits at y −130**, above the head's mid-point. That is where a
+teardrop's stringing area is widest, where a squash player's contact point
+actually is, and the only place the spark clears the frame at r 76.
 
 The spark is counter-rotated so that it reads as a *spark* (upright, symmetric)
 rather than as a tilted diamond. This is the one place the mark breaks its own
@@ -145,17 +173,22 @@ rotation, and it is intentional.
 
 ### Clear space
 
-**Clear space = the height of the spark**, on all four sides. At lockup scale
-that is 72 units. Nothing enters it: no type, no canvas edge, no photo, no UI
-chrome. It is also the gap between the mark and the wordmark, which is why the
-lockup feels like one object rather than two.
+**Clear space = a quarter of the mark's box**, on all four sides — 72 units at
+lockup scale, where the mark is nested at 288. Nothing enters it: no type, no
+canvas edge, no photo, no UI chrome. It is also the gap between the mark and
+the wordmark, which is why the lockup feels like one object rather than two.
+
+(This rule used to be stated as "the height of the spark", which was true of
+the tennis mark by coincidence. The squash mark is leaner, so its spark is
+smaller relative to the box; the quarter-of-the-box derivation is exact and
+survives geometry changes, so it is the one to keep.)
 
 ### Minimum sizes
 
 | Use | Minimum |
 | --- | --- |
-| Full-colour mark | 32 px — below this the string bed turns to mush; use the mono mark |
-| Monochrome mark | 20 px |
+| Full-colour mark | 32 px — the string bed only resolves above ~48 px, so below that the mark is carried by the silhouette alone |
+| Monochrome mark | 24 px — the leaner squash shaft goes sub-pixel below this, where the tennis mark held to 20 px |
 | Horizontal lockup | 160 px wide — below this drop the wordmark and use the mark alone |
 
 ### On light surfaces
@@ -283,12 +316,16 @@ config plugin and delete the block.
 
 ```bash
 node scripts/generate-assets.mjs          # render every PNG, then verify it
-node scripts/generate-assets.mjs --check   # verify the masters only, write nothing
+node scripts/generate-assets.mjs --check   # verify masters + committed PNGs, write nothing
 ```
 
 The script renders each deliverable, reads it back, and asserts size, colour
 type, alpha, and silhouette purity, plus the geometry-drift check across the
 masters. It exits non-zero on any failure, so it is safe to wire into CI.
+
+`--check` runs the same assertions against the **committed** PNGs instead of
+freshly rendered ones, so it catches a tree whose binaries are stale, hand
+edited, or re-saved with an alpha channel — without touching the working tree.
 
 To change something:
 

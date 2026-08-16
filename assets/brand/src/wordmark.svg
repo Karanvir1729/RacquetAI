@@ -1,15 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1161" height="369" viewBox="0 0 1161 369" role="img" aria-label="RacquetAI">
+<svg xmlns="http://www.w3.org/2000/svg" width="1152" height="369" viewBox="0 0 1152 369" role="img" aria-label="RacquetAI">
   <title>RacquetAI</title>
   <!--
     RacquetAI — horizontal lockup (mark + wordmark).
 
     Every number below is derived from the mark, not eyeballed. The mark is
-    nested at 288 units, so its ink box is 161 x 225 (56% x 78% of its grid).
+    nested at 288 units, so its ink box is 152 x 225 (53% x 78% of its grid).
+    The squash mark is leaner than the tennis one it replaced (270 wide on the
+    512 grid, not 287), so the nested x and the type's x both moved 9 units
+    left to hold the clear space at 72. The canvas narrowed by the same 9.
 
-      clear space   72 units on all four sides = the height of the AI spark at
-                    this scale. Nothing — type, edge, photo, UI chrome — may
+      clear space   72 units on all four sides = a quarter of the mark's
+                    288-unit box. Nothing — type, edge, photo, UI chrome — may
                     enter it. This is the whole spacing system for the lockup.
-      mark ink      x 72..233, y 72..297
+      mark ink      x 72..224, y 72..297
       gap to type   72 units (one clear-space unit)
       cap height    120 units (font-size 168 x 0.717 cap ratio)
       baseline      y 227, so the type's optical box (cap top 107 to descender
@@ -30,24 +33,25 @@
   -->
   <defs>
     <clipPath id="racquetai-bed">
-      <ellipse cx="0" cy="-96" rx="96" ry="116" />
+      <path d="M 0 -227 C 47 -227 85 -195 85 -150 C 85 -97 58 -35 28 12 C 18 27 -18 27 -28 12 C -58 -35 -85 -97 -85 -150 C -85 -195 -47 -227 0 -227 Z" />
     </clipPath>
   </defs>
 
-  <svg x="8.5" y="40.5" width="288" height="288" viewBox="0 0 512 512">
+  <svg x="4" y="40.5" width="288" height="288" viewBox="0 0 512 512">
     <!-- @mark-geometry:start -->
-    <g transform="translate(277.5 261.5) rotate(-30) scale(0.855) translate(0 -6)">
+    <g transform="translate(243.3 211.2) rotate(-30) scale(0.637)">
       <g clip-path="url(#racquetai-bed)" stroke="#FFFFFF" stroke-opacity="0.24" stroke-width="8" stroke-linecap="round">
-        <path d="M -56 -240 V 40 M 0 -240 V 40 M 56 -240 V 40" />
-        <path d="M -130 -160 H 130 M -130 -96 H 130 M -130 -32 H 130" />
+        <path d="M -50 -252 V 40 M 0 -252 V 40 M 50 -252 V 40" />
+        <path d="M -110 -194 H 110 M -110 -130 H 110 M -110 -66 H 110 M -110 -2 H 110" />
       </g>
-      <ellipse cx="0" cy="-96" rx="116" ry="136" fill="none" stroke="#FFFFFF" stroke-width="40" />
-      <path d="M -61 19 L -20 128 M 61 19 L 20 128" fill="none" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round" />
-      <rect x="-26" y="112" width="52" height="152" rx="26" fill="#D8FA3C" />
-      <path transform="translate(0 -96) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#D8FA3C" />
+      <path d="M 0 -244 C 52 -244 100 -206 100 -150 C 100 -92 70 -28 38 20 C 26 40 -26 40 -38 20 C -70 -28 -100 -92 -100 -150 C -100 -206 -52 -244 0 -244 Z" fill="none" stroke="#FFFFFF" stroke-width="36" />
+      <path d="M -44 6 L -5 134 M 44 6 L 5 134" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" />
+      <rect x="-16" y="126" width="32" height="136" rx="16" fill="#FFFFFF" />
+      <rect x="-24" y="252" width="48" height="188" rx="24" fill="#D8FA3C" />
+      <path transform="translate(0 -130) rotate(30)" d="M 0 -76 Q 14 -14 76 0 Q 14 14 0 76 Q -14 14 -76 0 Q -14 -14 0 -76 Z" fill="#D8FA3C" />
     </g>
     <!-- @mark-geometry:end -->
   </svg>
 
-  <text x="305" y="227" font-family="-apple-system, SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif" font-size="168" font-weight="700" letter-spacing="-6" fill="#FFFFFF">Racquet<tspan fill="#D8FA3C">AI</tspan></text>
+  <text x="296" y="227" font-family="-apple-system, SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif" font-size="168" font-weight="700" letter-spacing="-6" fill="#FFFFFF">Racquet<tspan fill="#D8FA3C">AI</tspan></text>
 </svg>
