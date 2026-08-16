@@ -1,0 +1,652 @@
+{
+  "board": {
+    "title": "RacquetAI",
+    "subtitle": "7-day execution plan and the squash-club product definition · 15 Aug 2026"
+  },
+  "plan": {
+    "title": "RacquetAI — 7-Day Execution Plan",
+    "subtitle": "Sat 15 Aug → Fri 21 Aug 2026 · from tonight's merged scaffold to a squash club recording a real box-league match on their own phone — three agent tracks, two operator tracks, and no AI inside the app.",
+    "tracks": [
+      {
+        "key": "capture",
+        "name": "Capture",
+        "color": "green",
+        "lead": ".worktrees/video · feat/video-recording"
+      },
+      {
+        "key": "vision",
+        "name": "Vision & Azure",
+        "color": "blue",
+        "lead": ".worktrees/scoring · offline only, CPU-only"
+      },
+      {
+        "key": "club",
+        "name": "Club Product",
+        "color": "violet",
+        "lead": ".worktrees/club · feat/club-product (new)"
+      },
+      {
+        "key": "release",
+        "name": "Integration & Release",
+        "color": "orange",
+        "lead": "Karan + .worktrees/docs — merges main green nightly"
+      },
+      {
+        "key": "pilot",
+        "name": "Pilot & Consent",
+        "color": "teal",
+        "lead": "Karan — no worktree; phone, court, paperwork"
+      }
+    ],
+    "days": [
+      {
+        "n": 1,
+        "label": "Day 1 · Sat Aug 15",
+        "theme": "Every operator gate opened tonight, and main stops calling itself a tennis app.",
+        "milestone": "Operator gates cleared"
+      },
+      {
+        "n": 2,
+        "label": "Day 2 · Sun Aug 16",
+        "theme": "Consent, the session sheet, and the first honest look through the glass.",
+        "milestone": "First through-glass test shot"
+      },
+      {
+        "n": 3,
+        "label": "Day 3 · Mon Aug 17",
+        "theme": "Builds a phone can install, and Friday booked with the safeguarding officer's name on it.",
+        "milestone": "Friday booked and safeguarded"
+      },
+      {
+        "n": 4,
+        "label": "Day 4 · Tue Aug 18",
+        "theme": "Everything the club touches — minus the empty tab that gets the build rejected.",
+        "milestone": "v0.1.0 scope locked at three tabs"
+      },
+      {
+        "n": 5,
+        "label": "Day 5 · Wed Aug 19",
+        "theme": "It goes to Apple today, because review latency is the one thing this week cannot compress.",
+        "milestone": "External beta submitted"
+      },
+      {
+        "n": 6,
+        "label": "Day 6 · Thu Aug 20",
+        "theme": "A full box-league match filmed off TestFlight, and the file transfer timed.",
+        "milestone": "Clean install on a second device"
+      },
+      {
+        "n": 7,
+        "label": "Day 7 · Fri Aug 21",
+        "theme": "Their court, their phone, their coach — and a rally timeline before the lights go out.",
+        "milestone": "Club pilot on a club-owned device"
+      }
+    ],
+    "cards": [
+      {
+        "day": 1,
+        "track": "capture",
+        "title": "Install the three missing modules",
+        "detail": "expo-screen-orientation, -video-thumbnails, -sharing. Adding one after Day 3 forces a new dev build.",
+        "tag": null
+      },
+      {
+        "day": 1,
+        "track": "vision",
+        "title": "Open Azure: region, credits, CPU-only",
+        "detail": "Pin the region to Canada. Name the credit programme and its expiry. v0 needs no GPU — audio only.",
+        "tag": "operator"
+      },
+      {
+        "day": 1,
+        "track": "club",
+        "title": "Kill the tennis lineage on main",
+        "detail": "README, five tennisball icons, and the tokens.ts accent rationale. Ace Spark hexes stay frozen.",
+        "tag": null
+      },
+      {
+        "day": 1,
+        "track": "release",
+        "title": "eas init + ASC record + Team ID",
+        "detail": "No eas.projectId in app.json; eas.json still holds TODO_OPERATOR_*. Do this first — Day 3 needs it.",
+        "tag": "operator"
+      },
+      {
+        "day": 1,
+        "track": "pilot",
+        "title": "Email five clubs, warmest one first",
+        "detail": "First question: full glass back wall? Primary is a club Karan already knows; cold clubs feed week 2.",
+        "tag": null
+      },
+      {
+        "day": 2,
+        "track": "capture",
+        "title": "Session sheet: players, court, best-of",
+        "detail": "Sidecar v1 stores only date, duration and sport. Add the session fields and bump the schema to v2.",
+        "tag": null
+      },
+      {
+        "day": 2,
+        "track": "vision",
+        "title": "Label rallies on public squash video",
+        "detail": "Rally start/stop on 3 public club clips with clean audio. No court trip, no camera, no own footage.",
+        "tag": null
+      },
+      {
+        "day": 2,
+        "track": "club",
+        "title": "Consent gate before recording arms",
+        "detail": "Every player on court confirms, per session. A non-consenting player blocks the start — no recording.",
+        "tag": null
+      },
+      {
+        "day": 2,
+        "track": "release",
+        "title": "Green main becomes a nightly ritual",
+        "detail": "Merge every worktree, typecheck + lint + jest green. Also fix app.json's thin mic-purpose string.",
+        "tag": null
+      },
+      {
+        "day": 2,
+        "track": "pilot",
+        "title": "First device run: shoot through glass",
+        "detail": "Lens hood flush, film from a corner, gallery lights off. Check for 60 Hz banding. Real hardware.",
+        "tag": "needs court"
+      },
+      {
+        "day": 2,
+        "track": "pilot",
+        "title": "Draft the filming + consent policy",
+        "detail": "One page: club is controller, RacquetAI is processor and may process footage off-device.",
+        "tag": null
+      },
+      {
+        "day": 3,
+        "track": "capture",
+        "title": "Landscape + a drawn framing overlay",
+        "detail": "orientation is global in app.json, so use expo-screen-orientation. The overlay is drawn, not detected.",
+        "tag": "needs device"
+      },
+      {
+        "day": 3,
+        "track": "vision",
+        "title": "Audio-onset rally segmenter, CPU only",
+        "detail": "Strikes are loud and periodic; the tin's metallic hit is the highest-precision rally-END marker.",
+        "tag": "Azure"
+      },
+      {
+        "day": 3,
+        "track": "club",
+        "title": "iPad pass now, not after submission",
+        "detail": "supportsTablet is true, so Apple will test iPad. layout.ts has the caps — verify before Day 5 submits.",
+        "tag": null
+      },
+      {
+        "day": 3,
+        "track": "release",
+        "title": "Dev + preview builds; register the UDID",
+        "detail": "First EAS builds, now that every native module is in. Send eas device:create to the head pro today.",
+        "tag": "operator"
+      },
+      {
+        "day": 3,
+        "track": "pilot",
+        "title": "Book Friday; get safeguarding's OK",
+        "detail": "Court time, named head pro, a club-owned iPhone, and the safeguarding officer's written sign-off.",
+        "tag": "operator"
+      },
+      {
+        "day": 4,
+        "track": "capture",
+        "title": "Chunked capture + free-space guard",
+        "detail": "iOS suspends capture on an incoming call. Chunk so you lose one chunk, not the match. Paths API.",
+        "tag": null
+      },
+      {
+        "day": 4,
+        "track": "capture",
+        "title": "Delete for real, then share via Files",
+        "detail": "Delete removes video, sidecar and clips. Share sheet only — a copy in Photos can never be deleted.",
+        "tag": null
+      },
+      {
+        "day": 4,
+        "track": "vision",
+        "title": "Score the segmenter, price a match",
+        "detail": "Precision and recall on the three labelled clips, plus dollars per match against the credit budget.",
+        "tag": "Azure"
+      },
+      {
+        "day": 4,
+        "track": "club",
+        "title": "Tap scoreboard on the PAR-11 reducer",
+        "detail": "squash.ts is a tested pure reducer; a tap UI emits the exact tuple the AI will emit later.",
+        "tag": null
+      },
+      {
+        "day": 4,
+        "track": "club",
+        "title": "Cut the Score AI tab from v0.1.0",
+        "detail": "A permanently empty tab is a 2.1 rejection. Ship Record, Library, Settings; route behind a dev flag.",
+        "tag": null
+      },
+      {
+        "day": 4,
+        "track": "release",
+        "title": "Privacy policy URL + beta notes",
+        "detail": "External beta needs a hosted policy, a beta description and review notes. Write them before Day 5.",
+        "tag": "operator"
+      },
+      {
+        "day": 4,
+        "track": "pilot",
+        "title": "Court notice that permits processing",
+        "detail": "It must say RacquetAI processes footage off-device, or Friday's Azure run breaks our own consent.",
+        "tag": null
+      },
+      {
+        "day": 5,
+        "track": "capture",
+        "title": "Survive a 45-minute match, for real",
+        "detail": "One genuine full-length take, never a 2-min proxy. HEVC ~6 Mbps is ~2 GB; pass codec to record().",
+        "tag": "needs device"
+      },
+      {
+        "day": 5,
+        "track": "vision",
+        "title": "Reconcile docs/03 with audio-onset v0",
+        "detail": "docs/03 is written and merged. Update it: offline server-side first, on-device only when earned.",
+        "tag": null
+      },
+      {
+        "day": 5,
+        "track": "club",
+        "title": "The honest brief lives on paper",
+        "detail": "One page for the head pro: it records (yes), it scores (not yet), here is how to mount the phone.",
+        "tag": null
+      },
+      {
+        "day": 5,
+        "track": "release",
+        "title": "TestFlight and ad-hoc in one batch",
+        "detail": "Submit external beta Wednesday morning — review is 24-48h. The club-UDID ad-hoc build is the fallback.",
+        "tag": "operator"
+      },
+      {
+        "day": 5,
+        "track": "pilot",
+        "title": "Invite the pro; laminate the one-pager",
+        "detail": "Mount, tap, confirm consent, play. Plus: turn on Do Not Disturb before you start recording.",
+        "tag": null
+      },
+      {
+        "day": 6,
+        "track": "capture",
+        "title": "Freeze: crashes and lost footage only",
+        "detail": "Anything else waits for next week. A fix after today has to clear review again before Friday.",
+        "tag": "code freeze"
+      },
+      {
+        "day": 6,
+        "track": "vision",
+        "title": "One-command offline runner on Azure",
+        "detail": "Clip in, rally timeline out, CPU only, repeatable — so Friday's match is processed that evening.",
+        "tag": "Azure"
+      },
+      {
+        "day": 6,
+        "track": "club",
+        "title": "Fix only what the dry run broke",
+        "detail": "Whatever the coach fumbled on court today. No new surfaces; the club's build is already cut.",
+        "tag": null
+      },
+      {
+        "day": 6,
+        "track": "release",
+        "title": "Beta approved; verify a clean install",
+        "detail": "Add the head pro's Apple ID. Install on a device that has never seen Metro. Re-confirm the court.",
+        "tag": "operator"
+      },
+      {
+        "day": 6,
+        "track": "pilot",
+        "title": "Dry run, then time the file transfer",
+        "detail": "Film a full box-league match off TestFlight. Then time AirDrop of a 2 GB file and budget it.",
+        "tag": "needs court"
+      },
+      {
+        "day": 7,
+        "track": "capture",
+        "title": "Court-side observation. Ship nothing.",
+        "detail": "You cannot hotfix a TestFlight build mid-pilot. Sit on the bench and log every fumble and drop.",
+        "tag": "on-site"
+      },
+      {
+        "day": 7,
+        "track": "vision",
+        "title": "Their match through the Azure runner",
+        "detail": "20 minutes budgeted to get the file off a club phone. Lets count as rallies, not as points.",
+        "tag": "Azure"
+      },
+      {
+        "day": 7,
+        "track": "club",
+        "title": "Write down the coach's exact words",
+        "detail": "Every question and every feature he asked for unprompted. That list is week 2's backlog.",
+        "tag": "on-site"
+      },
+      {
+        "day": 7,
+        "track": "release",
+        "title": "Tag v0.1.0 + pilot release notes",
+        "detail": "Freeze the build the club is holding. Record what shipped and what is deliberately still a stub.",
+        "tag": null
+      },
+      {
+        "day": 7,
+        "track": "pilot",
+        "title": "Run it; leave with a written answer",
+        "detail": "The coach records on the club's own phone. A second session booked, or an explicit no with a reason.",
+        "tag": "on-site"
+      }
+    ],
+    "notes": {
+      "risks": [
+        "Karan is two of the five tracks. Integration & Release and Pilot & Consent are the same human, time-sliced, not parallel — that is the week's real ceiling. Mitigation: three agent worktrees is the maximum that stays mergeable, operator work is capped at roughly two hours a day, and Day 1 is deliberately an evening because the scaffold already landed today.",
+        "Five branches and no integration owner is the most probable way this week actually fails. Mitigation: Karan merges every worktree to main nightly and typecheck + lint + jest must be green before anyone sleeps. The README already declares that bar; from Day 2 it is a scheduled ritual, not a hope.",
+        "TestFlight external beta review is 24-48h and can bounce, sitting between Wednesday and Friday. Mitigation: submit Wednesday morning, collect the club device UDID on Monday via eas device:create, and cut the ad-hoc build in the same Wednesday batch so the fallback exists as a binary rather than a sentence.",
+        "The safeguarding officer has a veto and is the likeliest single cause of Friday collapsing. Mitigation: the filming and consent policy is drafted Day 2 and their written sign-off is a Day 3 booking condition — if it is not in hand Monday, the pilot moves rather than proceeds on assumption.",
+        "The club cancels, or the pro is away. Mitigation: the primary is a club Karan already has a relationship with, a second club is held from the Day 1 email, and Thursday re-confirms. The fallback must still put a club coach on a club-owned device or the demo gate is not met — a public-court session with a member does not count.",
+        "The simulator has no camera and Karan's iPhone is the only test device, so every capture bug is hardware-only. Mitigation: first real device run is Day 2 at the court, the dev-client build lands Day 3, and the genuine 45-minute endurance take is Day 5 — never a two-minute proxy.",
+        "Operator gates block all four agent tracks: eas init, the ASC app record, the Apple Team ID and the Azure subscription. Mitigation: all of them are Day 1 evening, before anything downstream needs them; eas.json's TODO_OPERATOR_* placeholders are the literal checklist.",
+        "Azure is CPU-only this week by design. New subscriptions carry zero GPU quota, a quota increase is a 1-3 business-day support ticket, and startup-credit subscriptions are frequently barred from GPU SKUs entirely. Mitigation: audio-onset segmentation needs no GPU, so the week needs only Blob storage and a B-series VM or Function. File the quota request Day 1 anyway so week 2 is not blocked.",
+        "Storage and interruptions. HEVC at ~6 Mbps is ~2 GB for 45 minutes; iOS suspends AVCaptureSession when the app backgrounds and there is no expo-camera flag that prevents it. Mitigation: chunked capture caps an interruption at one chunk, plus a free-space guard via Paths.availableDiskSpace and Do Not Disturb on the laminated one-pager.",
+        "Squash is hostile to computer vision — a black 40 mm ball, glass reflections, heavy occlusion. Mitigation: the week-1 target is rally segmentation from audio onsets scored on three hand-labelled clips, not ball tracking and not score inference. Club box-league drives run roughly 100-160 km/h, not the ~270 km/h professional figure both source documents were quoting."
+      ],
+      "outOfScope": [
+        "No AI inference inside the app, real-time or otherwise. Every AI step runs offline on already-recorded video, and Day 3's framing overlay is drawn by hand and eyeballed by the operator — no line detection, no homography, no calibration.",
+        "No Score AI tab in v0.1.0. A permanently empty tab is a standard App Review 2.1 placeholder rejection, so the route ships behind a dev flag and the app is described to review as exactly what it is: a match recorder.",
+        "No automatic scoring of any kind. The manual PAR-11 tap scoreboard does ship — squash.ts is already a tested pure reducer on main — but the AI that would fill it does not.",
+        "No accounts, no backend, no upload from the app. Footage stays on device and Azure gets files hand-carried off it, which is also why there is no share link this week.",
+        "No Photos-library write until deletion works end to end. A copy in someone's camera roll cannot be recalled, and the deletion path lands the same day as the export.",
+        "Canada only for this pilot's legal work — one jurisdiction, Milton being the operating base. UK and US paperwork is market entry, not week one. Note the source requirement had it backwards: UK GDPR is the stricter bar, not PIPEDA.",
+        "No Android, no App Store submission, no payments or pricing conversation. TestFlight only, and the pilot is free.",
+        "No booking, league, ladder or ratings integration. Club Locker and SportyHQ own that rail and neither has a confirmed write API."
+      ],
+      "demoGate": [
+        "A club coach, on a club-owned device, installs RacquetAI from TestFlight and records a full box-league match — 30-50 minutes of best-of-5 PAR-11, not a 20-minute blowout — in landscape from the gallery.",
+        "That recording plays back full length in Library on the same device with the session sheet attached: both players, court number, sport and best-of.",
+        "Nobody in the room walked away thinking the app scores matches. The one-page brief says so in writing and there is no Score AI tab to imply otherwise.",
+        "The match file comes off the club phone inside the 20 minutes budgeted for it, runs through the CPU-only Azure runner, and returns a rally timeline within ±2 rallies of a hand count — replayed lets counted as separate rallies, with the hand-counter logging lets separately so the comparison is apples to apples.",
+        "Deleting that match on the device removes the video, its sidecar and every derived clip — demonstrated in front of the coach, not asserted.",
+        "main is green — typecheck, lint and jest — at the v0.1.0 tag the club is holding.",
+        "Karan leaves with a written next step from the club: a second session booked, or an explicit no with the reason."
+      ]
+    }
+  },
+  "squash": {
+    "title": "Squash Clubs: The Beachhead Product",
+    "subtitle": "Four pillars for the club product — Recording, Feedback, Data & Analytics, AI Coaching. P0 = needed for the first club pilot, P1 = needed to charge money, P2 = the moat later. One jurisdiction is P0 (Ontario, Canada — build to the UK GDPR engineering bar), everything in AI Coaching runs on Azure after the match, and a single back-wall phone will never call a stroke, a serve fault or a not-up.",
+    "pillars": [
+      {
+        "key": "recording",
+        "name": "Data Recording",
+        "color": "green",
+        "why": "Every box-league match becomes an asset with zero staff time and zero capital works — the club's only spend is a clamp mount behind the glass. Nothing in this pillar infers anything; no model runs in the app.",
+        "features": [
+          {
+            "name": "Back-wall phone capture",
+            "detail": "Phone clamped 0–2.5 m behind the glass, in a corner not the centre; one tap arms it. No capital works.",
+            "priority": "P0"
+          },
+          {
+            "name": "Static framing overlay",
+            "detail": "A drawn guide the operator eyeballs against the out line and short line. Nothing is detected; no CV in the app.",
+            "priority": "P0"
+          },
+          {
+            "name": "Chunked local capture",
+            "detail": "Five-minute segments, so an incoming call or a crash costs one chunk of a 30–50 min match, not the match.",
+            "priority": "P0"
+          },
+          {
+            "name": "Consent gate: video and audio",
+            "detail": "Both players confirm video and audio before arming; an under-16 needs a linked parent approval or it will not start.",
+            "priority": "P0"
+          },
+          {
+            "name": "Delete a match, everywhere",
+            "detail": "Wipes source, chunks, clips, flags and any live link; logged confirmation to the requester, stated turnaround.",
+            "priority": "P0"
+          },
+          {
+            "name": "Resumable upload on club WiFi",
+            "detail": "Chunks upload when the phone rejoins a known network. Needs the backend that does not exist yet — hence P1.",
+            "priority": "P1"
+          },
+          {
+            "name": "Permanent mount, docked phone",
+            "detail": "Clamp and charger stay on the wall: the only way a self-scheduled 9pm box match records with nobody there.",
+            "priority": "P1"
+          }
+        ]
+      },
+      {
+        "key": "feedback",
+        "name": "Feedback",
+        "color": "blue",
+        "why": "A member gets something worth watching before they leave the building, and the box-league argument they just had gets settled — that is what makes the next member ask for it.",
+        "features": [
+          {
+            "name": "In-app match replay",
+            "detail": "Watchable on the device minutes after the match, scrubbable, jump by game. No backend, no link, no account.",
+            "priority": "P0"
+          },
+          {
+            "name": "Flag that rally",
+            "detail": "One button marks the rally you will argue about. Zero AI, an afternoon's work, and it labels the audio corpus.",
+            "priority": "P0"
+          },
+          {
+            "name": "Device-local match history",
+            "detail": "Every match on this device with date, opponent and court. Club-wide history waits on member identity (P1).",
+            "priority": "P0"
+          },
+          {
+            "name": "Let / stroke dispute replay",
+            "detail": "Jump to a flagged rally, frame-step at 0.25x, settle it without a referee — the argument box leagues actually have.",
+            "priority": "P1"
+          },
+          {
+            "name": "Coach note, parent-routed",
+            "detail": "Coach draws on the frame and records audio. For a junior it goes via a parent, never a 1:1 adult-child channel.",
+            "priority": "P1"
+          },
+          {
+            "name": "Expiring share link",
+            "detail": "Time-boxed link to one match or clip, with a revoke that really revokes. Needs backend, auth rules and hosting.",
+            "priority": "P1"
+          },
+          {
+            "name": "Branded clip export, adults only",
+            "detail": "60s club cut with burned-in score once scoring exists. Hard age gate: no junior footage leaves the club, ever.",
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "key": "data",
+        "name": "Data Injection & Analytics",
+        "color": "orange",
+        "why": "It feeds off whatever the club already runs, records the score in the shape USR and SquashLevels ingest, and hands the GM a court-hour number rather than a coaching toy.",
+        "features": [
+          {
+            "name": "CSV member and court import",
+            "detail": "Upload the club's courts, members and this month's boxes. The only integration that needs nobody's permission.",
+            "priority": "P0"
+          },
+          {
+            "name": "Tap scoreboard, PAR-11",
+            "detail": "Tap the rally winner; a tested pure reducer handles hand-out, best of 5 and win-by-2 past 10-10. Code exists.",
+            "priority": "P0"
+          },
+          {
+            "name": "Let / stroke / no-let logging",
+            "detail": "A let replays with no point, so rallies and points are different counts. Log all three outcomes from the start.",
+            "priority": "P0"
+          },
+          {
+            "name": "Ratings tuple export",
+            "detail": "Emits players, game scores, point scores, date and event type — all USR or SquashLevels need. Points matter.",
+            "priority": "P1"
+          },
+          {
+            "name": "Booking and box-league sync",
+            "detail": "Pulls court, slot, players and round from SportyHQ or Club Locker. Gated on a commercial deal, not on our code.",
+            "priority": "P1"
+          },
+          {
+            "name": "Club dashboard: court-hours",
+            "detail": "Recorded court-hours, off-peak fill, and whether recording members renew — priced per court-hour, the GM's unit.",
+            "priority": "P1"
+          },
+          {
+            "name": "Movement analytics, no ball",
+            "detail": "T dominance, heat map, distance, recovery time. Strictly downstream of two-player tracking, so it lands after it.",
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "key": "coaching",
+        "name": "AI Coaching",
+        "color": "violet",
+        "why": "The pro's time finally scales — but every item here runs on Azure after the match, never in the app, and one back-wall phone can never adjudicate the tin, the out line, a serve fault or a not-up.",
+        "features": [
+          {
+            "name": "Audio rally segmentation",
+            "detail": "Ball-strike onsets bound each rally; the tin's metallic clang always ends one, the best rally-END marker we get.",
+            "priority": "P1"
+          },
+          {
+            "name": "Court auto-calibration",
+            "detail": "Homography off the painted lines, after upload. The side out line slopes 4,570 to 2,130 mm — it is not level.",
+            "priority": "P1"
+          },
+          {
+            "name": "Two-player tracking",
+            "detail": "Pose and court position for both players on a calibrated court. Every analytic below this line depends on it.",
+            "priority": "P1"
+          },
+          {
+            "name": "Auto-scoring (PAR-11)",
+            "detail": "Rally winner plus serve box feeds the reducer; a let replays scoreless, so rally end never means a point.",
+            "priority": "P2"
+          },
+          {
+            "name": "Ball tracking and shot type",
+            "detail": "Black 40 mm ball at club pace (100–160 km/h): needs trajectory inpainting, not frame-wise detection. Then shot type.",
+            "priority": "P2"
+          },
+          {
+            "name": "One coaching LLM over the stats",
+            "detail": "Drills, a 4-week plan, the pro's next session, an opponent card — one feature, all gated on trusted stats.",
+            "priority": "P2"
+          },
+          {
+            "name": "Human correction re-folds it",
+            "detail": "Every score is a confidence plus an event stream; a player's fix re-folds it and becomes training data.",
+            "priority": "P2"
+          }
+        ]
+      }
+    ],
+    "requirements": [
+      {
+        "category": "Hardware & court fit-out",
+        "items": [
+          "One court with a FULL-GLASS back wall, and phone clamped 0–2.5 m behind it in a CORNER of the glass rather than the centre, where the door frame, handle and club logos sit. Full-glass back walls are a minority of club courts, so this is the first question on the phone, not something discovered on a site visit. Nothing may protrude into the playing surface — WSF requires a flush court.",
+          "The reflection fix is about $10: a rubber lens hood pressed flush against the glass, plus killing or avoiding the gallery lights directly behind the phone. Prove it on a dry run at a real court, not on pilot day.",
+          "Lighting: WSF rule 11's 300 lux (measured 1 m above the floor) is the RECREATIONAL floor, not the competition bar. Club and county competition is ~500 lux, televised is 1,000+. Test against 500 and treat 300 as worst case. Uniformity beats average — a court can average 400 lux with dark back corners, which is exactly where the players stand; WSF also caps wall illumination variation at 15% from average.",
+          "Mains flicker: 60 Hz in Canada and the US, 50 Hz in the UK. A mismatched shutter bands the footage, and expo-camera exposes no manual shutter or ISO control. Treat this as 'test it, and if it bands, that is the argument for react-native-vision-camera' — not a week-one fix.",
+          "Calibration constants, all to be re-checked against the primary WSF PDF before anything is hard-coded: court 9,750 × 6,400 mm; front-wall out line 4,570 mm; back-wall out line 2,130 mm; front-wall service line 1,780 mm; short line 5,440 mm from the front wall (its far edge is the commonly quoted 4,260 mm from the back wall); service boxes 1,600 × 1,600 mm. Two traps: the SIDE-wall out line slopes 4,570 → 2,130, so any homography assuming a level side edge is wrong; and the tin is 480 mm on a club court but 430 mm on the PSA men's tour, so it is a parameter, not a constant.",
+          "Design for the real ball and the honest limits. The competition ball is BLACK rubber, 40 mm — the contrast problem is black ball against black tin, dark floor shadow and dark kit, never white-on-white — and club box-league players hit roughly 100–160 km/h, not the ~270 km/h professional record. One back-wall camera cannot adjudicate the tin, the out line, a serve fault against the service line, or down / not-up (the double bounce), which is the single most disputed call in club squash. Those need a ceiling or in-tin angle the club would have to install."
+        ]
+      },
+      {
+        "category": "Network, storage & device limits",
+        "items": [
+          "Derive the file size from the codec the app actually sets, then quote one number everywhere: HEVC at ~6 Mbps is roughly 2 GB per 45 minutes, H.264 at ~10 Mbps is roughly 3.4 GB. The current documents disagree (3–4 GB vs 3–6 GB) and both figures are guesses presented as constraints. Keep ~20 GB free on the device or chunk-and-purge as segments upload.",
+          "Size the endurance target to squash, not to a demo: a best-of-5 PAR-11 club match typically runs 30–50 minutes, so the real bar is one continuous 50-minute take on a phone that is already throttling. A 20-minute match is a 3-0 blowout.",
+          "Chunking is the interruption story, and there is no expo-camera flag for it: iOS suspends the AVCaptureSession when the app backgrounds, so an incoming call ends the take. Five-minute chunks plus maxFileSize / maxDuration guards, plus 'enable Do Not Disturb or Guided Access' on the laminated card at the court door.",
+          "No live streaming in v1. Record locally and upload opportunistically when the phone rejoins club WiFi or the player's home network. One reliable upload point in the building — front desk or a wired dock — with ~15 Mbps up, tested during the site visit rather than during the pilot.",
+          "'Squash courts are WiFi dead zones' is an inference from court construction (interior or below-grade rooms, solid walls, glass), not evidence — no squash-specific survey was found. Survey real clubs before it becomes an architectural axiom.",
+          "Pin the data region to the pilot club's country on day one — an Ontario pilot means Canadian region — and write down the retention window (30 days of raw video by default) with every purge logged. Storage is linear in retained hours, but per-match inference dominates cost. Also confirm which Azure credit vehicle the $10k actually is and when it expires: $10k is not a standard Founders Hub tier, and a new subscription has zero GPU quota by default, while the v0 audio pipeline needs no GPU at all."
+        ]
+      },
+      {
+        "category": "Consent, safeguarding & minors",
+        "items": [
+          "Pick ONE jurisdiction for the pilot. Milton, Ontario means Canada is the P0 legal surface; England Squash / CPSU and US Squash move to market-entry. Correction to the previous draft: PIPEDA is NOT stricter than UK/EU GDPR — GDPR has explicit-consent standards, mandatory DPIAs, hard-deadline data-subject rights and fines to 4% of global turnover against PIPEDA's CAD $100k ceiling. Build to the UK GDPR engineering bar and you clear PIPEDA; the reverse is not true. The strictest Canadian bar is Quebec's Law 25, not PIPEDA.",
+          "Assume a DPIA is required and ship a template. Session-based, consent-triggered recording does NOT keep this out of DPIA territory — under UK GDPR a DPIA is triggered by children's data, by biometric processing and by innovative technology, independently of whether capture is continuous. Filming minors plus pose estimation almost certainly requires one. (The previous draft claimed both that a DPIA was avoided and that purges were logged 'for the DPIA'.)",
+          "AUDIO consent is a separate and larger ask than video, and the entire v0 signal is audio. On-court conversation between two players is private speech in both Canada and the UK. app.json currently describes the microphone as being used 'so playback includes the sound of the rally' — that under-describes it, and shipping that audio to Azure for ML is a purpose change requiring fresh consent. Fix the string now, and make audio its own checkbox on the consent gate.",
+          "Under-16s: parent or carer consent BEFORE filming, linked to the child's account and revocable at any time, with a non-consenting player hard-blocking the session. Four things the earlier draft missed — what happens to junior footage when the child turns 16 or leaves the club; background checks (Vulnerable Sector Check in Ontario, DBS in the UK) for anyone with access to junior footage, including Karan; a hard rule that no junior footage ever appears in an outbound or social artefact; and the fact that junior box leagues are where clubs film most, so this is the highest-volume use case, not an edge case.",
+          "A coach voice-over sent to a junior is a 1:1 asynchronous adult-child channel. Most NGB safeguarding codes require it to be visible to a second adult or routed through a parent. Write that rule before the feature is built, not after a safeguarding officer finds it.",
+          "The consent gate covers 'every player' and nothing else — not the gallery, not the pair warming up, not faces reflected in the glass back wall. Alongside it: a written photography, filming AND livestreaming policy template shipped with the app; signage at the court entrance naming the operator, the purpose and a data-rights contact; and a per-session audit log, which is exactly what the OPC's 'documented record of every decision to record' expectation asks for."
+        ]
+      },
+      {
+        "category": "Ownership, deletion & data rights",
+        "items": [
+          "Write a default operating rule for the PILOT, separate from the eventual contract: the club is controller, RacquetAI is processor, each player may obtain a personal copy, and nothing is published without club sign-off. 'No precedent found, this needs a lawyer' is honest, but the first match is filmed in six days and a pilot cannot run with the question open.",
+          "Fix the direct contradiction before the notice is printed: the pilot notice says 'footage stays with the club' while the same week's plan hand-carries that footage off the device to Azure. Either the notice authorises processing by RacquetAI — named, with the region — or the Azure run does not happen.",
+          "Deletion is a shared-subject problem, because every squash match has exactly two players. Written answers needed: who may request deletion (either player, the account holder, only the club?); what happens to the OTHER player's copy of the same file; and what happens to a coach's voice-over recorded on top of it.",
+          "Some exports are unrecoverable: a clip AirDropped into someone's Photos library cannot be deleted by us. Either the deletion path ships first, or export is restricted to Files-only with no Photos write until it exists. Do not build an un-deletable escape hatch before the consent and erasure mechanism exists.",
+          "Publish a deletion SLA: a stated turnaround, a logged confirmation to the requester, and propagation to derived clips, thumbnails, rally flags, share links and any Azure copy — plus an explicit statement of what survives (aggregate stats with no footage) and why.",
+          "The authorization model is the second question a GM asks and the documents never answer it: who at the club may watch whose match — the front desk, every member, or only the two players and the pro? Add a DPA with the club, a named sub-processor list (Azure, with its region), and a breach process naming who tells the club and the affected members if footage leaks."
+        ]
+      },
+      {
+        "category": "Integrations, ratings & data model",
+        "items": [
+          "Confirm what the pilot club actually runs before writing any connector, and order the list by the pilot's country. For Ontario the two candidates are SportyHQ and Club Locker, and the research is contradictory — Squash Canada selected Club Locker in 2018 and Ontario adopted it, yet SportyHQ is also described as dominant among Canadian clubs. One phone call settles it. ClubSpark is LTA/tennis-centric and does not belong at the top of a squash list; the realistic UK squash stack is SportyHQ, Club Locker, myClubhouse or Sport80, and that is market-entry, not the pilot.",
+          "CSV in and CSV out is the P0 integration; every API is P1 because none of them is signed. Club Locker exposes api.ussquash.com but has no public docs, endpoint list, auth model or partner programme, so assume a commercial conversation with the new majority owner. That owner is reported as Artisan Ventures from November 2025 — corroborated by Squash Canada and search snippets, with terms and price unverified — so do not state it flatly in a deck.",
+          "The ratings payload is tiny: (player A, player B, game scores, point scores, date, event type). USR ingests every match recorded in Club Locker — tournaments, leagues, ladders and friendlies — and updates daily; SquashLevels weights POINT scores, not just game wins, so point-level accuracy is what makes the hook work. No public WRITE API is confirmed for either, and that is the first email to send.",
+          "Member identity — club SSO or an email-matched directory — so a recorded player maps to a real membership and a real rating. Until that exists, match history stays device-local, which is why the Feedback pillar scopes it that way rather than promising a club-wide archive.",
+          "Fix the canonical enums now, against World Squash Rules of Singles Squash 2025 v1.2 (effective 1 Sept 2025): rally outcomes are winner, error, Yes Let (replay, no point), Stroke and No Let; shot types are drive, drop, boast, lob, kill, nick and volley, plus serve and error. Expect volley, lob and nick to need height information or a user correction.",
+          "Do not build booking, leagues or ladders. Club Locker, SportyHQ and CourtReserve own that and no club will switch booking systems to get video. The one thing worth importing is the box-league round: self-scheduled, unrefereed, score-disputed, already tracked digitally, and the highest-frequency recordable event in any club."
+        ]
+      },
+      {
+        "category": "Club operations & staffing",
+        "items": [
+          "One named owner inside the club, realistically the head pro or the box-league organiser — not the GM and not the front desk.",
+          "Zero-staff recording is a hard requirement, not a preference. Box matches are self-scheduled at 9pm; anything that needs a person to set it up will simply not happen. That is why the permanent clamp plus a docked, charging phone is P1 rather than a later moat — for the pilot Karan mounts it himself, but that configuration is not the product.",
+          "Someone owns charging, re-mounting and wiping the lens on the phone. Agree whose job that is, in writing, before the pilot starts.",
+          "A 15-minute onboarding for the pro plus a laminated card at the court door: mount, tap, confirm consent (video and audio), enable Do Not Disturb, play.",
+          "Three people must be in the first meeting — the GM signs, the pro champions, and the safeguarding officer can veto — and the safeguarding officer's written non-objection to the filming policy must land BEFORE the pilot date is confirmed. That is the likeliest single cause of a pilot collapsing on the day.",
+          "Support is a direct text thread to Karan during the pilot; an SLA only once it is paid. Budget 20 minutes on pilot day to hand-carry 2–3.5 GB off a club-owned phone with a member standing there, and pre-test that exact transfer on a real match file the day before."
+        ]
+      },
+      {
+        "category": "Commercial & pilot terms",
+        "items": [
+          "Clubs already spend roughly $100–550/mo on booking software (CourtReserve $199–549/mo, Skedda $99–199/mo). RacquetAI is an add-on inside that envelope, not a replacement. Fix the currency drift too — quote the pilot's country (CAD for Ontario) and convert everything else rather than mixing $, £ and € in one argument.",
+          "The anchor price in an operator's head is CourtReserve's own $25/mo Video Recording Integration add-on. Anything above roughly $50/court/mo needs a court-hour argument to survive the first pricing conversation.",
+          "Per-player willingness to pay is proven in squash: Club Locker's Canadian consumer tier is $6.67/mo billed annually or $11.99/mo month-to-month, and its PAID tier already promises 'match media'. Sit inside that band — and note this makes Club Locker a plausible competitor on video, not only a distribution rail.",
+          "Model unit economics as cost-per-match, not cost-per-GB, because per-match inference dominates storage. Rally Vision's reported $10 basic / $50 premium per match is the direct evidence for that, but it is a marketing page read once and independently unverified — treat it as an anchor to test, not a fact to quote.",
+          "Fixed installs are the ceiling and the reason almost no club has anything: InteractiveSQUASH is quoted 'starting at €16,550' plus €1,000–5,000 of operator prerequisite works, installed only via ASB SquashCourts — and that figure sits on a page whose surrounding content dates to around 2017, so it is stale rather than current pricing. Any RacquetAI hardware SKU must land well under €2,000/court; realistically it is a $200 clamp and a retired iPhone.",
+          "Pilot terms: one club, one or two courts, free through the LA28 / Rally28 growth window in exchange for named-reference rights, utilisation data, and the footage-ownership rule signed as written. Nothing about money is signed this week."
+        ]
+      }
+    ],
+    "openQuestions": [
+      "Does your back wall have full glass, and may I clamp a phone about two metres behind it, in a corner of the glass? Full-glass back walls are a minority of club courts and this is the hardest filter on the whole target list — ask it in the first thirty seconds of the call, not on the site visit.",
+      "Which system do you run the box league on — SportyHQ, Club Locker, something else — and can you export this month's boxes as a CSV? That answer decides the first integration and whether a recorded match arrives already knowing both players and the round.",
+      "If it took one tap, what share of your monthly box matches would actually get recorded — 10%, 50% or 90%? Below roughly 30% the club dashboard has no data in it and the ratings hook is noise.",
+      "Who owns footage of a member's match at your club — the club, the player or the coach — and has anything in your terms ever answered that? No precedent was found anywhere, and it blocks both the pilot notice and the first contract.",
+      "What would stop your junior box league being filmed, and does a written filming policy plus per-session parent consent clear it with your safeguarding officer? Juniors are where clubs film most, so if this fails the highest-volume use case is off the table.",
+      "What line item would this come out of and what is its ceiling — a $25/mo software add-on, a per-member fee, or the coaching P&L? That single number decides per-court versus per-player pricing."
+    ]
+  }
+}
