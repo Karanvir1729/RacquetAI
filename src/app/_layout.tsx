@@ -58,6 +58,8 @@ export default function RootLayout() {
             {/* Match analysis — reached from Library cards, never the tab bar
                 (href: null hides it there); see features/analysis. */}
             <Tabs.Screen name="analysis" options={{ href: null }} />
+            {/* Import & analyze flow — reached from the Library's import card. */}
+            <Tabs.Screen name="import-analysis" options={{ href: null }} />
           </Tabs>
           {/* iOS: "auto" = light icons on the dark theme, dark icons on the
               light one. Android pins the dark palette (tokens.ts dyn()), so

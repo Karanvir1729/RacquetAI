@@ -37,5 +37,8 @@ npm-debug.*
 # analysis pipeline artifacts
 analysis/samples/
 analysis/.venv/
+analysis/jobs/
 analysis/out/**/pose_cache.pkl
 analysis/out/**/_tmp/
+__pycache__/
+analysis/out/**/pose_cache*.pkl

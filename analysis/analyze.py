@@ -19,6 +19,7 @@ import argparse
 import json
 import math
 import os
+import pickle
 import subprocess
 import sys
 
@@ -35,7 +36,7 @@ HEAT_ROWS, HEAT_COLS = 12, 8
 SAMPLE_FPS = 8.0
 ONSET_MERGE_S = 0.35
 RALLY_GAP_S = 8.0
-WRIST_WIN_S = 0.25
+WRIST_WIN_S = 0.30
 MIN_ALIGN_INLIERS = 25
 KPT_CONF = 0.3
 COURT_MARGIN = 0.8  # meters of slack when filtering detections to the court
@@ -68,49 +69,118 @@ def extract_frame(cap, t_sec):
 
 
 # ---------------------------------------------------------------- alignment
-class Aligner:
-    """ORB alignment of each frame to the calibration reference frame."""
+ANCHOR_MIN_INLIERS = 80  # direct match strength needed to (re-)anchor to the ref
+
+
+def _fit_h(kp_a, desc_a, kp_b, desc_b, matcher):
+    """Homography mapping a -> b from ORB descriptors, or (None, 0)."""
+    if desc_a is None or desc_b is None or len(kp_a) < 30 or len(kp_b) < 30:
+        return None, 0
+    matches = matcher.match(desc_a, desc_b)
+    if len(matches) < 30:
+        return None, 0
+    matches = sorted(matches, key=lambda m: m.distance)[:600]
+    src = np.float32([kp_a[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
+    dst = np.float32([kp_b[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+    H, mask = cv2.findHomography(src, dst, cv2.RANSAC, 3.0)
+    if H is None:
+        return None, 0
+    det = np.linalg.det(H[:2, :2])
+    if not (0.25 < det < 4.0):
+        return None, 0
+    return H / H[2, 2], int(mask.sum())
+
+
+class FrameAligner:
+    """Per-frame ORB features; direct match to the reference frame plus a
+    sequential step match to the previous sampled frame.
+
+    A single wide-baseline homography mixes the back-glass plane with the floor
+    plane once a handheld camera translates, so the final alignment is built by
+    chaining small steps from the nearest strongly-anchored frame instead
+    (see build_alignments)."""
 
     def __init__(self, ref_img):
         self.orb = cv2.ORB_create(2500)
         self.matcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
         g = cv2.cvtColor(ref_img, cv2.COLOR_BGR2GRAY)
         self.ref_kp, self.ref_desc = self.orb.detectAndCompute(g, None)
-        self.last_good = np.eye(3)
-        self.n_aligned = 0
-        self.n_total = 0
+        self.prev = None  # (kp, desc)
 
-    def align(self, frame):
-        """Return H mapping frame pixels -> reference pixels (fallback: last good)."""
-        self.n_total += 1
+    def observe(self, frame):
+        """Return (H_direct, direct_inliers, H_step) for this frame.
+        H_step maps this frame -> previous sampled frame."""
         g = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         kp, desc = self.orb.detectAndCompute(g, None)
-        if desc is None or len(kp) < 30:
-            return self.last_good, False
-        matches = self.matcher.match(desc, self.ref_desc)
-        if len(matches) < 30:
-            return self.last_good, False
-        matches = sorted(matches, key=lambda m: m.distance)[:500]
-        src = np.float32([kp[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
-        dst = np.float32([self.ref_kp[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
-        H, mask = cv2.findHomography(src, dst, cv2.RANSAC, 3.0)
-        if H is None or mask.sum() < MIN_ALIGN_INLIERS:
-            return self.last_good, False
-        # sanity: reject wild warps (scale way off / flips)
-        det = np.linalg.det(H[:2, :2])
-        if not (0.25 < det < 4.0):
-            return self.last_good, False
-        self.last_good = H
-        self.n_aligned += 1
-        return H, True
+        H_dir, n_dir = _fit_h(kp, desc, self.ref_kp, self.ref_desc, self.matcher)
+        H_step = None
+        if self.prev is not None:
+            H_step, n_step = _fit_h(kp, desc, self.prev[0], self.prev[1], self.matcher)
+            if n_step < MIN_ALIGN_INLIERS:
+                H_step = None
+        self.prev = (kp, desc)
+        return H_dir, n_dir, H_step
+
+
+def build_alignments(directs, steps):
+    """Combine per-frame direct/step observations into final frame->ref maps.
+
+    Frames whose direct match has >= ANCHOR_MIN_INLIERS become anchors; other
+    frames chain step homographies from the nearest anchor (forward and
+    backward sweeps, fewest chained steps wins). Returns (H_list, anchored_pct).
+    """
+    n = len(directs)
+    INF = 10 ** 9
+    fwd = [None] * n
+    fwd_d = [INF] * n
+    cur, dist = None, INF
+    for i in range(n):
+        H_dir, n_dir = directs[i]
+        if H_dir is not None and n_dir >= ANCHOR_MIN_INLIERS:
+            cur, dist = H_dir, 0
+        elif cur is not None and steps[i] is not None:
+            cur = cur @ steps[i]          # prev->ref  o  cur->prev
+            cur = cur / cur[2, 2]
+            dist += 1
+        elif cur is not None:
+            dist += 25                    # missing step: heavy penalty
+        fwd[i], fwd_d[i] = cur, dist
+    bwd = [None] * n
+    bwd_d = [INF] * n
+    cur, dist = None, INF
+    for i in range(n - 1, -1, -1):
+        H_dir, n_dir = directs[i]
+        if H_dir is not None and n_dir >= ANCHOR_MIN_INLIERS:
+            cur, dist = H_dir, 0
+        elif cur is not None:
+            if i + 1 < n and steps[i + 1] is not None:
+                cur = cur @ np.linalg.inv(steps[i + 1])   # next->ref o cur->next
+                cur = cur / cur[2, 2]
+                dist += 1
+            else:
+                dist += 25
+        bwd[i], bwd_d[i] = cur, dist
+    out = []
+    anchored = 0
+    for i in range(n):
+        if fwd_d[i] <= bwd_d[i] and fwd[i] is not None:
+            H, d = fwd[i], fwd_d[i]
+        elif bwd[i] is not None:
+            H, d = bwd[i], bwd_d[i]
+        else:
+            H, d = np.eye(3), INF
+        out.append(H)
+        if d <= 80:  # within ~10 s of an anchor at 8 fps
+            anchored += 1
+    return out, 100.0 * anchored / max(n, 1)
 
 
 # ---------------------------------------------------------------- pose + tracking
-def detect_players(kpts, scores, H_px2court):
-    """Filter rtmlib detections to in-court players; keep the 2 biggest."""
+def detect_players(raw_dets, H_px2court):
+    """Filter raw pose detections to in-court players; keep the 2 biggest."""
     cands = []
-    for i in range(len(kpts)):
-        k, s = kpts[i], scores[i]
+    for det in raw_dets:
+        k, s = det["kpts"], det["scores"]
         ank = []
         for j in (L_ANK, R_ANK):
             if s[j] > KPT_CONF:
@@ -129,6 +199,7 @@ def detect_players(kpts, scores, H_px2court):
         h = vis[:, 1].max() - vis[:, 1].min()
         cands.append({
             "kpts": k, "scores": s, "ankle_px": ankle_px,
+            "torso_val": det.get("torso_val"),
             "court": (float(np.clip(cx, 0, COURT_W)), float(np.clip(cy, 0, COURT_L))),
             "area": float(w * h), "bbox_h": float(h),
         })
@@ -191,19 +262,24 @@ def extract_audio(video_path, tmp_dir):
 
 
 def audio_onsets(wav):
+    """Spectral-flux onset envelope + adaptive peak picking.
+
+    librosa.onset_detect's local-average delta collapses on continuously noisy
+    audio (multi-court venues), so peaks are picked directly: height above an
+    adaptive threshold, minimum prominence, minimum separation ONSET_MERGE_S.
+    """
     import librosa
+    from scipy.signal import find_peaks
     y, sr = librosa.load(wav, sr=22050, mono=True)
     env = librosa.onset.onset_strength(y=y, sr=sr)
-    times = librosa.onset.onset_detect(onset_envelope=env, sr=sr, units="time",
-                                       backtrack=False, delta=np.percentile(env, 90) * 0.30,
-                                       wait=2)
-    merged = []
-    for t in times:
-        if merged and t - merged[-1] < ONSET_MERGE_S:
-            continue
-        merged.append(float(t))
     env_t = librosa.times_like(env, sr=sr)
-    return merged, (env_t, env)
+    frame_dt = float(env_t[1] - env_t[0])
+    med = float(np.median(env))
+    p95 = float(np.percentile(env, 95))
+    thr = med + 1.0 * (p95 - med)
+    peaks, _ = find_peaks(env, height=thr, prominence=0.5 * (p95 - med),
+                          distance=max(1, int(round(ONSET_MERGE_S / frame_dt))))
+    return [float(t) for t in env_t[peaks]], (env_t, env)
 
 
 def wrist_speed_onsets(track_frames, times):
@@ -238,8 +314,13 @@ def wrist_speed_onsets(track_frames, times):
 
 
 # ---------------------------------------------------------------- striker attribution
-def wrist_travel(track_frames, times, idx_lo, idx_hi, pid):
-    total = {L_WRI: 0.0, R_WRI: 0.0}
+def peak_wrist_speed(track_frames, times, idx_lo, idx_hi, pid):
+    """Peak scale-normalized wrist speed (bbox-heights/sec) in a window.
+
+    Racquet swings measured on real footage peak at 2-5, ball-bouncing /
+    walking between rallies at 0.5-1.9 — this is the swing discriminator.
+    Returns (peak, n_obs)."""
+    best, obs = 0.0, 0
     prev = {}
     for i in range(idx_lo, idx_hi + 1):
         d = track_frames[i].get(pid)
@@ -249,9 +330,13 @@ def wrist_travel(track_frames, times, idx_lo, idx_hi, pid):
             if d["scores"][j] > KPT_CONF:
                 cur = d["kpts"][j]
                 if j in prev:
-                    total[j] += float(np.hypot(*(cur - prev[j]))) / max(d["bbox_h"], 1.0)
-                prev[j] = cur
-    return max(total.values())
+                    dt = times[i] - prev[j][1]
+                    if 0 < dt < 0.4:
+                        v = float(np.hypot(*(cur - prev[j][0]))) / max(d["bbox_h"], 1.0) / dt
+                        best = max(best, v)
+                        obs += 1
+                prev[j] = (cur, times[i])
+    return best, obs
 
 
 def nearest_tracked(track_frames, times, t, pid, max_dt=0.6):
@@ -351,6 +436,8 @@ def main():
     ap.add_argument("--corners", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--max-sec", type=float, default=None, help="analyze only first N seconds")
+    ap.add_argument("--rally-gap", type=float, default=RALLY_GAP_S,
+                    help="silence gap (s) between attributed shots that ends a rally")
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
@@ -377,54 +464,79 @@ def main():
     src = np.float32([c["frontLeft"], c["frontRight"], c["backLeft"], c["backRight"]])
     dst = np.float32([[0, 0], [COURT_W, 0], [0, COURT_L], [COURT_W, COURT_L]])
     H_ref2court = cv2.getPerspectiveTransform(src, dst)
-    aligner = Aligner(ref)
 
-    from rtmlib import Body
-    body = Body(mode="balanced", backend="onnxruntime", device="cpu")
+    # ---------------- pass 1: pose + alignment observations (cached) ----------------
+    cache_path = os.path.join(args.out, "pose_cache_v2.pkl")
+    if os.path.exists(cache_path):
+        with open(cache_path, "rb") as f:
+            blob = pickle.load(f)
+        times, raw_frames = blob["times"], blob["raw_frames"]
+        directs, steps = blob["directs"], blob["steps"]
+        print(f"pose cache hit: {len(times)} frames")
+    else:
+        from rtmlib import Body
+        body = Body(mode="balanced", backend="onnxruntime", device="cpu")
+        aligner = FrameAligner(ref)
+        stride = max(1, round(fps / SAMPLE_FPS))
+        times, raw_frames, directs, steps = [], [], [], []
+        idx = 0
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        while True:
+            ok, frame = cap.read()
+            if not ok:
+                break
+            if idx % stride:
+                idx += 1
+                continue
+            t = idx / fps
+            if t > duration:
+                break
+            H_dir, n_dir, H_step = aligner.observe(frame)
+            kpts, scores = body(frame)
+            dets = []
+            for i in range(len(kpts)):
+                k, s = kpts[i], scores[i]
+                tv = None
+                if all(s[j] > KPT_CONF for j in (L_SHO, R_SHO, L_HIP, R_HIP)):
+                    tx = int(np.mean([k[j][0] for j in (L_SHO, R_SHO, L_HIP, R_HIP)]))
+                    ty = int(np.mean([k[j][1] for j in (L_SHO, R_SHO, L_HIP, R_HIP)]))
+                    if 0 <= tx < width and 0 <= ty < height:
+                        tv = float(frame[ty, tx].mean())
+                dets.append({"kpts": k, "scores": s, "torso_val": tv})
+            times.append(t)
+            raw_frames.append(dets)
+            directs.append((H_dir, n_dir))
+            steps.append(H_step)
+            idx += 1
+            if len(times) % 400 == 0:
+                print(f"  ... {t:.0f}s / {duration:.0f}s")
+        cap.release()
+        with open(cache_path, "wb") as f:
+            pickle.dump({"times": times, "raw_frames": raw_frames,
+                         "directs": directs, "steps": steps}, f)
 
-    # ---------------- pass over sampled frames ----------------
-    stride = max(1, round(fps / SAMPLE_FPS))
-    times, track_frames = [], []
+    # ---------------- pass 2: final alignment + court filter + tracking ----------------
+    aligns, anchored_pct = build_alignments(directs, steps)
+    if anchored_pct < 95:
+        notes.append(f"camera alignment anchored for {anchored_pct:.0f}% of frames; "
+                     "positions in unanchored stretches are less reliable")
+    track_frames = []
     tracker = TwoTracker()
     torso_vals = {"A": [], "B": []}
-    idx = 0
-    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    while True:
-        ok, frame = cap.read()
-        if not ok:
-            break
-        if idx % stride:
-            idx += 1
-            continue
-        t = idx / fps
-        if t > duration:
-            break
-        H_align, _ = aligner.align(frame)
+    for i in range(len(times)):
+        H_align = aligns[i]
         H_px2court = H_ref2court @ H_align
-        kpts, scores = body(frame)
-        dets = detect_players(kpts, scores, H_px2court)
+        dets = detect_players(raw_frames[i], H_px2court)
         tracked = tracker.update(dets)
         for pid, d in tracked.items():
             d["H_align"] = H_align
-            k, s = d["kpts"], d["scores"]
-            if all(s[j] > KPT_CONF for j in (L_SHO, R_SHO, L_HIP, R_HIP)):
-                tx = int(np.mean([k[j][0] for j in (L_SHO, R_SHO, L_HIP, R_HIP)]))
-                ty = int(np.mean([k[j][1] for j in (L_SHO, R_SHO, L_HIP, R_HIP)]))
-                if 0 <= tx < width and 0 <= ty < height:
-                    torso_vals[pid].append(frame[ty, tx].mean())
-        times.append(t)
+            if d.get("torso_val") is not None:
+                torso_vals[pid].append(d["torso_val"])
         track_frames.append(tracked)
-        idx += 1
-        if len(times) % 400 == 0:
-            print(f"  ... {t:.0f}s / {duration:.0f}s")
-    cap.release()
 
     frames_analyzed = len(times)
     both_pct = 100.0 * sum(1 for tf in track_frames if len(tf) == 2) / max(frames_analyzed, 1)
-    align_pct = 100.0 * aligner.n_aligned / max(aligner.n_total, 1)
-    if align_pct < 90:
-        notes.append(f"camera alignment succeeded on {align_pct:.0f}% of frames; "
-                     "unaligned frames reuse the previous homography")
+    align_pct = anchored_pct
 
     # player labels from torso brightness
     labels = {"A": "Player A", "B": "Player B"}
@@ -446,16 +558,27 @@ def main():
         notes.append("no audio track: shot moments from wrist-speed peaks (less reliable)")
         onsets, (env_t, env) = wrist_speed_onsets(track_frames, times)
 
-    # striker attribution
-    shots_raw = []  # (t, striker_pid, court_pos)
+    # striker attribution, with a swing gate to reject onsets from neighbouring
+    # courts, voices, and between-rally ball-bouncing (measured separation:
+    # real swings peak >= ~2 bbox-heights/s, bounces/walking < ~1.9)
+    WRIST_PEAK_GATE = 1.9
+    ANKLE_GATE = 0.30   # meters moved over the window (fallback signal)
+    shots_raw = []      # (t, striker_pid, court_pos)
+    n_gated = 0
     for t in onsets:
         lo = max(0, int(np.searchsorted(times, t - WRIST_WIN_S)))
         hi = min(len(times) - 1, int(np.searchsorted(times, t + WRIST_WIN_S)))
         if hi < lo:
             continue
-        trav = {p: wrist_travel(track_frames, times, lo, hi, p) for p in ("A", "B")}
-        if trav["A"] <= 0 and trav["B"] <= 0:
-            # fallback: fastest-moving player by ankle speed
+        trav, obs = {}, {}
+        for p in ("A", "B"):
+            trav[p], obs[p] = peak_wrist_speed(track_frames, times, lo, hi, p)
+        if obs["A"] >= 2 or obs["B"] >= 2:
+            if audio_available and max(trav.values()) < WRIST_PEAK_GATE:
+                n_gated += 1
+                continue
+        else:
+            # wrists never seen in the window: ankle-speed fallback
             def ankle_speed(pid):
                 pts = [(times[i],) + track_frames[i][pid]["court"]
                        for i in range(lo, hi + 1) if pid in track_frames[i]]
@@ -463,19 +586,23 @@ def main():
                     return 0.0
                 return sum(math.hypot(b[1] - a[1], b[2] - a[2]) for a, b in zip(pts, pts[1:]))
             trav = {p: ankle_speed(p) for p in ("A", "B")}
-            if trav["A"] <= 0 and trav["B"] <= 0:
+            if max(trav.values()) < (ANKLE_GATE if audio_available else 1e-9):
+                n_gated += 1
                 continue
         pid = "A" if trav["A"] >= trav["B"] else "B"
         i = nearest_tracked(track_frames, times, t, pid)
         if i is None:
             continue
         shots_raw.append((float(t), pid, track_frames[i][pid]["court"]))
+    if n_gated:
+        notes.append(f"{n_gated} audio onsets rejected by the player-activity gate "
+                     "(likely neighbouring courts, voices or bounces)")
 
     # ---------------- rallies + retrieval-proxy placement ----------------
     rallies = []
     cur = []
     for s in shots_raw:
-        if cur and s[0] - cur[-1][0] > RALLY_GAP_S:
+        if cur and s[0] - cur[-1][0] > args.rally_gap:
             rallies.append(cur)
             cur = []
         cur.append(s)
@@ -496,6 +623,9 @@ def main():
     total_strikes = sum(len(r) for r in rallies)
     if len(shots_raw) and not rallies:
         notes.append("onsets detected but no rally had >= 2 attributed shots")
+    if args.rally_gap != RALLY_GAP_S:
+        notes.append(f"rally split gap set to {args.rally_gap:.1f}s for this venue "
+                     f"(default {RALLY_GAP_S:.1f}s; serve turnarounds here are ~5s)")
     notes.append(f"{len(onsets)} onsets detected, {len(shots_raw)} attributed to a striker, "
                  f"{total_strikes} inside rallies, {len(shots_out)} placed via retrieval proxy")
 

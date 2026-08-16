@@ -16,119 +16,119 @@
     {
       "id": "A",
       "label": "Player A",
-      "shots": 236,
+      "shots": 138,
       "placement": {
-        "frontLeft": 29,
-        "frontRight": 43,
-        "backLeft": 71,
-        "backRight": 93
+        "frontLeft": 17,
+        "frontRight": 28,
+        "backLeft": 34,
+        "backRight": 59
       },
       "coverageHeatmap": {
         "rows": 12,
         "cols": 8,
         "values": [
           0.0,
+          0.0056,
+          0.0112,
+          0.0056,
+          0.0112,
+          0.0223,
+          0.0112,
+          0.0279,
+          0.0112,
+          0.1061,
+          0.0056,
+          0.0112,
+          0.0056,
+          0.0056,
+          0.0112,
+          0.0391,
+          0.0223,
+          0.0559,
           0.0,
           0.0,
+          0.0056,
+          0.0112,
+          0.0503,
+          0.1061,
+          0.0056,
+          0.067,
+          0.0726,
+          0.0279,
+          0.0838,
+          0.0503,
+          0.0223,
+          0.067,
           0.0,
+          0.0838,
+          0.1285,
+          0.0838,
+          0.0838,
+          0.095,
+          0.067,
+          0.2011,
+          0.0056,
+          0.1173,
+          0.162,
+          0.2235,
+          0.1564,
+          0.1397,
+          0.1564,
+          0.1732,
           0.0,
-          0.0055,
+          0.2402,
+          0.2402,
+          0.257,
+          0.3743,
+          0.1788,
+          0.1341,
+          0.2235,
           0.0,
-          0.1374,
-          0.011,
-          0.044,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.033,
-          0.022,
-          0.0385,
-          0.011,
-          0.022,
-          0.0,
-          0.0,
-          0.0275,
-          0.0604,
-          0.0055,
-          0.0385,
-          0.0879,
-          0.0275,
-          0.0769,
-          0.033,
-          0.0165,
-          0.0604,
-          0.0,
-          0.0659,
-          0.0714,
-          0.0549,
-          0.0495,
-          0.0659,
-          0.044,
-          0.1429,
-          0.0,
-          0.1044,
-          0.0989,
-          0.1044,
-          0.1319,
-          0.1374,
-          0.0989,
-          0.1209,
-          0.0,
-          0.2363,
-          0.2747,
-          0.2747,
-          0.3956,
-          0.1758,
-          0.0824,
-          0.1538,
-          0.0,
-          0.3681,
-          0.3846,
-          0.7418,
+          0.4581,
+          0.4302,
+          0.5531,
           1.0,
-          0.4615,
-          0.2473,
-          0.4176,
-          0.0055,
-          0.0824,
-          0.6484,
-          0.6923,
-          0.7637,
-          0.4725,
-          0.5165,
-          0.2857,
-          0.011,
-          0.3297,
-          0.8462,
-          0.2527,
-          0.2527,
-          0.2802,
-          0.2253,
-          0.2143,
+          0.4581,
+          0.2011,
+          0.4078,
           0.0,
-          0.0055,
-          0.1099,
-          0.0989,
-          0.0604,
-          0.0879,
-          0.1374,
-          0.1868,
+          0.162,
+          0.5251,
+          0.5475,
+          0.7039,
+          0.486,
+          0.4637,
+          0.2626,
+          0.0112,
+          0.2737,
+          0.8045,
+          0.2067,
+          0.2402,
+          0.2123,
+          0.2402,
+          0.2514,
           0.0,
           0.0,
-          0.011,
-          0.033,
-          0.0165,
-          0.0495,
-          0.0659,
-          0.0275
+          0.1341,
+          0.1173,
+          0.0335,
+          0.0894,
+          0.1006,
+          0.1788,
+          0.0,
+          0.0,
+          0.0112,
+          0.0335,
+          0.0168,
+          0.0559,
+          0.0615,
+          0.0223
         ]
       },
-      "tTimePct": 32.8,
+      "tTimePct": 31.1,
       "predictability": {
-        "score": 0.153,
-        "entropyBits": 1.694,
+        "score": 0.125,
+        "entropyBits": 1.75,
         "maxEntropyBits": 2.0,
         "topPattern": "backRight -> backRight (23%)"
       }
@@ -136,159 +136,134 @@
     {
       "id": "B",
       "label": "Player B",
-      "shots": 184,
+      "shots": 141,
       "placement": {
         "frontLeft": 11,
-        "frontRight": 34,
-        "backLeft": 53,
-        "backRight": 86
+        "frontRight": 27,
+        "backLeft": 41,
+        "backRight": 62
       },
       "coverageHeatmap": {
         "rows": 12,
         "cols": 8,
         "values": [
           0.0,
-          0.0414,
-          0.0483,
-          0.0276,
-          0.069,
-          0.0414,
-          0.0069,
-          0.0759,
+          0.0342,
+          0.0342,
+          0.0137,
+          0.0616,
+          0.0274,
           0.0,
-          0.0828,
-          0.0069,
-          0.0207,
-          0.0207,
-          0.0069,
-          0.0621,
-          0.069,
+          0.1849,
           0.0,
-          0.0414,
+          0.0068,
           0.0,
-          0.0345,
-          0.0483,
-          0.0138,
-          0.0552,
-          0.1103,
+          0.0137,
+          0.0137,
           0.0,
-          0.0621,
-          0.0069,
-          0.0414,
-          0.0345,
-          0.0414,
-          0.0483,
-          0.1172,
+          0.0342,
+          0.0822,
           0.0,
-          0.0828,
-          0.0345,
-          0.0276,
-          0.0897,
-          0.0966,
-          0.1172,
-          0.2276,
-          0.0069,
-          0.1172,
-          0.1862,
-          0.2138,
-          0.3241,
-          0.1517,
-          0.2138,
-          0.2414,
+          0.0205,
           0.0,
-          0.2552,
-          0.3862,
-          0.4414,
-          0.4828,
-          0.3931,
-          0.2552,
-          0.5034,
-          0.0345,
-          0.531,
-          0.4828,
-          0.6069,
+          0.0205,
+          0.0274,
+          0.0068,
+          0.0274,
+          0.0616,
+          0.0,
+          0.0274,
+          0.0,
+          0.0,
+          0.0342,
+          0.0274,
+          0.0479,
+          0.0753,
+          0.0,
+          0.0274,
+          0.0411,
+          0.0274,
+          0.0616,
+          0.0753,
+          0.0479,
+          0.137,
+          0.0,
+          0.0753,
+          0.1644,
+          0.1438,
+          0.3082,
+          0.1712,
+          0.1575,
+          0.1438,
+          0.0,
+          0.137,
+          0.6233,
+          0.4932,
+          0.5616,
+          0.4041,
+          0.274,
+          0.4521,
+          0.0274,
+          0.4521,
+          0.4452,
+          0.6918,
           1.0,
-          0.6138,
-          0.5172,
-          0.6897,
-          0.0069,
-          0.0414,
-          0.5379,
-          0.6414,
-          0.8552,
-          0.3724,
-          0.4,
-          0.4138,
+          0.5616,
+          0.5411,
+          0.7329,
           0.0,
-          0.0966,
-          0.4483,
-          0.269,
-          0.1586,
-          0.2552,
-          0.2069,
-          0.4,
+          0.1301,
+          0.4932,
+          0.7945,
+          0.9247,
+          0.3356,
+          0.3904,
+          0.4932,
           0.0,
-          0.0897,
-          0.2621,
-          0.1241,
-          0.0552,
-          0.1172,
-          0.1241,
-          0.3241,
+          0.1096,
+          0.6301,
+          0.3014,
+          0.1781,
+          0.3014,
+          0.2808,
+          0.3767,
+          0.0,
+          0.0548,
+          0.2466,
+          0.089,
+          0.0616,
+          0.1301,
+          0.1712,
+          0.3288,
           0.0,
           0.0,
-          0.0207,
-          0.0207,
-          0.0621,
-          0.0552,
-          0.0345,
-          0.0621
+          0.0205,
+          0.0274,
+          0.089,
+          0.0753,
+          0.0479,
+          0.0411
         ]
       },
-      "tTimePct": 33.5,
+      "tTimePct": 36.1,
       "predictability": {
-        "score": 0.188,
-        "entropyBits": 1.625,
+        "score": 0.151,
+        "entropyBits": 1.699,
         "maxEntropyBits": 2.0,
-        "topPattern": "backRight -> backRight (28%)"
+        "topPattern": "backRight -> backRight (26%)"
       }
     }
   ],
   "rallies": {
-    "count": 1,
-    "avgShotsPerRally": 421.0,
-    "longestRally": 421
+    "count": 10,
+    "avgShotsPerRally": 28.9,
+    "longestRally": 55
   },
   "shots": [
     {
-      "tSec": 0.07,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 0.51,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 0.88,
-      "player": "B",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 1.25,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 1.63,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
       "tSec": 2.3,
       "player": "B",
-      "cell": "backRight"
+      "cell": "frontRight"
     },
     {
       "tSec": 2.65,
@@ -327,18 +302,8 @@
     },
     {
       "tSec": 8.01,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 9.1,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 9.78,
-      "player": "A",
-      "cell": "backRight"
+      "player": "B",
+      "cell": "frontRight"
     },
     {
       "tSec": 10.4,
@@ -346,27 +311,17 @@
       "cell": "frontLeft"
     },
     {
-      "tSec": 12.84,
-      "player": "B",
-      "cell": "frontLeft"
-    },
-    {
       "tSec": 13.35,
-      "player": "B",
+      "player": "A",
       "cell": "backRight"
     },
     {
       "tSec": 14.88,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
       "tSec": 15.49,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 17.07,
       "player": "B",
       "cell": "backRight"
     },
@@ -382,22 +337,22 @@
     },
     {
       "tSec": 18.78,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
       "tSec": 19.3,
       "player": "A",
-      "cell": "frontRight"
+      "cell": "backRight"
     },
     {
       "tSec": 19.92,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
       "tSec": 20.97,
-      "player": "B",
+      "player": "A",
       "cell": "backRight"
     },
     {
@@ -432,12 +387,7 @@
     },
     {
       "tSec": 26.12,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 26.77,
-      "player": "B",
+      "player": "A",
       "cell": "frontLeft"
     },
     {
@@ -451,53 +401,18 @@
       "cell": "frontRight"
     },
     {
-      "tSec": 28.58,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 30.42,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 31.09,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 32.04,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 32.46,
-      "player": "B",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 35.81,
-      "player": "B",
-      "cell": "frontRight"
-    },
-    {
       "tSec": 36.5,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 37.24,
       "player": "B",
       "cell": "backLeft"
     },
     {
       "tSec": 37.78,
       "player": "A",
-      "cell": "backRight"
+      "cell": "backLeft"
     },
     {
       "tSec": 38.31,
-      "player": "B",
+      "player": "A",
       "cell": "backRight"
     },
     {
@@ -507,7 +422,7 @@
     },
     {
       "tSec": 39.78,
-      "player": "B",
+      "player": "A",
       "cell": "backLeft"
     },
     {
@@ -523,7 +438,7 @@
     {
       "tSec": 41.8,
       "player": "B",
-      "cell": "backRight"
+      "cell": "backLeft"
     },
     {
       "tSec": 42.31,
@@ -551,32 +466,7 @@
       "cell": "frontLeft"
     },
     {
-      "tSec": 46.11,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 47.44,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
       "tSec": 48.62,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 49.6,
-      "player": "B",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 50.02,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 51.34,
       "player": "A",
       "cell": "frontLeft"
     },
@@ -591,28 +481,13 @@
       "cell": "backLeft"
     },
     {
-      "tSec": 54.03,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
       "tSec": 54.85,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 56.05,
       "player": "A",
       "cell": "backRight"
     },
     {
       "tSec": 56.91,
       "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 57.75,
-      "player": "B",
       "cell": "backRight"
     },
     {
@@ -623,16 +498,11 @@
     {
       "tSec": 59.95,
       "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 61.0,
-      "player": "B",
-      "cell": "backRight"
+      "cell": "frontRight"
     },
     {
       "tSec": 62.39,
-      "player": "B",
+      "player": "A",
       "cell": "frontRight"
     },
     {
@@ -668,25 +538,10 @@
     {
       "tSec": 67.45,
       "player": "B",
-      "cell": "backRight"
+      "cell": "frontRight"
     },
     {
       "tSec": 68.2,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 69.38,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 70.12,
-      "player": "B",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 70.66,
       "player": "B",
       "cell": "backLeft"
     },
@@ -703,31 +558,31 @@
     {
       "tSec": 72.61,
       "player": "A",
-      "cell": "backRight"
+      "cell": "backLeft"
     },
     {
       "tSec": 73.17,
-      "player": "A",
+      "player": "B",
       "cell": "frontRight"
     },
     {
       "tSec": 75.05,
-      "player": "A",
+      "player": "B",
       "cell": "backLeft"
     },
     {
       "tSec": 75.79,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 76.21,
       "player": "B",
       "cell": "backRight"
     },
     {
-      "tSec": 77.44,
+      "tSec": 76.21,
       "player": "A",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 77.44,
+      "player": "B",
       "cell": "backRight"
     },
     {
@@ -743,16 +598,11 @@
     {
       "tSec": 78.69,
       "player": "B",
-      "cell": "frontLeft"
+      "cell": "backLeft"
     },
     {
       "tSec": 79.55,
       "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 80.09,
-      "player": "A",
       "cell": "backRight"
     },
     {
@@ -763,21 +613,11 @@
     {
       "tSec": 82.04,
       "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 82.78,
-      "player": "B",
       "cell": "frontRight"
     },
     {
       "tSec": 84.15,
       "player": "B",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 84.71,
-      "player": "A",
       "cell": "backLeft"
     },
     {
@@ -793,17 +633,12 @@
     {
       "tSec": 86.29,
       "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 87.35,
-      "player": "B",
       "cell": "frontRight"
     },
     {
       "tSec": 87.77,
-      "player": "B",
-      "cell": "frontRight"
+      "player": "A",
+      "cell": "backRight"
     },
     {
       "tSec": 88.35,
@@ -812,13 +647,13 @@
     },
     {
       "tSec": 89.16,
-      "player": "A",
+      "player": "B",
       "cell": "backLeft"
     },
     {
       "tSec": 90.26,
       "player": "A",
-      "cell": "backLeft"
+      "cell": "frontLeft"
     },
     {
       "tSec": 90.88,
@@ -827,67 +662,32 @@
     },
     {
       "tSec": 91.53,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 92.6,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 93.16,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 93.74,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
       "tSec": 94.81,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
-      "tSec": 95.62,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 98.55,
-      "player": "B",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 99.17,
-      "player": "B",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 99.71,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
       "tSec": 101.38,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
       "tSec": 102.79,
-      "player": "B",
+      "player": "A",
       "cell": "backRight"
     },
     {
       "tSec": 103.61,
-      "player": "A",
+      "player": "B",
       "cell": "backLeft"
     },
     {
       "tSec": 104.54,
-      "player": "A",
+      "player": "B",
       "cell": "backLeft"
     },
     {
@@ -906,26 +706,6 @@
       "cell": "frontRight"
     },
     {
-      "tSec": 107.53,
-      "player": "B",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 110.32,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 111.04,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 111.39,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
       "tSec": 115.47,
       "player": "B",
       "cell": "backRight"
@@ -942,7 +722,7 @@
     },
     {
       "tSec": 118.49,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
@@ -962,7 +742,7 @@
     },
     {
       "tSec": 122.11,
-      "player": "B",
+      "player": "A",
       "cell": "frontRight"
     },
     {
@@ -983,7 +763,7 @@
     {
       "tSec": 126.48,
       "player": "B",
-      "cell": "backLeft"
+      "cell": "frontLeft"
     },
     {
       "tSec": 127.62,
@@ -993,21 +773,21 @@
     {
       "tSec": 128.99,
       "player": "A",
-      "cell": "backRight"
+      "cell": "frontRight"
     },
     {
       "tSec": 129.59,
       "player": "B",
-      "cell": "frontRight"
+      "cell": "backRight"
     },
     {
-      "tSec": 131.63,
-      "player": "A",
-      "cell": "frontRight"
+      "tSec": 130.89,
+      "player": "B",
+      "cell": "backRight"
     },
     {
       "tSec": 132.47,
-      "player": "A",
+      "player": "B",
       "cell": "frontLeft"
     },
     {
@@ -1033,27 +813,7 @@
     {
       "tSec": 134.95,
       "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 135.3,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 136.21,
-      "player": "B",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 138.21,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 139.6,
-      "player": "A",
-      "cell": "backLeft"
+      "cell": "frontLeft"
     },
     {
       "tSec": 140.67,
@@ -1068,7 +828,7 @@
     {
       "tSec": 141.73,
       "player": "A",
-      "cell": "backRight"
+      "cell": "backLeft"
     },
     {
       "tSec": 142.59,
@@ -1101,19 +861,14 @@
       "cell": "frontLeft"
     },
     {
-      "tSec": 147.66,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
       "tSec": 148.31,
       "player": "B",
-      "cell": "backLeft"
+      "cell": "frontLeft"
     },
     {
       "tSec": 148.75,
-      "player": "A",
-      "cell": "frontLeft"
+      "player": "B",
+      "cell": "backRight"
     },
     {
       "tSec": 149.51,
@@ -1122,7 +877,7 @@
     },
     {
       "tSec": 150.58,
-      "player": "A",
+      "player": "B",
       "cell": "frontRight"
     },
     {
@@ -1137,26 +892,21 @@
     },
     {
       "tSec": 154.64,
-      "player": "A",
+      "player": "B",
       "cell": "frontLeft"
     },
     {
       "tSec": 155.62,
-      "player": "B",
+      "player": "A",
       "cell": "frontLeft"
     },
     {
       "tSec": 156.87,
-      "player": "B",
+      "player": "A",
       "cell": "frontRight"
     },
     {
       "tSec": 157.73,
-      "player": "B",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 158.36,
       "player": "A",
       "cell": "frontRight"
     },
@@ -1167,17 +917,17 @@
     },
     {
       "tSec": 160.71,
-      "player": "A",
+      "player": "B",
       "cell": "frontRight"
     },
     {
       "tSec": 161.56,
-      "player": "A",
+      "player": "B",
       "cell": "frontRight"
     },
     {
       "tSec": 162.03,
-      "player": "A",
+      "player": "B",
       "cell": "frontRight"
     },
     {
@@ -1187,38 +937,13 @@
     },
     {
       "tSec": 162.73,
-      "player": "A",
+      "player": "B",
       "cell": "frontRight"
     },
     {
       "tSec": 163.12,
       "player": "B",
       "cell": "frontRight"
-    },
-    {
-      "tSec": 163.51,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 164.56,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 166.3,
-      "player": "B",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 166.7,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 167.72,
-      "player": "A",
-      "cell": "frontLeft"
     },
     {
       "tSec": 169.32,
@@ -1238,11 +963,6 @@
     {
       "tSec": 173.15,
       "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 173.52,
-      "player": "A",
       "cell": "backRight"
     },
     {
@@ -1272,12 +992,7 @@
     },
     {
       "tSec": 176.45,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 177.38,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
@@ -1293,11 +1008,6 @@
     {
       "tSec": 179.33,
       "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 180.16,
-      "player": "B",
       "cell": "backRight"
     },
     {
@@ -1321,18 +1031,8 @@
       "cell": "backLeft"
     },
     {
-      "tSec": 184.25,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 185.48,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
       "tSec": 186.85,
-      "player": "B",
+      "player": "A",
       "cell": "frontRight"
     },
     {
@@ -1341,32 +1041,7 @@
       "cell": "backLeft"
     },
     {
-      "tSec": 188.8,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 189.52,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
       "tSec": 190.19,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 190.75,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 191.45,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 192.08,
       "player": "A",
       "cell": "frontRight"
     },
@@ -1382,11 +1057,6 @@
     },
     {
       "tSec": 194.58,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 195.02,
       "player": "B",
       "cell": "backLeft"
     },
@@ -1412,12 +1082,12 @@
     },
     {
       "tSec": 199.04,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
       "tSec": 200.48,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
@@ -1431,49 +1101,9 @@
       "cell": "backRight"
     },
     {
-      "tSec": 202.2,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 203.1,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 203.64,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 204.41,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 204.8,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 205.59,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 206.43,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 207.05,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
       "tSec": 207.93,
       "player": "A",
-      "cell": "backLeft"
+      "cell": "frontLeft"
     },
     {
       "tSec": 208.31,
@@ -1488,16 +1118,6 @@
     {
       "tSec": 210.86,
       "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 211.46,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 212.28,
-      "player": "B",
       "cell": "backRight"
     },
     {
@@ -1511,49 +1131,9 @@
       "cell": "backRight"
     },
     {
-      "tSec": 214.27,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
       "tSec": 215.41,
-      "player": "B",
+      "player": "A",
       "cell": "backRight"
-    },
-    {
-      "tSec": 216.76,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 218.69,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 219.24,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 220.98,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 221.63,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 222.59,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 223.05,
-      "player": "A",
-      "cell": "frontRight"
     },
     {
       "tSec": 224.19,
@@ -1593,36 +1173,21 @@
     {
       "tSec": 230.55,
       "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 231.41,
-      "player": "B",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 231.83,
-      "player": "B",
       "cell": "frontRight"
     },
     {
       "tSec": 232.76,
       "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 233.71,
-      "player": "A",
       "cell": "backLeft"
     },
     {
       "tSec": 234.54,
       "player": "B",
-      "cell": "backRight"
+      "cell": "frontLeft"
     },
     {
       "tSec": 234.96,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
@@ -1656,13 +1221,8 @@
       "cell": "backLeft"
     },
     {
-      "tSec": 240.86,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
       "tSec": 241.42,
-      "player": "A",
+      "player": "B",
       "cell": "backLeft"
     },
     {
@@ -1683,11 +1243,6 @@
     {
       "tSec": 243.67,
       "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 244.46,
-      "player": "A",
       "cell": "frontRight"
     },
     {
@@ -1697,16 +1252,6 @@
     },
     {
       "tSec": 246.15,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 247.39,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 247.87,
       "player": "A",
       "cell": "backLeft"
     },
@@ -1721,48 +1266,8 @@
       "cell": "backRight"
     },
     {
-      "tSec": 249.75,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 251.75,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 253.05,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 255.35,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 255.95,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 256.44,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
       "tSec": 257.42,
       "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 258.11,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 258.53,
-      "player": "B",
       "cell": "backRight"
     },
     {
@@ -1816,47 +1321,17 @@
       "cell": "backRight"
     },
     {
-      "tSec": 268.4,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 269.19,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
       "tSec": 269.93,
-      "player": "B",
+      "player": "A",
       "cell": "backRight"
     },
     {
       "tSec": 270.58,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 271.14,
       "player": "B",
       "cell": "backRight"
     },
     {
       "tSec": 271.91,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 272.81,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 273.16,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 273.62,
       "player": "B",
       "cell": "backRight"
     },
@@ -1882,21 +1357,16 @@
     },
     {
       "tSec": 277.52,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
       "tSec": 278.13,
-      "player": "B",
+      "player": "A",
       "cell": "backLeft"
     },
     {
       "tSec": 279.31,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 279.78,
       "player": "B",
       "cell": "backRight"
     },
@@ -1911,26 +1381,6 @@
       "cell": "backRight"
     },
     {
-      "tSec": 281.61,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 281.96,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 282.63,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 283.03,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
       "tSec": 284.14,
       "player": "A",
       "cell": "backRight"
@@ -1941,33 +1391,13 @@
       "cell": "backRight"
     },
     {
-      "tSec": 285.26,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
       "tSec": 285.93,
       "player": "B",
       "cell": "backRight"
     },
     {
-      "tSec": 286.91,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
       "tSec": 287.65,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 288.07,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 288.69,
-      "player": "B",
+      "player": "A",
       "cell": "backRight"
     },
     {
@@ -1982,16 +1412,6 @@
     },
     {
       "tSec": 290.76,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 291.57,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 292.11,
       "player": "A",
       "cell": "backLeft"
     },
@@ -2026,63 +1446,18 @@
       "cell": "backLeft"
     },
     {
-      "tSec": 297.19,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 299.91,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 301.46,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 303.51,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 304.81,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 306.67,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 307.18,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
       "tSec": 307.94,
       "player": "B",
-      "cell": "backLeft"
+      "cell": "frontLeft"
     },
     {
       "tSec": 308.64,
       "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 309.34,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 309.85,
-      "player": "B",
-      "cell": "backRight"
+      "cell": "frontRight"
     },
     {
       "tSec": 310.8,
-      "player": "A",
+      "player": "B",
       "cell": "frontRight"
     },
     {
@@ -2096,11 +1471,6 @@
       "cell": "frontRight"
     },
     {
-      "tSec": 313.42,
-      "player": "A",
-      "cell": "frontRight"
-    },
-    {
       "tSec": 314.33,
       "player": "A",
       "cell": "frontRight"
@@ -2108,30 +1478,10 @@
     {
       "tSec": 314.79,
       "player": "A",
-      "cell": "frontRight"
-    },
-    {
-      "tSec": 315.56,
-      "player": "A",
       "cell": "backRight"
     },
     {
       "tSec": 316.42,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 318.21,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 318.86,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 319.41,
       "player": "A",
       "cell": "backLeft"
     },
@@ -2148,11 +1498,11 @@
     {
       "tSec": 322.76,
       "player": "A",
-      "cell": "backLeft"
+      "cell": "frontLeft"
     },
     {
       "tSec": 323.38,
-      "player": "B",
+      "player": "A",
       "cell": "frontRight"
     },
     {
@@ -2178,16 +1528,6 @@
     {
       "tSec": 327.15,
       "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 328.1,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 328.52,
-      "player": "B",
       "cell": "frontRight"
     },
     {
@@ -2197,12 +1537,7 @@
     },
     {
       "tSec": 332.02,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 333.76,
-      "player": "A",
+      "player": "B",
       "cell": "backLeft"
     },
     {
@@ -2213,22 +1548,12 @@
     {
       "tSec": 334.72,
       "player": "B",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 335.48,
-      "player": "B",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 336.62,
-      "player": "A",
       "cell": "backLeft"
     },
     {
       "tSec": 336.99,
       "player": "A",
-      "cell": "frontLeft"
+      "cell": "backLeft"
     },
     {
       "tSec": 337.87,
@@ -2256,11 +1581,6 @@
       "cell": "backRight"
     },
     {
-      "tSec": 341.43,
-      "player": "B",
-      "cell": "backRight"
-    },
-    {
       "tSec": 341.84,
       "player": "B",
       "cell": "backRight"
@@ -2271,53 +1591,33 @@
       "cell": "backRight"
     },
     {
-      "tSec": 343.1,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
       "tSec": 344.0,
-      "player": "A",
-      "cell": "backRight"
-    },
-    {
-      "tSec": 344.77,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 345.72,
-      "player": "A",
+      "player": "B",
       "cell": "backRight"
     },
     {
       "tSec": 346.98,
-      "player": "A",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 348.16,
-      "player": "A",
-      "cell": "backLeft"
-    },
-    {
-      "tSec": 348.55,
       "player": "B",
       "cell": "backLeft"
     },
     {
-      "tSec": 350.18,
+      "tSec": 348.16,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 348.55,
       "player": "A",
       "cell": "backRight"
     },
     {
       "tSec": 351.27,
-      "player": "B",
-      "cell": "backRight"
+      "player": "A",
+      "cell": "frontRight"
     },
     {
       "tSec": 352.2,
-      "player": "A",
+      "player": "B",
       "cell": "frontRight"
     },
     {
@@ -2328,11 +1628,11 @@
     {
       "tSec": 354.48,
       "player": "B",
-      "cell": "backLeft"
+      "cell": "frontLeft"
     },
     {
       "tSec": 355.68,
-      "player": "B",
+      "player": "A",
       "cell": "backRight"
     },
     {
@@ -2353,21 +1653,17 @@
     {
       "tSec": 360.14,
       "player": "A",
-      "cell": "frontLeft"
-    },
-    {
-      "tSec": 360.93,
-      "player": "A",
       "cell": "backLeft"
     }
   ],
   "quality": {
     "framesAnalyzed": 2739,
-    "bothPlayersDetectedPct": 83.4,
+    "bothPlayersDetectedPct": 83.5,
     "audioAvailable": true,
     "notes": [
-      "9 audio onsets rejected by the player-activity gate (likely neighbouring courts, voices or bounces)",
-      "430 onsets detected, 421 attributed to a striker, 421 inside rallies, 420 placed via retrieval proxy"
+      "141 audio onsets rejected by the player-activity gate (likely neighbouring courts, voices or bounces)",
+      "rally split gap set to 5.0s for this venue (default 8.0s; serve turnarounds here are ~5s)",
+      "430 onsets detected, 289 attributed to a striker, 289 inside rallies, 279 placed via retrieval proxy"
     ]
   }
 }

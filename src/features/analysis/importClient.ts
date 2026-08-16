@@ -1,0 +1,98 @@
+/**
+ * Network layer for the import flow — the only file that talks HTTP. Response
+ * bodies are narrowed by jobContract.ts parsers; every function either returns
+ * a parsed value or throws an `ImportServerError` with a message that is safe
+ * to render verbatim in the error state. The multipart upload goes through the
+ * legacy expo-file-system `createUploadTask` because it is the one Expo API
+ * with native upload progress callbacks (the new File API has none yet).
+ */
+import * as FileSystem from "expo-file-system/legacy";
+
+import {
+  analysisUrl,
+  cornersBody,
+  cornersUrl,
+  jobsUrl,
+  jobUrl,
+  parseJobStatus,
+  videoMimeType,
+  type CourtCorners,
+  type JobStatus,
+} from "./jobContract";
+
+/** A failure whose `message` is written for the user, not a stack trace. */
+export class ImportServerError extends Error {}
+
+export type UploadTask = FileSystem.UploadTask;
+
+/**
+ * Build (but do not start) the multipart upload of the picked video to
+ * POST /jobs, field "video". `onProgress` receives a 0..1 fraction, or null
+ * when the total size is unknown. Callers start it with `task.uploadAsync()`
+ * and cancel with `task.cancelAsync()` on unmount.
+ */
+export function createVideoUploadTask(
+  baseUrl: string,
+  videoUri: string,
+  onProgress: (fraction: number | null) => void,
+): UploadTask {
+  return FileSystem.createUploadTask(
+    jobsUrl(baseUrl),
+    videoUri,
+    {
+      httpMethod: "POST",
+      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+      fieldName: "video",
+      mimeType: videoMimeType(videoUri),
+      // Foreground-only: the flow screen owns the task lifecycle; a background
+      // iOS session would outlive the screen that reports its progress.
+      sessionType: FileSystem.FileSystemSessionType.FOREGROUND,
+    },
+    ({ totalBytesSent, totalBytesExpectedToSend }) => {
+      onProgress(totalBytesExpectedToSend > 0 ? totalBytesSent / totalBytesExpectedToSend : null);
+    },
+  );
+}
+
+async function fetchText(url: string, init?: RequestInit): Promise<string> {
+  let response: Response;
+  try {
+    response = await fetch(url, init);
+  } catch {
+    throw new ImportServerError(
+      "Could not reach the analysis server. Check that it is running and that the server URL in Settings is right.",
+    );
+  }
+  if (!response.ok) {
+    throw new ImportServerError(`The analysis server responded with HTTP ${response.status}.`);
+  }
+  return response.text();
+}
+
+/** GET /jobs/{id} → parsed status. */
+export async function fetchJobStatus(baseUrl: string, jobId: string): Promise<JobStatus> {
+  const body = await fetchText(jobUrl(baseUrl, jobId));
+  const status = parseJobStatus(body);
+  if (status === null) {
+    throw new ImportServerError("The analysis server sent a status this app version can't read.");
+  }
+  return status;
+}
+
+/** POST /jobs/{id}/corners with normalized floor-corner coordinates. */
+export async function postCorners(
+  baseUrl: string,
+  jobId: string,
+  corners: CourtCorners,
+): Promise<void> {
+  await fetchText(cornersUrl(baseUrl, jobId), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: cornersBody(corners),
+  });
+}
+
+/** GET /jobs/{id}/analysis.json → the raw JSON text (validated by the caller). */
+export async function fetchAnalysisText(baseUrl: string, jobId: string): Promise<string> {
+  return fetchText(analysisUrl(baseUrl, jobId));
+}

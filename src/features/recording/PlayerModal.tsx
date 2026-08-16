@@ -44,7 +44,7 @@ export function PlayerModal({ entry, onClose }: PlayerModalProps) {
         setExportState("idle");
         Alert.alert(
           "Photos access needed",
-          "Allow RacquetAI to add to your photo library in Settings, then try again.",
+          "Allow RacquetIQ to add to your photo library in Settings, then try again.",
         );
         return;
       }

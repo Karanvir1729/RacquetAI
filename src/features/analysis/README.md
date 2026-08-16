@@ -7,6 +7,13 @@ View-analysis affordance that opens `/analysis?id=<recording id>`. The route fil
 (`src/app/analysis.tsx`) is a hidden tab (`href: null` in `_layout`), so nothing new shows in
 the tab bar.
 
+The feature also owns the **import flow** (`/import-analysis`, also a hidden tab): the
+Library's "Import & analyze" card picks a video, this feature uploads it to the analysis
+server (base URL in Settings via `ServerConfigCard`, default `http://localhost:8082`), polls
+job status, collects the four floor-corner taps on the server's reference frame, then
+persists the returned `analysis.json` as `<imp-id>.analysis.json` (`src/lib/importedAnalyses`)
+and replaces itself with `/analysis?id=<imp-id>`.
+
 ## The contract
 
 Both sides build to `analysis.json` schemaVersion 1, typed in `types.ts` (pure — the pipeline
@@ -34,3 +41,11 @@ is reviewable now; the orchestrator overwrites its values with real analyzed-foo
 | `PredictabilityCard.tsx` | Score bar, plain-English top pattern, entropy detail. |
 | `RallyStatsRow.tsx` | Rallies / avg shots / longest as stat tiles. |
 | `QualityFootnote.tsx` | Frames analyzed, detection rate, audio caveat, pipeline notes. |
+| `jobContract.ts` | The analysis-server HTTP contract: endpoints, status/jobId parsing, corners payload. Pure — unit-tested. |
+| `letterbox.ts` | Contain-fit geometry: view taps ↔ normalized frame coords. Pure — unit-tested. |
+| `serverConfig.ts` | Persisted server base URL (`<documents>/analysis-server.json`, sidecar pattern). |
+| `importClient.ts` | The only HTTP layer: multipart upload task, status poll, corners POST, analysis fetch. |
+| `useImportFlow.ts` | Import state machine: upload → poll → corners → validate + persist → done/failed. |
+| `ImportAnalysisScreen.tsx` | Flow screen: stage list with progress, error + retry, handoff to `/analysis`. |
+| `CornerPicker.tsx` | Reference frame + numbered corner taps (Front left → Front right → Back left → Back right). |
+| `ServerConfigCard.tsx` | Settings card: show/edit the analysis-server URL with the LAN-IP hint. |

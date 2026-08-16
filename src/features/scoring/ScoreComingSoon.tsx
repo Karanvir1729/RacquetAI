@@ -27,7 +27,7 @@ export function ScoreComingSoon() {
           <Text style={styles.badgeText}>In development</Text>
         </View>
         <Text style={styles.heroNote}>
-          Soon RacquetAI will watch your match videos and keep score for you — squash first, then
+          Soon RacquetIQ will watch your match videos and keep score for you — squash first, then
           tennis, pickleball, and badminton. Nothing to set up now: every match you record is ready
           for scoring the day it ships.
         </Text>

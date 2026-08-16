@@ -30,8 +30,8 @@ export function PermissionGate({ canAskAgain, onRequest }: PermissionGateProps) 
           title={canAskAgain ? "Camera & microphone access" : "Camera access is off"}
           caption={
             canAskAgain
-              ? "RacquetAI films your matches with sound so you can review every rally. Nothing leaves your device."
-              : "Recording needs the camera and microphone. Turn both on for RacquetAI in Settings to start filming."
+              ? "RacquetIQ films your matches with sound so you can review every rally. Nothing leaves your device."
+              : "Recording needs the camera and microphone. Turn both on for RacquetIQ in Settings to start filming."
           }
         />
         <View style={styles.action}>
@@ -63,7 +63,7 @@ export function CameraUnavailable() {
           icon="videocam-off-outline"
           iconColor={colors.textFaint}
           title="No camera on this device"
-          caption="This device doesn't have a usable camera — the iOS Simulator, for instance, has none. Run RacquetAI on a real phone to record matches."
+          caption="This device doesn't have a usable camera — the iOS Simulator, for instance, has none. Run RacquetIQ on a real phone to record matches."
         />
       </View>
     </Screen>

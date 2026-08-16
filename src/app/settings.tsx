@@ -6,6 +6,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { Card } from "@/components/Card";
 import { Screen } from "@/components/Screen";
 import { ScreenHeader } from "@/components/ScreenHeader";
+import { ServerConfigCard } from "@/features/analysis/ServerConfigCard";
 import { selection as selectionHaptic } from "@/lib/haptics";
 import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens";
 
@@ -73,7 +74,7 @@ export default function SettingsScreen() {
             <Ionicons name="tennisball" size={26} color={colors.onAccent} />
           </View>
           <View style={styles.aboutBody}>
-            <Text style={styles.appName}>RacquetAI</Text>
+            <Text style={styles.appName}>RacquetIQ</Text>
             <Text style={styles.appMeta}>Version {APP_VERSION}</Text>
           </View>
         </View>
@@ -81,6 +82,8 @@ export default function SettingsScreen() {
           Record your matches. Review your play. AI score tracking is on the way.
         </Text>
       </Card>
+
+      <ServerConfigCard />
 
       <Card>
         <Text style={styles.sectionTitle}>Links</Text>
@@ -92,13 +95,13 @@ export default function SettingsScreen() {
       <Card>
         <Text style={styles.sectionTitle}>Open-source licenses</Text>
         <Text style={styles.licenseBody}>
-          RacquetAI is built on open-source software, including React Native and the Expo SDK.
+          RacquetIQ is built on open-source software, including React Native and the Expo SDK.
           Full license attributions will be listed here before the first App Store release
           (tracked in docs/07-app-store-prep.md).
         </Text>
       </Card>
 
-      <Text style={styles.footer}>RacquetAI · made for court time</Text>
+      <Text style={styles.footer}>RacquetIQ · made for court time</Text>
     </Screen>
   );
 }

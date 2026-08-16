@@ -16,6 +16,8 @@ import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens"
 
 import { DemoAnalysisCard } from "./DemoAnalysisCard";
 import { formatRecordedAt, sportLabel } from "./display";
+import { ImportAnalysisCard } from "./ImportAnalysisCard";
+import { ImportedAnalysesSection } from "./ImportedAnalysesSection";
 import { PlayerModal } from "./PlayerModal";
 import { deleteRecording } from "./storage";
 import { useRecordings } from "./useRecordings";
@@ -80,8 +82,12 @@ export function LibraryScreen() {
       ) : recordings.length === 0 ? (
         // The demo teaser stays visible even with zero recordings — it is the
         // only way to see what analysis looks like before recording anything.
+        // Import & analyze sits beside it: analyzing existing footage needs no
+        // recordings at all.
         <View style={styles.emptyWrap}>
           <DemoAnalysisCard />
+          <ImportAnalysisCard />
+          <ImportedAnalysesSection />
           <View style={styles.emptyCenter}>
             <EmptyState
               icon="film-outline"
@@ -96,7 +102,13 @@ export function LibraryScreen() {
           keyExtractor={(entry) => entry.meta.id}
           style={styles.flatList}
           contentContainerStyle={styles.list}
-          ListHeaderComponent={<DemoAnalysisCard />}
+          ListHeaderComponent={
+            <View style={styles.listHeader}>
+              <DemoAnalysisCard />
+              <ImportAnalysisCard />
+              <ImportedAnalysesSection />
+            </View>
+          }
           renderItem={({ item }) => (
             <RecordingRow
               entry={item}
@@ -199,6 +211,7 @@ const styles = StyleSheet.create({
   emptyCenter: { flex: 1, justifyContent: "center" },
   flatList: { flex: 1 },
   list: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
+  listHeader: { gap: spacing.sm },
   rowCard: { flexDirection: "row", alignItems: "center" },
   rowBody: { flex: 1, flexDirection: "row", alignItems: "center", gap: spacing.md },
   thumb: {

@@ -38,7 +38,7 @@ export class ErrorBoundary extends Component<PropsWithChildren, ErrorBoundarySta
       <View style={styles.root}>
         <Text style={styles.title}>Something broke</Text>
         <Text style={styles.body}>
-          RacquetAI hit an unexpected error. Recordings already saved on this device are safe —
+          RacquetIQ hit an unexpected error. Recordings already saved on this device are safe —
           this is only a display problem.
         </Text>
         <Button label="Try again" onPress={this.handleRetry} />

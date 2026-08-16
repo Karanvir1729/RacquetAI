@@ -1,5 +1,5 @@
 /**
- * RacquetAI design tokens — final palette. See docs/04-branding.md.
+ * RacquetIQ design tokens — final palette. See docs/04-branding.md.
  *
  * The pattern is inherited from a prior App-Store-shipped app (see docs/02): every colour
  * is a dark/light `DynamicColorIOS` pair, so iOS resolves the theme natively.
@@ -57,6 +57,9 @@ export const colors = {
   danger: dyn("#FF6B6B", "#C62F26"),
   dangerSoft: dyn("rgba(255,107,107,0.12)", "rgba(198,47,38,0.10)"),
 
+  // backdrop behind transparent modals (settings editors); ink-tinted on light
+  scrim: dyn("rgba(0,0,0,0.60)", "rgba(6,19,14,0.45)"),
+
   // literal white surfaces that must NOT flip with the theme (switch thumbs)
   surfaceWhite: "#FFFFFF" as ColorValue,
   inkOnWhite: "#06130E" as ColorValue,
@@ -79,7 +82,7 @@ export const radius = {
 } as const;
 
 /** Type scale — the platform UI face (SF on iOS, Roboto on Android) at weights
- *  400 / 600 / 800. RacquetAI ships no custom font; see docs/04-branding.md. */
+ *  400 / 600 / 800. RacquetIQ ships no custom font; see docs/04-branding.md. */
 export const type = {
   display: { fontSize: 34, fontWeight: "800" as const, letterSpacing: -1.2, lineHeight: 36 },
   title: { fontSize: 26, fontWeight: "800" as const, letterSpacing: -0.8 },
