@@ -15,6 +15,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 
+import { adoptAnalysisVideo } from "@/lib/analysisVideo";
 import { writeImportedAnalysis } from "@/lib/importedAnalyses";
 import { makeImportedAnalysisId } from "@/lib/importedAnalysisId";
 
@@ -96,6 +97,11 @@ function useServerImportFlow(videoUri: string | null): ImportFlow {
         }
         const importedId = makeImportedAnalysisId();
         writeImportedAnalysis(importedId, raw);
+        try {
+          adoptAnalysisVideo(importedId, videoUri);
+        } catch {
+          // Video copy is garnish — the analysis page just hides the player.
+        }
         safeSetState({ phase: "done", importedId });
       } catch (error) {
         fail(failureMessage(error));

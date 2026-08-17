@@ -9,6 +9,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { adoptAnalysisVideo } from "@/lib/analysisVideo";
 import { writeImportedAnalysis } from "@/lib/importedAnalyses";
 import { makeImportedAnalysisId } from "@/lib/importedAnalysisId";
 
@@ -110,6 +111,11 @@ export function useDeviceImportFlow(videoUri: string | null): ImportFlow {
           // runDeviceAnalysis already validated the JSON; persist it verbatim.
           const importedId = makeImportedAnalysisId();
           writeImportedAnalysis(importedId, raw);
+          try {
+            adoptAnalysisVideo(importedId, videoUri);
+          } catch {
+            // Video copy is garnish — the analysis page just hides the player.
+          }
           safeSetState({ phase: "done", importedId });
         } catch (error) {
           safeSetState({ phase: "failed", message: failureMessage(error) });

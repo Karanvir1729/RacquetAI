@@ -11,6 +11,7 @@
  */
 import { File } from "expo-file-system";
 
+import { deleteAnalysisVideoRef } from "./analysisVideo";
 import {
   idFromImportedSidecarName,
   importedAnalysisTimestamp,
@@ -63,4 +64,5 @@ export function deleteImportedAnalysis(id: string): void {
   if (!dir.exists) return;
   const file = new File(dir, importedSidecarName(id));
   if (file.exists) file.delete();
+  deleteAnalysisVideoRef(id);
 }

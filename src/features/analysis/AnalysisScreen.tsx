@@ -6,11 +6,13 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { EmptyState } from "@/components/EmptyState";
 import { Screen } from "@/components/Screen";
 import { ScreenHeader } from "@/components/ScreenHeader";
+import { readAnalysisVideoRef } from "@/lib/analysisVideo";
 import { formatClock } from "@/lib/format";
 import { selection as selectionHaptic } from "@/lib/haptics";
 import { colors, MIN_TOUCH_TARGET, spacing, type } from "@/theme/tokens";
 
 import { DEMO_ANALYSIS } from "./demoAnalysis";
+import { MatchVideoCard } from "./MatchVideoCard";
 import { PlayerSection } from "./PlayerSection";
 import { QualityFootnote } from "./QualityFootnote";
 import { RallyStatsRow } from "./RallyStatsRow";
@@ -34,6 +36,11 @@ export function AnalysisScreen({ source, recordingId }: AnalysisScreenProps) {
   const isDemo = source === "demo";
   const analysis = useMemo<MatchAnalysis | null>(
     () => (isDemo ? DEMO_ANALYSIS : recordingId ? loadAnalysisForRecording(recordingId) : null),
+    [isDemo, recordingId],
+  );
+  // The demo ships stats only; imported analyses may carry a copy of the clip.
+  const videoUri = useMemo(
+    () => (!isDemo && recordingId ? readAnalysisVideoRef(recordingId) : null),
     [isDemo, recordingId],
   );
 
@@ -79,6 +86,7 @@ export function AnalysisScreen({ source, recordingId }: AnalysisScreenProps) {
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
         >
+          {videoUri !== null && <MatchVideoCard videoUri={videoUri} />}
           <RallyStatsRow rallies={analysis.rallies} />
           {analysis.players.map((player) => (
             <PlayerSection key={player.id} player={player} />
