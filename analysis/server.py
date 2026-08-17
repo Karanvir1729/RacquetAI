@@ -32,6 +32,7 @@ Run:  analysis/.venv/bin/python analysis/server.py   (port 8082)
 import json
 import os
 import re
+import shutil
 import subprocess
 import threading
 import time
@@ -43,8 +44,11 @@ ANALYSIS_DIR = os.path.dirname(os.path.abspath(__file__))
 JOBS_DIR = os.path.join(ANALYSIS_DIR, "jobs")
 VENV_PY = os.path.join(ANALYSIS_DIR, ".venv", "bin", "python")
 ANALYZE_PY = os.path.join(ANALYSIS_DIR, "analyze.py")
-FFMPEG = "/opt/homebrew/bin/ffmpeg"
-FFPROBE = "/opt/homebrew/bin/ffprobe"
+# Resolve from PATH (Linux containers: /usr/bin), keeping the Homebrew
+# location as a fallback for a bare `python server.py` on a Mac without
+# ffmpeg on PATH.
+FFMPEG = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
+FFPROBE = shutil.which("ffprobe") or "/opt/homebrew/bin/ffprobe"
 
 PORT = int(os.environ.get("RACQUET_ANALYSIS_PORT", "8082"))
 DOWNSCALE_W = 854
