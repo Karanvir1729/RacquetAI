@@ -1,0 +1,7 @@
+{
+  "name": "racquet-analyzer",
+  "version": "0.1.0",
+  "description": "On-device squash match analysis (iOS Expo local module)",
+  "main": "index.ts",
+  "private": true
+}

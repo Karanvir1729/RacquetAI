@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Tabs, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ComponentProps } from "react";
+import { ComponentProps, useEffect } from "react";
 import { ColorValue, Platform, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -25,6 +25,25 @@ function tabIcon(name: IoniconName) {
  * the "theming" the root has to do.
  */
 export default function RootLayout() {
+  // DEV autorun (simulator): jump straight into the on-device import flow so
+  // the native pipeline can be exercised hands-free. Env-gated; no-op in
+  // production bundles.
+  useEffect(() => {
+    if (__DEV__ && process.env.EXPO_PUBLIC_AUTORUN_SAMPLE === "1") {
+      const t = setTimeout(() => {
+        router.push({
+          pathname: "/import-analysis",
+          params: {
+            videoUri:
+              "file:///Users/karanvirkhanna/RacquetAI/analysis/samples/pexels_squash.mp4",
+          },
+        });
+      }, 1200);
+      return () => clearTimeout(t);
+    }
+    return undefined;
+  }, []);
+
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={styles.root}>

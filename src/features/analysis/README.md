@@ -8,11 +8,20 @@ View-analysis affordance that opens `/analysis?id=<recording id>`. The route fil
 the tab bar.
 
 The feature also owns the **import flow** (`/import-analysis`, also a hidden tab): the
-Library's "Import & analyze" card picks a video, this feature uploads it to the analysis
-server (base URL in Settings via `ServerConfigCard`, default `http://localhost:8082`), polls
-job status, collects the four floor-corner taps on the server's reference frame, then
-persists the returned `analysis.json` as `<imp-id>.analysis.json` (`src/lib/importedAnalyses`)
-and replaces itself with `/analysis?id=<imp-id>`.
+Library's "Import & analyze" card picks a video, and `useImportFlow` dispatches it to one of
+two backends (`backend.ts`, chosen in Settings, default "device"):
+
+- **On this device** — the `racquet-analyzer` Expo local module
+  (`modules/racquet-analyzer/`, loaded via require-in-try/catch so Expo Go degrades to the
+  server path instead of crashing): extract a mid-video reference frame, corner taps on that
+  local frame, then `analyzeMatch` with `analysisProgress` events driving the progress UI.
+- **Analysis server** — upload to the server (base URL in Settings via `ServerConfigCard`,
+  default `http://localhost:8082`), poll job status, corner taps on the server's reference
+  frame.
+
+Both paths collect the four floor-corner taps with the same `CornerPicker`, validate the
+resulting `analysis.json` with `parseAnalysis`, persist it as `<imp-id>.analysis.json`
+(`src/lib/importedAnalyses`) and replace themselves with `/analysis?id=<imp-id>`.
 
 ## The contract
 
@@ -44,8 +53,12 @@ is reviewable now; the orchestrator overwrites its values with real analyzed-foo
 | `jobContract.ts` | The analysis-server HTTP contract: endpoints, status/jobId parsing, corners payload. Pure — unit-tested. |
 | `letterbox.ts` | Contain-fit geometry: view taps ↔ normalized frame coords. Pure — unit-tested. |
 | `serverConfig.ts` | Persisted server base URL (`<documents>/analysis-server.json`, sidecar pattern). |
+| `backend.ts` | Backend choice ("device"/"server"): persisted setting, module availability, `resolveBackend` fallback. Pure parts unit-tested. |
+| `deviceClient.ts` | racquet-analyzer wrapper: require-in-try/catch loader, frame extraction, `analyzeMatch` + progress→JobStatus mapping, corners/options JSON. Unit-tested. |
 | `importClient.ts` | The only HTTP layer: multipart upload task, status poll, corners POST, analysis fetch. |
-| `useImportFlow.ts` | Import state machine: upload → poll → corners → validate + persist → done/failed. |
-| `ImportAnalysisScreen.tsx` | Flow screen: stage list with progress, error + retry, handoff to `/analysis`. |
+| `importFlowState.ts` | The shared flow-state union both machines drive and the screen renders. |
+| `useImportFlow.ts` | Entry hook: resolves the backend, dispatches; owns the server machine (upload → poll → corners → validate + persist). |
+| `useDeviceImportFlow.ts` | Device machine: extract frame → corners → on-device analyze with progress → validate + persist. |
+| `ImportAnalysisScreen.tsx` | Flow screen: stage list with progress for either backend, error + retry, handoff to `/analysis`. |
 | `CornerPicker.tsx` | Reference frame + numbered corner taps (Front left → Front right → Back left → Back right). |
-| `ServerConfigCard.tsx` | Settings card: show/edit the analysis-server URL with the LAN-IP hint. |
+| `ServerConfigCard.tsx` | Settings "Analysis" card: backend choice (device disabled in Expo Go) + show/edit the server URL with the LAN-IP hint. |

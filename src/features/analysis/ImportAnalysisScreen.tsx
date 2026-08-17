@@ -1,10 +1,13 @@
 /**
- * Import & analyze: drives useImportFlow through its stages — upload with
- * progress, server-side preparing, the tap-the-corners step (CornerPicker),
- * analyzing, then persist-and-handoff. On success the screen replaces itself
- * with /analysis?id=<imported id>, so Back from the results returns to the
- * Library, not to a dead progress screen. Errors render a readable message
- * with a retry that restarts the whole flow.
+ * Import & analyze: drives useImportFlow through its stages for EITHER
+ * backend. Server flow: upload with progress → server-side preparing → the
+ * tap-the-corners step (CornerPicker on the server's frame) → analyzing.
+ * Device flow: extract a local reference frame → the same CornerPicker on that
+ * frame → on-device analyzing with stage progress. Both end in
+ * persist-and-handoff: the screen replaces itself with
+ * /analysis?id=<imported id>, so Back from the results returns to the Library,
+ * not to a dead progress screen. Errors render a readable message with a retry
+ * that restarts the whole flow.
  */
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -20,8 +23,9 @@ import { selection as selectionHaptic } from "@/lib/haptics";
 import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens";
 
 import { CornerPicker } from "./CornerPicker";
+import type { ImportFlowState } from "./importFlowState";
 import { frameUrl } from "./jobContract";
-import { useImportFlow, type ImportFlowState } from "./useImportFlow";
+import { useImportFlow } from "./useImportFlow";
 
 interface ImportAnalysisScreenProps {
   /** file:// URI of the picked video; null when the route got no usable param. */
@@ -88,27 +92,71 @@ function FlowStage({ state, retry, submitCorners }: FlowStageProps) {
       <CornerPicker frameUri={frameUrl(state.baseUrl, state.jobId)} onSubmit={submitCorners} />
     );
   }
+  if (state.phase === "corners") {
+    // Device flow: same picker, on the locally extracted reference frame.
+    return <CornerPicker frameUri={state.frameUri} onSubmit={submitCorners} />;
+  }
   if (state.phase === "saving" || state.phase === "done") {
     return <LoadingState fill caption="Saving your analysis…" />;
   }
 
-  // Upload or a server-side stage: the step list with live progress.
-  const uploading = state.phase === "uploading";
-  const status = uploading ? null : state.status;
-  const stepIndex = uploading
-    ? 0
-    : status?.status === "queued" || status?.status === "preparing"
-      ? 1
-      : 3;
-  const progressPct = uploading
-    ? state.progress === null
-      ? null
-      : state.progress * 100
-    : (status?.progressPct ?? null);
+  // A progress stage — device (extracting/analyzing) or server (upload/job):
+  // the step list with live progress.
+  if (state.phase === "extracting") {
+    return <StepsProgress steps={DEVICE_STEPS} stepIndex={0} progressPct={null} message={null} />;
+  }
+  if (state.phase === "analyzing") {
+    return (
+      <StepsProgress
+        steps={DEVICE_STEPS}
+        stepIndex={2}
+        progressPct={state.status.progressPct}
+        message={state.status.message}
+      />
+    );
+  }
+  if (state.phase === "uploading") {
+    return (
+      <StepsProgress
+        steps={SERVER_STEPS}
+        stepIndex={0}
+        progressPct={state.progress === null ? null : state.progress * 100}
+        message={null}
+      />
+    );
+  }
+  // Remaining server "job" stages: queued/preparing before corners, analyzing after.
+  const stepIndex = state.status.status === "queued" || state.status.status === "preparing" ? 1 : 3;
+  return (
+    <StepsProgress
+      steps={SERVER_STEPS}
+      stepIndex={stepIndex}
+      progressPct={state.status.progressPct}
+      message={state.status.message}
+    />
+  );
+}
+
+const SERVER_STEPS = [
+  "Uploading video…",
+  "Preparing video…",
+  "Mark the court corners",
+  "Analyzing…",
+];
+const DEVICE_STEPS = ["Preparing video…", "Mark the court corners", "Analyzing on this device…"];
+
+interface StepsProgressProps {
+  steps: readonly string[];
+  stepIndex: number;
+  progressPct: number | null;
+  message: string | null;
+}
+
+function StepsProgress({ steps, stepIndex, progressPct, message }: StepsProgressProps) {
   return (
     <View style={styles.centerFill}>
       <View style={styles.steps}>
-        {STEPS.map((label, index) => (
+        {steps.map((label, index) => (
           <View key={label} style={styles.stepRow}>
             <Ionicons
               name={
@@ -129,12 +177,10 @@ function FlowStage({ state, retry, submitCorners }: FlowStageProps) {
         ))}
       </View>
       <ProgressBar pct={progressPct} />
-      {status?.message ? <Text style={styles.serverMessage}>{status.message}</Text> : null}
+      {message ? <Text style={styles.serverMessage}>{message}</Text> : null}
     </View>
   );
 }
-
-const STEPS = ["Uploading video…", "Preparing video…", "Mark the court corners", "Analyzing…"];
 
 function ProgressBar({ pct }: { pct: number | null }) {
   return (

@@ -1,16 +1,24 @@
 /**
- * The import-flow state machine: upload → poll → (corners) → poll → fetch,
- * validate, persist → done. One effect per attempt owns the whole lifecycle —
- * upload task, 2-second poll interval, finalization — and tears all of it down
- * on unmount or retry, so a half-dead flow can never keep polling behind a
- * screen that left. Every server payload crosses jobContract/parseAnalysis
- * narrowing before it can drive the UI.
+ * The import flow's entry hook. `useImportFlow` resolves the analysis backend
+ * once per mount — the persisted setting, downgraded to "server" whenever the
+ * racquet-analyzer module is unavailable (Expo Go) — and hands the video to
+ * either the on-device machine (useDeviceImportFlow) or the server machine
+ * below. Exactly one machine gets the real videoUri; the other idles on null,
+ * keeping hook order stable.
+ *
+ * The server machine: upload → poll → (corners) → poll → fetch, validate,
+ * persist → done. One effect per attempt owns the whole lifecycle — upload
+ * task, 2-second poll interval, finalization — and tears all of it down on
+ * unmount or retry, so a half-dead flow can never keep polling behind a screen
+ * that left. Every server payload crosses jobContract/parseAnalysis narrowing
+ * before it can drive the UI.
  */
 import { useCallback, useEffect, useState } from "react";
 
-import { makeImportedAnalysisId } from "@/lib/importedAnalysisId";
 import { writeImportedAnalysis } from "@/lib/importedAnalyses";
+import { makeImportedAnalysisId } from "@/lib/importedAnalysisId";
 
+import { isDeviceAnalysisAvailable, loadAnalysisBackend, resolveBackend } from "./backend";
 import {
   createVideoUploadTask,
   fetchAnalysisText,
@@ -18,28 +26,17 @@ import {
   ImportServerError,
   postCorners,
 } from "./importClient";
-import { parseJobCreated, type CourtCorners, type JobStatus } from "./jobContract";
+import { NO_VIDEO_STATE, type ImportFlow, type ImportFlowState } from "./importFlowState";
+import { parseJobCreated, type CourtCorners } from "./jobContract";
 import { loadServerBaseUrl } from "./serverConfig";
 import { parseAnalysis } from "./types";
+import { useDeviceImportFlow } from "./useDeviceImportFlow";
+
+export type { ImportFlow, ImportFlowState };
 
 const POLL_INTERVAL_MS = 2000;
 /** Tolerated consecutive poll failures (transient Wi-Fi blips) before erroring. */
 const MAX_POLL_FAILURES = 5;
-
-export type ImportFlowState =
-  | { phase: "uploading"; progress: number | null }
-  | { phase: "job"; baseUrl: string; jobId: string; status: JobStatus }
-  | { phase: "saving" }
-  | { phase: "done"; importedId: string }
-  | { phase: "failed"; message: string };
-
-interface ImportFlow {
-  state: ImportFlowState;
-  /** Restart the whole flow (re-upload) after a failure. */
-  retry: () => void;
-  /** POST the four corners; false = request failed and the picker should say so. */
-  submitCorners: (corners: CourtCorners) => Promise<boolean>;
-}
 
 function failureMessage(error: unknown): string {
   return error instanceof ImportServerError
@@ -47,14 +44,23 @@ function failureMessage(error: unknown): string {
     : "Something went wrong talking to the analysis server.";
 }
 
-/** Module-scope constants so re-renders compare by reference. */
+/** Module-scope constant so re-renders compare by reference. */
 const INITIAL_STATE: ImportFlowState = { phase: "uploading", progress: 0 };
-const NO_VIDEO_STATE: ImportFlowState = {
-  phase: "failed",
-  message: "No video was selected. Go back to the Library and pick one.",
-};
 
+/**
+ * Backend-aware dispatcher. The decision is taken once per mount: flipping the
+ * setting mid-import must not orphan a running upload or native analysis.
+ */
 export function useImportFlow(videoUri: string | null): ImportFlow {
+  const [backend] = useState(() =>
+    resolveBackend(loadAnalysisBackend(), isDeviceAnalysisAvailable()),
+  );
+  const device = useDeviceImportFlow(backend === "device" ? videoUri : null);
+  const server = useServerImportFlow(backend === "server" ? videoUri : null);
+  return backend === "device" ? device : server;
+}
+
+function useServerImportFlow(videoUri: string | null): ImportFlow {
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<ImportFlowState>(INITIAL_STATE);
 
