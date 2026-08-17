@@ -7,7 +7,11 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { installCrashGuard, reportLastFatalError } from "@/lib/crashGuard";
 import { colors } from "@/theme/tokens";
+
+// As early as possible: capture fatal JS errors that TestFlight logs strip.
+installCrashGuard();
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -28,6 +32,13 @@ export default function RootLayout() {
   // DEV autorun (simulator): jump straight into the on-device import flow so
   // the native pipeline can be exercised hands-free. Env-gated; no-op in
   // production bundles.
+  // Beta forensics: if the previous run died on a fatal JS error, show the
+  // captured message so the tester can screenshot it.
+  useEffect(() => {
+    const t = setTimeout(reportLastFatalError, 1500);
+    return () => clearTimeout(t);
+  }, []);
+
   useEffect(() => {
     if (__DEV__ && process.env.EXPO_PUBLIC_AUTORUN_OPEN) {
       const id = process.env.EXPO_PUBLIC_AUTORUN_OPEN;
