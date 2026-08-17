@@ -15,6 +15,7 @@ import {
   jobsUrl,
   jobUrl,
   parseJobStatus,
+  uploadFileName,
   videoMimeType,
   type CourtCorners,
   type JobStatus,
@@ -41,9 +42,16 @@ export function createVideoUploadTask(
     videoUri,
     {
       httpMethod: "POST",
-      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-      fieldName: "video",
-      mimeType: videoMimeType(videoUri),
+      // BINARY_CONTENT streams the file from disk. MULTIPART is off-limits
+      // here: expo's iOS implementation buffers the entire file in memory
+      // (twice) before sending, which for a match video is a multi-hundred-MB
+      // spike that crashed the app on device. The server accepts a raw
+      // video/* body with the original name in X-Filename.
+      uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+      headers: {
+        "Content-Type": videoMimeType(videoUri),
+        "X-Filename": uploadFileName(videoUri),
+      },
       // Foreground-only: the flow screen owns the task lifecycle; a background
       // iOS session would outlive the screen that reports its progress.
       sessionType: FileSystem.FileSystemSessionType.FOREGROUND,

@@ -144,3 +144,22 @@ export function cornersBody(corners: CourtCorners): string {
 export function videoMimeType(uri: string): string {
   return /\.mov$/i.test(uri.split("?")[0].split("#")[0]) ? "video/quicktime" : "video/mp4";
 }
+
+/**
+ * The picked file's basename, reduced to header-safe ASCII for the raw
+ * upload's X-Filename header. Falls back to "upload.mp4" when the URI has no
+ * usable name.
+ */
+export function uploadFileName(uri: string): string {
+  const base = uri.split("?")[0].split("#")[0].split("/").pop() ?? "";
+  const safe = decodeURIComponentSafe(base).replace(/[^A-Za-z0-9._-]/g, "_");
+  return safe.length > 0 ? safe : "upload.mp4";
+}
+
+function decodeURIComponentSafe(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}

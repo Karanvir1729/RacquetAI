@@ -160,7 +160,10 @@ def _prepare_worker(job):
                   "-vf", f"scale='min({DOWNSCALE_W},iw)':-2",
                   "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
                   "-pix_fmt", "yuv420p",
-                  "-map", "0:v:0", "-map", "0:a?", "-c:a", "aac",
+                  # First video + first audio stream ONLY. iPhone originals
+                  # carry extra timed-metadata/no-codec streams that "0:a?"
+                  # sweeps in and ffmpeg then fails to find a decoder for.
+                  "-map", "0:v:0", "-map", "0:a:0?", "-dn", "-c:a", "aac",
                   "-movflags", "+faststart", video], timeout=1800)
         if r.returncode != 0:
             raise RuntimeError(f"ffmpeg downscale failed: {_tail(r.stderr)}")
@@ -279,10 +282,21 @@ def health():
 
 @app.route("/jobs", methods=["POST"])
 def create_job():
+    # Two upload shapes: multipart field "video" (curl, older app builds) or a
+    # raw video/* body (app build 11+). Raw exists because expo's iOS multipart
+    # implementation buffers the whole file in memory before sending — a match
+    # video is a multi-hundred-MB spike that killed the app on device.
     f = request.files.get("video")
-    if f is None or not f.filename:
-        return jsonify({"error": 'multipart field "video" (mp4/mov) is required'}), 400
-    ext = os.path.splitext(f.filename)[1].lower() or ".mp4"
+    ctype = (request.content_type or "").lower()
+    if f is not None and f.filename:
+        src_name = f.filename
+        ext = os.path.splitext(src_name)[1].lower() or ".mp4"
+    elif ctype.startswith("video/"):
+        src_name = request.headers.get("X-Filename") or "upload"
+        ext = ".mov" if "quicktime" in ctype else ".mp4"
+    else:
+        return jsonify({"error": 'multipart field "video" (mp4/mov) or a raw '
+                                 "video/* body is required"}), 400
     if ext not in ALLOWED_EXT:
         return jsonify({"error": f"unsupported extension {ext}; use mp4 or mov"}), 400
 
@@ -290,11 +304,15 @@ def create_job():
     d = _job_dir(job_id)
     os.makedirs(d, exist_ok=True)
     input_path = os.path.join(d, "input" + ext)
-    f.save(input_path)
+    if f is not None and f.filename:
+        f.save(input_path)
+    else:
+        with open(input_path, "wb") as out:
+            shutil.copyfileobj(request.stream, out, length=1024 * 1024)
     if os.path.getsize(input_path) == 0:
         return jsonify({"error": "uploaded video is empty"}), 400
 
-    job = _new_job(job_id, os.path.basename(f.filename))
+    job = _new_job(job_id, os.path.basename(src_name))
     job["inputPath"] = input_path
     with jobs_lock:
         jobs[job_id] = job
