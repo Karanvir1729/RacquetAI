@@ -51,8 +51,11 @@ export function reportLastFatalError(): void {
   try {
     const file = errorFile();
     if (!file.exists) return;
-    const parsed: unknown = JSON.parse(file.textSync());
+    // Read then DELETE before parsing: a truncated/empty file from a dying
+    // process must not survive to silently re-fail on every future launch.
+    const raw = file.textSync();
     file.delete();
+    const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== "object" || parsed === null) return;
     const record = parsed as { at?: unknown; message?: unknown; stack?: unknown };
     const message = typeof record.message === "string" ? record.message : "(no message)";
