@@ -1,0 +1,613 @@
+{
+  "schemaVersion": 1,
+  "video": {
+    "source": "userclip_854.mp4",
+    "license": "unknown",
+    "durationSec": 272.77,
+    "fps": 30.0,
+    "width": 854,
+    "height": 480
+  },
+  "court": {
+    "gridRows": 2,
+    "gridCols": 2
+  },
+  "players": [
+    {
+      "id": "A",
+      "label": "Player A",
+      "shots": 34,
+      "placement": {
+        "frontLeft": 0,
+        "frontRight": 0,
+        "backLeft": 24,
+        "backRight": 10
+      },
+      "coverageHeatmap": {
+        "rows": 12,
+        "cols": 8,
+        "values": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.4084,
+          0.2618,
+          0.6021,
+          1.0,
+          0.4503,
+          0.4346,
+          0.288,
+          0.1518
+        ]
+      },
+      "tTimePct": 0.0,
+      "predictability": {
+        "score": 0.57,
+        "entropyBits": 0.86,
+        "maxEntropyBits": 2.0,
+        "topPattern": "backLeft -> backLeft (55%)"
+      }
+    },
+    {
+      "id": "B",
+      "label": "Player B",
+      "shots": 34,
+      "placement": {
+        "frontLeft": 0,
+        "frontRight": 0,
+        "backLeft": 23,
+        "backRight": 11
+      },
+      "coverageHeatmap": {
+        "rows": 12,
+        "cols": 8,
+        "values": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.7731,
+          0.5714,
+          1.0,
+          1.0,
+          0.7143,
+          0.4286,
+          0.521,
+          0.1345
+        ]
+      },
+      "tTimePct": 0.0,
+      "predictability": {
+        "score": 0.566,
+        "entropyBits": 0.868,
+        "maxEntropyBits": 2.0,
+        "topPattern": "backLeft -> backLeft (45%)"
+      }
+    }
+  ],
+  "rallies": {
+    "count": 10,
+    "avgShotsPerRally": 7.8,
+    "longestRally": 23
+  },
+  "shots": [
+    {
+      "tSec": 0.79,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 3.88,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 10.89,
+      "player": "B",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 13.7,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 14.16,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 16.46,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 17.76,
+      "player": "B",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 19.16,
+      "player": "A",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 21.41,
+      "player": "A",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 22.08,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 24.01,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 29.77,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 30.7,
+      "player": "B",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 35.18,
+      "player": "B",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 38.57,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 69.64,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 71.54,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 72.98,
+      "player": "A",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 82.62,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 89.37,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 97.04,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 98.64,
+      "player": "B",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 98.99,
+      "player": "B",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 102.17,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 104.56,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 114.06,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 131.42,
+      "player": "B",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 134.14,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 136.7,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 138.41,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 139.41,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 140.5,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 142.76,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 143.13,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 143.96,
+      "player": "B",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 145.08,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 145.57,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 145.96,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 146.49,
+      "player": "A",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 147.4,
+      "player": "A",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 149.54,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 156.6,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 163.42,
+      "player": "B",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 164.75,
+      "player": "A",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 165.74,
+      "player": "A",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 166.28,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 167.02,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 167.58,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 179.63,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 195.54,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 195.91,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 196.77,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 198.25,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 199.41,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 212.81,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 216.76,
+      "player": "B",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 218.06,
+      "player": "A",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 222.38,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 224.28,
+      "player": "A",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 224.65,
+      "player": "A",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 225.4,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 226.88,
+      "player": "A",
+      "cell": "backRight"
+    },
+    {
+      "tSec": 230.41,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 257.86,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 258.9,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 259.25,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 267.94,
+      "player": "B",
+      "cell": "backLeft"
+    },
+    {
+      "tSec": 268.42,
+      "player": "B",
+      "cell": "backRight"
+    }
+  ],
+  "quality": {
+    "framesAnalyzed": 2046,
+    "bothPlayersDetectedPct": 9.9,
+    "audioAvailable": true,
+    "notes": [
+      "134 audio onsets rejected by the player-activity gate (likely neighbouring courts, voices or bounces)",
+      "214 onsets detected, 80 attributed to a striker, 78 inside rallies, 68 placed via retrieval proxy"
+    ]
+  }
+}

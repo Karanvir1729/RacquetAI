@@ -29,6 +29,13 @@ export default function RootLayout() {
   // the native pipeline can be exercised hands-free. Env-gated; no-op in
   // production bundles.
   useEffect(() => {
+    if (__DEV__ && process.env.EXPO_PUBLIC_AUTORUN_OPEN) {
+      const id = process.env.EXPO_PUBLIC_AUTORUN_OPEN;
+      const t = setTimeout(() => {
+        router.push({ pathname: "/analysis", params: { id } });
+      }, 1200);
+      return () => clearTimeout(t);
+    }
     if (__DEV__ && process.env.EXPO_PUBLIC_AUTORUN_SAMPLE === "1") {
       const t = setTimeout(() => {
         router.push({
