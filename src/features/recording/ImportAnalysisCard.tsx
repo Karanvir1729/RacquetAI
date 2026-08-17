@@ -25,6 +25,13 @@ export function ImportAnalysisCard() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["videos"],
         allowsEditing: false,
+        // Hand over the original file as-is. The default (Automatic) lets
+        // Photos transcode HDR/Dolby-Vision camera originals to a
+        // "compatible" format DURING the pick — minutes of silent work on a
+        // long 4K video, and the app dies with it. Our pipeline (server
+        // ffmpeg + on-device compressor) handles HEVC/DV inputs directly.
+        preferredAssetRepresentationMode:
+          ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Current,
       });
       if (result.canceled || result.assets.length === 0) return;
       router.push({ pathname: "/import-analysis", params: { videoUri: result.assets[0].uri } });
