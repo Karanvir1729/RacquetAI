@@ -115,18 +115,21 @@ function FlowStage({ state, retry, submitCorners }: FlowStageProps) {
       />
     );
   }
+  if (state.phase === "compressing") {
+    return <StepsProgress steps={SERVER_STEPS} stepIndex={0} progressPct={null} message={null} />;
+  }
   if (state.phase === "uploading") {
     return (
       <StepsProgress
         steps={SERVER_STEPS}
-        stepIndex={0}
+        stepIndex={1}
         progressPct={state.progress === null ? null : state.progress * 100}
         message={null}
       />
     );
   }
   // Remaining server "job" stages: queued/preparing before corners, analyzing after.
-  const stepIndex = state.status.status === "queued" || state.status.status === "preparing" ? 1 : 3;
+  const stepIndex = state.status.status === "queued" || state.status.status === "preparing" ? 2 : 4;
   return (
     <StepsProgress
       steps={SERVER_STEPS}
@@ -138,6 +141,7 @@ function FlowStage({ state, retry, submitCorners }: FlowStageProps) {
 }
 
 const SERVER_STEPS = [
+  "Compressing video…",
   "Uploading video…",
   "Preparing video…",
   "Mark the court corners",

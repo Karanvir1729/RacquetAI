@@ -12,6 +12,7 @@
 import type { CourtCorners, JobStatus } from "./jobContract";
 
 export type ImportFlowState =
+  | { phase: "compressing" }
   | { phase: "uploading"; progress: number | null }
   | { phase: "job"; baseUrl: string; jobId: string; status: JobStatus }
   | { phase: "extracting" }

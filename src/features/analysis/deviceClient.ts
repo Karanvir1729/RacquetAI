@@ -40,6 +40,8 @@ export interface RacquetAnalyzerModule {
   extractReferenceFrame(videoUri: string): Promise<unknown>;
   analyzeMatch(videoUri: string, cornersJson: string, optionsJson: string): Promise<unknown>;
   addListener(eventName: string, listener: (event: unknown) => void): unknown;
+  /** Added after v1 — older installed binaries may not have it. */
+  compressVideo?(videoUri: string): Promise<unknown>;
 }
 
 export type RacquetAnalyzerLoader = () => unknown;
@@ -217,4 +219,32 @@ export async function runDeviceAnalysis(
     );
   }
   return raw;
+}
+
+/**
+ * Best-effort 960x540 export before a server upload — an optimization, never a
+ * blocker. Returns the original URI when the module is missing (Expo Go, older
+ * installed binaries without compressVideo) or the export fails for any
+ * reason; the server accepts full-size uploads either way.
+ */
+export async function compressForUpload(
+  videoUri: string,
+  module: RacquetAnalyzerModule | null = loadRacquetAnalyzer(),
+): Promise<string> {
+  if (module === null || typeof module.compressVideo !== "function") return videoUri;
+  try {
+    const result = await module.compressVideo(videoUri);
+    if (
+      typeof result === "object" &&
+      result !== null &&
+      "uri" in result &&
+      typeof (result as { uri: unknown }).uri === "string" &&
+      (result as { uri: string }).uri.length > 0
+    ) {
+      return (result as { uri: string }).uri;
+    }
+    return videoUri;
+  } catch {
+    return videoUri;
+  }
 }

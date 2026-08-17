@@ -44,9 +44,17 @@ type RacquetAnalyzerEvents = {
   analysisProgress: (event: AnalysisProgressEvent) => void;
 };
 
+export type CompressedVideo = {
+  /** file:// URI of the 960x540 mp4 in the app cache directory. */
+  uri: string;
+  bytes: number;
+};
+
 declare class RacquetAnalyzerModule extends NativeModule<RacquetAnalyzerEvents> {
   /** Extract the mid-video frame as a JPEG in the app cache directory. */
   extractReferenceFrame(videoUri: string): Promise<ReferenceFrame>;
+  /** Export a 960x540 H.264 copy for upload (server downscales to 854px anyway). */
+  compressVideo(videoUri: string): Promise<CompressedVideo>;
   /**
    * Run the full pipeline. `cornersJson` is `JSON.stringify(CourtCorners)`,
    * `optionsJson` is `JSON.stringify(AnalyzeOptions)`. Resolves with the

@@ -20,12 +20,14 @@ import { writeImportedAnalysis } from "@/lib/importedAnalyses";
 import { makeImportedAnalysisId } from "@/lib/importedAnalysisId";
 
 import { isDeviceAnalysisAvailable, loadAnalysisBackend, resolveBackend } from "./backend";
+import { compressForUpload } from "./deviceClient";
 import {
   createVideoUploadTask,
   fetchAnalysisText,
   fetchJobStatus,
   ImportServerError,
   postCorners,
+  type UploadTask,
 } from "./importClient";
 import { NO_VIDEO_STATE, type ImportFlow, type ImportFlowState } from "./importFlowState";
 import { parseJobCreated, type CourtCorners } from "./jobContract";
@@ -72,6 +74,9 @@ function useServerImportFlow(videoUri: string | null): ImportFlow {
     let interval: ReturnType<typeof setInterval> | null = null;
     let pollBusy = false;
     let pollFailures = 0;
+    // What actually gets uploaded (and later adopted as the match video):
+    // the compressed export when compression succeeds, the original otherwise.
+    let uploadUri = videoUri;
     const baseUrl = loadServerBaseUrl();
 
     const safeSetState = (next: ImportFlowState) => {
@@ -98,7 +103,7 @@ function useServerImportFlow(videoUri: string | null): ImportFlow {
         const importedId = makeImportedAnalysisId();
         writeImportedAnalysis(importedId, raw);
         try {
-          adoptAnalysisVideo(importedId, videoUri);
+          adoptAnalysisVideo(importedId, uploadUri);
         } catch {
           // Video copy is garnish — the analysis page just hides the player.
         }
@@ -143,38 +148,48 @@ function useServerImportFlow(videoUri: string | null): ImportFlow {
 
     // No sync state reset here: mount starts at INITIAL_STATE and retry()
     // resets before bumping `attempt`, so the effect only reacts.
-    const task = createVideoUploadTask(baseUrl, videoUri, (progress) => {
-      safeSetState({ phase: "uploading", progress });
-    });
-    task
-      .uploadAsync()
-      .then((result) => {
-        if (cancelled) return;
-        if (result === null || result === undefined) return; // cancelled task
-        if (result.status < 200 || result.status >= 300) {
-          fail(`The analysis server rejected the upload (HTTP ${result.status}).`);
-          return;
-        }
-        const jobId = parseJobCreated(result.body);
-        if (jobId === null) {
-          fail("The analysis server accepted the upload but sent an unreadable reply.");
-          return;
-        }
-        startPolling(jobId);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          fail(
-            `Could not upload to ${baseUrl}. Check that the analysis server is running and that ` +
-              "the server URL in Settings is right.",
-          );
-        }
+    let task: UploadTask | null = null;
+    void (async () => {
+      // Best-effort 960x540 export first — a camera original is ~10x the
+      // upload (and the server downscales to 854px regardless). Falls back to
+      // the original URI when unavailable; uploadUri is also what finalize
+      // adopts as the match video, so playback matches what was analyzed.
+      safeSetState({ phase: "compressing" });
+      uploadUri = await compressForUpload(videoUri);
+      if (cancelled) return;
+      task = createVideoUploadTask(baseUrl, uploadUri, (progress) => {
+        safeSetState({ phase: "uploading", progress });
       });
+      task
+        .uploadAsync()
+        .then((result) => {
+          if (cancelled) return;
+          if (result === null || result === undefined) return; // cancelled task
+          if (result.status < 200 || result.status >= 300) {
+            fail(`The analysis server rejected the upload (HTTP ${result.status}).`);
+            return;
+          }
+          const jobId = parseJobCreated(result.body);
+          if (jobId === null) {
+            fail("The analysis server accepted the upload but sent an unreadable reply.");
+            return;
+          }
+          startPolling(jobId);
+        })
+        .catch(() => {
+          if (!cancelled) {
+            fail(
+              `Could not upload to ${baseUrl}. Check that the analysis server is running and that ` +
+                "the server URL in Settings is right.",
+            );
+          }
+        });
+    })();
 
     return () => {
       cancelled = true;
       if (interval !== null) clearInterval(interval);
-      void task.cancelAsync().catch(() => {});
+      void task?.cancelAsync().catch(() => {});
     };
   }, [videoUri, attempt]);
 
