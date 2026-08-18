@@ -1,0 +1,10 @@
+node_modules
+dist
+.vite
+*.local
+
+# Demo footage is CC BY-NC (see analysis/samples/archive_match2.meta.json) —
+# NonCommercial forbids it on a site selling subscriptions. Kept out of the
+# repo so the licensing decision stays visible instead of shipped by accident.
+# Populate public/sample/ with footage you own before any commercial launch.
+public/sample/match.mp4

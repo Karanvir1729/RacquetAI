@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/racquetiq-mark.svg" />
+    <link rel="apple-touch-icon" href="/racquetiq-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#06130E" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#F4F7F3" media="(prefers-color-scheme: light)" />
+    <title>RacquetIQ — See what your squash match actually did</title>
+    <meta
+      name="description"
+      content="Upload a squash match recorded from the balcony, mark the four floor corners, and get a measured read-out: pose overlay, per-player shot mix, court placement, coverage, T-time and predictability."
+    />
+    <meta property="og:title" content="RacquetIQ — See what your squash match actually did" />
+    <meta
+      property="og:description"
+      content="Squash match video analysis in the browser. Pose overlay, shot mix, placement, coverage, T-time and predictability — measured from your own footage."
+    />
+    <meta property="og:type" content="website" />
+    <script>
+      // Resolve the theme before first paint so a light-mode visitor never sees
+      // a flash of Court Ink (and vice versa). Mirrors ThemeProvider's rules;
+      // the two must agree on the storage key.
+      (function () {
+        try {
+          var saved = localStorage.getItem("racquetiq.theme");
+          var theme =
+            saved === "light" || saved === "dark"
+              ? saved
+              : window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches
+                ? "light"
+                : "dark";
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {
+          /* storage blocked — the dark default in the markup stands */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

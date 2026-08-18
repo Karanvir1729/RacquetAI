@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="RacquetAI">
+  <title>RacquetAI</title>
+  <!--
+    RacquetAI — primary mark (“Ace Spark”).
+    
+    CANONICAL GEOMETRY. icon/splash/wordmark embed a copy of the block between
+    the @mark-geometry markers; mark-mono.svg is the flattened variant. Change
+    geometry here first, then mirror it. See docs/04-branding.md.
+    
+    Construction grid 512 x 512. Ink box 223 x 400 (78% of the grid tall),
+    centred on (256,256) to the pixel, so every consumer can scale this file
+    about its centre and trust the result.
+    
+    Local space, before the transform:
+      frame   ellipse, centre (0,-87), rx 78, ry 96, stroke 34, Optic
+      throat  ONE closed path from the frame's shoulders to the butt of the
+              grip. It leaves the frame tangentially (the attachment sits on
+              the outer edge and the first control point runs along that
+              edge's own direction), so head and handle are a single line with
+              no shoulder to bulge and no grip pill to sit off axis.
+      bed     10 mains x 12 crosses at 13 gauge, stroke 2.8, Optic at 18%
+              GROUP opacity, not stroke opacity: at stroke opacity every
+              crossing doubles up and the bed reads as noise instead of cloth.
+              Clipped to the inside of the frame.
+      spark   4 point star, r 42, Chalk, on the sweet spot, counter-rotated
+              20 degrees so it stands upright inside the tilted mark
+    Tilt +20 degrees, head to the upper right, uniform scale 1.042.
+    
+    Colour: the frame carries Optic and the spark is Chalk, which inverts the
+    old mark. It is deliberate. Optic is the loudest thing in the palette, so
+    giving it the largest shape is what makes the icon recognisable at a
+    glance on a home screen, and it leaves the single brightest value, Chalk,
+    for the one element that has to win the eye: the spark at the sweet spot.
+    Optic disappears on light surfaces, so there use mark-mono.svg in Court
+    Ink, exactly as before.
+  -->
+  <defs>
+    <clipPath id="racquetai-bed">
+      <path d="M 0 -166 C 33.69 -166 61 -130.63 61 -87 C 61 -43.37 33.69 -8 0 -8 C -33.69 -8 -61 -43.37 -61 -87 C -61 -130.63 -33.69 -166 0 -166 Z" />
+    </clipPath>
+  </defs>
+  <!-- @mark-geometry:start -->
+  <g transform="translate(235.25 256.85) rotate(20) scale(1.0416)">
+    <ellipse cx="0" cy="-87" rx="78" ry="96" fill="none" stroke="#D8FA3C" stroke-width="34" />
+    <path d="M 66.24 -6 C 28.94 37.16 26 68.4 26 118 L 26 180 C 26 191.05 17.05 200 6 200 L -6 200 C -17.05 200 -26 191.05 -26 180 L -26 118 C -26 68.4 -28.94 37.16 -66.24 -6 Z" fill="#D8FA3C" />
+    <g clip-path="url(#racquetai-bed)" opacity="0.18" stroke="#D8FA3C" stroke-width="2.8" stroke-linecap="round">
+      <path d="M -58.5 -183 V 9 M -45.5 -183 V 9 M -32.5 -183 V 9 M -19.5 -183 V 9 M -6.5 -183 V 9 M 6.5 -183 V 9 M 19.5 -183 V 9 M 32.5 -183 V 9 M 45.5 -183 V 9 M 58.5 -183 V 9" />
+      <path d="M -78 -158.5 H 78 M -78 -145.5 H 78 M -78 -132.5 H 78 M -78 -119.5 H 78 M -78 -106.5 H 78 M -78 -93.5 H 78 M -78 -80.5 H 78 M -78 -67.5 H 78 M -78 -54.5 H 78 M -78 -41.5 H 78 M -78 -28.5 H 78 M -78 -15.5 H 78" />
+    </g>
+    <path d="M -14.36 -126.47 C 0.14 -106.27 14.67 -99.49 39.47 -101.36 C 19.27 -86.86 12.49 -72.33 14.36 -47.53 C -0.14 -67.73 -14.67 -74.51 -39.47 -72.64 C -19.27 -87.14 -12.49 -101.67 -14.36 -126.47 Z" fill="#FFFFFF" />
+  </g>
+  <!-- @mark-geometry:end -->
+</svg>

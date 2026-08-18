@@ -1,0 +1,190 @@
+/**
+ * RacquetIQ web design tokens.
+ *
+ * Structure is lifted from Daybot's storefront theming (frontend/LANDING_DESIGN.md):
+ * every colour is a CSS custom property, switched by a `data-theme` attribute,
+ * and **no component ever writes a literal colour**. The VALUES are RacquetIQ's
+ * own — the dark/light pairs in `src/theme/tokens.ts` at the repo root, which
+ * `docs/04-branding.md` documents hex for hex. Changing a colour here means
+ * changing it there too; the two are expected to agree.
+ *
+ * The palette: Court Ink (#06130E) canvas, Chalk text, one accent — Optic
+ * (#D8FA3C), the ball under floodlight.
+ *
+ * The rule that bites: `--rq-accent` does NOT flip between themes (a ball is
+ * the same colour in both, and Optic holds up as a *fill* on either canvas),
+ * but Optic as TEXT on a light surface is illegible. Accent-coloured text and
+ * icons must read `--rq-accent-text`, which deepens to Court Green (#1F6B4A)
+ * in light mode. Same discipline as Daybot's `--db-accent-text`.
+ *
+ * `data-theme` lives on <html> (not on a wrapper div as in Daybot) so the body
+ * canvas, overscroll gutter and form controls follow the theme too.
+ */
+
+:root[data-theme="dark"] {
+  /* canvas & surfaces — Court Ink / Court */
+  --rq-bg: #06130e;
+  --rq-panel: #0b2119;
+  --rq-card: rgba(255, 255, 255, 0.03);
+  --rq-card-raised: rgba(255, 255, 255, 0.05);
+  --rq-chip: rgba(12, 42, 30, 0.72);
+  --rq-header: rgba(6, 19, 14, 0.72);
+  --rq-input: rgba(255, 255, 255, 0.05);
+  --rq-input-foot: rgba(6, 19, 14, 0.6);
+  --rq-scrim: rgba(0, 0, 0, 0.6);
+
+  /* hairlines */
+  --rq-line: rgba(255, 255, 255, 0.09);
+  --rq-line-2: rgba(255, 255, 255, 0.16);
+
+  /* text */
+  --rq-text: rgba(255, 255, 255, 0.92);
+  --rq-text-dim: rgba(255, 255, 255, 0.62);
+  --rq-text-faint: rgba(255, 255, 255, 0.45);
+  --rq-watermark: rgba(255, 255, 255, 0.06);
+
+  /* Hero-sized watermark type. Separate from --rq-watermark because a 6%
+     wash that reads correctly behind a card is invisible at 110px — the same
+     correction Daybot makes for its light-mode headline. */
+  --rq-hero-watermark: rgba(255, 255, 255, 0.07);
+
+  /* brand accent — Optic. Fill constant, TEXT deepens on light (see below). */
+  --rq-accent: #d8fa3c;
+  --rq-accent-text: #ebff8c;
+  --rq-accent-soft: rgba(216, 250, 60, 0.12);
+  --rq-accent-line: rgba(216, 250, 60, 0.32);
+  --rq-on-accent: #06130e;
+  --rq-glow: rgba(216, 250, 60, 0.35);
+  --rq-glow-soft: rgba(216, 250, 60, 0.14);
+  /* The highlight that sweeps across the hero's accent phrase once, when the
+     court finishes filling. Chalk on ink; a lighter Court Green on Chalk Wash,
+     because a white sweep on a white canvas erases the word mid-animation. */
+  --rq-sweep: #ffffff;
+
+  /* status */
+  --rq-danger: #ff6b6b;
+  --rq-danger-soft: rgba(255, 107, 107, 0.12);
+
+  /* depth — the app's cardShadow, translated from RN shadow props */
+  --rq-card-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  --rq-lift-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+
+  /* the mark: Optic frame + Chalk spark on ink */
+  --rq-mark: #d8fa3c;
+  --rq-mark-spark: #ffffff;
+
+  /* Data ink — heat cells, meters, the T marker. A thin or low-opacity mark
+     cannot use --rq-accent: Optic at 12% on a white canvas is nothing at all.
+     This is the accent's *data* form, and like accent text it deepens to Court
+     Green on light. Same rule, different surface. */
+  --rq-data: #d8fa3c;
+  --rq-court-floor: #081a13;
+  --rq-court-line: rgba(255, 255, 255, 0.22);
+
+  /* Overlay ink — the pose skeleton drawn ON THE VIDEO. See the note beside
+     the light-theme copy: these two are deliberately identical in both
+     themes. */
+  --rq-overlay-a: #d8fa3c;
+  --rq-overlay-b: #ffffff;
+  --rq-overlay-casing: #06130e;
+}
+
+:root[data-theme="light"] {
+  /* Chalk Wash canvas */
+  --rq-bg: #f4f7f3;
+  --rq-panel: #ffffff;
+  --rq-card: #ffffff;
+  --rq-card-raised: rgba(6, 19, 14, 0.04);
+  --rq-chip: rgba(255, 255, 255, 0.86);
+  --rq-header: rgba(244, 247, 243, 0.8);
+  --rq-input: #ffffff;
+  --rq-input-foot: rgba(6, 19, 14, 0.04);
+  --rq-scrim: rgba(6, 19, 14, 0.45);
+
+  --rq-line: rgba(6, 19, 14, 0.1);
+  --rq-line-2: rgba(6, 19, 14, 0.18);
+
+  --rq-text: #08160f;
+  --rq-text-dim: rgba(8, 22, 15, 0.62);
+  --rq-text-faint: rgba(8, 22, 15, 0.42);
+  --rq-watermark: rgba(6, 19, 14, 0.08);
+  --rq-hero-watermark: rgba(31, 107, 74, 0.18);
+
+  --rq-accent: #d8fa3c;
+  --rq-accent-text: #1f6b4a; /* Court Green — Optic is illegible as light-mode text */
+  --rq-accent-soft: rgba(31, 107, 74, 0.12);
+  --rq-accent-line: rgba(31, 107, 74, 0.26);
+  --rq-on-accent: #06130e;
+  --rq-glow: rgba(31, 107, 74, 0.22);
+  --rq-glow-soft: rgba(31, 107, 74, 0.09);
+  --rq-sweep: #58b98a;
+
+  --rq-danger: #c62f26;
+  --rq-danger-soft: rgba(198, 47, 38, 0.1);
+
+  --rq-card-shadow: 0 16px 40px rgba(6, 19, 14, 0.08);
+  --rq-lift-shadow: 0 28px 70px rgba(6, 19, 14, 0.12);
+
+  /* Optic vanishes on Chalk Wash, so the mark goes mono in Court Ink
+     (docs/04-branding.md §2). */
+  --rq-mark: #06130e;
+  --rq-mark-spark: #f4f7f3;
+
+  --rq-data: #1f6b4a; /* Court Green — Optic cannot carry data on Chalk Wash */
+  --rq-court-floor: #ffffff;
+  --rq-court-line: rgba(6, 19, 14, 0.28);
+
+  /**
+   * Overlay ink — IDENTICAL to the dark theme, on purpose, and the one place
+   * on this site where a colour does not flip.
+   *
+   * The pose skeleton is drawn over VIDEO. A squash court is a bright wall and
+   * a pale floor no matter which theme the visitor chose, so the figures have
+   * to be legible against the footage, not against the page. Wiring player B
+   * to `--rq-text` looked right in dark mode and turned the skeleton near-black
+   * over a dark-shirted player in light mode — the same figure, invisible,
+   * because a page token was used to paint something that is not on the page.
+   * Chalk on Optic, with an ink casing, works over both.
+   */
+  --rq-overlay-a: #d8fa3c;
+  --rq-overlay-b: #ffffff;
+  --rq-overlay-casing: #06130e;
+}
+
+/**
+ * Geometry + type scale — ported from `spacing`, `radius` and `type` in
+ * src/theme/tokens.ts so the web and the app measure the same.
+ */
+:root {
+  --rq-r-sm: 10px;
+  --rq-r-md: 14px;
+  --rq-r-lg: 20px;
+  --rq-r-xl: 28px;
+  --rq-r-pill: 999px;
+
+  --rq-sp-xs: 4px;
+  --rq-sp-sm: 8px;
+  --rq-sp-md: 16px;
+  --rq-sp-lg: 24px;
+  --rq-sp-xl: 32px;
+
+  /* Apple HIG minimum tap target — every interactive element honours it. */
+  --rq-touch: 44px;
+
+  /* Type. The app ships weights 400 / 600 / 800 and no custom face; the web
+     keeps to the same three so the two products read as one brand. */
+  --rq-fs-hero: clamp(42px, 8.6vw, 112px);
+  --rq-fs-display: clamp(30px, 4.4vw, 44px);
+  --rq-fs-title: clamp(21px, 2.4vw, 26px);
+  --rq-fs-lead: clamp(17px, 1.4vw, 19px);
+  --rq-fs-body: 16px;
+  --rq-fs-label: 14px;
+  --rq-fs-caption: 12.5px;
+
+  --rq-ls-hero: -0.045em;
+  --rq-ls-display: -0.03em;
+  --rq-ls-title: -0.02em;
+  --rq-ls-caps: 0.2em;
+
+  --rq-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
