@@ -1,0 +1,852 @@
+{
+ "schema": "racquetai-shot-labels/1",
+ "createdBy": "hand labelling from video frames (analysis/tools/eval_frames.py montages)",
+ "criterion": {
+  "positive": "a purposeful racquet-ball strike that puts the ball onto a wall: serve, rally stroke, or knock-up/warm-up drive. The stroke shows a wind-up, a contact and a follow-through, and the ball leaves toward a wall.",
+  "negative": "everything else: ball bouncing on the floor with no racquet, scooping/flicking a dead ball, picking the ball up, walking or turning between points, a swing that misses, an empty court, and wall/echo transients that follow a real strike.",
+  "secondaryFlag": "inPlay = the strike is part of live play (serve or rally exchange) as opposed to knock-up / between-point practice hitting.",
+  "matchTolerance": 0.3,
+  "confidence": "high = the swing and its follow-through are unambiguous; med = the stroke is clear but the exact contact frame or the ball is not; low = a guess, EXCLUDED from the headline metrics."
+ },
+ "note": "Contact times are read off frames sampled every 0.2 s (strips) or 0.08-0.25 s (zooms), so they carry about +/-0.08 s of timing error - well inside the 0.3 s match tolerance. strikerBox is the colour of the engine's tracked box (GREEN=A, MAGENTA=B) drawn on the striker in the frame that was looked at; strikerLook is the striker's appearance, which is what identifies the human. The two disagree wherever the identity tracker has swapped.",
+ "exhaustiveWindows": [
+  {
+   "clip": "archive_match2",
+   "t0": 154.24,
+   "t1": 164.04,
+   "character": "between points / knock-up: players walk, pick the ball up, then trade a few practice drives",
+   "coverage": "0.2 s filmstrips 154.24-163.64 plus 0.08-0.25 s zooms out to 164.04"
+  },
+  {
+   "clip": "archive_match2",
+   "t0": 266.52,
+   "t1": 276.12,
+   "character": "a live point: serve at ~267.9, exchange, ends ~273.6; both players walk afterwards"
+  },
+  {
+   "clip": "archive_match3",
+   "t0": 203.52,
+   "t1": 213.12,
+   "character": "dead time between games: a player stands talking to a grey-haired man in a sweatshirt (a coach) on court, both walk off, players then walk to position; the first serve of the next point lands at the very end of the window"
+  },
+  {
+   "clip": "archive_match3",
+   "t0": 310.4,
+   "t1": 318.2,
+   "character": "a live rally, players far from the camera; ends with one player scrambling in the back-right"
+  },
+  {
+   "clip": "archive_match4",
+   "t0": 128.37,
+   "t1": 137.97,
+   "character": "a live rally that ends about 133.2, then ~4.5 s of dead time - ball loose on the floor, a player bends to pick it up, the other walks back and starts a serve routine at the very end"
+  },
+  {
+   "clip": "archive_match4",
+   "t0": 215.18,
+   "t1": 224.58,
+   "character": "~3 s of dead time (players apart, walking), then play resumes; camera is zoomed in and the players occlude each other, so several moments here are only low-confidence"
+  }
+ ],
+ "contacts": [
+  {
+   "clip": "archive_match2",
+   "t": 161.4,
+   "strikerLook": "light",
+   "strikerBox": "B",
+   "inPlay": false,
+   "conf": "med",
+   "note": "runs to the front, racquet high then swings through low-left; follow-through clear"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 163.05,
+   "strikerLook": "dark",
+   "strikerBox": "B",
+   "inPlay": false,
+   "conf": "med",
+   "note": "backswing right at -0.08, racquet up-left at +0.08"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 163.85,
+   "strikerLook": "light",
+   "strikerBox": "A",
+   "inPlay": false,
+   "conf": "med",
+   "note": "steps right and lunges through; ball on the floor to his right after"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 267.87,
+   "strikerLook": "light",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "high",
+   "note": "serve: ball in the left hand, racquet cocked, blurred swing at +0.08, follow-through across the chest"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 269.8,
+   "strikerLook": "dark",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "med",
+   "note": "full swing, racquet above head at 269.72 and follow-through at 269.92"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 270.9,
+   "strikerLook": "light",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "med",
+   "note": "lunges right, racquet blurred through the ball"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 271.75,
+   "strikerLook": "dark",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "med",
+   "note": "lunge left with the racquet extended low"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 272.35,
+   "strikerLook": "dark",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "med",
+   "note": "second lunge to the front-left, racquet forward"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 272.85,
+   "strikerLook": "dark",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "low",
+   "note": "blurred racquet up at -0.08 then extended left; could equally be the recovery from 272.35"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 273.55,
+   "strikerLook": "light",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "med",
+   "note": "ball clearly visible low in the front-left corner with the racquet reaching it; the onset at 273.74 was REJECTED by the gate"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 212.95,
+   "strikerLook": "dark-navy",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "high",
+   "note": "serve: racquet blurred above the head at -0.25, arm swung through at -0.08, recovery after; NO detector candidate within 0.3 s"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 310.98,
+   "strikerLook": "navy",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "low",
+   "note": "racquet flicks up to head height and back down inside 0.3 s - could be a volley or just a re-grip"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 311.55,
+   "strikerLook": "khaki",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "high",
+   "note": "racquet high above the head at -0.25, swung down across the body at +0.08; NO detector candidate within 0.3 s and no rejected onset either"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 312.33,
+   "strikerLook": "navy",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "low",
+   "note": "both players moving to the back-right, no clear swing frame"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 313.1,
+   "strikerLook": "khaki",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "low",
+   "note": "scramble in the back-right corner with the ball at floor level; occlusion makes the contact unreadable"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 313.9,
+   "strikerLook": "khaki",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "med",
+   "note": "deep lunge into the back-right corner, racquet extended"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 314.85,
+   "strikerLook": "navy",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "med",
+   "note": "lunge left, racquet blurred through the ball"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 315.5,
+   "strikerLook": "khaki",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "med",
+   "note": "low lunge to the left, racquet extended along the floor"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 316.95,
+   "strikerLook": "navy",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "med",
+   "note": "wide lunge right with the racquet extended"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 128.6,
+   "strikerLook": "maroon",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "med",
+   "note": "low lunge right with the racquet extended"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 129.8,
+   "strikerLook": "white",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "med",
+   "note": "lunge with the racquet swung through"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 130.4,
+   "strikerLook": "maroon",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "low",
+   "note": "bent low at the left wall then straightens with the arm up - dig or just a retrieval, unreadable"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 131.05,
+   "strikerLook": "unclear",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "med",
+   "note": "lunge into the front-left with the racquet out"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 131.85,
+   "strikerLook": "white",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "med",
+   "note": "low lunge in the front-left corner"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 133.0,
+   "strikerLook": "maroon",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "med",
+   "note": "racquet down at floor level in the front-left; the rally dies right after"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 220.45,
+   "strikerLook": "maroon",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "low",
+   "note": "ball in the air beside a crouching player; contact frame not readable"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 222.1,
+   "strikerLook": "white",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "med",
+   "note": "racquet high at 221.8-222.0 then a lunge left with the racquet extended low and the ball visible"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 223.75,
+   "strikerLook": "maroon",
+   "strikerBox": "A",
+   "inPlay": true,
+   "conf": "med",
+   "note": "racquet blurred high above the head at -0.08, down at the side at +0.08"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 224.6,
+   "strikerLook": "white",
+   "strikerBox": "B",
+   "inPlay": true,
+   "conf": "low",
+   "note": "lunge left with the racquet at the window edge"
+  }
+ ],
+ "candidateLabels": [
+  {
+   "clip": "archive_match2",
+   "t": 3.831,
+   "contact": false,
+   "conf": "med",
+   "reason": "pickup",
+   "note": "bent low with the racquet at the floor, then stands up; opponent static"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 157.965,
+   "contact": false,
+   "conf": "med",
+   "reason": "pickup",
+   "note": "A drops into a crouch and reaches to the floor; other player static"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 158.801,
+   "contact": false,
+   "conf": "med",
+   "reason": "flick",
+   "note": "racquet lifted in front of the chest on the spot, no footwork, no wall shot"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 159.614,
+   "contact": false,
+   "conf": "high",
+   "reason": "bounce",
+   "note": "ball loose on the floor, player bending over it"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 160.032,
+   "contact": false,
+   "conf": "high",
+   "reason": "bounce",
+   "note": "ball bouncing on the floor next to the bent-over player"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 160.636,
+   "contact": false,
+   "conf": "high",
+   "reason": "pickup",
+   "note": "near player bent double, hand to the floor picking the ball up"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 161.286,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches contact 161.40"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 162.516,
+   "contact": false,
+   "conf": "med",
+   "reason": "scoop",
+   "note": "racquet dragged along the floor to scoop the ball up, no wind-up"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 163.027,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches contact 163.05"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 163.794,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches contact 163.85"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 171.897,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "one player walking with the racquet down, the other bent over the ball"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 199.645,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "lunge with a blurred racquet swung through to the right; opponent retrieving"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 259.228,
+   "contact": false,
+   "conf": "low",
+   "reason": "air-swing",
+   "note": "big racquet arc with feet planted and no visible ball, opponent walking away - excluded"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 266.82,
+   "contact": false,
+   "conf": "med",
+   "reason": "walk",
+   "note": "one player walking left, the other crouched by the side wall"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 267.308,
+   "contact": false,
+   "conf": "med",
+   "reason": "pre-serve",
+   "note": "racquet still cocked and the ball still in the hand; contact is 0.55 s later"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 267.703,
+   "contact": true,
+   "conf": "high",
+   "reason": "strike",
+   "note": "serve, matches 267.87"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 268.144,
+   "contact": false,
+   "conf": "med",
+   "reason": "duplicate",
+   "note": "0.29 s after the serve contact - the follow-through / front-wall impact, not a second strike"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 269.909,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 269.80"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 270.373,
+   "contact": false,
+   "conf": "high",
+   "reason": "no-swing",
+   "note": "player bent over recovering, arms down, no racquet motion; other player static"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 271.116,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 270.90"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 271.79,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 271.75"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 272.3,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 272.35"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 272.834,
+   "contact": true,
+   "conf": "low",
+   "reason": "strike?",
+   "note": "ambiguous - excluded from the headline numbers"
+  },
+  {
+   "clip": "archive_match2",
+   "t": 420.978,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "player walks toward the camera and raises an arm to wipe his head"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 1.718,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "lunge right with the racquet extended, follow-through visible"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 91.463,
+   "contact": false,
+   "conf": "high",
+   "reason": "idle",
+   "note": "both players standing still between points"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 176.959,
+   "contact": true,
+   "conf": "low",
+   "reason": "strike?",
+   "note": "one player sprinting, the other extends 0.25 s later - excluded"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 206.541,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "two players walking on court, racquets down"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 207.099,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "same walk-in, no swing"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 208.678,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "player strolling left holding the racquet up, opponent standing"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 209.119,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "same stroll"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 211.673,
+   "contact": false,
+   "conf": "med",
+   "reason": "pre-serve",
+   "note": "server standing, handling the ball; no swing"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 212.045,
+   "contact": false,
+   "conf": "med",
+   "reason": "pre-serve",
+   "note": "turning with the racquet raised; contact is 0.9 s later"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 311.031,
+   "contact": true,
+   "conf": "low",
+   "reason": "strike?",
+   "note": "ambiguous racquet flick - excluded from the headline numbers"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 312.332,
+   "contact": true,
+   "conf": "low",
+   "reason": "strike?",
+   "note": "ambiguous - excluded"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 313.144,
+   "contact": true,
+   "conf": "low",
+   "reason": "strike?",
+   "note": "corner scramble, occluded - excluded"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 314.003,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 313.90"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 314.677,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 314.85"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 315.49,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 315.50"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 316.883,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 316.95"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 362.138,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "racquet high then follow-through across the body"
+  },
+  {
+   "clip": "archive_match3",
+   "t": 407.928,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "player strolling with the racquet down, opponent waiting"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 13.468,
+   "contact": false,
+   "conf": "med",
+   "reason": "pickup",
+   "note": "bent double reaching to the floor, opponent waiting"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 128.755,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 128.60"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 129.753,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 129.80"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 131.03,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 131.05"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 131.495,
+   "contact": false,
+   "conf": "low",
+   "reason": "unclear",
+   "note": "0.45 s after a strike, no readable swing - excluded"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 131.889,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 131.85"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 132.934,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 133.00"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 134.095,
+   "contact": false,
+   "conf": "high",
+   "reason": "bounce",
+   "note": "ball loose on the floor, player bending over it, rally already dead"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 134.978,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "both players walking, ball on the floor"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 135.697,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "players walking toward each other"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 136.092,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "players walking"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 136.905,
+   "contact": false,
+   "conf": "high",
+   "reason": "pickup",
+   "note": "player bent double over the ball at the left wall"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 137.578,
+   "contact": false,
+   "conf": "med",
+   "reason": "pre-serve",
+   "note": "server stretching with the racquet up; the ball is still on the floor by the opponent"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 150.837,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "racquet blurred above the head then swung through to the right"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 215.969,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "players at opposite ends of the court, walking, racquets down"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 218.36,
+   "contact": false,
+   "conf": "low",
+   "reason": "unclear",
+   "note": "racquet handling but no readable swing - excluded"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 218.941,
+   "contact": false,
+   "conf": "med",
+   "reason": "no-swing",
+   "note": "one player standing still, the other bending forward without a wind-up"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 220.357,
+   "contact": true,
+   "conf": "low",
+   "reason": "strike?",
+   "note": "matches the low-confidence 220.45 - excluded"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 221.96,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 222.10"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 222.378,
+   "contact": false,
+   "conf": "med",
+   "reason": "duplicate",
+   "note": "second onset inside the same stroke as 221.96 (0.42 s apart, one visible swing)"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 223.771,
+   "contact": true,
+   "conf": "med",
+   "reason": "strike",
+   "note": "matches 223.75"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 224.165,
+   "contact": false,
+   "conf": "low",
+   "reason": "unclear",
+   "note": "racquet up but no readable contact - excluded"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 242.811,
+   "contact": false,
+   "conf": "high",
+   "reason": "no-play",
+   "note": "player leaning on the side wall stretching; the second tracked box is a spectator behind the glass"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 356.635,
+   "contact": false,
+   "conf": "low",
+   "reason": "pickup?",
+   "note": "bends progressively lower in the back corner while the opponent stands - excluded"
+  },
+  {
+   "clip": "archive_match4",
+   "t": 474.5,
+   "contact": false,
+   "conf": "high",
+   "reason": "walk",
+   "note": "one player static in a ready stance, the other walking in"
+  }
+ ]
+}

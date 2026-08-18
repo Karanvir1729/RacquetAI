@@ -42,6 +42,16 @@ enum AnalyzerParams {
   static let ankleGateMeters = 0.30 // ANKLE_GATE
   static let wristSpeedMaxDt = 0.4 // peak_wrist_speed dt cap
   static let nearestTrackedMaxDt = 0.6 // nearest_tracked max_dt
+  // Rally-activity gate (see rallyActivity). The cut is a percentile of the
+  // clip's OWN activity distribution, not an absolute number: activity is
+  // measured in bbox-heights/sec, so its scale moves with camera framing and
+  // player distance. Absolute thresholds picked on two of the three archive
+  // clips gave held-out recall 0.60; the percentile form gave 0.73 under the
+  // same protocol. Do not hard-code one clip's q65 here.
+  static let rallyWinS = 1.5 // RALLY_WIN_S, half-width of the activity window
+  static let rallyActQ = 65.0 // RALLY_ACT_Q, keep onsets in the busiest 35%
+  static let rallyMinObs = 3 // RALLY_MIN_OBS, wrist samples before a median counts
+  static let strongSwingF = 1.2 // STRONG_SWING_F x the clip's p90 swing peak
   static let minVisibleJoints = 6 // detect_players len(vis) >= 6
   static let audioSampleRate = 22050.0
   static let audioHopS = 0.010 // ~10 ms hop
@@ -505,19 +515,30 @@ func cellOf(x: Double, y: Double) -> String {
 }
 
 /// numpy-style linear-interpolation percentile; p in 0..100.
+///
+/// The interpolation is written as `v[f] + frac*(v[f+1] - v[f])`, which is
+/// np.percentile's own arithmetic: the algebraically identical
+/// `v[f]*(1-frac) + v[f+1]*frac` lands one ulp away on real data, and the
+/// rally gate compares activity against a percentile OF that activity, so a
+/// frame sitting exactly on the threshold would be gated by one engine and
+/// kept by the other.
 func percentile(_ values: [Double], _ p: Double) -> Double {
   guard !values.isEmpty else { return 0 }
   let sorted = values.sorted()
   let rank = p / 100.0 * Double(sorted.count - 1)
   let lo = Int(rank.rounded(.down))
-  let hi = Int(rank.rounded(.up))
-  if lo == hi { return sorted[lo] }
-  let frac = rank - Double(lo)
-  return sorted[lo] * (1 - frac) + sorted[hi] * frac
+  let hi = min(lo + 1, sorted.count - 1)
+  return sorted[lo] + (rank - Double(lo)) * (sorted[hi] - sorted[lo])
 }
 
+/// np.median: the middle element, or the mean of the two middle ones. Not
+/// percentile(_, 50) — the interpolated form is a different rounding of the
+/// same number, and rallyActivity takes a median per player per frame.
 func median(_ values: [Double]) -> Double {
-  percentile(values, 50)
+  guard !values.isEmpty else { return 0 }
+  let sorted = values.sorted()
+  let mid = sorted.count / 2
+  return sorted.count % 2 == 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
 }
 
 func round1(_ x: Double) -> Double { (x * 10).rounded() / 10 }
@@ -588,6 +609,82 @@ func peakWristSpeed(
     }
   }
   return (best, obs)
+}
+
+/// Per-pose-frame scale-normalized wrist speed for each player — the same
+/// measurement peakWristSpeed makes, kept as a time series instead of a window
+/// maximum. NaN where no wrist speed could be measured on that frame.
+///
+/// Port of wrist_speed_frames. The per-joint previous observation persists
+/// across the WHOLE clip and is not reset when the player goes untracked, and
+/// it is updated whenever the joint is confident — even when the dt test
+/// rejects the pair — exactly as the Python reference does.
+func wristSpeedFrames(
+  trackFrames: [[String: PlayerDetection]],
+  times: [Double]
+) -> [String: [Double]] {
+  var out: [String: [Double]] = [:]
+  for pid in ["A", "B"] {
+    var prev: [String: (x: Double, y: Double, t: Double)] = [:]
+    var vals = [Double](repeating: Double.nan, count: times.count)
+    for i in 0..<times.count {
+      guard let d = trackFrames[i][pid] else { continue } // stays NaN; prev untouched
+      var best = Double.nan
+      for joint in ["leftWrist", "rightWrist"] {
+        guard let j = d.joints[joint], j.conf > AnalyzerParams.kptConf else { continue }
+        if let p = prev[joint] {
+          let dt = times[i] - p.t
+          if dt > 0 && dt < AnalyzerParams.wristSpeedMaxDt {
+            let dx = j.x - p.x
+            let dy = j.y - p.y
+            let v = (dx * dx + dy * dy).squareRoot() / max(d.bboxH, 1.0) / dt
+            best = best.isNaN ? v : max(best, v)
+          }
+        }
+        prev[joint] = (j.x, j.y, times[i])
+      }
+      vals[i] = best
+    }
+    out[pid] = vals
+  }
+  return out
+}
+
+/// How hard BOTH players are working, per pose frame.
+///
+/// Port of rally_activity. An audio onset is only a shot on THIS court if
+/// somebody here is playing a rally. Between points the players drift, bounce
+/// the ball and walk, while the microphone keeps hearing racquet strikes from
+/// neighbouring courts — which is what the wrist-peak gate cannot reject,
+/// because those onsets sit next to a player whose arm happens to be moving.
+///
+/// Sustained two-player effort separates the two states far better than any
+/// instantaneous swing measure: the statistic is the median wrist speed over
+/// +/-rallyWinS for each player, then the MINIMUM over the two, so one player
+/// pacing about while the other stands still does not qualify. A player who is
+/// untracked across the whole window is ignored rather than scored zero, so a
+/// tracking dropout cannot veto a real rally.
+func rallyActivity(
+  trackFrames: [[String: PlayerDetection]],
+  times: [Double]
+) -> [Double] {
+  let per = wristSpeedFrames(trackFrames: trackFrames, times: times)
+  var act = [Double](repeating: 0, count: times.count)
+  for i in 0..<times.count {
+    // Half-open [lo, hi), matching numpy searchsorted on both ends.
+    let lo = lowerBound(times, times[i] - AnalyzerParams.rallyWinS)
+    let hi = lowerBound(times, times[i] + AnalyzerParams.rallyWinS)
+    var seen: [Double] = []
+    for pid in ["A", "B"] {
+      guard let w = per[pid], lo < hi else { continue }
+      var s: [Double] = []
+      s.reserveCapacity(hi - lo)
+      for k in lo..<hi where !w[k].isNaN { s.append(w[k]) }
+      if s.count >= AnalyzerParams.rallyMinObs { seen.append(median(s)) }
+    }
+    act[i] = seen.isEmpty ? 0.0 : (seen.count == 2 ? min(seen[0], seen[1]) : seen[0])
+  }
+  return act
 }
 
 /// Total court-space ankle path length for a player over a frame window
@@ -919,6 +1016,9 @@ struct AnalysisInputs {
   var onsets: [Double]
   var shotsRaw: [RawShot]
   var nGated: Int
+  /// Onsets that survived the swing gate but landed between points, with no
+  /// rally in progress on this court (see rallyActivity).
+  var nRallyGated: Int = 0
   var audioAvailable: Bool
   /// Pre-serialized `tracks` array (see TrackWriter); nil emits no field.
   var tracksJSON: String?
@@ -991,6 +1091,12 @@ func buildAnalysisJSON(_ inp: AnalysisInputs) throws -> String {
     notes.append(
       "\(inp.nGated) audio onsets rejected by the player-activity gate "
         + "(likely neighbouring courts, voices or bounces)"
+    )
+  }
+  if inp.nRallyGated > 0 {
+    notes.append(
+      "\(inp.nRallyGated) further onsets rejected as between-point noise "
+        + "(no rally in progress on this court)"
     )
   }
 

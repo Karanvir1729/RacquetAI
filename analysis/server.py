@@ -260,7 +260,9 @@ def _progress_pct(job):
 def _cors(resp):
     resp.headers["Access-Control-Allow-Origin"] = "*"
     resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    # X-Filename rides on the raw-body upload the web client uses; omitting it
+    # here makes the browser preflight fail and every cross-origin upload dies.
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Filename"
     return resp
 
 

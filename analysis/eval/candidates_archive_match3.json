@@ -1,0 +1,8098 @@
+{
+ "video": "archive_match3.mp4",
+ "durationSec": 463.36,
+ "fps": 29.97,
+ "rallyGapSec": 8.0,
+ "anchoredPct": 68.5,
+ "nOnsets": 536,
+ "nPassed": 170,
+ "onsets": [
+  0.07,
+  0.488,
+  1.161,
+  1.718,
+  2.647,
+  3.251,
+  3.599,
+  4.551,
+  5.341,
+  5.991,
+  7.152,
+  8.429,
+  9.218,
+  10.612,
+  11.703,
+  12.887,
+  14.675,
+  15.093,
+  15.488,
+  17.043,
+  17.856,
+  19.969,
+  20.619,
+  21.107,
+  21.478,
+  22.198,
+  22.709,
+  23.708,
+  25.403,
+  26.355,
+  27.237,
+  29.629,
+  30.604,
+  31.231,
+  31.858,
+  34.203,
+  34.667,
+  35.619,
+  35.991,
+  36.757,
+  37.454,
+  38.336,
+  38.708,
+  39.892,
+  40.472,
+  40.867,
+  41.332,
+  41.796,
+  42.26,
+  43.793,
+  44.188,
+  44.559,
+  45.441,
+  45.836,
+  46.301,
+  47.578,
+  48.39,
+  48.924,
+  49.273,
+  50.341,
+  52.361,
+  53.197,
+  53.824,
+  54.288,
+  54.683,
+  55.194,
+  56.076,
+  57.051,
+  58.073,
+  58.445,
+  58.955,
+  60.0,
+  60.534,
+  61.068,
+  61.812,
+  63.414,
+  65.178,
+  66.734,
+  67.686,
+  68.151,
+  68.545,
+  69.033,
+  69.428,
+  70.682,
+  71.726,
+  72.4,
+  73.027,
+  74.025,
+  74.745,
+  75.233,
+  75.674,
+  76.115,
+  76.579,
+  78.251,
+  78.623,
+  79.83,
+  81.2,
+  81.595,
+  82.756,
+  83.29,
+  84.219,
+  84.753,
+  85.635,
+  87.121,
+  88.213,
+  88.607,
+  90.024,
+  91.463,
+  92.114,
+  93.6,
+  94.018,
+  94.621,
+  94.993,
+  95.573,
+  96.061,
+  96.943,
+  97.477,
+  98.035,
+  98.383,
+  99.033,
+  99.381,
+  99.73,
+  100.31,
+  100.867,
+  102.4,
+  103.027,
+  103.375,
+  105.372,
+  105.86,
+  106.394,
+  107.299,
+  108.066,
+  108.6,
+  109.645,
+  110.155,
+  111.316,
+  112.06,
+  113.453,
+  115.217,
+  115.914,
+  116.773,
+  117.563,
+  118.027,
+  118.933,
+  119.815,
+  121.696,
+  123.275,
+  124.575,
+  126.154,
+  127.269,
+  127.965,
+  128.801,
+  130.566,
+  131.355,
+  133.329,
+  133.677,
+  134.444,
+  134.792,
+  135.21,
+  135.744,
+  137.439,
+  138.182,
+  138.67,
+  139.088,
+  139.598,
+  140.04,
+  141.108,
+  141.479,
+  142.083,
+  142.547,
+  143.105,
+  144.544,
+  145.496,
+  146.611,
+  147.609,
+  147.958,
+  148.584,
+  149.908,
+  151.905,
+  153.043,
+  153.948,
+  154.552,
+  155.109,
+  155.458,
+  155.968,
+  156.363,
+  156.851,
+  158.337,
+  159.498,
+  160.264,
+  161.239,
+  162.052,
+  162.424,
+  163.19,
+  163.724,
+  164.374,
+  165.651,
+  166.626,
+  167.021,
+  167.787,
+  169.506,
+  169.947,
+  170.713,
+  171.178,
+  171.851,
+  172.965,
+  173.407,
+  174.637,
+  175.334,
+  176.959,
+  177.4,
+  178.515,
+  179.258,
+  180.048,
+  180.489,
+  180.976,
+  181.325,
+  182.346,
+  183.043,
+  184.227,
+  185.945,
+  186.572,
+  187.455,
+  188.732,
+  189.637,
+  191.704,
+  192.075,
+  192.819,
+  195.442,
+  198.368,
+  199.39,
+  199.738,
+  201.503,
+  202.432,
+  203.848,
+  205.984,
+  206.541,
+  207.099,
+  207.563,
+  208.678,
+  209.119,
+  209.769,
+  210.164,
+  210.535,
+  211.673,
+  212.045,
+  213.345,
+  215.272,
+  216.48,
+  217.71,
+  219.057,
+  220.543,
+  222.006,
+  222.656,
+  223.028,
+  223.887,
+  224.56,
+  225.048,
+  225.884,
+  226.418,
+  226.859,
+  227.718,
+  228.252,
+  228.6,
+  229.854,
+  231.549,
+  235.334,
+  236.147,
+  237.122,
+  237.47,
+  238.376,
+  239.003,
+  239.932,
+  240.443,
+  240.977,
+  241.627,
+  242.068,
+  242.741,
+  243.345,
+  243.949,
+  244.622,
+  245.551,
+  246.48,
+  247.246,
+  247.687,
+  248.5,
+  249.777,
+  250.311,
+  251.193,
+  251.89,
+  252.494,
+  253.632,
+  254.537,
+  255.071,
+  255.768,
+  256.998,
+  257.347,
+  258.438,
+  260.087,
+  260.83,
+  261.387,
+  262.223,
+  263.291,
+  264.266,
+  264.777,
+  265.915,
+  266.449,
+  267.61,
+  268.423,
+  268.771,
+  269.235,
+  270.257,
+  271.116,
+  271.534,
+  271.906,
+  273.252,
+  273.601,
+  274.042,
+  274.39,
+  275.458,
+  276.619,
+  277.06,
+  277.432,
+  278.872,
+  279.661,
+  280.288,
+  281.681,
+  282.285,
+  282.703,
+  283.144,
+  283.678,
+  284.352,
+  284.77,
+  285.304,
+  286.186,
+  286.581,
+  287.37,
+  287.765,
+  288.136,
+  288.624,
+  289.228,
+  289.646,
+  290.482,
+  291.48,
+  292.2,
+  293.059,
+  293.663,
+  294.197,
+  294.545,
+  295.172,
+  295.683,
+  296.147,
+  297.982,
+  298.701,
+  300.466,
+  301.256,
+  302.393,
+  302.742,
+  303.16,
+  303.671,
+  304.414,
+  305.041,
+  306.225,
+  307.2,
+  307.711,
+  308.57,
+  309.522,
+  311.031,
+  312.332,
+  313.144,
+  314.003,
+  314.677,
+  315.49,
+  316.883,
+  320.366,
+  320.83,
+  321.62,
+  322.293,
+  322.757,
+  323.175,
+  325.126,
+  325.869,
+  326.333,
+  327.494,
+  329.561,
+  333.764,
+  334.809,
+  336.991,
+  339.035,
+  341.031,
+  342.123,
+  343.679,
+  344.677,
+  346.14,
+  347.44,
+  348.648,
+  350.134,
+  350.854,
+  351.643,
+  352.177,
+  352.734,
+  353.965,
+  354.708,
+  355.381,
+  355.985,
+  356.659,
+  357.007,
+  357.518,
+  357.936,
+  358.563,
+  359.677,
+  360.374,
+  360.768,
+  361.697,
+  362.138,
+  362.951,
+  363.741,
+  364.089,
+  364.484,
+  366.063,
+  366.527,
+  367.154,
+  367.595,
+  368.129,
+  368.826,
+  369.429,
+  370.149,
+  370.916,
+  371.635,
+  372.169,
+  373.098,
+  373.911,
+  374.608,
+  375.792,
+  377.162,
+  378.903,
+  380.389,
+  380.761,
+  381.295,
+  383.524,
+  383.896,
+  384.871,
+  385.985,
+  387.355,
+  389.283,
+  390.699,
+  392.417,
+  393.88,
+  395.111,
+  395.738,
+  396.411,
+  397.131,
+  398.571,
+  399.058,
+  399.662,
+  400.196,
+  400.637,
+  401.171,
+  401.798,
+  402.262,
+  403.238,
+  403.656,
+  404.584,
+  406.21,
+  407.464,
+  407.928,
+  408.532,
+  411.481,
+  412.711,
+  413.408,
+  414.058,
+  414.732,
+  415.614,
+  417.03,
+  418.238,
+  418.702,
+  419.236,
+  419.701,
+  420.072,
+  420.42,
+  421.117,
+  421.907,
+  422.65,
+  423.23,
+  424.763,
+  425.227,
+  426.156,
+  427.386,
+  429.546,
+  430.521,
+  431.589,
+  432.216,
+  433.099,
+  433.702,
+  434.236,
+  435.165,
+  436.349,
+  437.534,
+  437.998,
+  439.182,
+  439.879,
+  440.831,
+  441.597,
+  442.108,
+  443.362,
+  444.082,
+  444.848,
+  445.916,
+  446.38,
+  446.961,
+  448.052,
+  448.517,
+  449.236,
+  449.817,
+  450.583,
+  450.955,
+  451.605,
+  452.139,
+  452.627,
+  453.184,
+  453.741,
+  454.322,
+  455.041,
+  455.529,
+  456.086,
+  457.038,
+  457.642,
+  458.315,
+  458.896,
+  459.36,
+  459.871,
+  460.73,
+  461.102,
+  461.868,
+  462.472,
+  462.867
+ ],
+ "shotsRaw": [
+  {
+   "t": 0.07,
+   "player": "A"
+  },
+  {
+   "t": 0.488,
+   "player": "A"
+  },
+  {
+   "t": 1.161,
+   "player": "A"
+  },
+  {
+   "t": 1.718,
+   "player": "B"
+  },
+  {
+   "t": 2.647,
+   "player": "A"
+  },
+  {
+   "t": 3.251,
+   "player": "B"
+  },
+  {
+   "t": 3.599,
+   "player": "A"
+  },
+  {
+   "t": 4.551,
+   "player": "B"
+  },
+  {
+   "t": 5.341,
+   "player": "A"
+  },
+  {
+   "t": 5.991,
+   "player": "A"
+  },
+  {
+   "t": 7.152,
+   "player": "A"
+  },
+  {
+   "t": 23.708,
+   "player": "B"
+  },
+  {
+   "t": 25.403,
+   "player": "B"
+  },
+  {
+   "t": 26.355,
+   "player": "A"
+  },
+  {
+   "t": 36.757,
+   "player": "B"
+  },
+  {
+   "t": 37.454,
+   "player": "A"
+  },
+  {
+   "t": 38.336,
+   "player": "B"
+  },
+  {
+   "t": 53.197,
+   "player": "A"
+  },
+  {
+   "t": 53.824,
+   "player": "B"
+  },
+  {
+   "t": 54.288,
+   "player": "B"
+  },
+  {
+   "t": 54.683,
+   "player": "B"
+  },
+  {
+   "t": 67.686,
+   "player": "B"
+  },
+  {
+   "t": 68.151,
+   "player": "B"
+  },
+  {
+   "t": 68.545,
+   "player": "B"
+  },
+  {
+   "t": 69.033,
+   "player": "A"
+  },
+  {
+   "t": 69.428,
+   "player": "B"
+  },
+  {
+   "t": 81.2,
+   "player": "A"
+  },
+  {
+   "t": 81.595,
+   "player": "B"
+  },
+  {
+   "t": 94.621,
+   "player": "B"
+  },
+  {
+   "t": 94.993,
+   "player": "B"
+  },
+  {
+   "t": 95.573,
+   "player": "A"
+  },
+  {
+   "t": 96.061,
+   "player": "A"
+  },
+  {
+   "t": 96.943,
+   "player": "B"
+  },
+  {
+   "t": 106.394,
+   "player": "B"
+  },
+  {
+   "t": 107.299,
+   "player": "B"
+  },
+  {
+   "t": 108.066,
+   "player": "B"
+  },
+  {
+   "t": 108.6,
+   "player": "A"
+  },
+  {
+   "t": 118.933,
+   "player": "A"
+  },
+  {
+   "t": 119.815,
+   "player": "B"
+  },
+  {
+   "t": 121.696,
+   "player": "B"
+  },
+  {
+   "t": 123.275,
+   "player": "B"
+  },
+  {
+   "t": 127.965,
+   "player": "B"
+  },
+  {
+   "t": 131.355,
+   "player": "A"
+  },
+  {
+   "t": 133.677,
+   "player": "B"
+  },
+  {
+   "t": 134.444,
+   "player": "B"
+  },
+  {
+   "t": 134.792,
+   "player": "B"
+  },
+  {
+   "t": 135.21,
+   "player": "A"
+  },
+  {
+   "t": 135.744,
+   "player": "A"
+  },
+  {
+   "t": 147.609,
+   "player": "B"
+  },
+  {
+   "t": 147.958,
+   "player": "B"
+  },
+  {
+   "t": 149.908,
+   "player": "B"
+  },
+  {
+   "t": 151.905,
+   "player": "B"
+  },
+  {
+   "t": 153.043,
+   "player": "B"
+  },
+  {
+   "t": 153.948,
+   "player": "B"
+  },
+  {
+   "t": 154.552,
+   "player": "A"
+  },
+  {
+   "t": 174.637,
+   "player": "A"
+  },
+  {
+   "t": 175.334,
+   "player": "A"
+  },
+  {
+   "t": 176.959,
+   "player": "A"
+  },
+  {
+   "t": 177.4,
+   "player": "A"
+  },
+  {
+   "t": 178.515,
+   "player": "A"
+  },
+  {
+   "t": 179.258,
+   "player": "A"
+  },
+  {
+   "t": 180.048,
+   "player": "B"
+  },
+  {
+   "t": 180.489,
+   "player": "B"
+  },
+  {
+   "t": 182.346,
+   "player": "B"
+  },
+  {
+   "t": 183.043,
+   "player": "A"
+  },
+  {
+   "t": 217.71,
+   "player": "B"
+  },
+  {
+   "t": 219.057,
+   "player": "B"
+  },
+  {
+   "t": 220.543,
+   "player": "A"
+  },
+  {
+   "t": 223.887,
+   "player": "B"
+  },
+  {
+   "t": 224.56,
+   "player": "A"
+  },
+  {
+   "t": 225.048,
+   "player": "A"
+  },
+  {
+   "t": 236.147,
+   "player": "B"
+  },
+  {
+   "t": 237.122,
+   "player": "A"
+  },
+  {
+   "t": 237.47,
+   "player": "B"
+  },
+  {
+   "t": 238.376,
+   "player": "B"
+  },
+  {
+   "t": 239.003,
+   "player": "A"
+  },
+  {
+   "t": 239.932,
+   "player": "B"
+  },
+  {
+   "t": 240.977,
+   "player": "A"
+  },
+  {
+   "t": 241.627,
+   "player": "A"
+  },
+  {
+   "t": 242.068,
+   "player": "A"
+  },
+  {
+   "t": 242.741,
+   "player": "B"
+  },
+  {
+   "t": 243.345,
+   "player": "A"
+  },
+  {
+   "t": 243.949,
+   "player": "A"
+  },
+  {
+   "t": 244.622,
+   "player": "B"
+  },
+  {
+   "t": 245.551,
+   "player": "A"
+  },
+  {
+   "t": 246.48,
+   "player": "A"
+  },
+  {
+   "t": 247.246,
+   "player": "A"
+  },
+  {
+   "t": 247.687,
+   "player": "A"
+  },
+  {
+   "t": 248.5,
+   "player": "A"
+  },
+  {
+   "t": 260.83,
+   "player": "A"
+  },
+  {
+   "t": 261.387,
+   "player": "B"
+  },
+  {
+   "t": 262.223,
+   "player": "B"
+  },
+  {
+   "t": 263.291,
+   "player": "B"
+  },
+  {
+   "t": 264.266,
+   "player": "B"
+  },
+  {
+   "t": 264.777,
+   "player": "B"
+  },
+  {
+   "t": 265.915,
+   "player": "B"
+  },
+  {
+   "t": 267.61,
+   "player": "B"
+  },
+  {
+   "t": 268.423,
+   "player": "A"
+  },
+  {
+   "t": 269.235,
+   "player": "A"
+  },
+  {
+   "t": 270.257,
+   "player": "A"
+  },
+  {
+   "t": 273.601,
+   "player": "A"
+  },
+  {
+   "t": 274.39,
+   "player": "A"
+  },
+  {
+   "t": 289.646,
+   "player": "B"
+  },
+  {
+   "t": 290.482,
+   "player": "B"
+  },
+  {
+   "t": 292.2,
+   "player": "B"
+  },
+  {
+   "t": 294.197,
+   "player": "A"
+  },
+  {
+   "t": 295.683,
+   "player": "B"
+  },
+  {
+   "t": 296.147,
+   "player": "B"
+  },
+  {
+   "t": 297.982,
+   "player": "B"
+  },
+  {
+   "t": 298.701,
+   "player": "B"
+  },
+  {
+   "t": 300.466,
+   "player": "B"
+  },
+  {
+   "t": 301.256,
+   "player": "B"
+  },
+  {
+   "t": 306.225,
+   "player": "A"
+  },
+  {
+   "t": 312.332,
+   "player": "A"
+  },
+  {
+   "t": 313.144,
+   "player": "B"
+  },
+  {
+   "t": 314.003,
+   "player": "B"
+  },
+  {
+   "t": 314.677,
+   "player": "A"
+  },
+  {
+   "t": 315.49,
+   "player": "B"
+  },
+  {
+   "t": 316.883,
+   "player": "A"
+  },
+  {
+   "t": 320.366,
+   "player": "A"
+  },
+  {
+   "t": 320.83,
+   "player": "A"
+  },
+  {
+   "t": 321.62,
+   "player": "A"
+  },
+  {
+   "t": 323.175,
+   "player": "B"
+  },
+  {
+   "t": 325.126,
+   "player": "A"
+  },
+  {
+   "t": 326.333,
+   "player": "B"
+  },
+  {
+   "t": 348.648,
+   "player": "B"
+  },
+  {
+   "t": 353.965,
+   "player": "A"
+  },
+  {
+   "t": 355.381,
+   "player": "A"
+  },
+  {
+   "t": 356.659,
+   "player": "B"
+  },
+  {
+   "t": 357.007,
+   "player": "B"
+  },
+  {
+   "t": 357.518,
+   "player": "B"
+  },
+  {
+   "t": 357.936,
+   "player": "A"
+  },
+  {
+   "t": 358.563,
+   "player": "B"
+  },
+  {
+   "t": 359.677,
+   "player": "B"
+  },
+  {
+   "t": 360.374,
+   "player": "A"
+  },
+  {
+   "t": 361.697,
+   "player": "A"
+  },
+  {
+   "t": 362.138,
+   "player": "B"
+  },
+  {
+   "t": 363.741,
+   "player": "A"
+  },
+  {
+   "t": 364.089,
+   "player": "A"
+  },
+  {
+   "t": 366.063,
+   "player": "A"
+  },
+  {
+   "t": 366.527,
+   "player": "A"
+  },
+  {
+   "t": 380.389,
+   "player": "B"
+  },
+  {
+   "t": 380.761,
+   "player": "B"
+  },
+  {
+   "t": 381.295,
+   "player": "A"
+  },
+  {
+   "t": 383.524,
+   "player": "B"
+  },
+  {
+   "t": 383.896,
+   "player": "B"
+  },
+  {
+   "t": 398.571,
+   "player": "A"
+  },
+  {
+   "t": 399.058,
+   "player": "B"
+  },
+  {
+   "t": 399.662,
+   "player": "A"
+  },
+  {
+   "t": 400.196,
+   "player": "A"
+  },
+  {
+   "t": 400.637,
+   "player": "B"
+  },
+  {
+   "t": 411.481,
+   "player": "A"
+  },
+  {
+   "t": 412.711,
+   "player": "A"
+  },
+  {
+   "t": 413.408,
+   "player": "B"
+  },
+  {
+   "t": 414.058,
+   "player": "B"
+  },
+  {
+   "t": 414.732,
+   "player": "A"
+  },
+  {
+   "t": 415.614,
+   "player": "A"
+  },
+  {
+   "t": 417.03,
+   "player": "A"
+  },
+  {
+   "t": 427.386,
+   "player": "A"
+  },
+  {
+   "t": 437.534,
+   "player": "B"
+  },
+  {
+   "t": 445.916,
+   "player": "B"
+  },
+  {
+   "t": 446.38,
+   "player": "B"
+  },
+  {
+   "t": 446.961,
+   "player": "B"
+  },
+  {
+   "t": 448.052,
+   "player": "A"
+  },
+  {
+   "t": 448.517,
+   "player": "A"
+  },
+  {
+   "t": 449.817,
+   "player": "A"
+  },
+  {
+   "t": 457.642,
+   "player": "A"
+  },
+  {
+   "t": 458.315,
+   "player": "A"
+  },
+  {
+   "t": 458.896,
+   "player": "B"
+  },
+  {
+   "t": 459.36,
+   "player": "B"
+  }
+ ],
+ "candidates": [
+  {
+   "t": 0.07,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.771,
+   "travB": 1.106,
+   "obsA": 6,
+   "obsB": 5,
+   "act": 1.289,
+   "court": [
+    2.0,
+    7.46
+   ]
+  },
+  {
+   "t": 0.488,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.218,
+   "travB": 1.541,
+   "obsA": 6,
+   "obsB": 3,
+   "act": 1.415,
+   "court": [
+    2.4,
+    7.55
+   ]
+  },
+  {
+   "t": 1.161,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 8.822,
+   "travB": 6.181,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.36,
+   "court": [
+    2.86,
+    7.22
+   ]
+  },
+  {
+   "t": 1.718,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 9.841,
+   "travB": 10.366,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.448,
+   "court": [
+    4.61,
+    8.15
+   ]
+  },
+  {
+   "t": 2.647,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.394,
+   "travB": 2.492,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.819,
+   "court": [
+    3.36,
+    6.7
+   ]
+  },
+  {
+   "t": 3.251,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.957,
+   "travB": 3.337,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.651,
+   "court": [
+    3.79,
+    7.32
+   ]
+  },
+  {
+   "t": 3.599,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.446,
+   "travB": 4.07,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.651,
+   "court": [
+    1.75,
+    6.05
+   ]
+  },
+  {
+   "t": 4.551,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.651,
+   "travB": 2.75,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.732,
+   "court": [
+    0.49,
+    3.45
+   ]
+  },
+  {
+   "t": 5.341,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.288,
+   "travB": 1.582,
+   "obsA": 10,
+   "obsB": 8,
+   "act": 1.38,
+   "court": [
+    1.7,
+    6.05
+   ]
+  },
+  {
+   "t": 5.991,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 6.055,
+   "travB": 2.483,
+   "obsA": 8,
+   "obsB": 6,
+   "act": 1.406,
+   "court": [
+    1.05,
+    5.8
+   ]
+  },
+  {
+   "t": 7.152,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.869,
+   "travB": 1.115,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.218,
+   "court": [
+    2.2,
+    5.4
+   ]
+  },
+  {
+   "t": 8.429,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.204,
+   "travB": 0.75,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 9.218,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.413,
+   "travB": 0.644,
+   "obsA": 6,
+   "obsB": 10
+  },
+  {
+   "t": 10.612,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.701,
+   "travB": 0.996,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 11.703,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.572,
+   "travB": 1.356,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 12.887,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.037,
+   "travB": 0.536,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 14.675,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.244,
+   "travB": 0.841,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 15.093,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.373,
+   "travB": 0.129,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 15.488,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.373,
+   "travB": 0.413,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 17.043,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.079,
+   "travB": 0.6,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 17.856,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.774,
+   "travB": 0.579,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 19.969,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.913,
+   "travB": 1.32,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.616
+  },
+  {
+   "t": 20.619,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.236,
+   "travB": 3.713,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.678
+  },
+  {
+   "t": 21.107,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.426,
+   "travB": 1.023,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 0.721
+  },
+  {
+   "t": 21.478,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.426,
+   "travB": 1.087,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 0.721
+  },
+  {
+   "t": 22.198,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.078,
+   "travB": 0.954,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.721
+  },
+  {
+   "t": 22.709,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.733,
+   "travB": 0.894,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 23.708,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.068,
+   "travB": 3.153,
+   "obsA": 1,
+   "obsB": 7,
+   "act": 0.954,
+   "court": [
+    4.3,
+    5.67
+   ]
+  },
+  {
+   "t": 25.403,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.084,
+   "travB": 2.146,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.401,
+   "court": [
+    2.35,
+    3.41
+   ]
+  },
+  {
+   "t": 26.355,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.163,
+   "travB": 1.974,
+   "obsA": 8,
+   "obsB": 6,
+   "act": 1.384,
+   "court": [
+    2.64,
+    4.54
+   ]
+  },
+  {
+   "t": 27.237,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.848,
+   "travB": 1.531,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 29.629,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.927,
+   "travB": 0.956,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 30.604,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.638,
+   "travB": 0.844,
+   "obsA": 7,
+   "obsB": 8
+  },
+  {
+   "t": 31.231,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.307,
+   "travB": 2.516,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 0.494
+  },
+  {
+   "t": 31.858,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.598,
+   "travB": 1.227,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 34.203,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.53,
+   "travB": 3.732,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.502
+  },
+  {
+   "t": 34.667,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.721,
+   "travB": 1.666,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 35.619,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.269,
+   "travB": 1.732,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.721
+  },
+  {
+   "t": 35.991,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.939,
+   "travB": 1.732,
+   "obsA": 8,
+   "obsB": 5
+  },
+  {
+   "t": 36.757,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.669,
+   "travB": 3.298,
+   "obsA": 8,
+   "obsB": 3,
+   "act": 1.159,
+   "court": [
+    3.19,
+    4.79
+   ]
+  },
+  {
+   "t": 37.454,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.5,
+   "travB": 1.253,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.933,
+   "court": [
+    1.88,
+    5.25
+   ]
+  },
+  {
+   "t": 38.336,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.149,
+   "travB": 7.027,
+   "obsA": 8,
+   "obsB": 10,
+   "act": 0.933,
+   "court": [
+    1.83,
+    5.31
+   ]
+  },
+  {
+   "t": 38.708,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.958,
+   "travB": 5.409,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.806
+  },
+  {
+   "t": 39.892,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.501,
+   "travB": 1.552,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 40.472,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.519,
+   "travB": 1.475,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 40.867,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.647,
+   "travB": 1.016,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 41.332,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.477,
+   "travB": 1.834,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 41.796,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.288,
+   "travB": 1.04,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 42.26,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.302,
+   "travB": 0.947,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 43.793,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.431,
+   "travB": 3.498,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.317
+  },
+  {
+   "t": 44.188,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.453,
+   "travB": 3.498,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.342
+  },
+  {
+   "t": 44.559,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.607,
+   "travB": 1.578,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 45.441,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.706,
+   "travB": 2.987,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.489
+  },
+  {
+   "t": 45.836,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.343,
+   "travB": 2.358,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.547
+  },
+  {
+   "t": 46.301,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.22,
+   "travB": 2.358,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.676
+  },
+  {
+   "t": 47.578,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.396,
+   "travB": 2.153,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.613
+  },
+  {
+   "t": 48.39,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.786,
+   "travB": 0.605,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 48.924,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.894,
+   "travB": 2.131,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.477
+  },
+  {
+   "t": 49.273,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.559,
+   "travB": 2.131,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.458
+  },
+  {
+   "t": 50.341,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.349,
+   "travB": 0.714,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 52.361,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.86,
+   "travB": 0.993,
+   "obsA": 8,
+   "obsB": 7
+  },
+  {
+   "t": 53.197,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.089,
+   "travB": 2.999,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.088,
+   "court": [
+    1.75,
+    6.99
+   ]
+  },
+  {
+   "t": 53.824,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.564,
+   "travB": 2.461,
+   "obsA": 8,
+   "obsB": 6,
+   "act": 1.119,
+   "court": [
+    2.6,
+    5.62
+   ]
+  },
+  {
+   "t": 54.288,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.683,
+   "travB": 3.479,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.111,
+   "court": [
+    1.78,
+    4.62
+   ]
+  },
+  {
+   "t": 54.683,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.429,
+   "travB": 2.815,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.005,
+   "court": [
+    1.77,
+    4.57
+   ]
+  },
+  {
+   "t": 55.194,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.521,
+   "travB": 1.002,
+   "obsA": 4,
+   "obsB": 8
+  },
+  {
+   "t": 56.076,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.174,
+   "travB": 3.182,
+   "obsA": 5,
+   "obsB": 10,
+   "act": 0.782
+  },
+  {
+   "t": 57.051,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.896,
+   "travB": 0.692,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 58.073,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.628,
+   "travB": 0.968,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 58.445,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.379,
+   "travB": 1.0,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 58.955,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.321,
+   "travB": 1.623,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 60.0,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.328,
+   "travB": 1.621,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 60.534,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.573,
+   "travB": 1.561,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 61.068,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.725,
+   "travB": 1.096,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 61.812,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.559,
+   "travB": 2.127,
+   "obsA": 10,
+   "obsB": 9,
+   "act": 0.411
+  },
+  {
+   "t": 63.414,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.429,
+   "travB": 1.51,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 65.178,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.565,
+   "travB": 0.197,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 66.734,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.169,
+   "travB": 1.39,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.626
+  },
+  {
+   "t": 67.686,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.534,
+   "travB": 3.059,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.895,
+   "court": [
+    5.91,
+    6.63
+   ]
+  },
+  {
+   "t": 68.151,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.113,
+   "travB": 2.128,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.002,
+   "court": [
+    5.83,
+    7.44
+   ]
+  },
+  {
+   "t": 68.545,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.92,
+   "travB": 3.263,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.264,
+   "court": [
+    4.66,
+    6.72
+   ]
+  },
+  {
+   "t": 69.033,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.843,
+   "travB": 2.337,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 1.128,
+   "court": [
+    3.44,
+    4.41
+   ]
+  },
+  {
+   "t": 69.428,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.767,
+   "travB": 2.337,
+   "obsA": 10,
+   "obsB": 9,
+   "act": 1.114,
+   "court": [
+    4.4,
+    4.83
+   ]
+  },
+  {
+   "t": 70.682,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.358,
+   "travB": 0.732,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 71.726,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.28,
+   "travB": 1.851,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.758
+  },
+  {
+   "t": 72.4,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.005,
+   "travB": 0.0,
+   "obsA": 8,
+   "obsB": 0,
+   "act": 0.696
+  },
+  {
+   "t": 73.027,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.127,
+   "travB": 0.617,
+   "obsA": 10,
+   "obsB": 8
+  },
+  {
+   "t": 74.025,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.301,
+   "travB": 1.878,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 74.745,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.552,
+   "travB": 1.38,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 75.233,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.484,
+   "travB": 1.291,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 75.674,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.825,
+   "travB": 1.291,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 76.115,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.36,
+   "travB": 0.837,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 76.579,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.942,
+   "travB": 0.837,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 78.251,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.359,
+   "travB": 0.949,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.646
+  },
+  {
+   "t": 78.623,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.528,
+   "travB": 2.129,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.65
+  },
+  {
+   "t": 79.83,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.046,
+   "travB": 1.039,
+   "obsA": 8,
+   "obsB": 10,
+   "act": 0.614
+  },
+  {
+   "t": 81.2,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.634,
+   "travB": 1.873,
+   "obsA": 6,
+   "obsB": 8,
+   "act": 0.937,
+   "court": [
+    6.12,
+    7.01
+   ]
+  },
+  {
+   "t": 81.595,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.749,
+   "travB": 2.719,
+   "obsA": 6,
+   "obsB": 8,
+   "act": 0.872,
+   "court": [
+    3.91,
+    6.76
+   ]
+  },
+  {
+   "t": 82.756,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.06,
+   "travB": 0.827,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 83.29,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.293,
+   "travB": 1.065,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 84.219,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.108,
+   "travB": 0.695,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 84.753,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.108,
+   "travB": 1.278,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 85.635,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.599,
+   "travB": 3.628,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.625
+  },
+  {
+   "t": 87.121,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.311,
+   "travB": 2.303,
+   "obsA": 10,
+   "obsB": 4,
+   "act": 0.599
+  },
+  {
+   "t": 88.213,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.871,
+   "travB": 2.252,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.31
+  },
+  {
+   "t": 88.607,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.385,
+   "travB": 1.428,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 90.024,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.376,
+   "travB": 0.484,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 91.463,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.349,
+   "travB": 4.554,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.173
+  },
+  {
+   "t": 92.114,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.66,
+   "travB": 1.518,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 93.6,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.483,
+   "travB": 1.22,
+   "obsA": 5,
+   "obsB": 4,
+   "act": 0.66
+  },
+  {
+   "t": 94.018,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.745,
+   "travB": 0.0,
+   "obsA": 7,
+   "obsB": 0
+  },
+  {
+   "t": 94.621,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.175,
+   "travB": 2.024,
+   "obsA": 10,
+   "obsB": 6,
+   "act": 1.138,
+   "court": [
+    4.13,
+    4.58
+   ]
+  },
+  {
+   "t": 94.993,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.834,
+   "travB": 4.606,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.138,
+   "court": [
+    4.51,
+    4.04
+   ]
+  },
+  {
+   "t": 95.573,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.945,
+   "travB": 2.027,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.104,
+   "court": [
+    3.04,
+    5.09
+   ]
+  },
+  {
+   "t": 96.061,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.945,
+   "travB": 2.122,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.834,
+   "court": [
+    3.05,
+    4.87
+   ]
+  },
+  {
+   "t": 96.943,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.583,
+   "travB": 2.062,
+   "obsA": 4,
+   "obsB": 6,
+   "act": 0.918,
+   "court": [
+    3.05,
+    5.12
+   ]
+  },
+  {
+   "t": 97.477,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.0,
+   "travB": 0.823,
+   "obsA": 0,
+   "obsB": 8
+  },
+  {
+   "t": 98.035,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.841,
+   "travB": 1.73,
+   "obsA": 6,
+   "obsB": 8
+  },
+  {
+   "t": 98.383,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.841,
+   "travB": 1.118,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 99.033,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.23,
+   "travB": 1.111,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 99.381,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.381,
+   "travB": 1.111,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 99.73,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.805,
+   "travB": 1.063,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 100.31,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.122,
+   "travB": 1.12,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 100.867,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.67,
+   "travB": 1.082,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 102.4,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.498,
+   "travB": 0.767,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 103.027,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.268,
+   "travB": 0.506,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 103.375,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.54,
+   "travB": 0.391,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 105.372,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 1.911,
+   "travB": 1.178,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.651
+  },
+  {
+   "t": 105.86,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.911,
+   "travB": 3.445,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.798
+  },
+  {
+   "t": 106.394,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.162,
+   "travB": 3.445,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.165,
+   "court": [
+    5.67,
+    7.03
+   ]
+  },
+  {
+   "t": 107.299,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.57,
+   "travB": 3.461,
+   "obsA": 10,
+   "obsB": 8,
+   "act": 1.276,
+   "court": [
+    3.81,
+    6.14
+   ]
+  },
+  {
+   "t": 108.066,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.683,
+   "travB": 4.724,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.915,
+   "court": [
+    1.99,
+    4.24
+   ]
+  },
+  {
+   "t": 108.6,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.182,
+   "travB": 1.34,
+   "obsA": 8,
+   "obsB": 7,
+   "act": 1.489,
+   "court": [
+    2.8,
+    5.9
+   ]
+  },
+  {
+   "t": 109.645,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.761,
+   "travB": 1.489,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.731
+  },
+  {
+   "t": 110.155,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.617,
+   "travB": 0.432,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 111.316,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.943,
+   "travB": 1.938,
+   "obsA": 10,
+   "obsB": 4,
+   "act": 0.562
+  },
+  {
+   "t": 112.06,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.009,
+   "travB": 0.93,
+   "obsA": 8,
+   "obsB": 6
+  },
+  {
+   "t": 113.453,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.03,
+   "travB": 1.083,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 115.217,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.602,
+   "travB": 1.233,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 115.914,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.141,
+   "travB": 0.614,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 116.773,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.45,
+   "travB": 0.949,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 117.563,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.912,
+   "travB": 4.516,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.495
+  },
+  {
+   "t": 118.027,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.239,
+   "travB": 1.431,
+   "obsA": 8,
+   "obsB": 7
+  },
+  {
+   "t": 118.933,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.611,
+   "travB": 2.632,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.061,
+   "court": [
+    1.23,
+    7.59
+   ]
+  },
+  {
+   "t": 119.815,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.421,
+   "travB": 1.96,
+   "obsA": 8,
+   "obsB": 7,
+   "act": 1.122,
+   "court": [
+    5.07,
+    5.65
+   ]
+  },
+  {
+   "t": 121.696,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.533,
+   "travB": 2.84,
+   "obsA": 10,
+   "obsB": 9,
+   "act": 1.131,
+   "court": [
+    5.94,
+    4.7
+   ]
+  },
+  {
+   "t": 123.275,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.492,
+   "travB": 2.243,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.122,
+   "court": [
+    6.4,
+    2.56
+   ]
+  },
+  {
+   "t": 124.575,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.215,
+   "travB": 1.085,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 126.154,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.615,
+   "travB": 0.663,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 127.269,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.802,
+   "travB": 1.235,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 127.965,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.615,
+   "travB": 24.135,
+   "obsA": 10,
+   "obsB": 2,
+   "act": 0.437,
+   "court": [
+    5.59,
+    8.27
+   ]
+  },
+  {
+   "t": 128.801,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.411,
+   "travB": 4.858,
+   "obsA": 10,
+   "obsB": 4,
+   "act": 0.435
+  },
+  {
+   "t": 130.566,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.747,
+   "travB": 0.836,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.741
+  },
+  {
+   "t": 131.355,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.952,
+   "travB": 1.139,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.836,
+   "court": [
+    2.73,
+    5.7
+   ]
+  },
+  {
+   "t": 133.329,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.86,
+   "travB": 1.161,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 133.677,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.86,
+   "travB": 2.482,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.008,
+   "court": [
+    5.08,
+    5.33
+   ]
+  },
+  {
+   "t": 134.444,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.91,
+   "travB": 2.15,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.008,
+   "court": [
+    6.05,
+    5.47
+   ]
+  },
+  {
+   "t": 134.792,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.91,
+   "travB": 2.15,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.905,
+   "court": [
+    5.59,
+    5.88
+   ]
+  },
+  {
+   "t": 135.21,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.9,
+   "travB": 1.287,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.084,
+   "court": [
+    2.19,
+    6.24
+   ]
+  },
+  {
+   "t": 135.744,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.9,
+   "travB": 2.167,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.079,
+   "court": [
+    1.77,
+    6.07
+   ]
+  },
+  {
+   "t": 137.439,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.881,
+   "travB": 0.438,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 138.182,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.543,
+   "travB": 1.418,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 138.67,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.543,
+   "travB": 1.418,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 139.088,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.064,
+   "travB": 2.464,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.515
+  },
+  {
+   "t": 139.598,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.595,
+   "travB": 1.429,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 140.04,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.403,
+   "travB": 0.971,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 141.108,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.315,
+   "travB": 0.0,
+   "obsA": 8,
+   "obsB": 0
+  },
+  {
+   "t": 141.479,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.2,
+   "travB": 1.42,
+   "obsA": 10,
+   "obsB": 4
+  },
+  {
+   "t": 142.083,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.418,
+   "travB": 1.266,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 142.547,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.814,
+   "travB": 1.266,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 143.105,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.268,
+   "travB": 0.791,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 144.544,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.44,
+   "travB": 1.969,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.527
+  },
+  {
+   "t": 145.496,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.869,
+   "travB": 1.699,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 146.611,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.177,
+   "travB": 1.465,
+   "obsA": 7,
+   "obsB": 8,
+   "act": 0.808
+  },
+  {
+   "t": 147.609,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.129,
+   "travB": 2.198,
+   "obsA": 10,
+   "obsB": 6,
+   "act": 0.883,
+   "court": [
+    2.69,
+    5.65
+   ]
+  },
+  {
+   "t": 147.958,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.577,
+   "travB": 5.203,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.089,
+   "court": [
+    1.73,
+    5.16
+   ]
+  },
+  {
+   "t": 148.584,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.521,
+   "travB": 1.186,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 149.908,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.678,
+   "travB": 2.417,
+   "obsA": 5,
+   "obsB": 10,
+   "act": 1.152,
+   "court": [
+    2.33,
+    5.98
+   ]
+  },
+  {
+   "t": 151.905,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.907,
+   "travB": 3.231,
+   "obsA": 7,
+   "obsB": 10,
+   "act": 1.227,
+   "court": [
+    2.15,
+    4.03
+   ]
+  },
+  {
+   "t": 153.043,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.016,
+   "travB": 4.175,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.428,
+   "court": [
+    6.07,
+    2.71
+   ]
+  },
+  {
+   "t": 153.948,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.987,
+   "travB": 2.52,
+   "obsA": 8,
+   "obsB": 7,
+   "act": 1.329,
+   "court": [
+    6.4,
+    2.64
+   ]
+  },
+  {
+   "t": 154.552,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.51,
+   "travB": 2.198,
+   "obsA": 10,
+   "obsB": 6,
+   "act": 1.189,
+   "court": [
+    2.46,
+    6.53
+   ]
+  },
+  {
+   "t": 155.109,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.548,
+   "travB": 0.714,
+   "obsA": 10,
+   "obsB": 6
+  },
+  {
+   "t": 155.458,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.548,
+   "travB": 1.189,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 155.968,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.581,
+   "travB": 1.189,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 156.363,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.298,
+   "travB": 0.676,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 156.851,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.123,
+   "travB": 0.978,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 158.337,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.233,
+   "travB": 1.361,
+   "obsA": 6,
+   "obsB": 2,
+   "act": 0.513
+  },
+  {
+   "t": 159.498,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.261,
+   "travB": 0.0,
+   "obsA": 9,
+   "obsB": 0
+  },
+  {
+   "t": 160.264,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "ankle",
+   "travA": 0.357,
+   "travB": 0.0,
+   "obsA": 1,
+   "obsB": 0,
+   "act": 0.52
+  },
+  {
+   "t": 161.239,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.879,
+   "travB": 0.0,
+   "obsA": 5,
+   "obsB": 0
+  },
+  {
+   "t": 162.052,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.697,
+   "travB": 2.923,
+   "obsA": 10,
+   "obsB": 8,
+   "act": 0.608
+  },
+  {
+   "t": 162.424,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.253,
+   "travB": 2.182,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.345
+  },
+  {
+   "t": 163.19,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.262,
+   "travB": 0.877,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 163.724,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.22,
+   "travB": 0.758,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 164.374,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.367,
+   "travB": 1.258,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 165.651,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.302,
+   "travB": 4.557,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.178
+  },
+  {
+   "t": 166.626,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.761,
+   "travB": 2.357,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.26
+  },
+  {
+   "t": 167.021,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.289,
+   "travB": 1.771,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 167.787,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.379,
+   "travB": 2.539,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.341
+  },
+  {
+   "t": 169.506,
+   "passed": false,
+   "reason": "ankle gate",
+   "player": null,
+   "mode": "ankle",
+   "travA": 0.0,
+   "travB": 0.0,
+   "obsA": 0,
+   "obsB": 0
+  },
+  {
+   "t": 169.947,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.0,
+   "travB": 1.333,
+   "obsA": 0,
+   "obsB": 2
+  },
+  {
+   "t": 170.713,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.053,
+   "travB": 1.131,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.425
+  },
+  {
+   "t": 171.178,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.592,
+   "travB": 0.74,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 171.851,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.26,
+   "travB": 0.785,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 172.965,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.652,
+   "travB": 3.088,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.43
+  },
+  {
+   "t": 173.407,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.817,
+   "travB": 1.535,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 174.637,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 6.244,
+   "travB": 3.174,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.946,
+   "court": [
+    3.15,
+    6.64
+   ]
+  },
+  {
+   "t": 175.334,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.955,
+   "travB": 0.911,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.976,
+   "court": [
+    1.71,
+    7.14
+   ]
+  },
+  {
+   "t": 176.959,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.947,
+   "travB": 1.932,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.997,
+   "court": [
+    1.59,
+    7.22
+   ]
+  },
+  {
+   "t": 177.4,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.231,
+   "travB": 2.179,
+   "obsA": 10,
+   "obsB": 8,
+   "act": 1.046,
+   "court": [
+    1.61,
+    7.55
+   ]
+  },
+  {
+   "t": 178.515,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.446,
+   "travB": 1.522,
+   "obsA": 6,
+   "obsB": 8,
+   "act": 0.961,
+   "court": [
+    3.22,
+    5.98
+   ]
+  },
+  {
+   "t": 179.258,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 11.717,
+   "travB": 0.916,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.005,
+   "court": [
+    1.77,
+    4.83
+   ]
+  },
+  {
+   "t": 180.048,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.12,
+   "travB": 3.242,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.005,
+   "court": [
+    3.54,
+    5.52
+   ]
+  },
+  {
+   "t": 180.489,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.459,
+   "travB": 4.493,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.01,
+   "court": [
+    4.65,
+    5.74
+   ]
+  },
+  {
+   "t": 180.976,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.277,
+   "travB": 1.522,
+   "obsA": 9,
+   "obsB": 10
+  },
+  {
+   "t": 181.325,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.886,
+   "travB": 1.01,
+   "obsA": 3,
+   "obsB": 8
+  },
+  {
+   "t": 182.346,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.058,
+   "travB": 2.999,
+   "obsA": 5,
+   "obsB": 10,
+   "act": 1.017,
+   "court": [
+    5.06,
+    3.72
+   ]
+  },
+  {
+   "t": 183.043,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 7.042,
+   "travB": 1.376,
+   "obsA": 4,
+   "obsB": 8,
+   "act": 0.96,
+   "court": [
+    5.56,
+    4.17
+   ]
+  },
+  {
+   "t": 184.227,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.859,
+   "travB": 1.286,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 185.945,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.195,
+   "travB": 0.617,
+   "obsA": 2,
+   "obsB": 10
+  },
+  {
+   "t": 186.572,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.0,
+   "travB": 1.041,
+   "obsA": 0,
+   "obsB": 10
+  },
+  {
+   "t": 187.455,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.341,
+   "travB": 1.411,
+   "obsA": 6,
+   "obsB": 8
+  },
+  {
+   "t": 188.732,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.305,
+   "travB": 0.716,
+   "obsA": 10,
+   "obsB": 8
+  },
+  {
+   "t": 189.637,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.373,
+   "travB": 1.463,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 191.704,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.138,
+   "travB": 0.339,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 192.075,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.116,
+   "travB": 0.339,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 192.819,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.048,
+   "travB": 1.027,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 195.442,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.099,
+   "travB": 0.202,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 198.368,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.101,
+   "travB": 0.216,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 199.39,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.081,
+   "travB": 1.945,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.057
+  },
+  {
+   "t": 199.738,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.09,
+   "travB": 2.044,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.057
+  },
+  {
+   "t": 201.503,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.09,
+   "travB": 0.361,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 202.432,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.195,
+   "travB": 0.376,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 203.848,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.258,
+   "travB": 0.507,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 205.984,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.566,
+   "travB": 0.604,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 206.541,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.785,
+   "travB": 1.358,
+   "obsA": 8,
+   "obsB": 7,
+   "act": 0.498
+  },
+  {
+   "t": 207.099,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.295,
+   "travB": 0.958,
+   "obsA": 8,
+   "obsB": 7,
+   "act": 0.566
+  },
+  {
+   "t": 207.563,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.759,
+   "travB": 1.152,
+   "obsA": 10,
+   "obsB": 9
+  },
+  {
+   "t": 208.678,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.409,
+   "travB": 2.019,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.545
+  },
+  {
+   "t": 209.119,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.545,
+   "travB": 3.296,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.513
+  },
+  {
+   "t": 209.769,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.556,
+   "travB": 0.455,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 210.164,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.612,
+   "travB": 0.455,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 210.535,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.612,
+   "travB": 0.842,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 211.673,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.129,
+   "travB": 3.542,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.407
+  },
+  {
+   "t": 212.045,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.129,
+   "travB": 3.542,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.462
+  },
+  {
+   "t": 213.345,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.829,
+   "travB": 1.09,
+   "obsA": 8,
+   "obsB": 6,
+   "act": 0.788
+  },
+  {
+   "t": 215.272,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.276,
+   "travB": 0.978,
+   "obsA": 10,
+   "obsB": 8,
+   "act": 0.648
+  },
+  {
+   "t": 216.48,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.236,
+   "travB": 2.619,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 0.656
+  },
+  {
+   "t": 217.71,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.405,
+   "travB": 3.357,
+   "obsA": 10,
+   "obsB": 7,
+   "act": 1.14,
+   "court": [
+    3.23,
+    6.8
+   ]
+  },
+  {
+   "t": 219.057,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.468,
+   "travB": 2.147,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.947,
+   "court": [
+    3.54,
+    6.72
+   ]
+  },
+  {
+   "t": 220.543,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 7.076,
+   "travB": 0.796,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.941,
+   "court": [
+    2.08,
+    7.96
+   ]
+  },
+  {
+   "t": 222.006,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.118,
+   "travB": 0.802,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.796
+  },
+  {
+   "t": 222.656,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.671,
+   "travB": 1.052,
+   "obsA": 7,
+   "obsB": 8,
+   "act": 0.827
+  },
+  {
+   "t": 223.028,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.701,
+   "travB": 2.522,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 0.8
+  },
+  {
+   "t": 223.887,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 3.444,
+   "travB": 3.692,
+   "obsA": 8,
+   "obsB": 2,
+   "act": 0.836,
+   "court": [
+    5.18,
+    3.82
+   ]
+  },
+  {
+   "t": 224.56,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.774,
+   "travB": 1.733,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.491,
+   "court": [
+    2.67,
+    3.95
+   ]
+  },
+  {
+   "t": 225.048,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 9.078,
+   "travB": 2.423,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 1.385,
+   "court": [
+    1.34,
+    2.93
+   ]
+  },
+  {
+   "t": 225.884,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.505,
+   "travB": 1.839,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 226.418,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.596,
+   "travB": 0.744,
+   "obsA": 6,
+   "obsB": 8
+  },
+  {
+   "t": 226.859,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.023,
+   "travB": 0.569,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 227.718,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.745,
+   "travB": 1.806,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 228.252,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.742,
+   "travB": 2.473,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.66
+  },
+  {
+   "t": 228.6,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.861,
+   "travB": 1.632,
+   "obsA": 6,
+   "obsB": 9
+  },
+  {
+   "t": 229.854,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.533,
+   "travB": 1.669,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 231.549,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.769,
+   "travB": 0.337,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 235.334,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.044,
+   "travB": 1.395,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.603
+  },
+  {
+   "t": 236.147,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.524,
+   "travB": 2.763,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.337,
+   "court": [
+    5.71,
+    7.04
+   ]
+  },
+  {
+   "t": 237.122,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 5.272,
+   "travB": 3.944,
+   "obsA": 7,
+   "obsB": 6,
+   "act": 1.265,
+   "court": [
+    1.72,
+    6.96
+   ]
+  },
+  {
+   "t": 237.47,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.912,
+   "travB": 2.783,
+   "obsA": 10,
+   "obsB": 7,
+   "act": 1.331,
+   "court": [
+    2.15,
+    4.93
+   ]
+  },
+  {
+   "t": 238.376,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.099,
+   "travB": 2.9,
+   "obsA": 10,
+   "obsB": 8,
+   "act": 1.326,
+   "court": [
+    1.67,
+    3.68
+   ]
+  },
+  {
+   "t": 239.003,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.635,
+   "travB": 1.393,
+   "obsA": 6,
+   "obsB": 7,
+   "act": 1.258,
+   "court": [
+    1.5,
+    6.86
+   ]
+  },
+  {
+   "t": 239.932,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.648,
+   "travB": 5.092,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.186,
+   "court": [
+    1.56,
+    5.64
+   ]
+  },
+  {
+   "t": 240.443,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.67,
+   "travB": 1.73,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 240.977,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.149,
+   "travB": 1.319,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.319,
+   "court": [
+    4.25,
+    6.85
+   ]
+  },
+  {
+   "t": 241.627,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.479,
+   "travB": 1.957,
+   "obsA": 7,
+   "obsB": 8,
+   "act": 1.335,
+   "court": [
+    5.09,
+    7.28
+   ]
+  },
+  {
+   "t": 242.068,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.069,
+   "travB": 1.957,
+   "obsA": 8,
+   "obsB": 6,
+   "act": 1.309,
+   "court": [
+    5.01,
+    7.4
+   ]
+  },
+  {
+   "t": 242.741,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.738,
+   "travB": 3.028,
+   "obsA": 4,
+   "obsB": 8,
+   "act": 1.809,
+   "court": [
+    3.81,
+    6.8
+   ]
+  },
+  {
+   "t": 243.345,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 7.722,
+   "travB": 5.747,
+   "obsA": 8,
+   "obsB": 7,
+   "act": 1.738,
+   "court": [
+    4.77,
+    4.69
+   ]
+  },
+  {
+   "t": 243.949,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.745,
+   "travB": 3.307,
+   "obsA": 6,
+   "obsB": 10,
+   "act": 1.229,
+   "court": [
+    4.99,
+    3.96
+   ]
+  },
+  {
+   "t": 244.622,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.078,
+   "travB": 2.945,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.403,
+   "court": [
+    2.82,
+    3.2
+   ]
+  },
+  {
+   "t": 245.551,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 5.64,
+   "travB": 1.403,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.431,
+   "court": [
+    3.07,
+    5.04
+   ]
+  },
+  {
+   "t": 246.48,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 6.226,
+   "travB": 2.422,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.358,
+   "court": [
+    0.8,
+    3.11
+   ]
+  },
+  {
+   "t": 247.246,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.699,
+   "travB": 2.489,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.358,
+   "court": [
+    0.25,
+    3.32
+   ]
+  },
+  {
+   "t": 247.687,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.699,
+   "travB": 1.358,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.358,
+   "court": [
+    1.56,
+    4.49
+   ]
+  },
+  {
+   "t": 248.5,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.372,
+   "travB": 1.957,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.866,
+   "court": [
+    4.03,
+    5.29
+   ]
+  },
+  {
+   "t": 249.777,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.386,
+   "travB": 1.499,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 250.311,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.878,
+   "travB": 1.066,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 251.193,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.529,
+   "travB": 1.416,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 251.89,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.598,
+   "travB": 1.305,
+   "obsA": 8,
+   "obsB": 6
+  },
+  {
+   "t": 252.494,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.995,
+   "travB": 1.732,
+   "obsA": 10,
+   "obsB": 4
+  },
+  {
+   "t": 253.632,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.718,
+   "travB": 1.481,
+   "obsA": 2,
+   "obsB": 4
+  },
+  {
+   "t": 254.537,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.996,
+   "travB": 0.779,
+   "obsA": 2,
+   "obsB": 10,
+   "act": 0.574
+  },
+  {
+   "t": 255.071,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.996,
+   "travB": 1.135,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.595
+  },
+  {
+   "t": 255.768,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.595,
+   "travB": 0.825,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 256.998,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.049,
+   "travB": 0.51,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 257.347,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.302,
+   "travB": 0.58,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.113
+  },
+  {
+   "t": 258.438,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.166,
+   "travB": 0.261,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.15
+  },
+  {
+   "t": 260.087,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.0,
+   "travB": 0.911,
+   "obsA": 0,
+   "obsB": 8
+  },
+  {
+   "t": 260.83,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 6.887,
+   "travB": 3.102,
+   "obsA": 6,
+   "obsB": 6,
+   "act": 1.162,
+   "court": [
+    2.85,
+    7.67
+   ]
+  },
+  {
+   "t": 261.387,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.383,
+   "travB": 6.449,
+   "obsA": 8,
+   "obsB": 7,
+   "act": 1.18,
+   "court": [
+    2.64,
+    7.1
+   ]
+  },
+  {
+   "t": 262.223,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.431,
+   "travB": 2.212,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.167,
+   "court": [
+    1.65,
+    5.02
+   ]
+  },
+  {
+   "t": 263.291,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.524,
+   "travB": 1.918,
+   "obsA": 5,
+   "obsB": 8,
+   "act": 0.961,
+   "court": [
+    3.18,
+    5.24
+   ]
+  },
+  {
+   "t": 264.266,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.432,
+   "travB": 7.868,
+   "obsA": 10,
+   "obsB": 9,
+   "act": 1.165,
+   "court": [
+    5.19,
+    6.12
+   ]
+  },
+  {
+   "t": 264.777,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.651,
+   "travB": 5.387,
+   "obsA": 10,
+   "obsB": 9,
+   "act": 1.168,
+   "court": [
+    6.11,
+    6.4
+   ]
+  },
+  {
+   "t": 265.915,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.135,
+   "travB": 1.967,
+   "obsA": 5,
+   "obsB": 7,
+   "act": 1.135,
+   "court": [
+    4.04,
+    6.45
+   ]
+  },
+  {
+   "t": 266.449,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.596,
+   "travB": 1.798,
+   "obsA": 7,
+   "obsB": 7
+  },
+  {
+   "t": 267.61,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.785,
+   "travB": 2.962,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.086,
+   "court": [
+    2.58,
+    5.6
+   ]
+  },
+  {
+   "t": 268.423,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.449,
+   "travB": 1.93,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.121,
+   "court": [
+    3.66,
+    5.87
+   ]
+  },
+  {
+   "t": 268.771,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.594,
+   "travB": 1.812,
+   "obsA": 7,
+   "obsB": 10
+  },
+  {
+   "t": 269.235,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.976,
+   "travB": 3.517,
+   "obsA": 4,
+   "obsB": 10,
+   "act": 1.155,
+   "court": [
+    4.7,
+    2.67
+   ]
+  },
+  {
+   "t": 270.257,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.749,
+   "travB": 1.677,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.265,
+   "court": [
+    5.16,
+    7.64
+   ]
+  },
+  {
+   "t": 271.116,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.413,
+   "travB": 3.69,
+   "obsA": 8,
+   "obsB": 4,
+   "act": 0.749
+  },
+  {
+   "t": 271.534,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.344,
+   "travB": 0.749,
+   "obsA": 8,
+   "obsB": 1
+  },
+  {
+   "t": 271.906,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.624,
+   "travB": 1.625,
+   "obsA": 8,
+   "obsB": 7
+  },
+  {
+   "t": 273.252,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.041,
+   "travB": 0.279,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.673
+  },
+  {
+   "t": 273.601,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.041,
+   "travB": 1.171,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 0.892,
+   "court": [
+    5.12,
+    7.8
+   ]
+  },
+  {
+   "t": 274.042,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.06,
+   "travB": 1.171,
+   "obsA": 7,
+   "obsB": 8
+  },
+  {
+   "t": 274.39,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.164,
+   "travB": 1.265,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.936,
+   "court": [
+    4.91,
+    7.28
+   ]
+  },
+  {
+   "t": 275.458,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.492,
+   "travB": 1.876,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 276.619,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.743,
+   "travB": 0.73,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 277.06,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.746,
+   "travB": 0.443,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 277.432,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.746,
+   "travB": 0.247,
+   "obsA": 6,
+   "obsB": 8
+  },
+  {
+   "t": 278.872,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.0,
+   "travB": 1.371,
+   "obsA": 0,
+   "obsB": 8
+  },
+  {
+   "t": 279.661,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.766,
+   "travB": 5.384,
+   "obsA": 6,
+   "obsB": 6,
+   "act": 0.517
+  },
+  {
+   "t": 280.288,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.474,
+   "travB": 1.231,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 281.681,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.942,
+   "travB": 4.406,
+   "obsA": 8,
+   "obsB": 4,
+   "act": 0.314
+  },
+  {
+   "t": 282.285,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.369,
+   "travB": 2.644,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 0.287
+  },
+  {
+   "t": 282.703,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.305,
+   "travB": 1.18,
+   "obsA": 9,
+   "obsB": 10
+  },
+  {
+   "t": 283.144,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.259,
+   "travB": 0.853,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 283.678,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.11,
+   "travB": 0.682,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 284.352,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.371,
+   "travB": 1.764,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 284.77,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.398,
+   "travB": 0.73,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 285.304,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.337,
+   "travB": 0.871,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 286.186,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.45,
+   "travB": 1.687,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 286.581,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.475,
+   "travB": 1.687,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 287.37,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.684,
+   "travB": 2.541,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.475
+  },
+  {
+   "t": 287.765,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.808,
+   "travB": 2.295,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.595
+  },
+  {
+   "t": 288.136,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.815,
+   "travB": 1.672,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 288.624,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.124,
+   "travB": 0.627,
+   "obsA": 7,
+   "obsB": 8,
+   "act": 0.739
+  },
+  {
+   "t": 289.228,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.935,
+   "travB": 2.775,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 0.815
+  },
+  {
+   "t": 289.646,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.376,
+   "travB": 3.766,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.92,
+   "court": [
+    3.79,
+    6.46
+   ]
+  },
+  {
+   "t": 290.482,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.922,
+   "travB": 2.15,
+   "obsA": 8,
+   "obsB": 7,
+   "act": 0.987,
+   "court": [
+    1.97,
+    6.72
+   ]
+  },
+  {
+   "t": 291.48,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.114,
+   "travB": 1.779,
+   "obsA": 9,
+   "obsB": 10
+  },
+  {
+   "t": 292.2,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.534,
+   "travB": 3.611,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.912,
+   "court": [
+    2.62,
+    7.02
+   ]
+  },
+  {
+   "t": 293.059,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 5.089,
+   "travB": 4.582,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.794
+  },
+  {
+   "t": 293.663,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.503,
+   "travB": 0.912,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 294.197,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.324,
+   "travB": 0.85,
+   "obsA": 4,
+   "obsB": 6,
+   "act": 0.912,
+   "court": [
+    1.98,
+    7.7
+   ]
+  },
+  {
+   "t": 294.545,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.324,
+   "travB": 0.298,
+   "obsA": 6,
+   "obsB": 2,
+   "act": 0.794
+  },
+  {
+   "t": 295.172,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.235,
+   "travB": 1.786,
+   "obsA": 8,
+   "obsB": 4
+  },
+  {
+   "t": 295.683,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.147,
+   "travB": 5.33,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.023,
+   "court": [
+    1.59,
+    6.94
+   ]
+  },
+  {
+   "t": 296.147,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.59,
+   "travB": 3.662,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.117,
+   "court": [
+    1.19,
+    6.78
+   ]
+  },
+  {
+   "t": 297.982,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.188,
+   "travB": 2.657,
+   "obsA": 6,
+   "obsB": 8,
+   "act": 1.222,
+   "court": [
+    1.76,
+    5.13
+   ]
+  },
+  {
+   "t": 298.701,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.913,
+   "travB": 3.032,
+   "obsA": 10,
+   "obsB": 9,
+   "act": 1.259,
+   "court": [
+    0.72,
+    3.82
+   ]
+  },
+  {
+   "t": 300.466,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 3.214,
+   "travB": 3.781,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.27,
+   "court": [
+    2.62,
+    5.54
+   ]
+  },
+  {
+   "t": 301.256,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.705,
+   "travB": 7.393,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.0,
+   "court": [
+    5.13,
+    5.69
+   ]
+  },
+  {
+   "t": 302.393,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.677,
+   "travB": 1.244,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 302.742,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.677,
+   "travB": 1.244,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 303.16,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.598,
+   "travB": 1.733,
+   "obsA": 7,
+   "obsB": 8
+  },
+  {
+   "t": 303.671,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.324,
+   "travB": 1.067,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 304.414,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.45,
+   "travB": 0.775,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 305.041,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.756,
+   "travB": 0.533,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 306.225,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.767,
+   "travB": 2.401,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.894,
+   "court": [
+    3.25,
+    4.16
+   ]
+  },
+  {
+   "t": 307.2,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.418,
+   "travB": 2.105,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.784
+  },
+  {
+   "t": 307.711,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.15,
+   "travB": 1.027,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 308.57,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.658,
+   "travB": 1.118,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 309.522,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.664,
+   "travB": 1.281,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 311.031,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.104,
+   "travB": 1.814,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.58
+  },
+  {
+   "t": 312.332,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.856,
+   "travB": 1.519,
+   "obsA": 8,
+   "obsB": 10,
+   "act": 1.292,
+   "court": [
+    3.88,
+    6.26
+   ]
+  },
+  {
+   "t": 313.144,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.834,
+   "travB": 2.813,
+   "obsA": 4,
+   "obsB": 10,
+   "act": 1.221,
+   "court": [
+    3.58,
+    6.71
+   ]
+  },
+  {
+   "t": 314.003,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.849,
+   "travB": 6.455,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.606,
+   "court": [
+    5.1,
+    7.27
+   ]
+  },
+  {
+   "t": 314.677,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.48,
+   "travB": 2.456,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.335,
+   "court": [
+    4.47,
+    5.92
+   ]
+  },
+  {
+   "t": 315.49,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 3.3,
+   "travB": 4.532,
+   "obsA": 7,
+   "obsB": 10,
+   "act": 1.337,
+   "court": [
+    4.14,
+    6.99
+   ]
+  },
+  {
+   "t": 316.883,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.048,
+   "travB": 1.914,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.21,
+   "court": [
+    3.28,
+    5.91
+   ]
+  },
+  {
+   "t": 320.366,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.512,
+   "travB": 0.705,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.834,
+   "court": [
+    2.88,
+    6.05
+   ]
+  },
+  {
+   "t": 320.83,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 7.172,
+   "travB": 0.834,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.834,
+   "court": [
+    4.01,
+    6.14
+   ]
+  },
+  {
+   "t": 321.62,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 6.165,
+   "travB": 1.161,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.834,
+   "court": [
+    5.3,
+    7.49
+   ]
+  },
+  {
+   "t": 322.293,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.074,
+   "travB": 1.669,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 322.757,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.304,
+   "travB": 1.433,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 323.175,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.957,
+   "travB": 3.672,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.957,
+   "court": [
+    4.47,
+    4.33
+   ]
+  },
+  {
+   "t": 325.126,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.268,
+   "travB": 0.963,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.03,
+   "court": [
+    1.37,
+    7.74
+   ]
+  },
+  {
+   "t": 325.869,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.865,
+   "travB": 1.396,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 326.333,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.476,
+   "travB": 2.687,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.872,
+   "court": [
+    3.9,
+    6.04
+   ]
+  },
+  {
+   "t": 327.494,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.184,
+   "travB": 0.665,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 329.561,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.04,
+   "travB": 1.464,
+   "obsA": 10,
+   "obsB": 4
+  },
+  {
+   "t": 333.764,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.789,
+   "travB": 1.108,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 334.809,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.087,
+   "travB": 1.834,
+   "obsA": 4,
+   "obsB": 2
+  },
+  {
+   "t": 336.991,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.0,
+   "travB": 0.866,
+   "obsA": 0,
+   "obsB": 10
+  },
+  {
+   "t": 339.035,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.584,
+   "travB": 1.074,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.577
+  },
+  {
+   "t": 341.031,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.83,
+   "travB": 0.246,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 342.123,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.865,
+   "travB": 0.994,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.157
+  },
+  {
+   "t": 343.679,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.29,
+   "travB": 1.148,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 344.677,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.905,
+   "travB": 0.356,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 346.14,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.711,
+   "travB": 0.636,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 347.44,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.774,
+   "travB": 1.26,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.636
+  },
+  {
+   "t": 348.648,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.809,
+   "travB": 2.985,
+   "obsA": 8,
+   "obsB": 10,
+   "act": 0.922,
+   "court": [
+    1.8,
+    8.4
+   ]
+  },
+  {
+   "t": 350.134,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 5.123,
+   "travB": 1.663,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.792
+  },
+  {
+   "t": 350.854,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 1.972,
+   "travB": 1.309,
+   "obsA": 10,
+   "obsB": 8,
+   "act": 0.772
+  },
+  {
+   "t": 351.643,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.792,
+   "travB": 1.012,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 352.177,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.868,
+   "travB": 4.746,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.722
+  },
+  {
+   "t": 352.734,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.854,
+   "travB": 2.886,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 0.722
+  },
+  {
+   "t": 353.965,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 6.889,
+   "travB": 0.779,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.92,
+   "court": [
+    1.03,
+    8.52
+   ]
+  },
+  {
+   "t": 354.708,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.351,
+   "travB": 4.867,
+   "obsA": 6,
+   "obsB": 6,
+   "act": 0.762
+  },
+  {
+   "t": 355.381,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.81,
+   "travB": 2.155,
+   "obsA": 7,
+   "obsB": 8,
+   "act": 0.873,
+   "court": [
+    2.56,
+    7.85
+   ]
+  },
+  {
+   "t": 355.985,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.375,
+   "travB": 0.938,
+   "obsA": 2,
+   "obsB": 10
+  },
+  {
+   "t": 356.659,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.0,
+   "travB": 3.837,
+   "obsA": 0,
+   "obsB": 8,
+   "act": 1.114,
+   "court": [
+    3.09,
+    6.47
+   ]
+  },
+  {
+   "t": 357.007,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.685,
+   "travB": 3.837,
+   "obsA": 4,
+   "obsB": 9,
+   "act": 0.951,
+   "court": [
+    3.09,
+    6.17
+   ]
+  },
+  {
+   "t": 357.518,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.685,
+   "travB": 2.067,
+   "obsA": 8,
+   "obsB": 7,
+   "act": 1.114,
+   "court": [
+    2.74,
+    6.5
+   ]
+  },
+  {
+   "t": 357.936,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.124,
+   "travB": 1.358,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 0.947,
+   "court": [
+    3.35,
+    6.18
+   ]
+  },
+  {
+   "t": 358.563,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.583,
+   "travB": 2.247,
+   "obsA": 4,
+   "obsB": 8,
+   "act": 0.965,
+   "court": [
+    3.32,
+    6.47
+   ]
+  },
+  {
+   "t": 359.677,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.492,
+   "travB": 2.391,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.014,
+   "court": [
+    3.96,
+    6.61
+   ]
+  },
+  {
+   "t": 360.374,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 1.91,
+   "travB": 1.051,
+   "obsA": 8,
+   "obsB": 10,
+   "act": 0.987,
+   "court": [
+    3.97,
+    6.59
+   ]
+  },
+  {
+   "t": 360.768,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.807,
+   "travB": 1.549,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 361.697,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.391,
+   "travB": 1.291,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 1.063,
+   "court": [
+    4.54,
+    7.51
+   ]
+  },
+  {
+   "t": 362.138,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.362,
+   "travB": 3.566,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.015,
+   "court": [
+    3.34,
+    6.97
+   ]
+  },
+  {
+   "t": 362.951,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.335,
+   "travB": 3.329,
+   "obsA": 3,
+   "obsB": 6,
+   "act": 0.809
+  },
+  {
+   "t": 363.741,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 5.637,
+   "travB": 0.826,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.963,
+   "court": [
+    3.97,
+    5.49
+   ]
+  },
+  {
+   "t": 364.089,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 5.637,
+   "travB": 1.098,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 1.02,
+   "court": [
+    4.16,
+    4.6
+   ]
+  },
+  {
+   "t": 364.484,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.852,
+   "travB": 1.632,
+   "obsA": 9,
+   "obsB": 10
+  },
+  {
+   "t": 366.063,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.133,
+   "travB": 0.566,
+   "obsA": 6,
+   "obsB": 8,
+   "act": 1.043,
+   "court": [
+    4.55,
+    5.11
+   ]
+  },
+  {
+   "t": 366.527,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.133,
+   "travB": 1.871,
+   "obsA": 6,
+   "obsB": 10,
+   "act": 1.005,
+   "court": [
+    4.65,
+    5.05
+   ]
+  },
+  {
+   "t": 367.154,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.884,
+   "travB": 1.604,
+   "obsA": 9,
+   "obsB": 10
+  },
+  {
+   "t": 367.595,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.884,
+   "travB": 0.73,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 368.129,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.439,
+   "travB": 1.454,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 368.826,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.726,
+   "travB": 0.492,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 369.429,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.847,
+   "travB": 1.718,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 370.149,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.822,
+   "travB": 2.543,
+   "obsA": 8,
+   "obsB": 6,
+   "act": 0.542
+  },
+  {
+   "t": 370.916,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.32,
+   "travB": 2.927,
+   "obsA": 10,
+   "obsB": 8,
+   "act": 0.473
+  },
+  {
+   "t": 371.635,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.658,
+   "travB": 1.987,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.413
+  },
+  {
+   "t": 372.169,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.61,
+   "travB": 1.69,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.4
+  },
+  {
+   "t": 373.098,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.478,
+   "travB": 1.475,
+   "obsA": 8,
+   "obsB": 1
+  },
+  {
+   "t": 373.911,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.781,
+   "travB": 0.571,
+   "obsA": 8,
+   "obsB": 6
+  },
+  {
+   "t": 374.608,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.983,
+   "travB": 2.382,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.449
+  },
+  {
+   "t": 375.792,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.598,
+   "travB": 1.277,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 377.162,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.384,
+   "travB": 0.937,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 378.903,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.789,
+   "travB": 2.377,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.566
+  },
+  {
+   "t": 380.389,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 6.363,
+   "travB": 11.225,
+   "obsA": 8,
+   "obsB": 3,
+   "act": 1.213,
+   "court": [
+    3.37,
+    6.03
+   ]
+  },
+  {
+   "t": 380.761,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.629,
+   "travB": 11.225,
+   "obsA": 8,
+   "obsB": 7,
+   "act": 1.066,
+   "court": [
+    3.81,
+    5.77
+   ]
+  },
+  {
+   "t": 381.295,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.359,
+   "travB": 2.896,
+   "obsA": 10,
+   "obsB": 4,
+   "act": 0.915,
+   "court": [
+    3.51,
+    6.33
+   ]
+  },
+  {
+   "t": 383.524,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.871,
+   "travB": 2.717,
+   "obsA": 8,
+   "obsB": 7,
+   "act": 1.603,
+   "court": [
+    4.83,
+    4.92
+   ]
+  },
+  {
+   "t": 383.896,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.579,
+   "travB": 5.966,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.494,
+   "court": [
+    4.33,
+    6.12
+   ]
+  },
+  {
+   "t": 384.871,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.703,
+   "travB": 1.479,
+   "obsA": 6,
+   "obsB": 8
+  },
+  {
+   "t": 385.985,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.618,
+   "travB": 0.347,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.782
+  },
+  {
+   "t": 387.355,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.263,
+   "travB": 1.211,
+   "obsA": 7,
+   "obsB": 8,
+   "act": 0.782
+  },
+  {
+   "t": 389.283,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.334,
+   "travB": 0.986,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 390.699,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.364,
+   "travB": 1.826,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 392.417,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.364,
+   "travB": 1.779,
+   "obsA": 10,
+   "obsB": 7
+  },
+  {
+   "t": 393.88,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.179,
+   "travB": 1.126,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 395.111,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.615,
+   "travB": 1.979,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.346
+  },
+  {
+   "t": 395.738,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.932,
+   "travB": 2.508,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.446
+  },
+  {
+   "t": 396.411,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.079,
+   "travB": 1.709,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 397.131,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.038,
+   "travB": 0.558,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 398.571,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.728,
+   "travB": 1.8,
+   "obsA": 8,
+   "obsB": 5,
+   "act": 0.935,
+   "court": [
+    4.5,
+    9.12
+   ]
+  },
+  {
+   "t": 399.058,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.728,
+   "travB": 3.595,
+   "obsA": 10,
+   "obsB": 6,
+   "act": 1.072,
+   "court": [
+    4.0,
+    4.81
+   ]
+  },
+  {
+   "t": 399.662,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 5.131,
+   "travB": 2.262,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.304,
+   "court": [
+    2.24,
+    4.96
+   ]
+  },
+  {
+   "t": 400.196,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.38,
+   "travB": 2.502,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.46,
+   "court": [
+    1.89,
+    4.26
+   ]
+  },
+  {
+   "t": 400.637,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.965,
+   "travB": 2.098,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.346,
+   "court": [
+    2.68,
+    5.34
+   ]
+  },
+  {
+   "t": 401.171,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.842,
+   "travB": 2.516,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.778
+  },
+  {
+   "t": 401.798,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.595,
+   "travB": 1.345,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 402.262,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.704,
+   "travB": 1.345,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 403.238,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.812,
+   "travB": 4.336,
+   "obsA": 8,
+   "obsB": 6,
+   "act": 0.595
+  },
+  {
+   "t": 403.656,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.812,
+   "travB": 4.336,
+   "obsA": 8,
+   "obsB": 6,
+   "act": 0.619
+  },
+  {
+   "t": 404.584,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.013,
+   "travB": 0.828,
+   "obsA": 8,
+   "obsB": 3,
+   "act": 0.596
+  },
+  {
+   "t": 406.21,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.218,
+   "travB": 3.013,
+   "obsA": 6,
+   "obsB": 8,
+   "act": 0.448
+  },
+  {
+   "t": 407.464,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.653,
+   "travB": 0.715,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 407.928,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.154,
+   "travB": 0.704,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.496
+  },
+  {
+   "t": 408.532,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.737,
+   "travB": 0.752,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 411.481,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.333,
+   "travB": 2.284,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.273,
+   "court": [
+    2.82,
+    7.67
+   ]
+  },
+  {
+   "t": 412.711,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.615,
+   "travB": 1.567,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.152,
+   "court": [
+    1.31,
+    7.65
+   ]
+  },
+  {
+   "t": 413.408,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.498,
+   "travB": 2.409,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.134,
+   "court": [
+    3.95,
+    7.66
+   ]
+  },
+  {
+   "t": 414.058,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.761,
+   "travB": 2.848,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.059,
+   "court": [
+    5.35,
+    9.09
+   ]
+  },
+  {
+   "t": 414.732,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.89,
+   "travB": 2.168,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.95,
+   "court": [
+    2.16,
+    6.74
+   ]
+  },
+  {
+   "t": 415.614,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.015,
+   "travB": 1.771,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.916,
+   "court": [
+    1.7,
+    6.62
+   ]
+  },
+  {
+   "t": 417.03,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.996,
+   "travB": 1.122,
+   "obsA": 6,
+   "obsB": 8,
+   "act": 1.002,
+   "court": [
+    2.5,
+    6.19
+   ]
+  },
+  {
+   "t": 418.238,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.024,
+   "travB": 2.076,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.75
+  },
+  {
+   "t": 418.702,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.803,
+   "travB": 2.076,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.617
+  },
+  {
+   "t": 419.236,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.01,
+   "travB": 1.164,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 419.701,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.856,
+   "travB": 0.449,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 420.072,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.683,
+   "travB": 1.726,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 420.42,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.392,
+   "travB": 1.726,
+   "obsA": 10,
+   "obsB": 7
+  },
+  {
+   "t": 421.117,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.782,
+   "travB": 1.673,
+   "obsA": 10,
+   "obsB": 4
+  },
+  {
+   "t": 421.907,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.939,
+   "travB": 0.923,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 422.65,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.859,
+   "travB": 0.652,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.619
+  },
+  {
+   "t": 423.23,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.865,
+   "travB": 0.835,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 424.763,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.557,
+   "travB": 1.39,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 425.227,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.083,
+   "travB": 1.877,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 426.156,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.757,
+   "travB": 3.684,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.667
+  },
+  {
+   "t": 427.386,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.98,
+   "travB": 1.401,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.84,
+   "court": [
+    1.17,
+    7.05
+   ]
+  },
+  {
+   "t": 429.546,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.077,
+   "travB": 1.385,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 430.521,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.914,
+   "travB": 2.358,
+   "obsA": 7,
+   "obsB": 8,
+   "act": 0.608
+  },
+  {
+   "t": 431.589,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.183,
+   "travB": 1.547,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 432.216,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.873,
+   "travB": 2.999,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.657
+  },
+  {
+   "t": 433.099,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.942,
+   "travB": 1.015,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 433.702,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.479,
+   "travB": 1.672,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 434.236,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.25,
+   "travB": 1.728,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 435.165,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.806,
+   "travB": 2.563,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.567
+  },
+  {
+   "t": 436.349,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.208,
+   "travB": 1.099,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 437.534,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 6.89,
+   "travB": 8.283,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.729,
+   "court": [
+    5.01,
+    6.39
+   ]
+  },
+  {
+   "t": 437.998,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.081,
+   "travB": 1.695,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 439.182,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.797,
+   "travB": 1.59,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 439.879,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.814,
+   "travB": 1.667,
+   "obsA": 4,
+   "obsB": 10
+  },
+  {
+   "t": 440.831,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.482,
+   "travB": 1.683,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 441.597,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.896,
+   "travB": 1.327,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 442.108,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.546,
+   "travB": 0.674,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 443.362,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.161,
+   "travB": 1.535,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 444.082,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.507,
+   "travB": 2.182,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.604
+  },
+  {
+   "t": 444.848,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.931,
+   "travB": 3.002,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.772
+  },
+  {
+   "t": 445.916,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.88,
+   "travB": 2.961,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.154,
+   "court": [
+    3.67,
+    6.03
+   ]
+  },
+  {
+   "t": 446.38,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 2.595,
+   "travB": 3.015,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 1.204,
+   "court": [
+    3.19,
+    4.95
+   ]
+  },
+  {
+   "t": 446.961,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.599,
+   "travB": 2.174,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.12,
+   "court": [
+    3.0,
+    4.52
+   ]
+  },
+  {
+   "t": 448.052,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.823,
+   "travB": 1.384,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 1.032,
+   "court": [
+    2.89,
+    7.72
+   ]
+  },
+  {
+   "t": 448.517,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.787,
+   "travB": 1.376,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.887,
+   "court": [
+    2.99,
+    8.39
+   ]
+  },
+  {
+   "t": 449.236,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.868,
+   "travB": 1.332,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 449.817,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.47,
+   "travB": 1.225,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.85,
+   "court": [
+    3.31,
+    7.52
+   ]
+  },
+  {
+   "t": 450.583,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.362,
+   "travB": 1.437,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 450.955,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.362,
+   "travB": 1.437,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 451.605,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.604,
+   "travB": 1.305,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 452.139,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.481,
+   "travB": 0.907,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 452.627,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.58,
+   "travB": 1.318,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 453.184,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.413,
+   "travB": 1.908,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.331
+  },
+  {
+   "t": 453.741,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 0.344,
+   "travB": 2.027,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.294
+  },
+  {
+   "t": 454.322,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.788,
+   "travB": 1.691,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 455.041,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.856,
+   "travB": 1.21,
+   "obsA": 8,
+   "obsB": 8
+  },
+  {
+   "t": 455.529,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.856,
+   "travB": 0.631,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 456.086,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.607,
+   "travB": 0.646,
+   "obsA": 10,
+   "obsB": 10
+  },
+  {
+   "t": 457.038,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 4.686,
+   "travB": 0.965,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.608
+  },
+  {
+   "t": 457.642,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.952,
+   "travB": 1.019,
+   "obsA": 9,
+   "obsB": 10,
+   "act": 0.844,
+   "court": [
+    3.94,
+    9.41
+   ]
+  },
+  {
+   "t": 458.315,
+   "passed": true,
+   "reason": "",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 2.574,
+   "travB": 1.707,
+   "obsA": 10,
+   "obsB": 10,
+   "act": 0.901,
+   "court": [
+    3.76,
+    9.75
+   ]
+  },
+  {
+   "t": 458.896,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 3.368,
+   "travB": 7.252,
+   "obsA": 8,
+   "obsB": 8,
+   "act": 0.829,
+   "court": [
+    2.9,
+    8.58
+   ]
+  },
+  {
+   "t": 459.36,
+   "passed": true,
+   "reason": "",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.187,
+   "travB": 7.252,
+   "obsA": 6,
+   "obsB": 9,
+   "act": 0.755,
+   "court": [
+    4.06,
+    9.75
+   ]
+  },
+  {
+   "t": 459.871,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "A",
+   "mode": "wrist",
+   "travA": 3.147,
+   "travB": 2.961,
+   "obsA": 6,
+   "obsB": 8,
+   "act": 0.725
+  },
+  {
+   "t": 460.73,
+   "passed": false,
+   "reason": "rally gate",
+   "player": "B",
+   "mode": "wrist",
+   "travA": 1.376,
+   "travB": 2.226,
+   "obsA": 6,
+   "obsB": 4,
+   "act": 0.707
+  },
+  {
+   "t": 461.102,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 1.596,
+   "travB": 0.618,
+   "obsA": 10,
+   "obsB": 2
+  },
+  {
+   "t": 461.868,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.31,
+   "travB": 0.722,
+   "obsA": 2,
+   "obsB": 8
+  },
+  {
+   "t": 462.472,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.817,
+   "travB": 0.415,
+   "obsA": 2,
+   "obsB": 10
+  },
+  {
+   "t": 462.867,
+   "passed": false,
+   "reason": "wrist gate",
+   "player": null,
+   "mode": "wrist",
+   "travA": 0.817,
+   "travB": 0.415,
+   "obsA": 2,
+   "obsB": 10
+  }
+ ]
+}
