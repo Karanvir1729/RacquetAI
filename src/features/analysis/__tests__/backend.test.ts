@@ -3,7 +3,7 @@
  * logic always lands on a runnable backend, and availability degrades to false
  * (never a crash) when the racquet-analyzer module can't be required — the
  * Expo Go case. expo-file-system is mocked with an in-memory store so the
- * load/save round-trip runs on Node.
+ * config reads run on Node.
  */
 import {
   DEFAULT_ANALYSIS_BACKEND,
@@ -11,7 +11,6 @@ import {
   loadAnalysisBackend,
   parseBackendSetting,
   resolveBackend,
-  saveAnalysisBackend,
 } from "../backend";
 
 // Hoisted above the import by babel-jest, so ../backend gets the mock.
@@ -133,17 +132,17 @@ describe("parseBackendSetting", () => {
   });
 });
 
-describe("loadAnalysisBackend / saveAnalysisBackend", () => {
+describe("loadAnalysisBackend", () => {
   it("defaults to the device backend when nothing is saved", () => {
     expect(DEFAULT_ANALYSIS_BACKEND).toBe("device");
     expect(loadAnalysisBackend()).toBe("device");
   });
 
-  it("round-trips a saved choice", () => {
-    expect(saveAnalysisBackend("server")).toBe(true);
+  it("reads a stored choice written outside the app", () => {
+    // No UI writes this any more — the reader stays as the one escape hatch
+    // for pointing a build at a different engine.
+    store.set("analysis-backend.json", '{"v":1,"backend":"server"}');
     expect(loadAnalysisBackend()).toBe("server");
-    expect(saveAnalysisBackend("device")).toBe(true);
-    expect(loadAnalysisBackend()).toBe("device");
   });
 
   it("degrades a corrupt config file to the default instead of throwing", () => {

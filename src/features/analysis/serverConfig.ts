@@ -36,19 +36,3 @@ export function loadServerBaseUrl(): string {
   }
 }
 
-/**
- * Normalize and persist a new base URL. Returns the stored value, or null when
- * the input is unusable (nothing is written — the previous value stands).
- */
-export function saveServerBaseUrl(input: string): string | null {
-  const normalized = normalizeBaseUrl(input);
-  if (normalized === null) return null;
-  try {
-    const file = configFile();
-    if (!file.exists) file.create();
-    file.write(JSON.stringify({ v: 1, baseUrl: normalized }, null, 2));
-    return normalized;
-  } catch {
-    return null;
-  }
-}

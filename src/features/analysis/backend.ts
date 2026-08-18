@@ -67,15 +67,3 @@ export function loadAnalysisBackend(): AnalysisBackend {
     return DEFAULT_ANALYSIS_BACKEND;
   }
 }
-
-/** Persist the backend choice. False on disk error (previous value stands). */
-export function saveAnalysisBackend(backend: AnalysisBackend): boolean {
-  try {
-    const file = configFile();
-    if (!file.exists) file.create();
-    file.write(JSON.stringify({ v: 1, backend }, null, 2));
-    return true;
-  } catch {
-    return false;
-  }
-}

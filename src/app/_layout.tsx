@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs, router } from "expo-router";
+import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ComponentProps, useEffect } from "react";
 import { ColorValue, Platform, StyleSheet } from "react-native";
@@ -23,10 +23,12 @@ function tabIcon(name: IoniconName) {
 }
 
 /**
- * Root layout: error boundary + providers around the 4-tab shell. Theme is
- * module-scope tokens (src/theme/tokens.ts — DynamicColorIOS pairs), so there
- * is no theme provider to mount; the canvas colour on Tabs + StatusBar is all
- * the "theming" the root has to do.
+ * Root layout: error boundary + providers around the two-tab shell — Record
+ * and Library, the only two things the app does. Analysis and the import flow
+ * are pushed routes (href: null), not tabs. Theme is module-scope tokens
+ * (src/theme/tokens.ts — DynamicColorIOS pairs), so there is no theme
+ * provider to mount; the canvas colour on Tabs + StatusBar is all the
+ * "theming" the root has to do.
  */
 export default function RootLayout() {
   // Beta forensics: if the previous run died on a fatal JS error, show the
@@ -61,10 +63,6 @@ export default function RootLayout() {
           >
             <Tabs.Screen name="index" options={{ title: "Record", tabBarIcon: tabIcon("videocam") }} />
             <Tabs.Screen name="library" options={{ title: "Library", tabBarIcon: tabIcon("albums") }} />
-            <Tabs.Screen
-              name="settings"
-              options={{ title: "Settings", tabBarIcon: tabIcon("settings") }}
-            />
             {/* Match analysis — reached from Library cards, never the tab bar
                 (href: null hides it there); see features/analysis. */}
             <Tabs.Screen name="analysis" options={{ href: null }} />

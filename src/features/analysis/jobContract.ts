@@ -17,7 +17,14 @@
  */
 import { COURT_CELLS, type CourtCell } from "./types";
 
-export const DEFAULT_SERVER_BASE_URL = "http://localhost:8082";
+/**
+ * Where the server fallback points when nothing is stored. There is no
+ * settings UI to change it — analysis runs on-device by default and only
+ * falls back here when the native analyzer is unavailable, so the default has
+ * to be a host a phone can actually reach (localhost is a dev-machine-only
+ * address and left the fallback dead on device).
+ */
+export const DEFAULT_SERVER_BASE_URL = "http://racquetiq-a7682a.eastus.azurecontainer.io:8082";
 
 /** The five server-side job states, in flow order. */
 export const JOB_STATUSES = [
