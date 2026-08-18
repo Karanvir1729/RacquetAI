@@ -74,14 +74,17 @@ function narrowModule(value: unknown): RacquetAnalyzerModule | null {
 export function loadRacquetAnalyzer(
   loader: RacquetAnalyzerLoader = defaultLoader,
 ): RacquetAnalyzerModule | null {
-  let exported: unknown;
+  // The WHOLE body is guarded, not just the require: the module's default
+  // export resolves the native module lazily behind getters, so merely
+  // *reading* a property can throw when the native half is missing from the
+  // binary. Any throw here means "unavailable" → the server backend.
   try {
-    exported = loader();
+    const exported = loader();
+    const viaDefault = isRecord(exported) ? narrowModule(exported.default) : null;
+    return viaDefault ?? narrowModule(exported);
   } catch {
     return null;
   }
-  const viaDefault = isRecord(exported) ? narrowModule(exported.default) : null;
-  return viaDefault ?? narrowModule(exported);
 }
 
 const UNAVAILABLE_MESSAGE =

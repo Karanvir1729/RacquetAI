@@ -3,8 +3,13 @@ node_modules/
 .expo/
 dist/
 web-build/
-ios/
-android/
+# CNG-generated native projects — ROOT ONLY. A bare `ios/` also matches
+# modules/*/ios/, which silently kept every Swift file of the racquet-analyzer
+# local module out of git: EAS built from the repo, shipped the module's JS with
+# no native half, and `requireNativeModule('RacquetAnalyzer')` crashed on device
+# while local builds (which compile from the working dir) were fine.
+/ios/
+/android/
 *.log
 
 # secrets — never commit these (lesson from daybot: keep credential files out of git)

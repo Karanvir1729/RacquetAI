@@ -64,4 +64,40 @@ declare class RacquetAnalyzerModule extends NativeModule<RacquetAnalyzerEvents> 
   analyzeMatch(videoUri: string, cornersJson: string, optionsJson: string): Promise<string>;
 }
 
-export default requireNativeModule<RacquetAnalyzerModule>("RacquetAnalyzer");
+/**
+ * LAZY on purpose. `requireNativeModule` throws when the native half is not in
+ * the binary, and at module scope that throw happens at IMPORT time — fatal in
+ * a release build, before any caller's try/catch can see it (exactly how a
+ * gitignored `modules/racquet-analyzer/ios/` shipped a JS-only module to
+ * TestFlight and crashed it). Resolving inside the getter moves the throw to
+ * the call site, where deviceClient's loader catches it and degrades to the
+ * analysis-server backend.
+ */
+let cached: RacquetAnalyzerModule | null = null;
+
+function nativeModule(): RacquetAnalyzerModule {
+  cached ??= requireNativeModule<RacquetAnalyzerModule>("RacquetAnalyzer");
+  return cached;
+}
+
+/** Bound native method, or undefined when this binary doesn't expose it. */
+function method(name: keyof RacquetAnalyzerModule): unknown {
+  const target = nativeModule() as unknown as Record<string, unknown>;
+  const fn = target[name as string];
+  return typeof fn === "function" ? (fn as (...args: unknown[]) => unknown).bind(target) : undefined;
+}
+
+export default {
+  get extractReferenceFrame() {
+    return method("extractReferenceFrame");
+  },
+  get compressVideo() {
+    return method("compressVideo");
+  },
+  get analyzeMatch() {
+    return method("analyzeMatch");
+  },
+  get addListener() {
+    return method("addListener");
+  },
+};
