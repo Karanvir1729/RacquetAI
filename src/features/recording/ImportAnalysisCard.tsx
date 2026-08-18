@@ -4,6 +4,13 @@
  * navigate to /import-analysis with the picked file's URI. Navigates by route
  * only — no import from features/analysis internals (docs/01 rule 2), same as
  * DemoAnalysisCard.
+ *
+ * This card is also the free-tier gate. The check runs BEFORE the picker: a
+ * user who has spent their free analyses is sent to /paywall without first
+ * being asked to choose a video, because picking footage and only then being
+ * told no is the rudest possible order to do those two things in. The gate
+ * fails open — see canStartAnalysis — so an unverifiable entitlement lets the
+ * flow through.
  */
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -13,13 +20,20 @@ import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Card } from "@/components/Card";
 import { selection as selectionHaptic } from "@/lib/haptics";
+import { useAnalysisQuota } from "@/lib/subscription";
 import { colors, radius, spacing, type } from "@/theme/tokens";
 
 export function ImportAnalysisCard() {
   const [picking, setPicking] = useState(false);
+  const quota = useAnalysisQuota();
+  const locked = !quota.canStart;
 
   const pick = async () => {
     selectionHaptic();
+    if (locked) {
+      router.push("/paywall");
+      return;
+    }
     setPicking(true);
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -46,21 +60,39 @@ export function ImportAnalysisCard() {
     <Card compact style={styles.card}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Import a video and analyze it"
+        accessibilityLabel={
+          locked
+            ? "Subscribe to analyze more videos"
+            : "Import a video and analyze it" +
+              (quota.label === null ? "" : `, ${quota.label.toLowerCase()}`)
+        }
         disabled={picking}
         onPress={() => void pick()}
         style={({ pressed }) => [styles.body, (pressed || picking) && styles.pressed]}
       >
         <View style={styles.icon}>
-          <Ionicons name="cloud-upload" size={20} color={colors.onAccent} />
+          <Ionicons
+            name={locked ? "lock-closed" : "cloud-upload"}
+            size={20}
+            color={colors.onAccent}
+          />
         </View>
         <View style={styles.text}>
           <Text style={styles.title} numberOfLines={1}>
             Import & analyze
           </Text>
           <Text style={styles.caption} numberOfLines={2}>
-            Pick a match video from your library and send it to your analysis server.
+            {locked
+              ? "Subscribe for unlimited match analysis."
+              : "Pick a match video from your library and send it to your analysis server."}
           </Text>
+          {/* Null for subscribers and for anyone whose entitlement could not be
+              verified — a count means nothing when nothing is being enforced. */}
+          {quota.label === null ? null : (
+            <Text style={styles.quota} numberOfLines={1}>
+              {quota.label}
+            </Text>
+          )}
         </View>
         <Ionicons name="chevron-forward" size={16} color={colors.textFaint} />
       </Pressable>
@@ -82,5 +114,6 @@ const styles = StyleSheet.create({
   text: { flex: 1, gap: 2 },
   title: { ...type.bodyStrong, color: colors.text },
   caption: { ...type.caption, color: colors.textDim },
+  quota: { ...type.captionStrong, color: colors.accentText },
   pressed: { opacity: 0.7 },
 });

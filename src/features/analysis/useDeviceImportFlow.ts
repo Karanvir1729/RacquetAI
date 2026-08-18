@@ -9,6 +9,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { recordFreeAnalysisUsed } from "@/lib/analysisQuota";
 import { adoptAnalysisVideo } from "@/lib/analysisVideo";
 import { writeImportedAnalysis } from "@/lib/importedAnalyses";
 import { makeImportedAnalysisId } from "@/lib/importedAnalysisId";
@@ -111,6 +112,9 @@ export function useDeviceImportFlow(videoUri: string | null): ImportFlow {
           // runDeviceAnalysis already validated the JSON; persist it verbatim.
           const importedId = makeImportedAnalysisId();
           writeImportedAnalysis(importedId, raw);
+          // Only here — an analysis that never reached the disk cost the user
+          // nothing, and the bundled demo never passes through this path.
+          recordFreeAnalysisUsed();
           try {
             adoptAnalysisVideo(importedId, videoUri);
           } catch {

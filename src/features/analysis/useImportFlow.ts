@@ -15,6 +15,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 
+import { recordFreeAnalysisUsed } from "@/lib/analysisQuota";
 import { adoptAnalysisVideo } from "@/lib/analysisVideo";
 import { writeImportedAnalysis } from "@/lib/importedAnalyses";
 import { makeImportedAnalysisId } from "@/lib/importedAnalysisId";
@@ -102,6 +103,9 @@ function useServerImportFlow(videoUri: string | null): ImportFlow {
         }
         const importedId = makeImportedAnalysisId();
         writeImportedAnalysis(importedId, raw);
+        // Only here — an analysis that never reached the disk cost the user
+        // nothing, and the bundled demo never passes through this path.
+        recordFreeAnalysisUsed();
         try {
           adoptAnalysisVideo(importedId, uploadUri);
         } catch {

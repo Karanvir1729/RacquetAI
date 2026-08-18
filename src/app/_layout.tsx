@@ -10,6 +10,10 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { TutorialScreen } from "@/features/onboarding/TutorialScreen";
 import { installCrashGuard, reportLastFatalError } from "@/lib/crashGuard";
 import { hasSeenTutorial, markTutorialSeen } from "@/lib/onboarding";
+import {
+  configure as configureSubscriptions,
+  refresh as refreshEntitlement,
+} from "@/lib/subscription";
 import { colors } from "@/theme/tokens";
 
 // As early as possible: capture fatal JS errors that TestFlight logs strip.
@@ -49,6 +53,13 @@ export default function RootLayout() {
     return () => clearTimeout(t);
   }, []);
 
+  // RevenueCat, in an effect rather than at module scope: nothing on the first
+  // frame depends on it, and both calls are no-ops with no API key or no SDK
+  // in the binary — the entitlement simply stays "unknown", which never blocks.
+  useEffect(() => {
+    if (configureSubscriptions()) void refreshEntitlement();
+  }, []);
+
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={styles.root}>
@@ -72,13 +83,22 @@ export default function RootLayout() {
               tabBarHideOnKeyboard: true,
             }}
           >
-            <Tabs.Screen name="index" options={{ title: "Record", tabBarIcon: tabIcon("videocam") }} />
-            <Tabs.Screen name="library" options={{ title: "Library", tabBarIcon: tabIcon("albums") }} />
+            <Tabs.Screen
+              name="index"
+              options={{ title: "Record", tabBarIcon: tabIcon("videocam") }}
+            />
+            <Tabs.Screen
+              name="library"
+              options={{ title: "Library", tabBarIcon: tabIcon("albums") }}
+            />
             {/* Match analysis — reached from Library cards, never the tab bar
                 (href: null hides it there); see features/analysis. */}
             <Tabs.Screen name="analysis" options={{ href: null }} />
             {/* Import & analyze flow — reached from the Library's import card. */}
             <Tabs.Screen name="import-analysis" options={{ href: null }} />
+            {/* RacquetIQ Pro — pushed from the import card once the free
+                analyses are spent; never a tab of its own. */}
+            <Tabs.Screen name="paywall" options={{ href: null }} />
           </Tabs>
           {/* iOS: "auto" = light icons on the dark theme, dark icons on the
               light one. Android pins the dark palette (tokens.ts dyn()), so

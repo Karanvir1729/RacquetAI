@@ -1,0 +1,16 @@
+# GitHub Pages config for the published legal pages (docs/legal/).
+#
+# Pages is served from main + /docs. Everything else under docs/ is an INTERNAL
+# engineering document and must not be published at a URL handed to an App Store
+# reviewer, so the exclude list keeps the site to the legal pages only.
+#
+# "*.md" matches the docs/ root files only — fnmatch's * does not cross "/", so
+# docs/legal/*.md is unaffected. Anything new added at docs/ root is excluded
+# automatically; a new PUBLIC page must live under docs/legal/ with front matter.
+title: RacquetIQ
+description: Legal documents for the RacquetIQ iOS app.
+theme: jekyll-theme-minimal
+exclude:
+  - "*.md"
+  - planning
+  - legal/README.md
