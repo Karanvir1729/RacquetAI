@@ -90,6 +90,20 @@ describe("isDeviceAnalysisAvailable", () => {
     expect(isDeviceAnalysisAvailable(() => workingModule)).toBe(true);
   });
 
+  it("is false when reading the module's API throws (native half missing)", () => {
+    // The build-15 crash: modules/racquet-analyzer resolves its native module
+    // lazily, so a binary shipped without the Swift half throws on PROPERTY
+    // ACCESS, not on require. The loader must swallow that too, or the app
+    // dies at import with "Cannot find native module 'RacquetAnalyzer'".
+    const lazyExplodingModule = {
+      get extractReferenceFrame(): unknown {
+        throw new Error("Cannot find native module 'RacquetAnalyzer'");
+      },
+    };
+    expect(isDeviceAnalysisAvailable(() => ({ default: lazyExplodingModule }))).toBe(false);
+    expect(isDeviceAnalysisAvailable(() => lazyExplodingModule)).toBe(false);
+  });
+
   it("is false when the loaded module misses part of the contract", () => {
     expect(isDeviceAnalysisAvailable(() => ({}))).toBe(false);
     expect(
