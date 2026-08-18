@@ -43,41 +43,6 @@ export function ImportAnalysisCard() {
   };
 
   return (
-    <>
-    {__DEV__ ? (
-      // DEV-only: drive the import flow with a bundled sample video so the
-      // full on-device pipeline can be exercised in the simulator without
-      // the Photos picker. Stripped from production bundles by __DEV__.
-      <Card compact style={styles.card}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Dev: analyze bundled sample video"
-          onPress={() => {
-            router.push({
-              pathname: "/import-analysis",
-              params: {
-                videoUri:
-                  "file:///Users/karanvirkhanna/RacquetAI/analysis/samples/pexels_squash.mp4",
-              },
-            });
-          }}
-          style={({ pressed }) => [styles.body, pressed && styles.pressed]}
-        >
-          <View style={styles.icon}>
-            <Ionicons name="flask" size={20} color={colors.onAccent} />
-          </View>
-          <View style={styles.text}>
-            <Text style={styles.title} numberOfLines={1}>
-              Dev: analyze sample
-            </Text>
-            <Text style={styles.caption} numberOfLines={2}>
-              Runs the import flow on a bundled clip (simulator only).
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={16} color={colors.textFaint} />
-        </Pressable>
-      </Card>
-    ) : null}
     <Card compact style={styles.card}>
       <Pressable
         accessibilityRole="button"
@@ -100,7 +65,6 @@ export function ImportAnalysisCard() {
         <Ionicons name="chevron-forward" size={16} color={colors.textFaint} />
       </Pressable>
     </Card>
-    </>
   );
 }
 

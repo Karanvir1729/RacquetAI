@@ -29,37 +29,11 @@ function tabIcon(name: IoniconName) {
  * the "theming" the root has to do.
  */
 export default function RootLayout() {
-  // DEV autorun (simulator): jump straight into the on-device import flow so
-  // the native pipeline can be exercised hands-free. Env-gated; no-op in
-  // production bundles.
   // Beta forensics: if the previous run died on a fatal JS error, show the
   // captured message so the tester can screenshot it.
   useEffect(() => {
     const t = setTimeout(reportLastFatalError, 1500);
     return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    if (__DEV__ && process.env.EXPO_PUBLIC_AUTORUN_OPEN) {
-      const id = process.env.EXPO_PUBLIC_AUTORUN_OPEN;
-      const t = setTimeout(() => {
-        router.push({ pathname: "/analysis", params: { id } });
-      }, 1200);
-      return () => clearTimeout(t);
-    }
-    if (__DEV__ && process.env.EXPO_PUBLIC_AUTORUN_SAMPLE === "1") {
-      const t = setTimeout(() => {
-        router.push({
-          pathname: "/import-analysis",
-          params: {
-            videoUri:
-              "file:///Users/karanvirkhanna/RacquetAI/analysis/samples/pexels_squash.mp4",
-          },
-        });
-      }, 1200);
-      return () => clearTimeout(t);
-    }
-    return undefined;
   }, []);
 
   return (
@@ -87,7 +61,6 @@ export default function RootLayout() {
           >
             <Tabs.Screen name="index" options={{ title: "Record", tabBarIcon: tabIcon("videocam") }} />
             <Tabs.Screen name="library" options={{ title: "Library", tabBarIcon: tabIcon("albums") }} />
-            <Tabs.Screen name="score" options={{ title: "Score AI", tabBarIcon: tabIcon("tennisball") }} />
             <Tabs.Screen
               name="settings"
               options={{ title: "Settings", tabBarIcon: tabIcon("settings") }}
