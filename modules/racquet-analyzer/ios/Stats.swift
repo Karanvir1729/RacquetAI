@@ -165,25 +165,16 @@ struct PixelRect: Equatable {
   var height: Int { y1 - y0 }
 }
 
-/// Pixel bounding box over confidently-placed keypoints.
+/// Pixel bounding box over confidently-placed keypoints — analyze.py's
+/// keypoint_box. detectPlayers builds it from the same visible-joint set the
+/// detection's `area` comes from, so the two can never disagree.
 struct BBox: Equatable {
   var minX: Double
   var minY: Double
   var maxX: Double
   var maxY: Double
   var area: Double { max(maxX - minX, 0) * max(maxY - minY, 0) }
-}
-
-/// Port of keypoint_box: bbox over keypoints scoring above KPT_CONF, nil when
-/// fewer than two are visible.
-func keypointBox(_ joints: [String: JointPoint]) -> BBox? {
-  let visible = joints.values.filter { $0.conf > AnalyzerParams.kptConf }
-  guard visible.count >= 2 else { return nil }
-  let xs = visible.map { $0.x }
-  let ys = visible.map { $0.y }
-  guard let xMin = xs.min(), let xMax = xs.max(),
-        let yMin = ys.min(), let yMax = ys.max() else { return nil }
-  return BBox(minX: xMin, minY: yMin, maxX: xMax, maxY: yMax)
+  var height: Double { max(maxY - minY, 0) }
 }
 
 /// Port of box_overlap: intersection area over the SMALLER box's area, 0 when
@@ -327,21 +318,22 @@ func detectPlayers(
     guard let xMin = xs.min(), let xMax = xs.max(), let yMin = ys.min(), let yMax = ys.max() else {
       continue
     }
-    let bboxW = xMax - xMin
-    let bboxH = yMax - yMin
+    // One box, used three ways: the size that ranks candidates, the height that
+    // normalises wrist speed, and the overlap test that tells "in front of"
+    // from "beside". This is keypoint_box by construction — the same visible
+    // set, and >= 6 joints are visible here where keypoint_box needs 2.
+    let box = BBox(minX: xMin, minY: yMin, maxX: xMax, maxY: yMax)
     candidates.append(PlayerDetection(
       joints: joints,
       court: (
         min(max(projected.x, 0), Court.width),
         min(max(projected.y, 0), Court.length)
       ),
-      area: bboxW * bboxH,
-      bboxH: bboxH,
+      area: box.area,
+      bboxH: box.height,
       posConf: anchor.map { $0.conf }.reduce(0, +) / Double(anchor.count),
       app: nil, // filled by TorsoAppearanceSampler while the frame is still in hand
-      // Same visible set the area came from, so this is keypoint_box by construction
-      // (>= 6 visible joints here, and keypoint_box only needs 2).
-      box: BBox(minX: xMin, minY: yMin, maxX: xMax, maxY: yMax)
+      box: box
     ))
   }
   candidates.sort { $0.area > $1.area }
@@ -931,6 +923,13 @@ struct AnalysisInputs {
   /// Pre-serialized `tracks` array (see TrackWriter); nil emits no field.
   var tracksJSON: String?
   var trackSamples: Int = 0
+  /// Appearance re-identification coverage, reported in `quality.notes`. If the
+  /// torso patch could never be read the tracker silently falls back to
+  /// position-only — which is the failure mode this whole path exists to
+  /// remove — so it says so rather than looking healthy.
+  var appearanceDescribed: Int = 0
+  var appearanceAttempted: Int = 0
+  var appearanceUnsupportedFrames: Int = 0
 }
 
 enum AnalysisBuildError: LocalizedError {
@@ -962,6 +961,19 @@ func buildAnalysisJSON(_ inp: AnalysisInputs) throws -> String {
       format: "%d pose samples (COCO-17 keypoints, ~%.0f Hz) written for the skeleton overlay",
       inp.trackSamples, ShotClass.trackHz
     ))
+  }
+  if inp.appearanceAttempted > 0 {
+    let pct = 100.0 * Double(inp.appearanceDescribed) / Double(inp.appearanceAttempted)
+    notes.append(String(
+      format: "player identity from torso appearance (rg-chromaticity + exposure-relative luma) fused with court position; %.0f%% of detections described",
+      pct
+    ))
+    if inp.appearanceUnsupportedFrames > 0 {
+      notes.append(
+        "\(inp.appearanceUnsupportedFrames) frames could not be read for appearance; "
+          + "identity fell back to court position alone on those"
+      )
+    }
   }
   if inp.audioAvailable {
     notes.append(String(

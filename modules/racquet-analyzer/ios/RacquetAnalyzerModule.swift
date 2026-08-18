@@ -159,6 +159,7 @@ final class MatchAnalyzer {
     // skeleton overlay's keypoints are serialized here, one sample at a time,
     // rather than reconstructed from trackFrames at the end.
     let poseDetector = PoseDetector()
+    let sampler = TorsoAppearanceSampler()
     let tracker = TwoTracker()
     let trackWriter = TrackWriter()
     var times: [Double] = []
@@ -166,10 +167,20 @@ final class MatchAnalyzer {
     let duration = max(info.durationSec, 0.001)
     try decodeSampledFrames(asset: asset, info: info, sampleFps: sampleFps) { pixelBuffer, t in
       let rawPoses = try self.poseSafely(poseDetector, pixelBuffer, info, width, height)
-      let dets = detectPlayers(
+      var dets = detectPlayers(
         rawPoses: rawPoses, homography: homography, width: width, height: height
       )
-      let tracked = tracker.update(dets)
+      // Read each player's shirt while the frame is still in hand; the tracker
+      // needs it to keep A and B apart through a crossing, and nothing keeps a
+      // reference to the buffer past this line.
+      sampler.describe(
+        &dets,
+        pixelBuffer: pixelBuffer,
+        orientation: info.orientation,
+        uprightWidth: width,
+        uprightHeight: height
+      )
+      let tracked = tracker.update(dets, t: t)
       times.append(t)
       trackFrames.append(tracked)
       trackWriter.append(t: t, players: tracked, width: width, height: height)
@@ -248,7 +259,10 @@ final class MatchAnalyzer {
       nGated: nGated,
       audioAvailable: audioAvailable,
       tracksJSON: trackWriter.takeJSON(),
-      trackSamples: trackSamples
+      trackSamples: trackSamples,
+      appearanceDescribed: sampler.described,
+      appearanceAttempted: sampler.attempted,
+      appearanceUnsupportedFrames: sampler.unsupportedFrames
     ))
     emit("stats", 100)
     return json
