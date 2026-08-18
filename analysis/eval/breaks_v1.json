@@ -1,0 +1,531 @@
+{
+ "source": "shot stream snapshot with 327/291/428 attributed shots, split at gaps >= 3.5 s, segments < 3 shots dissolved",
+ "clips": {
+  "archive_match2": [
+   {
+    "i": 0,
+    "rallyStart": 0.97,
+    "tA": 8.68,
+    "rallyShots": 9,
+    "gapSec": 4.25,
+    "tB": 12.93
+   },
+   {
+    "i": 1,
+    "rallyStart": 12.93,
+    "tA": 20.94,
+    "rallyShots": 10,
+    "gapSec": 9.47,
+    "tB": 30.42
+   },
+   {
+    "i": 2,
+    "rallyStart": 30.42,
+    "tA": 33.62,
+    "rallyShots": 4,
+    "gapSec": 4.25,
+    "tB": 37.87
+   },
+   {
+    "i": 3,
+    "rallyStart": 37.87,
+    "tA": 56.96,
+    "rallyShots": 24,
+    "gapSec": 9.47,
+    "tB": 66.43
+   },
+   {
+    "i": 4,
+    "rallyStart": 66.43,
+    "tA": 72.86,
+    "rallyShots": 6,
+    "gapSec": 5.39,
+    "tB": 78.25
+   },
+   {
+    "i": 5,
+    "rallyStart": 78.25,
+    "tA": 94.37,
+    "rallyShots": 14,
+    "gapSec": 5.22,
+    "tB": 99.59
+   },
+   {
+    "i": 6,
+    "rallyStart": 99.59,
+    "tA": 102.63,
+    "rallyShots": 4,
+    "gapSec": 10.87,
+    "tB": 113.5
+   },
+   {
+    "i": 7,
+    "rallyStart": 113.5,
+    "tA": 120.6,
+    "rallyShots": 9,
+    "gapSec": 3.99,
+    "tB": 124.6
+   },
+   {
+    "i": 8,
+    "rallyStart": 124.6,
+    "tA": 152.97,
+    "rallyShots": 27,
+    "gapSec": 4.99,
+    "tB": 157.97
+   },
+   {
+    "i": 9,
+    "rallyStart": 157.97,
+    "tA": 171.9,
+    "rallyShots": 20,
+    "gapSec": 14.49,
+    "tB": 186.39
+   },
+   {
+    "i": 10,
+    "rallyStart": 186.39,
+    "tA": 193.1,
+    "rallyShots": 7,
+    "gapSec": 5.08,
+    "tB": 198.18
+   },
+   {
+    "i": 11,
+    "rallyStart": 198.18,
+    "tA": 208.45,
+    "rallyShots": 13,
+    "gapSec": 6.69,
+    "tB": 215.13
+   },
+   {
+    "i": 12,
+    "rallyStart": 215.13,
+    "tA": 237.05,
+    "rallyShots": 26,
+    "gapSec": 15.05,
+    "tB": 252.1
+   },
+   {
+    "i": 13,
+    "rallyStart": 252.1,
+    "tA": 259.23,
+    "rallyShots": 12,
+    "gapSec": 7.03,
+    "tB": 266.26
+   },
+   {
+    "i": 14,
+    "rallyStart": 266.26,
+    "tA": 272.83,
+    "rallyShots": 11,
+    "gapSec": 4.99,
+    "tB": 277.83
+   },
+   {
+    "i": 15,
+    "rallyStart": 277.83,
+    "tA": 287.9,
+    "rallyShots": 14,
+    "gapSec": 10.5,
+    "tB": 298.4
+   },
+   {
+    "i": 16,
+    "rallyStart": 298.4,
+    "tA": 315.91,
+    "rallyShots": 12,
+    "gapSec": 11.45,
+    "tB": 327.36
+   },
+   {
+    "i": 17,
+    "rallyStart": 327.36,
+    "tA": 350.16,
+    "rallyShots": 29,
+    "gapSec": 10.59,
+    "tB": 360.75
+   },
+   {
+    "i": 18,
+    "rallyStart": 360.75,
+    "tA": 365.78,
+    "rallyShots": 7,
+    "gapSec": 10.73,
+    "tB": 376.51
+   },
+   {
+    "i": 19,
+    "rallyStart": 376.51,
+    "tA": 405.68,
+    "rallyShots": 28,
+    "gapSec": 3.72,
+    "tB": 409.39
+   },
+   {
+    "i": 20,
+    "rallyStart": 409.39,
+    "tA": 420.98,
+    "rallyShots": 17,
+    "gapSec": 9.1,
+    "tB": 430.08
+   }
+  ],
+  "archive_match3": [
+   {
+    "i": 0,
+    "rallyStart": 0.07,
+    "tA": 7.15,
+    "rallyShots": 11,
+    "gapSec": 12.82,
+    "tB": 19.97
+   },
+   {
+    "i": 1,
+    "rallyStart": 19.97,
+    "tA": 26.36,
+    "rallyShots": 8,
+    "gapSec": 4.88,
+    "tB": 31.23
+   },
+   {
+    "i": 2,
+    "rallyStart": 31.23,
+    "tA": 38.71,
+    "rallyShots": 7,
+    "gapSec": 5.09,
+    "tB": 43.79
+   },
+   {
+    "i": 3,
+    "rallyStart": 43.79,
+    "tA": 49.27,
+    "rallyShots": 8,
+    "gapSec": 3.92,
+    "tB": 53.2
+   },
+   {
+    "i": 4,
+    "rallyStart": 53.2,
+    "tA": 56.08,
+    "rallyShots": 5,
+    "gapSec": 10.66,
+    "tB": 66.73
+   },
+   {
+    "i": 5,
+    "rallyStart": 66.73,
+    "tA": 72.4,
+    "rallyShots": 8,
+    "gapSec": 5.85,
+    "tB": 78.25
+   },
+   {
+    "i": 6,
+    "rallyStart": 78.25,
+    "tA": 81.59,
+    "rallyShots": 5,
+    "gapSec": 4.04,
+    "tB": 85.64
+   },
+   {
+    "i": 7,
+    "rallyStart": 85.64,
+    "tA": 96.94,
+    "rallyShots": 10,
+    "gapSec": 8.43,
+    "tB": 105.37
+   },
+   {
+    "i": 8,
+    "rallyStart": 105.37,
+    "tA": 111.32,
+    "rallyShots": 8,
+    "gapSec": 6.25,
+    "tB": 117.56
+   },
+   {
+    "i": 9,
+    "rallyStart": 117.56,
+    "tA": 123.28,
+    "rallyShots": 5,
+    "gapSec": 4.69,
+    "tB": 127.97
+   },
+   {
+    "i": 10,
+    "rallyStart": 127.97,
+    "tA": 139.09,
+    "rallyShots": 10,
+    "gapSec": 5.46,
+    "tB": 144.54
+   },
+   {
+    "i": 11,
+    "rallyStart": 144.54,
+    "tA": 154.55,
+    "rallyShots": 9,
+    "gapSec": 3.78,
+    "tB": 158.34
+   },
+   {
+    "i": 12,
+    "rallyStart": 158.34,
+    "tA": 183.04,
+    "rallyShots": 19,
+    "gapSec": 23.5,
+    "tB": 206.54
+   },
+   {
+    "i": 13,
+    "rallyStart": 206.54,
+    "tA": 228.25,
+    "rallyShots": 19,
+    "gapSec": 7.08,
+    "tB": 235.33
+   },
+   {
+    "i": 14,
+    "rallyStart": 235.33,
+    "tA": 248.5,
+    "rallyShots": 19,
+    "gapSec": 6.04,
+    "tB": 254.54
+   },
+   {
+    "i": 15,
+    "rallyStart": 254.54,
+    "tA": 274.39,
+    "rallyShots": 19,
+    "gapSec": 5.27,
+    "tB": 279.66
+   },
+   {
+    "i": 16,
+    "rallyStart": 279.66,
+    "tA": 282.29,
+    "rallyShots": 3,
+    "gapSec": 5.08,
+    "tB": 287.37
+   },
+   {
+    "i": 17,
+    "rallyStart": 287.37,
+    "tA": 301.26,
+    "rallyShots": 16,
+    "gapSec": 9.78,
+    "tB": 311.03
+   },
+   {
+    "i": 18,
+    "rallyStart": 311.03,
+    "tA": 326.33,
+    "rallyShots": 13,
+    "gapSec": 21.11,
+    "tB": 347.44
+   },
+   {
+    "i": 19,
+    "rallyStart": 347.44,
+    "tA": 366.53,
+    "rallyShots": 23,
+    "gapSec": 3.62,
+    "tB": 370.15
+   },
+   {
+    "i": 20,
+    "rallyStart": 370.15,
+    "tA": 374.61,
+    "rallyShots": 5,
+    "gapSec": 4.3,
+    "tB": 378.9
+   },
+   {
+    "i": 21,
+    "rallyStart": 378.9,
+    "tA": 387.36,
+    "rallyShots": 8,
+    "gapSec": 7.76,
+    "tB": 395.11
+   },
+   {
+    "i": 22,
+    "rallyStart": 395.11,
+    "tA": 407.93,
+    "rallyShots": 13,
+    "gapSec": 3.55,
+    "tB": 411.48
+   },
+   {
+    "i": 23,
+    "rallyStart": 411.48,
+    "tA": 418.7,
+    "rallyShots": 9,
+    "gapSec": 7.45,
+    "tB": 426.16
+   },
+   {
+    "i": 24,
+    "rallyStart": 426.16,
+    "tA": 437.53,
+    "rallyShots": 6,
+    "gapSec": 6.55,
+    "tB": 444.08
+   }
+  ],
+  "archive_match4": [
+   {
+    "i": 0,
+    "rallyStart": 1.74,
+    "tA": 27.77,
+    "rallyShots": 29,
+    "gapSec": 5.02,
+    "tB": 32.79
+   },
+   {
+    "i": 1,
+    "rallyStart": 32.79,
+    "tA": 48.67,
+    "rallyShots": 22,
+    "gapSec": 4.16,
+    "tB": 52.83
+   },
+   {
+    "i": 2,
+    "rallyStart": 52.83,
+    "tA": 88.38,
+    "rallyShots": 31,
+    "gapSec": 11.84,
+    "tB": 100.22
+   },
+   {
+    "i": 3,
+    "rallyStart": 100.22,
+    "tA": 111.18,
+    "rallyShots": 12,
+    "gapSec": 9.54,
+    "tB": 120.72
+   },
+   {
+    "i": 4,
+    "rallyStart": 120.72,
+    "tA": 151.67,
+    "rallyShots": 35,
+    "gapSec": 8.68,
+    "tB": 160.36
+   },
+   {
+    "i": 5,
+    "rallyStart": 160.36,
+    "tA": 163.44,
+    "rallyShots": 4,
+    "gapSec": 4.76,
+    "tB": 168.21
+   },
+   {
+    "i": 6,
+    "rallyStart": 168.21,
+    "tA": 193.89,
+    "rallyShots": 26,
+    "gapSec": 11.87,
+    "tB": 205.75
+   },
+   {
+    "i": 7,
+    "rallyStart": 205.75,
+    "tA": 210.91,
+    "rallyShots": 5,
+    "gapSec": 5.06,
+    "tB": 215.97
+   },
+   {
+    "i": 8,
+    "rallyStart": 215.97,
+    "tA": 270.88,
+    "rallyShots": 58,
+    "gapSec": 9.96,
+    "tB": 280.85
+   },
+   {
+    "i": 9,
+    "rallyStart": 280.85,
+    "tA": 286.49,
+    "rallyShots": 4,
+    "gapSec": 3.55,
+    "tB": 290.04
+   },
+   {
+    "i": 10,
+    "rallyStart": 290.04,
+    "tA": 318.58,
+    "rallyShots": 30,
+    "gapSec": 3.58,
+    "tB": 322.15
+   },
+   {
+    "i": 11,
+    "rallyStart": 322.15,
+    "tA": 330.88,
+    "rallyShots": 7,
+    "gapSec": 6.22,
+    "tB": 337.11
+   },
+   {
+    "i": 12,
+    "rallyStart": 337.11,
+    "tA": 367.69,
+    "rallyShots": 42,
+    "gapSec": 9.31,
+    "tB": 377.0
+   },
+   {
+    "i": 13,
+    "rallyStart": 377.0,
+    "tA": 392.0,
+    "rallyShots": 14,
+    "gapSec": 3.71,
+    "tB": 395.71
+   },
+   {
+    "i": 14,
+    "rallyStart": 395.71,
+    "tA": 419.49,
+    "rallyShots": 33,
+    "gapSec": 7.17,
+    "tB": 426.67
+   },
+   {
+    "i": 15,
+    "rallyStart": 426.67,
+    "tA": 437.0,
+    "rallyShots": 15,
+    "gapSec": 10.52,
+    "tB": 447.52
+   },
+   {
+    "i": 16,
+    "rallyStart": 447.52,
+    "tA": 451.21,
+    "rallyShots": 6,
+    "gapSec": 8.27,
+    "tB": 459.48
+   },
+   {
+    "i": 17,
+    "rallyStart": 459.48,
+    "tA": 462.56,
+    "rallyShots": 6,
+    "gapSec": 6.78,
+    "tB": 469.35
+   },
+   {
+    "i": 18,
+    "rallyStart": 469.35,
+    "tA": 489.92,
+    "rallyShots": 17,
+    "gapSec": 7.59,
+    "tB": 497.51
+   }
+  ]
+ }
+}

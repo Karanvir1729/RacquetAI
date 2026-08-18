@@ -13,7 +13,8 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
 
-  s.frameworks = 'AVFoundation', 'Vision', 'CoreMedia', 'CoreVideo', 'ImageIO'
+  # UIKit for the live camera preview view (LiveSession.swift).
+  s.frameworks = 'AVFoundation', 'Vision', 'CoreMedia', 'CoreVideo', 'ImageIO', 'UIKit'
 
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES'

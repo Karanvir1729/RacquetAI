@@ -671,20 +671,125 @@ func rallyActivity(
   let per = wristSpeedFrames(trackFrames: trackFrames, times: times)
   var act = [Double](repeating: 0, count: times.count)
   for i in 0..<times.count {
-    // Half-open [lo, hi), matching numpy searchsorted on both ends.
-    let lo = lowerBound(times, times[i] - AnalyzerParams.rallyWinS)
-    let hi = lowerBound(times, times[i] + AnalyzerParams.rallyWinS)
-    var seen: [Double] = []
-    for pid in ["A", "B"] {
-      guard let w = per[pid], lo < hi else { continue }
-      var s: [Double] = []
-      s.reserveCapacity(hi - lo)
-      for k in lo..<hi where !w[k].isNaN { s.append(w[k]) }
-      if s.count >= AnalyzerParams.rallyMinObs { seen.append(median(s)) }
-    }
-    act[i] = seen.isEmpty ? 0.0 : (seen.count == 2 ? min(seen[0], seen[1]) : seen[0])
+    act[i] = rallyActivityAt(per: per, times: times, index: i)
   }
   return act
+}
+
+/// The activity statistic for ONE pose frame. Extracted from rallyActivity's
+/// loop body so the live path (LiveReferee.swift), which can only ever afford
+/// to score the single frame whose centred window has just filled, runs the
+/// identical arithmetic instead of a second implementation of it.
+func rallyActivityAt(
+  per: [String: [Double]],
+  times: [Double],
+  index i: Int
+) -> Double {
+  guard i >= 0, i < times.count else { return 0 }
+  // Half-open [lo, hi), matching numpy searchsorted on both ends.
+  let lo = lowerBound(times, times[i] - AnalyzerParams.rallyWinS)
+  let hi = lowerBound(times, times[i] + AnalyzerParams.rallyWinS)
+  var seen: [Double] = []
+  for pid in ["A", "B"] {
+    guard let w = per[pid], lo < hi, hi <= w.count else { continue }
+    var s: [Double] = []
+    s.reserveCapacity(hi - lo)
+    for k in lo..<hi where !w[k].isNaN { s.append(w[k]) }
+    if s.count >= AnalyzerParams.rallyMinObs { seen.append(median(s)) }
+  }
+  return seen.isEmpty ? 0.0 : (seen.count == 2 ? min(seen[0], seen[1]) : seen[0])
+}
+
+/// One audio onset that survived the swing gate — which player struck it, and
+/// how strong the evidence was.
+struct StrikeCandidate {
+  let t: Double
+  let pid: String
+  /// The winning player's swing measure: peak wrist speed in bbox-heights/s,
+  /// or ankle path length in metres when no wrist was seen anywhere in the
+  /// window. The two branches are in different units, exactly as they are
+  /// offline; only comparisons WITHIN a branch mean anything.
+  let peak: Double
+  /// How decisively the strike was attributed to this player rather than the
+  /// other: |travA - travB| / max(travA, travB), so 0 is a coin flip between
+  /// two players who moved identically and 1 is one player moving alone.
+  /// Unused offline (the offline path only needs the argmax); the live
+  /// confidence model needs it, because "both players swung inside the same
+  /// second" is one of the labelled failure modes.
+  let margin: Double
+  /// False when `peak` came from the ankle fallback — weaker evidence.
+  let fromWrist: Bool
+}
+
+/// What pass 1 made of an onset.
+///
+/// Three cases, not two, because the offline pipeline counts them differently:
+/// an onset the swing gate REJECTED is a gated shot, while an onset with no
+/// pose frames near it at all was never a candidate. Collapsing the two would
+/// silently change the `gatedShots` figure in every analysis.json.
+enum StrikeGateResult {
+  /// No pose frames within the gate window — nothing to judge.
+  case noWindow
+  /// Judged, and rejected: no swing big enough to be a strike.
+  case gated
+  case strike(StrikeCandidate)
+
+  var candidate: StrikeCandidate? {
+    if case .strike(let c) = self { return c }
+    return nil
+  }
+}
+
+/// Pass 1 of the shot detector: is this onset a swing by one of the two
+/// tracked players, and which one?
+///
+/// This is MatchAnalyzer's own gating loop, lifted out so the live referee
+/// shares it rather than restating it. The offline caller adds pass 2 (the
+/// rally-activity percentile) around it; the live caller does the same with a
+/// rolling percentile.
+func gateOnsetToStriker(
+  trackFrames: [[String: PlayerDetection]],
+  times: [Double],
+  t: Double,
+  audioAvailable: Bool
+) -> StrikeGateResult {
+  let lo = max(0, lowerBound(times, t - AnalyzerParams.wristWinS))
+  let hi = min(times.count - 1, lowerBound(times, t + AnalyzerParams.wristWinS))
+  guard hi >= lo else { return .noWindow }
+  var trav: [String: Double] = [:]
+  var obs: [String: Int] = [:]
+  for pid in ["A", "B"] {
+    let r = peakWristSpeed(trackFrames: trackFrames, times: times, lo: lo, hi: hi, pid: pid)
+    trav[pid] = r.peak
+    obs[pid] = r.obs
+  }
+  var fromWrist = true
+  if (obs["A"] ?? 0) >= 2 || (obs["B"] ?? 0) >= 2 {
+    if audioAvailable, max(trav["A"] ?? 0, trav["B"] ?? 0) < AnalyzerParams.wristPeakGate {
+      return .gated
+    }
+  } else {
+    // Wrists never seen in the window: ankle-travel fallback.
+    fromWrist = false
+    for pid in ["A", "B"] {
+      trav[pid] = anklePathLength(trackFrames: trackFrames, times: times, lo: lo, hi: hi, pid: pid)
+    }
+    let gate = audioAvailable ? AnalyzerParams.ankleGateMeters : 1e-9
+    if max(trav["A"] ?? 0, trav["B"] ?? 0) < gate {
+      return .gated
+    }
+  }
+  let a = trav["A"] ?? 0
+  let b = trav["B"] ?? 0
+  let pid = a >= b ? "A" : "B"
+  let peak = max(a, b)
+  return .strike(StrikeCandidate(
+    t: t,
+    pid: pid,
+    peak: peak,
+    margin: peak > 0 ? abs(a - b) / peak : 0,
+    fromWrist: fromWrist
+  ))
 }
 
 /// Total court-space ankle path length for a player over a frame window

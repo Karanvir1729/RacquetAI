@@ -11,7 +11,88 @@ public class RacquetAnalyzerModule: Module {
   public func definition() -> ModuleDefinition {
     Name("RacquetAnalyzer")
 
-    Events("analysisProgress")
+    Events(
+      "analysisProgress",
+      // Live referee. See LiveReferee.swift for what these mean and, more
+      // importantly, for what they do NOT mean: "liveRallyEnded" carries a
+      // PROPOSED winner and a confidence, and is never a decision.
+      "liveRefereeStatus",
+      "liveRallyStarted",
+      "liveStrike",
+      "liveRallyEnded"
+    )
+
+    OnStartObserving {
+      LiveRefereeSession.shared.emit = { [weak self] name, payload in
+        self?.sendEvent(name, payload)
+      }
+    }
+
+    OnStopObserving {
+      LiveRefereeSession.shared.emit = nil
+    }
+
+    OnDestroy {
+      // A JS reload must not leave the camera on. The session is a process
+      // singleton, so nothing else will clean it up.
+      LiveRefereeSession.shared.emit = nil
+      LiveRefereeSession.shared.stop { _ in }
+    }
+
+    // MARK: Live referee
+
+    /// Camera/microphone authorization WITHOUT triggering a system prompt, so
+    /// a screen can render the right call-to-action before it asks.
+    Function("liveRefereePermissions") { () -> [String: Any] in
+      liveAuthorizationSnapshot()
+    }
+
+    /// Ask for camera and microphone. Resolves with the resulting snapshot —
+    /// it never rejects, because "denied" is a screen state, not an error.
+    AsyncFunction("requestLiveRefereePermissions") { (promise: Promise) in
+      LiveRefereeSession.requestPermissions { snapshot in
+        promise.resolve(snapshot)
+      }
+    }
+
+    /// Start watching the court. `cornersJson` is the same 4-corner payload
+    /// analyzeMatch takes and may be "" (uncalibrated — see the status's
+    /// `courtCalibrated`). `tuningJson` overrides LiveRefereeTuning; "" keeps
+    /// the defaults.
+    ///
+    /// Resolves with the status rather than rejecting on a denied permission:
+    /// the referee screen must stay usable by hand no matter what the camera
+    /// is doing.
+    AsyncFunction("startLiveReferee") { (cornersJson: String, tuningJson: String, promise: Promise) in
+      LiveRefereeSession.shared.start(cornersJson: cornersJson, tuningJson: tuningJson) { status in
+        promise.resolve(status.payload)
+      }
+    }
+
+    AsyncFunction("stopLiveReferee") { (promise: Promise) in
+      LiveRefereeSession.shared.stop { status in
+        promise.resolve(status.payload)
+      }
+    }
+
+    /// Poll the status without waiting for the next event.
+    Function("liveRefereeStatus") { () -> [String: Any] in
+      LiveRefereeSession.shared.currentStatus.payload
+    }
+
+    /// Re-apply the capture rotation after the device turns.
+    Function("refreshLiveRefereeOrientation") {
+      LiveRefereeSession.shared.refreshOrientation()
+    }
+
+    /// The camera preview. It borrows the analysis session's AVCaptureSession
+    /// because iOS gives the camera to exactly one session — an expo-camera
+    /// view on the same screen would fight this one for the device.
+    View(LivePreviewView.self) {
+      Prop("gravity") { (view: LivePreviewView, value: String) in
+        view.setGravity(value)
+      }
+    }
 
     AsyncFunction("extractReferenceFrame") { (videoUri: String) -> [String: Any] in
       let url = Self.parseUri(videoUri)
@@ -205,37 +286,26 @@ final class MatchAnalyzer {
     // discriminator). Survivors are held as (t, pid, swing peak) rather than
     // emitted, because the second gate's thresholds are percentiles of this
     // clip and cannot be known until every onset has been through pass 1.
-    var passed: [(t: Double, pid: String, peak: Double)] = []
+    //
+    // The gate itself lives in Stats.swift as `gateOnsetToStriker` so the live
+    // referee (LiveReferee.swift) runs THIS code rather than a second copy of
+    // it that could drift; the loop here is just "call it, count the rejects".
+    var passed: [StrikeCandidate] = []
     var nGated = 0
     for t in onsets {
-      let lo = max(0, lowerBound(times, t - AnalyzerParams.wristWinS))
-      let hi = min(times.count - 1, lowerBound(times, t + AnalyzerParams.wristWinS))
-      guard hi >= lo else { continue }
-      var trav: [String: Double] = [:]
-      var obs: [String: Int] = [:]
-      for pid in ["A", "B"] {
-        let r = peakWristSpeed(trackFrames: trackFrames, times: times, lo: lo, hi: hi, pid: pid)
-        trav[pid] = r.peak
-        obs[pid] = r.obs
+      switch gateOnsetToStriker(
+        trackFrames: trackFrames, times: times, t: t, audioAvailable: audioAvailable
+      ) {
+      case .noWindow:
+        // No pose frames near this onset: never a candidate, so it is NOT a
+        // gated shot. Keeping the two apart is what preserves the reported
+        // gatedShots figure across this extraction.
+        continue
+      case .gated:
+        nGated += 1
+      case .strike(let candidate):
+        passed.append(candidate)
       }
-      if (obs["A"] ?? 0) >= 2 || (obs["B"] ?? 0) >= 2 {
-        if audioAvailable, max(trav["A"] ?? 0, trav["B"] ?? 0) < AnalyzerParams.wristPeakGate {
-          nGated += 1
-          continue
-        }
-      } else {
-        // Wrists never seen in the window: ankle-travel fallback.
-        for pid in ["A", "B"] {
-          trav[pid] = anklePathLength(trackFrames: trackFrames, times: times, lo: lo, hi: hi, pid: pid)
-        }
-        let gate = audioAvailable ? AnalyzerParams.ankleGateMeters : 1e-9
-        if max(trav["A"] ?? 0, trav["B"] ?? 0) < gate {
-          nGated += 1
-          continue
-        }
-      }
-      let pid = (trav["A"] ?? 0) >= (trav["B"] ?? 0) ? "A" : "B"
-      passed.append((t, pid, max(trav["A"] ?? 0, trav["B"] ?? 0)))
     }
 
     // Pass 2 — the onset also has to land while a rally is actually being

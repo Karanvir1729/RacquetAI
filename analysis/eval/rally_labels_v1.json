@@ -1,0 +1,31 @@
+{
+ "labeller": "claude-opus-5, single pass, one labeller (no second opinion, so no inter-rater agreement)",
+ "date": "2026-08-18",
+ "breaks": "eval/breaks_v1.json (pinned)",
+ "frames": "tools/rally_end_frames.py --span : 16 tiles spanning tA-4.0 .. tB+2.5",
+ "winnerGroundTruth": "who serves the NEXT rally. Under both PAR and English scoring the player who wins a rally serves the next one, so the next server is the winner. The ball is 2-3 px at 854x480 and is never tracked, so the winner is NOT read off the ball.",
+ "reasonGroundTruth": "NOT ESTABLISHED. Tin vs out vs unreachable cannot be told apart at this resolution. The 'lastShotKind' field below is only whether the last stroke looked like an attacking shot or a scramble, which is a posture judgement, not a rules judgement.",
+ "kits": {
+  "archive_match2": {"WHT": "white/grey shirt, navy shorts", "BLK": "black shirt, black shorts"},
+  "archive_match3": {"BLK": "black shirt, black shorts", "LGT": "dark shirt, light/khaki shorts"},
+  "archive_match4": {"WHT": "white shirt (ST GEORGE'S), navy shorts", "DRK": "dark shirt, light/khaki shorts"}
+ },
+ "note": "Players are identified by kit, not by the engine's A/B boxes. The boxes swap identity within a single montage (archive_match4 b018 tiles 3-5), so scoring the heuristic against engine IDs would have measured the tracker, not the heuristic.",
+ "labels": [
+  {"clip": "archive_match2", "i": 1, "tA": 20.94, "realRallyEnd": true, "lastStriker": "BLK", "nextServer": "BLK", "correct": true, "confidence": "high", "lastShotKind": "attacking", "note": "BLK full stretch at ~21.7, WHT then picks the ball up, BLK serves at ~30.3"},
+  {"clip": "archive_match2", "i": 3, "tA": 56.96, "realRallyEnd": true, "lastStriker": "WHT", "nextServer": "WHT", "correct": true, "confidence": "medium", "lastShotKind": "scramble", "note": "WHT low dig at ~56.8 then play stops; WHT serves at ~66.3"},
+  {"clip": "archive_match2", "i": 5, "tA": 94.37, "realRallyEnd": false, "lastStriker": null, "nextServer": null, "correct": null, "confidence": "high", "lastShotKind": null, "note": "NOT a rally end. Continuous rally movement right across the detector's 5.2 s gap; the gap is missed shots, not a break"},
+  {"clip": "archive_match2", "i": 8, "tA": 152.97, "realRallyEnd": true, "lastStriker": "BLK", "nextServer": "BLK", "correct": true, "confidence": "medium", "lastShotKind": "scramble", "note": "true end ~151.3, about 1.7 s BEFORE the detector's last shot; BLK raises an arm at ~155.9 (appeal or acknowledgement)"},
+  {"clip": "archive_match2", "i": 11, "tA": 208.45, "realRallyEnd": true, "lastStriker": "WHT", "nextServer": "WHT", "correct": true, "confidence": "medium", "lastShotKind": "scramble", "note": "WHT low lunge ~208, WHT serves ~215.0"},
+  {"clip": "archive_match2", "i": 12, "tA": 237.05, "realRallyEnd": true, "lastStriker": "BLK", "nextServer": "BLK", "correct": true, "confidence": "high", "lastShotKind": "scramble", "note": "true end ~233.1 (BLK full-stretch dive), FOUR SECONDS before the detector's last shot; BLK serves ~253.2"},
+  {"clip": "archive_match2", "i": 13, "tA": 259.23, "realRallyEnd": true, "lastStriker": "WHT", "nextServer": "WHT", "correct": true, "confidence": "low", "lastShotKind": "attacking", "note": "break is short and shallow; serve read is weak"},
+  {"clip": "archive_match2", "i": 15, "tA": 287.90, "realRallyEnd": true, "lastStriker": "WHT", "nextServer": "BLK", "correct": false, "confidence": "medium", "lastShotKind": "attacking", "note": "WHT plays a high ball off the back wall ~287.3, both then walk; BLK serves ~297.5. Last striker LOST"},
+  {"clip": "archive_match2", "i": 17, "tA": 350.16, "realRallyEnd": true, "lastStriker": "BLK", "nextServer": "BLK", "correct": true, "confidence": "low", "lastShotKind": "attacking", "note": "last contact ambiguous; WHT raises an arm at ~353"},
+  {"clip": "archive_match3", "i": 13, "tA": 228.25, "realRallyEnd": true, "lastStriker": "LGT", "nextServer": "BLK", "correct": false, "confidence": "medium", "lastShotKind": "scramble", "note": "LGT reaches a ball off the back wall near the glass ~229.7, play stops, BLK serves ~234.2. Last striker LOST"},
+  {"clip": "archive_match3", "i": 14, "tA": 248.50, "realRallyEnd": true, "lastStriker": "BLK", "nextServer": null, "correct": null, "confidence": "medium", "lastShotKind": "scramble", "note": "rally end readable, serve is not: LGT walks off and picks the ball up, next serve falls outside the window"},
+  {"clip": "archive_match4", "i": 0, "tA": 27.77, "realRallyEnd": true, "lastStriker": "DRK", "nextServer": "DRK", "correct": true, "confidence": "low", "lastShotKind": "attacking", "note": "last contact partly hidden behind the glass mullion"},
+  {"clip": "archive_match4", "i": 4, "tA": 151.67, "realRallyEnd": true, "lastStriker": "DRK", "nextServer": null, "correct": null, "confidence": "medium", "lastShotKind": "attacking", "note": "DRK strikes ~152.7; DRK then leaves frame entirely, next serve not in the window"},
+  {"clip": "archive_match4", "i": 6, "tA": 193.89, "realRallyEnd": true, "lastStriker": "DRK", "nextServer": "WHT", "correct": false, "confidence": "low", "lastShotKind": "attacking", "note": "DRK does the striking through ~196 while WHT stands; WHT then alone on camera for 4 s and serves ~204.6. Last striker LOST"},
+  {"clip": "archive_match4", "i": 18, "tA": 489.92, "realRallyEnd": true, "lastStriker": null, "nextServer": "WHT", "correct": null, "confidence": "medium", "lastShotKind": null, "note": "serve readable, last contact is not: both players swing inside the same 1 s and the boxes swap identity across tiles"}
+ ]
+}

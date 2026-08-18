@@ -142,8 +142,13 @@ def span(video, plan, tA, tB, out_png, cols=4, rows=4):
     guessing where to look, this view covers the entire break and lets the
     labeller see the last strikes, the walk back and the serve in one image.
     """
+    # Start well before tA. The detector's last shot is often NOT the rally
+    # end: at archive_match2 t=152.97 both players are already standing still
+    # a second before it, so the point had finished earlier and the "shot" was
+    # a false positive during the break. A 1 s pre-roll missed the actual end
+    # in about half the breaks; 4 s catches most of them.
     n = cols * rows
-    t0, t1 = tA - 1.0, tB + 2.5
+    t0, t1 = tA - 4.0, tB + 2.5
     step = (t1 - t0) / (n - 1)
     tmp = out_png + ".parts"
     os.makedirs(tmp, exist_ok=True)
@@ -212,6 +217,13 @@ def main():
     ap.add_argument("--min-gap", type=float, default=2.5)
     ap.add_argument("--only", default="", help="comma separated boundary indices")
     ap.add_argument("--strip", default="", help="filmstrip instead: t0,step,n")
+    ap.add_argument("--candidates", default="",
+                    help="candidates JSON to segment; defaults to eval/candidates_<clip>.json. "
+                         "Point at eval/frozen/ to keep a label set pinned to one detector "
+                         "snapshot -- the live files get regenerated as the detector changes, "
+                         "which silently moves the break list out from under the labels")
+    ap.add_argument("--breaks", default="",
+                    help="pinned break list from make_breaks.py; overrides segmentation")
     ap.add_argument("--span", action="store_true",
                     help="16 tiles across the whole break instead of the 3-row view")
     ap.add_argument("--anchors", default="",
@@ -220,7 +232,11 @@ def main():
     args = ap.parse_args()
 
     video = os.path.join(ROOT, "samples", f"{args.clip}.mp4")
-    cand = json.load(open(os.path.join(ROOT, "eval", f"candidates_{args.clip}.json")))
+    if args.breaks:
+        cand = {"durationSec": 0.0, "shotsRaw": []}
+    else:
+        cand = json.load(open(args.candidates or
+                              os.path.join(ROOT, "eval", f"candidates_{args.clip}.json")))
     plan = json.load(open(os.path.join(ROOT, "eval", f"boxes_{args.clip}.json")))
     os.makedirs(args.outdir, exist_ok=True)
 
@@ -231,7 +247,10 @@ def main():
         print(png)
         return
 
-    bs = boundaries(cand["shotsRaw"], args.min_gap)
+    if args.breaks:
+        bs = json.load(open(args.breaks))["clips"][args.clip]
+    else:
+        bs = boundaries(cand["shotsRaw"], args.min_gap)
     if args.only:
         want = {int(x) for x in args.only.split(",")}
         bs = [b for b in bs if b["i"] in want]
@@ -247,8 +266,7 @@ def main():
         if args.span:
             step = span(video, plan, anchor, b["tB"], png)
             index.append({**b, "anchor": anchor, "stepSec": round(step, 3), "png": png})
-            print(png, f"gap={b['gapSec']}s engineLast={b['engineLastStriker']} "
-                       f"step={step:.2f}s")
+            print(png, f"gap={b['gapSec']}s step={step:.2f}s")
             continue
         montage(video, plan, anchor, b["tB"], png)
         index.append({**b, "anchor": anchor, "png": png})

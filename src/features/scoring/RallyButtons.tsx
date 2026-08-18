@@ -18,42 +18,78 @@ interface RallyButtonsProps {
   names: PlayerNames;
   /** Marks the serving side, so the board and the buttons tell one story. */
   server: Side | null;
+  /**
+   * The side the court-watcher thinks hit last, lit up so confirming is one
+   * tap. The buttons themselves are unchanged: this is a suggestion painted
+   * ONTO the manual controls, never a separate confirm control, so correcting
+   * it costs exactly one tap on the other button and refereeing by hand never
+   * becomes a mode you have to leave.
+   */
+  suggested?: Side | null;
   onWin: (side: Side) => void;
   disabled?: boolean;
 }
 
-export function RallyButtons({ names, server, onWin, disabled = false }: RallyButtonsProps) {
+export function RallyButtons({
+  names,
+  server,
+  suggested = null,
+  onWin,
+  disabled = false,
+}: RallyButtonsProps) {
   return (
     <View style={styles.row}>
-      {SIDES.map((side) => (
-        <Pressable
-          key={side}
-          accessibilityRole="button"
-          accessibilityLabel={`${names[side]} won the rally`}
-          accessibilityState={{ disabled }}
-          disabled={disabled}
-          onPress={() => {
-            tapMedium();
-            onWin(side);
-          }}
-          style={({ pressed }) => [
-            styles.button,
-            pressed && styles.buttonPressed,
-            disabled && styles.buttonDisabled,
-          ]}
-        >
-          {({ pressed }) => (
-            <>
-              <Text style={[styles.name, pressed && styles.textPressed]} numberOfLines={2}>
-                {names[side]}
-              </Text>
-              <Text style={[styles.caption, pressed && styles.textPressed]} numberOfLines={1}>
-                {server === side ? "serving · won rally" : "won rally"}
-              </Text>
-            </>
-          )}
-        </Pressable>
-      ))}
+      {SIDES.map((side) => {
+        const isSuggested = suggested === side;
+        return (
+          <Pressable
+            key={side}
+            accessibilityRole="button"
+            // Unchanged by the suggestion on purpose — this label is how a
+            // VoiceOver user finds the button, and it must not move under them
+            // between rallies. The suggestion rides on the hint instead.
+            accessibilityLabel={`${names[side]} won the rally`}
+            accessibilityHint={
+              isSuggested
+                ? "Suggested by the camera. Tap to confirm, or tap the other player."
+                : undefined
+            }
+            accessibilityState={{ disabled }}
+            disabled={disabled}
+            onPress={() => {
+              tapMedium();
+              onWin(side);
+            }}
+            style={({ pressed }) => [
+              styles.button,
+              isSuggested && styles.buttonSuggested,
+              pressed && styles.buttonPressed,
+              disabled && styles.buttonDisabled,
+            ]}
+          >
+            {({ pressed }) => (
+              <>
+                <Text
+                  style={[styles.name, (pressed || isSuggested) && styles.textPressed]}
+                  numberOfLines={2}
+                >
+                  {names[side]}
+                </Text>
+                <Text
+                  style={[styles.caption, (pressed || isSuggested) && styles.textPressed]}
+                  numberOfLines={1}
+                >
+                  {isSuggested
+                    ? "suggested · tap to confirm"
+                    : server === side
+                      ? "serving · won rally"
+                      : "won rally"}
+                </Text>
+              </>
+            )}
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -77,6 +113,10 @@ const styles = StyleSheet.create({
   // Inverted rather than dimmed: a tap this important should be unmistakable
   // even in peripheral vision.
   buttonPressed: { backgroundColor: colors.accent, transform: [{ scale: 0.99 }] },
+  // The suggested side wears the same accent fill a press does — "already
+  // half-chosen, waiting on you". Anything subtler is not findable at a glance
+  // from a metre away, which is the only distance this screen is read from.
+  buttonSuggested: { backgroundColor: colors.accent },
   buttonDisabled: { opacity: 0.35 },
   name: { ...type.title, color: colors.text, textAlign: "center" },
   caption: { ...type.caption, color: colors.textDim },

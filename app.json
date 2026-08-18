@@ -65,8 +65,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "RacquetIQ uses the camera to record your matches so you can review them and have them analyzed on this device.",
-          "microphonePermission": "RacquetIQ records match audio with the video because the analysis listens for the sound of ball strikes to find your shots and rallies."
+          "cameraPermission": "RacquetIQ uses the camera to record your matches, and to watch the court live so it can suggest the score for you to confirm.",
+          "microphonePermission": "RacquetIQ listens for the sound of ball strikes — that is how it finds your shots and rallies, both in a recording and while watching a match live."
         }
       ],
       [

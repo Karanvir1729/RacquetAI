@@ -10,10 +10,101 @@ which navigates by route only). The route file `src/app/referee.tsx` is a hidden
 
 ## Honesty
 
-This is **human-tapped scoring with spoken output**. Nothing here watches the court. The shot
-detector in `analysis/` audits at 63% precision and cannot tell a rally end from a bounce, so
-no copy on this screen — or about it — may imply the app is scoring by itself. "Score keeper"
-and "referee" are fine; "AI referee" is not.
+This is **human-tapped scoring with spoken output**. The camera may now watch the court and
+*suggest* the winner of a rally (`liveClient.ts`), but nothing scores by itself: every point
+still lands because a person tapped. No copy on this screen — or about it — may imply
+otherwise. "Score keeper" and "referee" are fine; "AI referee" is not.
+
+## Watching the court (`liveClient.ts`)
+
+The JS half of the native live session in `modules/racquet-analyzer/ios/`
+(`LiveSession.swift` → `LiveReferee.swift` → `LiveOnset.swift`). It emits **proposals**, never
+score events — `liveClient.ts` deliberately exposes no function that awards a point.
+
+**The measured reason.** There is no ball tracking anywhere in this project, and a squash rally
+ends for reasons that are entirely about the ball: two bounces, the tin, out, or a retrieval
+that failed. Hand-labelling rally outcomes on three archive matches put the heuristic behind
+the proposal — *the last player to strike the ball won the rally* — at **8/11 = 72.7%**
+(Wilson 95% CI 43.4%–90.3%, n = 11). All three misses were the last striker **losing**: a
+scrambling retrieval that failed, which is exactly what a camera without a ball cannot see.
+
+That 72.7% is an **oracle**: it was scored against the true last striker read off the frames by
+hand, not against anything the detector produces. The detector is worse, and the same labelling
+session showed why — 1 of 15 inspected breaks in the shot stream was not a rally end at all
+(the players were mid-rally through a 5.2 s gap of missed shots), and the detector's "last shot"
+is frequently a floor bounce or a ball pickup seconds after the point was already over.
+
+So `LiveConfidence.heuristicPrior` (0.727) is a **ceiling**, and each measured failure mode
+multiplies it downwards. `parseRallyEnded` re-clamps `confidence` into `[0, ceiling]` on the JS
+side too — that invariant is the one thing this feature must not get wrong, so it is enforced
+in both halves.
+
+`recommendation` is what the UI should do, and the number decides it, not taste:
+
+| band | meaning |
+| --- | --- |
+| `confirm` (≥ 0.85) | unreachable today **by construction** — the prior caps at 0.727. It exists so a better measurement can change the UX without changing UI code. |
+| `propose` (≥ 0.45) | show a suggested winner, obviously correctable. |
+| `ask` | show both players equally. No default under the thumb. |
+
+**At today's numbers most rallies land in `ask` or `propose`, never `confirm`.** The screen must
+therefore keep the manual taps live at all times and stay fully usable with the camera off.
+
+## The screen, when it is watching
+
+`useLiveReferee.ts` owns the session; `proposal.ts` owns every word it says; `WatchPanel.tsx`
+(preview stamp + status + the track-binding swap), `WatchControls.tsx` (the offer and the
+fallback banner) and `ProposalPrompt.tsx` (the question) are the UI; `RefereeControls.tsx` holds
+the two chrome rows so `RefereeScreen.tsx` stays about composition. `useLiveReferee` has **no
+reference to `useRefereeMatch`** — it cannot reach the score even by accident.
+
+**Answering happens on the rally buttons that were already there.** There is no separate confirm
+control. A `propose`-band rally end lights up the suggested player's own button
+(`RallyButtons`'s `suggested` prop, accent fill + "suggested · tap to confirm"), so confirming is
+one tap, correcting is one tap on the other button, and refereeing entirely by hand is never a
+mode anyone has to leave — ignoring the suggestions *is* the manual referee.
+
+Consequences of the measurement, in the UI:
+
+- **Nothing commits on a timer.** There is no timeout anywhere on this screen. An unanswered
+  question stays unanswered (pinned by a test that advances a minute of fake time). At 72.7%
+  oracle accuracy an auto-confirm would put the score quietly wrong within a handful of points,
+  with no way for the players to tell which point broke it.
+- **Everything spoken is a question.** `proposalCall` produces "Point to Sam? That would be five,
+  three." and never the marker's declarative forms that `announce.ts` reserves for a decision a
+  human made — pinned across every score state by `proposal.test.ts`. The question goes through
+  the *same* announcer as the calls, so the two can never overlap, and it obeys the same mute.
+- **`ask` names nobody.** Below the propose band, when the last striker was unreadable (21% of
+  real ends), or when shots keep landing after the question (`playResumed` — the mid-rally
+  misfire), the headline becomes "Who won that rally?" and no button is lit.
+- **"No point"** dismisses without scoring, for the break that was never a rally end.
+- **"Why?"** expands the engine's own sentence with the tracker's "Player A" mapped onto the
+  bound names in one pass, plus the confidence *and* the ceiling it can never exceed.
+
+Everything else is about not being a liability courtside: the offer to watch is hidden entirely
+when the module or the preview view is missing (a button that opens a broken camera is worse than
+no button); a refused session falls back to the tap-driven screen with a sentence and, for a
+denied permission, a Settings link; the camera is released on stop, on unmount and on background,
+and resumed on foreground; keep-awake is held only while watching. The preview is a small stamp,
+not a hero: it answers "is the phone pointed at the court?", which is asked once, while the score
+is read every rally for forty-five minutes.
+
+Other things the screen has to honour:
+
+- **`proposedWinner` is a tracker identity, not a player.** "A" is whoever was leftmost the
+  first time two people were seen on court. `TrackBinding` binds it to a `Side`, and `flipBinding`
+  must be one tap away, because trackers swap.
+- **No microphone, no detection.** Shot detection is an audio onset detector with a pose gate;
+  there is no measured video-only fallback, so a denied microphone yields `detectionAvailable:
+  false` and a pose-only preview rather than guesses.
+- **No corners, no court filter.** Without four tapped corners the filter that rejects the next
+  court and the gallery cannot run (`courtCalibrated: false`).
+- **The proposal arrives late.** ~6 s after the last detected strike (a 4.5 s silence threshold
+  plus a 1.6 s gate delay), and the true rally end is often seconds before that again.
+- The rally rule is **tunable per venue** and that is measured, not suspected: an 8 s split gave
+  47 shots per "rally" on the same footage where 4.5 s matched the play.
+
+`modules/racquet-analyzer/checks/run.sh` exercises the native rally engine off-device.
 
 ## The state machine
 
@@ -61,6 +152,16 @@ the user information.
 
 `squash.test.ts` and `engine.test.ts` (the restored machine and its laws), `announce.test.ts`
 (every spoken line), `storage.test.ts` (round trip + every way a file can be damaged),
-`speech.test.ts` (a missing, malformed or throwing module never breaks scoring), and
+`speech.test.ts` (a missing, malformed or throwing module never breaks scoring),
 `RefereeScreen.test.ts` (tap → event → score → announcement → disk, undo, and resuming after the
-app is killed).
+app is killed), and `liveClient.test.ts` (every live entry point degrades instead of throwing —
+including when merely *reading* a module property explodes, which is how the shipped crash
+presented — plus the confidence ceiling and the track binding).
+
+For the watching screen: `proposal.test.ts` (every spoken line is a question, in every score
+state; the suggestion is dropped rather than softened when the evidence is weak or play resumed;
+the tracker's labels map onto the right humans even with the default names and a swapped binding)
+and `RefereeScreen.watch.test.ts`, which drives the real screen through a faked native session —
+**a rally-end event never changes the score**, a minute of fake time changes nothing, confirming
+and correcting are each one tap, dismissing scores nothing, the manual buttons keep working
+throughout, and a binary that cannot watch simply shows the tap-driven referee.

@@ -51,6 +51,16 @@ export interface RefereeMatch {
   undo: () => void;
   startMatch: (setup: MatchSetup) => void;
   toggleMute: () => void;
+  /**
+   * Speak a line that is NOT a scoring call — today, the court-watcher's
+   * question. It goes through the SAME announcer as the calls, so a question
+   * and a call can never talk over each other, and it obeys the same mute.
+   *
+   * It deliberately does not touch `lastCall`: that line is the record of what
+   * was actually scored, and a question the app asked has no business
+   * appearing there.
+   */
+  say: (line: string) => void;
 }
 
 // Unique within a session; persisted ids are kept as-is on restore. Ids only
@@ -192,6 +202,14 @@ export function useRefereeMatch(): RefereeMatch {
     [announcer, commit],
   );
 
+  const say = useCallback(
+    (line: string) => {
+      if (muted || line.length === 0) return;
+      announcer.say(line);
+    },
+    [announcer, muted],
+  );
+
   const toggleMute = useCallback(() => {
     const next = !muted;
     setMuted(next);
@@ -213,5 +231,6 @@ export function useRefereeMatch(): RefereeMatch {
     undo,
     startMatch,
     toggleMute,
+    say,
   };
 }
