@@ -155,9 +155,12 @@ final class MatchAnalyzer {
     }
     emit("decoding", 5)
 
-    // Pass 1: sampled decode + pose + court filter + 2-ID tracking.
+    // Pass 1: sampled decode + pose + court filter + 2-ID tracking. The
+    // skeleton overlay's keypoints are serialized here, one sample at a time,
+    // rather than reconstructed from trackFrames at the end.
     let poseDetector = PoseDetector()
     let tracker = TwoTracker()
+    let trackWriter = TrackWriter()
     var times: [Double] = []
     var trackFrames: [[String: PlayerDetection]] = []
     let duration = max(info.durationSec, 0.001)
@@ -166,8 +169,10 @@ final class MatchAnalyzer {
       let dets = detectPlayers(
         rawPoses: rawPoses, homography: homography, width: width, height: height
       )
+      let tracked = tracker.update(dets)
       times.append(t)
-      trackFrames.append(tracker.update(dets))
+      trackFrames.append(tracked)
+      trackWriter.append(t: t, players: tracked, width: width, height: height)
       self.emit("pose", 5 + 65 * min(t / duration, 1.0))
     }
     emit("pose", 70)
@@ -218,10 +223,17 @@ final class MatchAnalyzer {
       let pid = (trav["A"] ?? 0) >= (trav["B"] ?? 0) ? "A" : "B"
       guard let i = nearestTracked(trackFrames: trackFrames, times: times, t: t, pid: pid),
             let det = trackFrames[i][pid] else { continue }
-      shotsRaw.append(RawShot(t: t, pid: pid, court: det.court))
+      shotsRaw.append(RawShot(
+        t: t,
+        pid: pid,
+        court: det.court,
+        highContact: isHighContact(det.joints),
+        lowConfidence: det.posConf < ShotClass.poseConfLow
+      ))
     }
 
     emit("stats", 95)
+    let trackSamples = trackWriter.sampleCount
     let json = try buildAnalysisJSON(AnalysisInputs(
       sourceName: url.lastPathComponent,
       durationSec: info.durationSec,
@@ -234,7 +246,9 @@ final class MatchAnalyzer {
       onsets: onsets,
       shotsRaw: shotsRaw,
       nGated: nGated,
-      audioAvailable: audioAvailable
+      audioAvailable: audioAvailable,
+      tracksJSON: trackWriter.takeJSON(),
+      trackSamples: trackSamples
     ))
     emit("stats", 100)
     return json

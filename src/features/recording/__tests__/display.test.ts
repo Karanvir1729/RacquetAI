@@ -44,11 +44,8 @@ describe("formatRecordedAt", () => {
 });
 
 describe("sportLabel", () => {
-  it("labels every sport, squash first among equals", () => {
+  it("labels squash and the untagged default", () => {
     expect(sportLabel("squash")).toBe("Squash");
-    expect(sportLabel("tennis")).toBe("Tennis");
-    expect(sportLabel("pickleball")).toBe("Pickleball");
-    expect(sportLabel("badminton")).toBe("Badminton");
     expect(sportLabel("unspecified")).toBe("Untagged");
   });
 });

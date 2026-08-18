@@ -2,7 +2,8 @@
 
 Turns a single fixed(ish)-camera recording of a squash match into per-player
 placement stats, coverage heatmaps, T-control and predictability scores,
-written as `analysis.json` (schemaVersion 1 — the contract shared with the app).
+plus a pose track and a type for every shot, written as `analysis.json`
+(schemaVersion 2 — the contract shared with the app; v1 files still open).
 
 ## Quick start
 

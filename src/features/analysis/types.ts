@@ -1,9 +1,8 @@
 /**
- * Match-analysis domain types — the shared `analysis.json` contract
- * (schemaVersion 1) between the offline pipeline (`analysis/` at the repo
- * root) and this feature. Pure — no Expo or React Native imports — so the
- * parse helper unit-tests on Node and the pipeline can treat this file as the
- * schema reference.
+ * Match-analysis domain types — the shared `analysis.json` contract between
+ * the offline pipeline (`analysis/` at the repo root) and this feature. Pure —
+ * no Expo or React Native imports — so the parse helper unit-tests on Node and
+ * the pipeline can treat this file as the schema reference.
  *
  * Parsing is defensive in the features/recording metadata.ts style: an
  * analysis file comes off disk, so every field is narrowed from `unknown`.
@@ -11,6 +10,12 @@
  * yields `null` — the screen shows its "not available" state — while small
  * numeric drift (a coverage value of 1.02, a percent of 100.4) is clamped
  * rather than fatal.
+ *
+ * schemaVersion 2 is PURELY ADDITIVE over 1: pose `tracks` for the video
+ * overlay, and `type`/`typeConfidence` on each shot. Both versions parse,
+ * because v1 sidecars are already sitting on users' phones — reading one just
+ * yields no skeleton and no shot types, which every consumer treats as
+ * "absent", not "broken".
  */
 
 /** Court quadrants of the 2x2 placement grid; names are the contract's cell keys. */
@@ -21,6 +26,55 @@ export type CourtCell = (typeof COURT_CELLS)[number];
 export const PLAYER_IDS = ["A", "B"] as const;
 
 export type PlayerId = (typeof PLAYER_IDS)[number];
+
+/**
+ * Shot classes the pipeline may assign (schema v2). There is deliberately no
+ * "lob": with no ball tracking a lob and a drive look identical, and a
+ * confidently-wrong label is worse than none — those come back as "unknown".
+ */
+export const SHOT_TYPES = [
+  "serve",
+  "drive",
+  "crossCourt",
+  "drop",
+  "boast",
+  "volley",
+  "unknown",
+] as const;
+
+export type ShotType = (typeof SHOT_TYPES)[number];
+
+/**
+ * COCO keypoint order. A pose's `k` array is these 17 names in this order,
+ * each as an [x, y, conf] triplet, so the index of a name here IS its triplet
+ * index in the payload.
+ */
+export const POSE_KEYPOINT_NAMES = [
+  "nose",
+  "leftEye",
+  "rightEye",
+  "leftEar",
+  "rightEar",
+  "leftShoulder",
+  "rightShoulder",
+  "leftElbow",
+  "rightElbow",
+  "leftWrist",
+  "rightWrist",
+  "leftHip",
+  "rightHip",
+  "leftKnee",
+  "rightKnee",
+  "leftAnkle",
+  "rightAnkle",
+] as const;
+
+export type PoseKeypointName = (typeof POSE_KEYPOINT_NAMES)[number];
+
+export const POSE_KEYPOINT_COUNT = POSE_KEYPOINT_NAMES.length;
+
+/** Flattened length of one pose: 17 keypoints x [x, y, conf]. */
+export const POSE_VALUE_COUNT = POSE_KEYPOINT_COUNT * 3;
 
 export interface AnalysisVideo {
   source: string;
@@ -76,6 +130,29 @@ export interface ShotEvent {
   tSec: number;
   player: PlayerId;
   cell: CourtCell;
+  /** v2 only; absent on v1 files and whenever the writer could not classify. */
+  type?: ShotType;
+  /** 0..1. Absent when `type` is. */
+  typeConfidence?: number;
+}
+
+/** One player's pose at a sampled instant. */
+export interface TrackPose {
+  id: PlayerId;
+  /**
+   * POSE_VALUE_COUNT numbers: 17 x [x, y, conf]. x/y are normalized 0..1
+   * against the ANALYSED frame (`video.width`/`video.height`), origin
+   * top-left, so the overlay can scale them onto any rendered size.
+   */
+  k: number[];
+}
+
+/** A sampled instant of the pose overlay (~8 Hz, not every frame). */
+export interface TrackFrame {
+  /** Seconds from video start, on the same timeline the app plays. */
+  t: number;
+  /** Players confidently detected at `t` — legitimately 0, 1 or 2 entries. */
+  p: TrackPose[];
 }
 
 export interface AnalysisQuality {
@@ -85,15 +162,21 @@ export interface AnalysisQuality {
   notes: string[];
 }
 
+export const SCHEMA_VERSIONS = [1, 2] as const;
+
+export type SchemaVersion = (typeof SCHEMA_VERSIONS)[number];
+
 export interface MatchAnalysis {
-  /** Bump on shape changes; `parseAnalysis` rejects unknown versions. */
-  schemaVersion: 1;
+  /** Bump on shape changes; `parseAnalysis` rejects versions it has no reader for. */
+  schemaVersion: SchemaVersion;
   video: AnalysisVideo;
   court: CourtGrid;
   players: PlayerAnalysis[];
   rallies: RallyStats;
   shots: ShotEvent[];
   quality: AnalysisQuality;
+  /** v2 pose samples, ascending by `t`. Absent means "no skeleton to draw". */
+  tracks?: TrackFrame[];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -121,6 +204,16 @@ function asCell(value: unknown): CourtCell | null {
   return typeof value === "string" && (COURT_CELLS as readonly string[]).includes(value)
     ? (value as CourtCell)
     : null;
+}
+
+function asShotType(value: unknown): ShotType | null {
+  return typeof value === "string" && (SHOT_TYPES as readonly string[]).includes(value)
+    ? (value as ShotType)
+    : null;
+}
+
+function asSchemaVersion(value: unknown): SchemaVersion | null {
+  return (SCHEMA_VERSIONS as readonly unknown[]).includes(value) ? (value as SchemaVersion) : null;
 }
 
 function parseVideo(value: unknown): AnalysisVideo | null {
@@ -226,9 +319,74 @@ function parseShots(value: unknown): ShotEvent[] | null {
     const player = asPlayerId(item.player);
     const cell = asCell(item.cell);
     if (tSec === null || player === null || cell === null) continue;
-    shots.push({ tSec, player, cell });
+    const shot: ShotEvent = { tSec, player, cell };
+    // An unreadable class drops to "no label" rather than sinking the shot —
+    // where it landed is still worth showing. A confidence without a class is
+    // meaningless, so the two only ever travel together.
+    const shotType = asShotType(item.type);
+    if (shotType !== null) {
+      shot.type = shotType;
+      const confidence = asClamped(item.typeConfidence, 1);
+      if (confidence !== null) shot.typeConfidence = confidence;
+    }
+    shots.push(shot);
   }
   return shots;
+}
+
+/**
+ * One pose, or null. The triplet layout is load-bearing for the overlay — a
+ * short or long array would silently shift every joint after the gap — so the
+ * length is exact, and a confidence outside 0..1 means the writer is on a
+ * different contract, not that it drifted, so the whole detection is dropped.
+ */
+function parseKeypoints(value: unknown): number[] | null {
+  if (!Array.isArray(value) || value.length !== POSE_VALUE_COUNT) return null;
+  const keypoints: number[] = [];
+  for (let index = 0; index < value.length; index += 1) {
+    const item: unknown = value[index];
+    if (typeof item !== "number" || !Number.isFinite(item)) return null;
+    if (index % 3 === 2 && (item < 0 || item > 1)) return null;
+    keypoints.push(item);
+  }
+  return keypoints;
+}
+
+function parseTrackFrame(value: unknown): TrackFrame | null {
+  if (!isRecord(value)) return null;
+  const t = asCount(value.t);
+  if (t === null || !Array.isArray(value.p)) return null;
+  const poses: TrackPose[] = [];
+  for (const item of value.p) {
+    if (!isRecord(item)) continue;
+    const id = asPlayerId(item.id);
+    const k = parseKeypoints(item.k);
+    // One broken detection drops alone: the other player still gets a skeleton.
+    if (id === null || k === null) continue;
+    if (poses.some((pose) => pose.id === id)) continue;
+    poses.push({ id, k });
+  }
+  // An empty `p` is meaningful — nobody was confidently detected at `t`, so the
+  // overlay must clear rather than hold the previous frame's pose.
+  return { t, p: poses };
+}
+
+/**
+ * Absent, non-array, or wholly unusable tracks read as "no skeleton" (the v1
+ * experience) rather than invalidating an otherwise good analysis. Sorted on
+ * the way in because the overlay binary-searches for the frame nearest the
+ * playhead on every tick.
+ */
+function parseTracks(value: unknown): TrackFrame[] | null {
+  if (!Array.isArray(value)) return null;
+  const frames: TrackFrame[] = [];
+  for (const item of value) {
+    const frame = parseTrackFrame(item);
+    if (frame !== null) frames.push(frame);
+  }
+  if (frames.length === 0) return null;
+  frames.sort((a, b) => a.t - b.t);
+  return frames;
 }
 
 function parseQuality(value: unknown): AnalysisQuality | null {
@@ -253,8 +411,10 @@ export function parseAnalysis(raw: string): MatchAnalysis | null {
   }
   if (!isRecord(data)) return null;
 
-  // Only schema v1 is readable; a future v2 file is rejected, not misread.
-  if (data.schemaVersion !== 1) return null;
+  // v2 is additive over v1, so one reader serves both; anything else is
+  // rejected rather than misread.
+  const schemaVersion = asSchemaVersion(data.schemaVersion);
+  if (schemaVersion === null) return null;
 
   const video = parseVideo(data.video);
   const court = parseCourt(data.court);
@@ -274,5 +434,16 @@ export function parseAnalysis(raw: string): MatchAnalysis | null {
     players.push(player);
   }
 
-  return { schemaVersion: 1, video, court, players, rallies, shots, quality };
+  const analysis: MatchAnalysis = {
+    schemaVersion,
+    video,
+    court,
+    players,
+    rallies,
+    shots,
+    quality,
+  };
+  const tracks = parseTracks(data.tracks);
+  if (tracks !== null) analysis.tracks = tracks;
+  return analysis;
 }

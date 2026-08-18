@@ -16,6 +16,7 @@ import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens"
 
 import { DemoAnalysisCard } from "./DemoAnalysisCard";
 import { formatRecordedAt, sportLabel } from "./display";
+import { HowItWorksCard } from "./HowItWorksCard";
 import { ImportAnalysisCard } from "./ImportAnalysisCard";
 import { ImportedAnalysesSection } from "./ImportedAnalysesSection";
 import { PlayerModal } from "./PlayerModal";
@@ -88,6 +89,7 @@ export function LibraryScreen() {
           <DemoAnalysisCard />
           <ImportAnalysisCard />
           <ImportedAnalysesSection />
+          <HowItWorksCard />
           <View style={styles.emptyCenter}>
             <EmptyState
               icon="film-outline"
@@ -107,6 +109,7 @@ export function LibraryScreen() {
               <DemoAnalysisCard />
               <ImportAnalysisCard />
               <ImportedAnalysesSection />
+              <HowItWorksCard />
             </View>
           }
           renderItem={({ item }) => (

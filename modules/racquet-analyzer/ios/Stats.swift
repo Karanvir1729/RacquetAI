@@ -1,8 +1,9 @@
 // Stats.swift — pure-Foundation port of analyze.py's tracking + analytics:
 // court geometry, two-player nearest-neighbour tracker with swap guard,
 // striker attribution helpers, rally split, retrieval-proxy placement,
-// 12x8 coverage heatmap, T-time, transition-entropy predictability, and the
-// analysis.json (schemaVersion 1) builder + shape validator.
+// 12x8 coverage heatmap, T-time, transition-entropy predictability, shot-type
+// classification, the COCO-17 keypoint track writer, and the analysis.json
+// (schemaVersion 2) builder + shape validator.
 //
 // No AVFoundation/Vision/Expo imports so the whole file compiles standalone
 // for off-device unit checks (see the scratchpad check harness).
@@ -47,6 +48,31 @@ enum AnalyzerParams {
   static let onsetMedianHalfWinS = 1.0 // sliding-window half width for median/MAD
 }
 
+/// schema v2 shot classification. The app, the Python engine and this engine
+/// all implement the same thresholds, so these must not drift.
+enum ShotClass {
+  static let trackHz = 8.0 // TRACK_HZ: keypoint sampling rate written to `tracks`
+  static let frontThirdY = 3.25 // FRONT_THIRD_Y: landing this far up = front-court shot
+  static let deepY = 6.5 // DEEP_Y: landing/striking behind this = back third
+  static let poseConfLow = 0.25 // POSE_CONF_LOW: below this the court fix is only rough.
+  // Calibrated to the ankle-score distribution the pose stage actually produces
+  // (median ~0.35); the old 0.5 sat above p75 and flagged nearly every shot,
+  // which made typeConfidence a constant carrying no signal.
+  static let baseConfidence = 0.8 // SHOT_BASE_CONF
+  static let lowPosePenalty = 0.5 // multiplier when either end came from a rough fix
+}
+
+/// COCO-17 order, expressed in the Vision joint names Pose.swift emits. Vision
+/// carries a few joints COCO does not (neck, root) and may drop any joint it
+/// cannot see; the track writer emits conf 0 for a missing slot rather than
+/// inventing a position.
+let cocoJointOrder: [String] = [
+  "nose", "leftEye", "rightEye", "leftEar", "rightEar",
+  "leftShoulder", "rightShoulder", "leftElbow", "rightElbow",
+  "leftWrist", "rightWrist", "leftHip", "rightHip",
+  "leftKnee", "rightKnee", "leftAnkle", "rightAnkle",
+]
+
 // MARK: - Detections and tracking
 
 struct JointPoint {
@@ -60,6 +86,10 @@ struct PlayerDetection {
   var court: (x: Double, y: Double) // meters, clamped into court bounds
   var area: Double
   var bboxH: Double
+  /// The court fix is only as good as the joints it was projected from: mean
+  /// confidence of the anchor (ankles, or the hip fallback). Drives the
+  /// shot-type confidence discount, nothing upstream.
+  var posConf: Double = 0
 }
 
 /// Port of detect_players: filter raw poses to in-court players (ankle
@@ -72,19 +102,19 @@ func detectPlayers(
 ) -> [PlayerDetection] {
   var candidates: [PlayerDetection] = []
   for joints in rawPoses {
-    var anchor: [(Double, Double)] = []
+    var anchor: [JointPoint] = []
     for key in ["leftAnkle", "rightAnkle"] {
-      if let j = joints[key], j.conf > AnalyzerParams.kptConf { anchor.append((j.x, j.y)) }
+      if let j = joints[key], j.conf > AnalyzerParams.kptConf { anchor.append(j) }
     }
     if anchor.isEmpty {
       // Ankles low-confidence: fall back to hips.
       for key in ["leftHip", "rightHip"] {
-        if let j = joints[key], j.conf > AnalyzerParams.kptConf { anchor.append((j.x, j.y)) }
+        if let j = joints[key], j.conf > AnalyzerParams.kptConf { anchor.append(j) }
       }
     }
     guard !anchor.isEmpty else { continue }
-    let ax = anchor.map { $0.0 }.reduce(0, +) / Double(anchor.count)
-    let ay = anchor.map { $0.1 }.reduce(0, +) / Double(anchor.count)
+    let ax = anchor.map { $0.x }.reduce(0, +) / Double(anchor.count)
+    let ay = anchor.map { $0.y }.reduce(0, +) / Double(anchor.count)
     let projected = homography.project(ax / width, ay / height)
     guard projected.x >= Court.filterLoX, projected.x <= Court.filterHiX,
           projected.y >= Court.filterLoY, projected.y <= Court.filterHiY else { continue }
@@ -104,7 +134,8 @@ func detectPlayers(
         min(max(projected.y, 0), Court.length)
       ),
       area: bboxW * bboxH,
-      bboxH: bboxH
+      bboxH: bboxH,
+      posConf: anchor.map { $0.conf }.reduce(0, +) / Double(anchor.count)
     ))
   }
   candidates.sort { $0.area > $1.area }
@@ -189,6 +220,25 @@ func lowerBound(_ sorted: [Double], _ target: Double) -> Int {
     if sorted[mid] < target { lo = mid + 1 } else { hi = mid }
   }
   return lo
+}
+
+func clamp01(_ x: Double) -> Double { min(max(x, 0), 1) }
+
+/// np.sign of the offset from the half-court line: which side of the court a
+/// point sits on, 0 exactly on the line.
+func halfSign(_ x: Double) -> Double {
+  let d = x - Court.midX
+  return d > 0 ? 1 : (d < 0 ? -1 : 0)
+}
+
+/// Shortest JSON number for a value already rounded to 3 decimals; integral
+/// values lose their ".0". Non-finite degrades to 0 — `nan` is not JSON, and a
+/// single bad keypoint must not poison the whole file.
+func compactNumber(_ x: Double) -> String {
+  guard x.isFinite else { return "0" }
+  let r = round3(x)
+  if r == r.rounded() && abs(r) < 1e15 { return String(Int(r)) }
+  return String(r)
 }
 
 // MARK: - Striker attribution helpers (ports of analyze.py)
@@ -318,6 +368,10 @@ struct RawShot {
   let t: Double
   let pid: String
   let court: (x: Double, y: Double)
+  /// Wrist above the shoulder line at contact — the volley tell.
+  var highContact: Bool = false
+  /// The striker's pose at contact was too weak to trust the court fix.
+  var lowConfidence: Bool = false
 }
 
 /// Split attributed shots into rallies on silence gaps > gap seconds; a rally
@@ -334,6 +388,158 @@ func splitRallies(_ shots: [RawShot], gap: Double) -> [[RawShot]] {
   }
   if !current.isEmpty { rallies.append(current) }
   return rallies.filter { $0.count >= 2 }
+}
+
+// MARK: - Shot classification (schema v2)
+
+struct ShotClassification {
+  let type: String
+  let confidence: Double
+}
+
+/// Did the striker meet the ball above the shoulder? — the volley signature.
+///
+/// Image y grows downward, so "above" is the smaller y. Only the higher of the
+/// two wrists matters; a shoulder hidden behind the body falls back to the
+/// other one, which is close enough for an above/below test.
+func isHighContact(_ joints: [String: JointPoint]) -> Bool {
+  func confident(_ name: String) -> JointPoint? {
+    guard let j = joints[name], j.conf >= AnalyzerParams.kptConf else { return nil }
+    return j
+  }
+  var pair: (wrist: JointPoint, shoulder: String)?
+  for (wristName, shoulderName) in [
+    ("leftWrist", "leftShoulder"), ("rightWrist", "rightShoulder"),
+  ] {
+    guard let wrist = confident(wristName) else { continue }
+    if let pair, pair.wrist.y <= wrist.y { continue }
+    pair = (wrist, shoulderName)
+  }
+  guard let pair else { return false }
+  let other = pair.shoulder == "leftShoulder" ? "rightShoulder" : "leftShoulder"
+  guard let shoulder = confident(pair.shoulder) ?? confident(other) else { return false }
+  return pair.wrist.y < shoulder.y
+}
+
+/// Shot type from striker position, where the ball ended up (the retrieval
+/// proxy: the striker of the next shot), and the contact height.
+///
+/// There is deliberately no "lob" class: without ball tracking a lob and a
+/// drive are the same observation, and a confidently wrong label is worse than
+/// none — anything the geometry cannot separate stays "unknown" at confidence 0.
+func classifyShot(
+  isFirstOfRally: Bool,
+  highContact: Bool,
+  striker: (x: Double, y: Double),
+  land: (x: Double, y: Double)?,
+  lowConfidencePose: Bool
+) -> ShotClassification {
+  func labelled(_ type: String) -> ShotClassification {
+    let raw = lowConfidencePose
+      ? ShotClass.baseConfidence * ShotClass.lowPosePenalty
+      : ShotClass.baseConfidence
+    return ShotClassification(type: type, confidence: clamp01(raw))
+  }
+  let unknown = ShotClassification(type: "unknown", confidence: 0)
+
+  if isFirstOfRally { return labelled("serve") }
+  guard let land else { return unknown } // rally ended: nothing to infer from
+  if highContact { return labelled("volley") }
+  if land.y < ShotClass.frontThirdY {
+    // Only a shot struck from the back that crosses the court reads as a boast;
+    // straight from the back or anything from mid-court is a drop.
+    let fromBack = striker.y > ShotClass.deepY
+    let crossed = halfSign(striker.x) != halfSign(land.x)
+    return labelled(fromBack && crossed ? "boast" : "drop")
+  }
+  guard halfSign(striker.x) != 0, halfSign(land.x) != 0 else {
+    // dead on the half-court line: the side that separates a drive from a
+    // cross-court is exactly what cannot be read here
+    return unknown
+  }
+  // Past the front third, depth no longer changes the name — a ball driven to
+  // mid-court is still a drive — so the side alone decides. Testing only
+  // land.y > deepY left ~46% of shots unlabelled on well-calibrated footage,
+  // because retrieval positions cluster in the band that test excluded.
+  return labelled(halfSign(striker.x) == halfSign(land.x) ? "drive" : "crossCourt")
+}
+
+// MARK: - Keypoint tracks (schema v2)
+
+/// Streams the `tracks` array straight into compact JSON text.
+///
+/// A 6-minute match is ~2900 samples x 2 players x 51 numbers; held as
+/// Foundation objects until the end that costs an order of magnitude more
+/// memory than the text it serializes to, and the phone is doing this while
+/// decoding video. Nothing is retained past the sample being written.
+final class TrackWriter {
+  private var body = "["
+  private var needsSeparator = false
+  private let minInterval: Double
+  private var lastT = -Double.greatestFiniteMagnitude
+  private(set) var sampleCount = 0
+
+  /// `hz` caps the emitted rate: the decode pass may sample faster, but the
+  /// overlay does not need it and the file lives on the user's phone.
+  init(hz: Double = ShotClass.trackHz) {
+    minInterval = hz > 0 ? 1.0 / hz : 0
+    body.reserveCapacity(1 << 16)
+  }
+
+  /// One sample. Frames where neither player was detected are dropped: a
+  /// sample with an empty `p` is pure overhead in a file the phone keeps.
+  func append(t: Double, players: [String: PlayerDetection], width: Double, height: Double) {
+    guard t.isFinite, t >= 0, width > 0, height > 0 else { return }
+    // The decoder targets sampleFps but lands wherever the source fps divides
+    // (a 25 fps source sampled at 8 gives 0.12 s steps), so decimate only when
+    // it overshoots by a real margin — a strict compare would halve the rate.
+    guard t >= lastT + minInterval * 0.75 else { return }
+    let present = ["A", "B"].compactMap { pid in players[pid].map { (pid, $0) } }
+    guard !present.isEmpty else { return }
+    lastT = t
+    sampleCount += 1
+    if needsSeparator { body += "," }
+    needsSeparator = true
+    body += "{\"t\":\(compactNumber(t)),\"p\":["
+    for (i, entry) in present.enumerated() {
+      if i > 0 { body += "," }
+      appendPlayer(pid: entry.0, det: entry.1, width: width, height: height)
+    }
+    body += "]}"
+  }
+
+  private func appendPlayer(pid: String, det: PlayerDetection, width: Double, height: Double) {
+    body += "{\"id\":\"\(pid)\",\"k\":["
+    for (i, name) in cocoJointOrder.enumerated() {
+      if i > 0 { body += "," }
+      guard let j = det.joints[name], j.conf > 0, j.x.isFinite, j.y.isFinite else {
+        body += "0,0,0"
+        continue
+      }
+      // Vision extrapolates joints a little past the frame edge; clamping keeps
+      // the overlay inside the video rect instead of drawing into the letterbox.
+      body += compactNumber(clamp01(j.x / width))
+      body += ","
+      body += compactNumber(clamp01(j.y / height))
+      body += ","
+      body += compactNumber(clamp01(j.conf))
+    }
+    body += "]}"
+  }
+
+  /// The finished JSON array, handed over and released — nil when nothing was
+  /// sampled, so the field is simply omitted and the app degrades to no
+  /// skeleton. Consumes the writer.
+  func takeJSON() -> String? {
+    guard sampleCount > 0 else { return nil }
+    body += "]"
+    defer {
+      body = "["
+      needsSeparator = false
+      sampleCount = 0
+    }
+    return body
+  }
 }
 
 // MARK: - Predictability (entropy over the cell-transition matrix)
@@ -400,6 +606,9 @@ struct AnalysisInputs {
   var shotsRaw: [RawShot]
   var nGated: Int
   var audioAvailable: Bool
+  /// Pre-serialized `tracks` array (see TrackWriter); nil emits no field.
+  var tracksJSON: String?
+  var trackSamples: Int = 0
 }
 
 enum AnalysisBuildError: LocalizedError {
@@ -411,7 +620,7 @@ enum AnalysisBuildError: LocalizedError {
     case .serializationFailed:
       return "could not serialize analysis.json"
     case .contractViolation(let detail):
-      return "analysis.json violates the schemaVersion 1 contract: \(detail)"
+      return "analysis.json violates the schemaVersion 2 contract: \(detail)"
     }
   }
 }
@@ -426,6 +635,12 @@ func buildAnalysisJSON(_ inp: AnalysisInputs) throws -> String {
     format: "on-device Vision pose (VNDetectHumanBodyPoseRequest), sampled at %.1f fps",
     inp.sampleFps
   ))
+  if inp.trackSamples > 0 {
+    notes.append(String(
+      format: "%d pose samples (COCO-17 keypoints, ~%.0f Hz) written for the skeleton overlay",
+      inp.trackSamples, ShotClass.trackHz
+    ))
+  }
   if inp.audioAvailable {
     notes.append(String(
       format: "shot moments from audio RMS-energy onsets (%.0f ms hop, sliding median + %.0f*MAD threshold, %.2f s merge, player-activity gated)",
@@ -455,7 +670,20 @@ func buildAnalysisJSON(_ inp: AnalysisInputs) throws -> String {
       let shot = rally[k]
       let next = rally[k + 1]
       let cell = cellOf(x: next.court.x, y: next.court.y)
-      shotsOut.append(["tSec": round2(shot.t), "player": shot.pid, "cell": cell])
+      let shotType = classifyShot(
+        isFirstOfRally: k == 0,
+        highContact: shot.highContact,
+        striker: shot.court,
+        land: next.court,
+        lowConfidencePose: shot.lowConfidence || next.lowConfidence
+      )
+      shotsOut.append([
+        "tSec": round2(shot.t),
+        "player": shot.pid,
+        "cell": cell,
+        "type": shotType.type,
+        "typeConfidence": round3(shotType.confidence),
+      ])
       placements[shot.pid, default: []].append(cell)
     }
   }
@@ -517,7 +745,7 @@ func buildAnalysisJSON(_ inp: AnalysisInputs) throws -> String {
     : round2(Double(rallyLens.reduce(0, +)) / Double(rallyLens.count))
 
   let analysis: [String: Any] = [
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "video": [
       "source": inp.sourceName,
       "license": "user footage",
@@ -546,15 +774,30 @@ func buildAnalysisJSON(_ inp: AnalysisInputs) throws -> String {
     throw AnalysisBuildError.serializationFailed
   }
   let data = try JSONSerialization.data(withJSONObject: analysis, options: [.sortedKeys])
-  guard let json = String(data: data, encoding: .utf8) else {
+  guard var json = String(data: data, encoding: .utf8) else {
     throw AnalysisBuildError.serializationFailed
   }
   try validateAnalysisShape(data)
+
+  // `tracks` is spliced into the finished document instead of being round-tripped
+  // through JSONSerialization: it is by far the largest part of the file, and it
+  // arrives already serialized (TrackWriter) precisely so the keypoints never
+  // exist as Foundation objects. Object key order carries no meaning in JSON, so
+  // going in right after the opening brace is safe.
+  if let tracks = inp.tracksJSON, !tracks.isEmpty {
+    guard json.hasPrefix("{"), json.dropFirst().first != "}" else {
+      throw AnalysisBuildError.serializationFailed
+    }
+    json.insert(contentsOf: "\"tracks\":\(tracks),", at: json.index(after: json.startIndex))
+  }
   return json
 }
 
 /// Mirror of the load-bearing checks in src/features/analysis/types.ts
-/// parseAnalysis — a shape this fails would parse to null in the app.
+/// parseAnalysis — a shape this fails would parse to null in the app. Runs on
+/// the document before `tracks` is spliced in; those samples are correct by
+/// construction (TrackWriter is the only writer) and re-parsing megabytes of
+/// keypoints just to check them would undo the point of streaming them.
 func validateAnalysisShape(_ data: Data) throws {
   func fail(_ detail: String) throws -> Never {
     throw AnalysisBuildError.contractViolation(detail)
@@ -562,7 +805,7 @@ func validateAnalysisShape(_ data: Data) throws {
   guard let root = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
     try fail("root is not an object")
   }
-  guard root["schemaVersion"] as? Int == 1 else { try fail("schemaVersion != 1") }
+  guard root["schemaVersion"] as? Int == 2 else { try fail("schemaVersion != 2") }
   guard let video = root["video"] as? [String: Any],
         video["source"] is String, video["license"] is String,
         (video["durationSec"] as? NSNumber)?.doubleValue ?? -1 >= 0,
@@ -605,12 +848,18 @@ func validateAnalysisShape(_ data: Data) throws {
         (rallies["avgShotsPerRally"] as? NSNumber)?.doubleValue ?? -1 >= 0,
         (rallies["longestRally"] as? NSNumber)?.doubleValue ?? -1 >= 0 else { try fail("rallies") }
   guard let shots = root["shots"] as? [[String: Any]] else { try fail("shots") }
+  let shotTypes = ["serve", "drive", "crossCourt", "drop", "boast", "volley", "unknown"]
   for shot in shots {
     guard (shot["tSec"] as? NSNumber)?.doubleValue ?? -1 >= 0,
           let pid = shot["player"] as? String, pid == "A" || pid == "B",
           let cell = shot["cell"] as? String,
           ["frontLeft", "frontRight", "backLeft", "backRight"].contains(cell) else {
       try fail("shot event")
+    }
+    if let type = shot["type"] {
+      guard let type = type as? String, shotTypes.contains(type) else { try fail("shot type") }
+      guard let conf = (shot["typeConfidence"] as? NSNumber)?.doubleValue,
+            conf >= 0, conf <= 1 else { try fail("shot typeConfidence") }
     }
   }
   guard let quality = root["quality"] as? [String: Any],

@@ -11,9 +11,7 @@ import { colors, radius, spacing, type } from "@/theme/tokens";
 
 import { CameraUnavailable, PermissionGate } from "./PermissionGate";
 import { ElapsedBadge, FlipButton, RecordButton } from "./RecordControls";
-import { SportChips } from "./SportChips";
 import { saveRecording } from "./storage";
-import type { Sport } from "./types";
 
 /** Keep-awake tag scoped to capture so other holds (if any appear) are unaffected. */
 const KEEP_AWAKE_TAG = "recording";
@@ -38,7 +36,6 @@ export function RecordScreen() {
   const [facing, setFacing] = useState<"back" | "front">("back");
   const [cameraReady, setCameraReady] = useState(false);
   const [mountFailed, setMountFailed] = useState(false);
-  const [sport, setSport] = useState<Sport>("unspecified");
   // Camera stays powered only while this tab is focused (battery + privacy).
   const [focused, setFocused] = useState(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -88,7 +85,7 @@ export function RecordScreen() {
         saveRecording({
           sourceUri: video.uri,
           durationSec: (Date.now() - startedAt) / 1000,
-          sport,
+          sport: "squash",
         });
         notifySuccess();
       }
@@ -145,11 +142,7 @@ export function RecordScreen() {
         onMountError={() => setMountFailed(true)}
       />
       <View style={[styles.overlay, { paddingTop: insets.top + spacing.md }]}>
-        {recording ? (
-          <ElapsedBadge elapsedSec={elapsedSec} />
-        ) : (
-          <SportChips value={sport} onChange={setSport} />
-        )}
+        {recording ? <ElapsedBadge elapsedSec={elapsedSec} /> : null}
         <View style={styles.spacer} />
         {phase === "saving" ? <Text style={styles.saving}>Saving…</Text> : null}
         <View style={styles.controls}>

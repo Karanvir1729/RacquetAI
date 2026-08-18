@@ -9,7 +9,7 @@
  * club courts), but the domain must fit the secondary racquet sports too — the
  * tag is what the scoring phase will branch on.
  */
-export const SPORTS = ["squash", "tennis", "pickleball", "badminton"] as const;
+export const SPORTS = ["squash"] as const;
 
 export type Sport = (typeof SPORTS)[number] | "unspecified";
 

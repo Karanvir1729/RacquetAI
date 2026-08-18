@@ -25,12 +25,27 @@ resulting `analysis.json` with `parseAnalysis`, persist it as `<imp-id>.analysis
 
 ## The contract
 
-Both sides build to `analysis.json` schemaVersion 1, typed in `types.ts` (pure — the pipeline
-can treat that file as the schema reference). Real analyses live as a third sidecar next to
-the footage: `<id>.analysis.json` in `<documents>/recordings/` (see `src/lib/analysisSidecar`;
+Both sides build to `analysis.json`, typed in `types.ts` (pure — the pipeline can treat that
+file as the schema reference). Real analyses live as a third sidecar next to the footage:
+`<id>.analysis.json` in `<documents>/recordings/` (see `src/lib/analysisSidecar`;
 `deleteRecording`'s prefix match cleans it up with the video). Every file read goes through
 `parseAnalysis`, which narrows from `unknown`: structural breakage → `null` → the screen's
 "not available" state; small numeric drift is clamped.
+
+**schemaVersion 2** is purely additive over 1 and BOTH parse — v1 sidecars are already on
+users' phones, and reading one must keep working:
+
+- `tracks`: pose keypoints sampled at ~8 Hz, `{ t, p: [{ id, k }] }` where `k` is 17 COCO
+  keypoints x `[x, y, conf]` flattened, x/y normalized against `video.width`/`video.height`.
+  Drives the skeleton overlay on the match video.
+- `type` / `typeConfidence` on each shot: `serve`/`drive`/`crossCourt`/`drop`/`boast`/`volley`
+  /`unknown`. There is deliberately no `lob` — without ball tracking it is indistinguishable
+  from a drive, so those come back `unknown`.
+
+A v1 file simply has neither, and the UI treats absence as "no skeleton, no types" rather than
+as an error. Malformed v2 detail degrades the same way: a pose whose `k` is the wrong length,
+holds a NaN, or claims a confidence outside 0..1 is dropped on its own, and an unreadable shot
+type is stripped while the shot itself survives.
 
 `demoAnalysis.ts` is PLACEHOLDER data — clearly-plausible hand-written numbers so the screen
 is reviewable now; the orchestrator overwrites its values with real analyzed-footage output.
@@ -39,12 +54,16 @@ is reviewable now; the orchestrator overwrites its values with real analyzed-foo
 
 | Module | Role |
 |---|---|
-| `types.ts` | The schemaVersion 1 contract + defensive `parseAnalysis`. Pure — unit-tested. |
-| `format.ts` | Percent/count/pattern-label formatting (no `toLocale*`). Pure — unit-tested. |
+| `types.ts` | The schemaVersion 1 + 2 contract and defensive `parseAnalysis`. Pure — unit-tested. |
+| `format.ts` | Percent/count/pattern/shot-type label formatting (no `toLocale*`). Pure — unit-tested. |
+| `shots.ts` | Shot-type counts per player + which shot the playhead is on. Pure — unit-tested. |
+| `pose.ts` | Overlay geometry: nearest track sample, letterbox-corrected bone/joint layout. Pure — unit-tested. |
 | `demoAnalysis.ts` | `DEMO_ANALYSIS` placeholder behind the Library "Sample" card. |
 | `storage.ts` | Sidecar text (via `src/lib/analysisSidecar`) → `parseAnalysis` → `MatchAnalysis \| null`. |
 | `AnalysisScreen.tsx` | Screen shell: back affordance, header, rally stats, player sections, quality footnote, error state. |
-| `PlayerSection.tsx` | One player's card: header stats + the three blocks below. |
+| `PlayerSection.tsx` | One player's card: header stats, shot-type breakdown, and the three blocks below. |
+| `MatchVideoCard.tsx` | Inline expo-video player, pose overlay on top, live read-out of the shot being played. |
+| `PoseOverlay.tsx` | The skeletons: plain absolutely-positioned Views (no native SVG dependency), one colour per player. |
 | `PlacementGrid.tsx` | 2x2 quadrant counts + shares, front wall at the top. |
 | `CoverageGrid.tsx` | 12x8 coverage heatmap — accent token at interpolated opacity, no computed hex. |
 | `PredictabilityCard.tsx` | Score bar, plain-English top pattern, entropy detail. |

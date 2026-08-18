@@ -24,9 +24,6 @@ const MONTHS = [
 
 const SPORT_LABELS: Record<Sport, string> = {
   squash: "Squash",
-  tennis: "Tennis",
-  pickleball: "Pickleball",
-  badminton: "Badminton",
   unspecified: "Untagged",
 };
 

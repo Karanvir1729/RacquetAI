@@ -1,9 +1,17 @@
 import { DEMO_ANALYSIS } from "../demoAnalysis";
-import { parseAnalysis } from "../types";
+import { parseAnalysis, POSE_VALUE_COUNT } from "../types";
 
 /** Stringify with shallow top-level overrides — mirrors the metadata.test.ts style. */
 const raw = (overrides: Record<string, unknown> = {}) =>
   JSON.stringify({ ...DEMO_ANALYSIS, ...overrides });
+
+/** A well-formed pose: 17 x [x, y, conf] with every keypoint confident. */
+const pose = (xy = 0.5): number[] =>
+  Array.from({ length: POSE_VALUE_COUNT }, (_, index) => (index % 3 === 2 ? 0.9 : xy));
+
+/** The demo re-stamped as v2, with whatever tracks/shots the case needs. */
+const rawV2 = (overrides: Record<string, unknown> = {}) =>
+  raw({ schemaVersion: 2, ...overrides });
 
 /** The demo's first player with shallow overrides, keeping the second player valid. */
 const rawWithPlayerA = (overrides: Record<string, unknown>) =>
@@ -28,7 +36,8 @@ describe("parseAnalysis structural rejection", () => {
   });
 
   it("rejects unknown schema versions rather than misreading them", () => {
-    expect(parseAnalysis(raw({ schemaVersion: 2 }))).toBeNull();
+    expect(parseAnalysis(raw({ schemaVersion: 3 }))).toBeNull();
+    expect(parseAnalysis(raw({ schemaVersion: "2" }))).toBeNull();
     expect(parseAnalysis(raw({ schemaVersion: undefined }))).toBeNull();
   });
 
@@ -127,5 +136,104 @@ describe("parseAnalysis clamping and degradation", () => {
     expect(
       parseAnalysis(raw({ quality: { ...quality, notes: "not an array" } }))?.quality.notes,
     ).toEqual([]);
+  });
+});
+
+describe("parseAnalysis schema v2", () => {
+  it("still reads a v1 file, with no tracks and no shot types", () => {
+    const parsed = parseAnalysis(raw());
+    expect(parsed?.schemaVersion).toBe(1);
+    expect(parsed?.tracks).toBeUndefined();
+    expect(parsed?.shots.every((shot) => shot.type === undefined)).toBe(true);
+  });
+
+  it("reads tracks and shot types off a v2 file", () => {
+    const parsed = parseAnalysis(
+      rawV2({
+        tracks: [{ t: 0.5, p: [{ id: "A", k: pose(0.25) }, { id: "B", k: pose(0.75) }] }],
+        shots: [{ tSec: 1.2, player: "A", cell: "backLeft", type: "boast", typeConfidence: 0.8 }],
+      }),
+    );
+    expect(parsed?.schemaVersion).toBe(2);
+    expect(parsed?.tracks).toEqual([
+      { t: 0.5, p: [{ id: "A", k: pose(0.25) }, { id: "B", k: pose(0.75) }] },
+    ]);
+    expect(parsed?.shots).toEqual([
+      { tSec: 1.2, player: "A", cell: "backLeft", type: "boast", typeConfidence: 0.8 },
+    ]);
+  });
+
+  it("sorts track frames so the overlay can binary-search them", () => {
+    const parsed = parseAnalysis(
+      rawV2({
+        tracks: [
+          { t: 2, p: [] },
+          { t: 0.5, p: [] },
+          { t: 1, p: [] },
+        ],
+      }),
+    );
+    expect(parsed?.tracks?.map((frame) => frame.t)).toEqual([0.5, 1, 2]);
+  });
+
+  it("keeps a frame whose players were all undetected", () => {
+    expect(parseAnalysis(rawV2({ tracks: [{ t: 1, p: [] }] }))?.tracks).toEqual([{ t: 1, p: [] }]);
+  });
+
+  it("drops a malformed pose without losing the other player or the frame", () => {
+    const broken = [
+      { id: "A", k: pose().slice(1) }, // wrong length
+      { id: "A", k: [...pose().slice(0, 4), Number.NaN, ...pose().slice(5)] }, // NaN
+      { id: "A", k: pose().map((value, index) => (index === 2 ? 1.4 : value)) }, // conf > 1
+      { id: "A", k: pose().map((value, index) => (index === 2 ? -0.1 : value)) }, // conf < 0
+      { id: "C", k: pose() }, // unknown player
+      { id: "A", k: "not an array" },
+      7,
+    ];
+    for (const bad of broken) {
+      const parsed = parseAnalysis(
+        rawV2({ tracks: [{ t: 1, p: [bad, { id: "B", k: pose(0.4) }] }] }),
+      );
+      expect(parsed?.tracks).toEqual([{ t: 1, p: [{ id: "B", k: pose(0.4) }] }]);
+    }
+  });
+
+  it("keeps the first of two poses claiming the same player", () => {
+    const parsed = parseAnalysis(
+      rawV2({ tracks: [{ t: 1, p: [{ id: "A", k: pose(0.1) }, { id: "A", k: pose(0.9) }] }] }),
+    );
+    expect(parsed?.tracks).toEqual([{ t: 1, p: [{ id: "A", k: pose(0.1) }] }]);
+  });
+
+  it("degrades unusable tracks to no tracks instead of failing the file", () => {
+    for (const tracks of ["nope", 7, {}, [], [{ t: "soon", p: [] }], [{ t: 1, p: "nope" }]]) {
+      const parsed = parseAnalysis(rawV2({ tracks }));
+      expect(parsed).not.toBeNull();
+      expect(parsed?.tracks).toBeUndefined();
+    }
+  });
+
+  it("drops an unreadable shot type but keeps the shot", () => {
+    const shots = [
+      { tSec: 1, player: "A", cell: "backLeft", type: "lob", typeConfidence: 0.9 },
+      { tSec: 2, player: "B", cell: "frontRight", type: 7 },
+    ];
+    expect(parseAnalysis(rawV2({ shots }))?.shots).toEqual([
+      { tSec: 1, player: "A", cell: "backLeft" },
+      { tSec: 2, player: "B", cell: "frontRight" },
+    ]);
+  });
+
+  it("clamps a type confidence and ignores one with no type beside it", () => {
+    const shots = [
+      { tSec: 1, player: "A", cell: "backLeft", type: "drive", typeConfidence: 1.4 },
+      { tSec: 2, player: "A", cell: "backLeft", type: "drop", typeConfidence: "high" },
+      { tSec: 3, player: "B", cell: "frontLeft", typeConfidence: 0.7 },
+    ];
+    expect(parseAnalysis(rawV2({ shots }))?.shots).toEqual([
+      { tSec: 1, player: "A", cell: "backLeft", type: "drive", typeConfidence: 1 },
+      { tSec: 2, player: "A", cell: "backLeft", type: "drop" },
+      { tSec: 3, player: "B", cell: "frontLeft" },
+    ]);
   });
 });

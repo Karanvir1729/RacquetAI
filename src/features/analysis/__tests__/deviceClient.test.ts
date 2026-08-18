@@ -76,7 +76,7 @@ describe("runDeviceAnalysis", () => {
   });
 
   it("rejects JSON that fails parseAnalysis validation", async () => {
-    const invalid = JSON.stringify({ ...DEMO_ANALYSIS, schemaVersion: 2 });
+    const invalid = JSON.stringify({ ...DEMO_ANALYSIS, schemaVersion: 3 });
     await expect(
       runDeviceAnalysis("file:///v.mp4", CORNERS, () => {}, fakeModule(invalid)),
     ).rejects.toBeInstanceOf(DeviceAnalysisError);

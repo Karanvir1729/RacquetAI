@@ -17,7 +17,7 @@ Bridges the Expo app to the offline pipeline (analyze.py). API contract
                               top-left; values may fall outside 0..1 because
                               court corners can sit outside the camera frame)
                               -> {"ok": true}, status moves to "analyzing"
-  GET  /jobs/<id>/analysis.json   schemaVersion-1 MatchAnalysis once "done"
+  GET  /jobs/<id>/analysis.json   schemaVersion-2 MatchAnalysis once "done"
 
 Flow: upload -> preparing (ffmpeg downscale to width<=854 + wav extract +
 reference mid-frame) -> corners_needed (always; tap-the-corners is the product

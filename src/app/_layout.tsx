@@ -1,13 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ComponentProps, useEffect } from "react";
-import { ColorValue, Platform, StyleSheet } from "react-native";
+import { ComponentProps, useCallback, useEffect, useState } from "react";
+import { ColorValue, Platform, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { TutorialScreen } from "@/features/onboarding/TutorialScreen";
 import { installCrashGuard, reportLastFatalError } from "@/lib/crashGuard";
+import { hasSeenTutorial, markTutorialSeen } from "@/lib/onboarding";
 import { colors } from "@/theme/tokens";
 
 // As early as possible: capture fatal JS errors that TestFlight logs strip.
@@ -31,6 +33,15 @@ function tabIcon(name: IoniconName) {
  * "theming" the root has to do.
  */
 export default function RootLayout() {
+  // Read once, synchronously, in the initializer: the flag lives in a local
+  // file, and deferring it to an effect would flash the tab bar before the
+  // tutorial on every cold start.
+  const [tutorialDone, setTutorialDone] = useState(hasSeenTutorial);
+  const finishTutorial = useCallback(() => {
+    markTutorialSeen();
+    setTutorialDone(true);
+  }, []);
+
   // Beta forensics: if the previous run died on a fatal JS error, show the
   // captured message so the tester can screenshot it.
   useEffect(() => {
@@ -75,6 +86,14 @@ export default function RootLayout() {
               canvas — force light icons there (app.json android.userInterfaceStyle
               matches). */}
           <StatusBar style={Platform.OS === "ios" ? "auto" : "light"} />
+          {/* Last sibling, absolutely filled: the tutorial covers the shell
+              instead of replacing it, so expo-router's Tabs never unmount and
+              remount underneath it. */}
+          {tutorialDone ? null : (
+            <View style={styles.tutorialLayer}>
+              <TutorialScreen onDone={finishTutorial} />
+            </View>
+          )}
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </ErrorBoundary>
@@ -83,4 +102,12 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
+  tutorialLayer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: colors.bg,
+  },
 });

@@ -64,7 +64,7 @@ curl -sf "$BASE/jobs/$JOB/analysis.json" -o /tmp/racquet_analysis_$JOB.json
 "$PY" - /tmp/racquet_analysis_$JOB.json <<'EOF'
 import json, sys
 d = json.load(open(sys.argv[1]))
-assert d["schemaVersion"] == 1, "schemaVersion != 1"
+assert d["schemaVersion"] in (1, 2), f'schemaVersion {d["schemaVersion"]}'
 ids = [p["id"] for p in d["players"]]
 assert ids == ["A", "B"], f"players {ids}"
 for p in d["players"]:

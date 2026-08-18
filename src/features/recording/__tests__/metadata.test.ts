@@ -16,10 +16,17 @@ describe("sidecar round-trip", () => {
   });
 
   it("round-trips every declared sport and the unspecified default", () => {
-    for (const sport of ["squash", "tennis", "pickleball", "badminton", "unspecified"] as const) {
+    for (const sport of ["squash", "unspecified"] as const) {
       const meta = { ...VALID, sport };
       expect(parseMetadata(serializeMetadata(meta))?.sport).toBe(sport);
     }
+  });
+
+  it("degrades a sport this build no longer records to the untagged default", () => {
+    // Sidecars written before the app narrowed to squash still open; the tag
+    // just falls back rather than invalidating the whole recording.
+    const raw = serializeMetadata(VALID).replace('"squash"', '"tennis"');
+    expect(parseMetadata(raw)?.sport).toBe("unspecified");
   });
 
   it("ignores unknown extra fields from a future writer", () => {

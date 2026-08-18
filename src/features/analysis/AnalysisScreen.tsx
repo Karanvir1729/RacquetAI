@@ -86,10 +86,10 @@ export function AnalysisScreen({ source, recordingId }: AnalysisScreenProps) {
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
         >
-          {videoUri !== null && <MatchVideoCard videoUri={videoUri} />}
+          {videoUri !== null && <MatchVideoCard videoUri={videoUri} analysis={analysis} />}
           <RallyStatsRow rallies={analysis.rallies} />
           {analysis.players.map((player) => (
-            <PlayerSection key={player.id} player={player} />
+            <PlayerSection key={player.id} player={player} shots={analysis.shots} />
           ))}
           <QualityFootnote quality={analysis.quality} />
         </ScrollView>

@@ -11,7 +11,10 @@ Stages:
   3. RTMPose (rtmlib, CPU) 2-person pose; nearest-neighbor 2-ID tracking with swap guard.
   4. Shot moments from audio onsets (librosa spectral flux); wrist-speed peaks if no audio.
   5. Placement via retrieval proxy: shot k lands where the opponent strikes shot k+1.
-  6. Analytics per player + verification artifacts + analysis.json (schemaVersion 1).
+  6. Shot type from the striker/landing geometry plus wrist-above-shoulder at contact.
+  7. Analytics per player + verification artifacts + analysis.json (schemaVersion 2:
+     adds `tracks`, the sampled pose keypoints the app draws as a skeleton overlay,
+     and `type`/`typeConfidence` on every shot).
 
 Court frame: x in [0, 6.4] (0 = left wall), y in [0, 9.75] (0 = front wall).
 """
@@ -40,6 +43,22 @@ WRIST_WIN_S = 0.30
 MIN_ALIGN_INLIERS = 25
 KPT_CONF = 0.3
 COURT_MARGIN = 0.8  # meters of slack when filtering detections to the court
+
+# schema v2 shot classification (see the schema v2 spec — the app and the Swift
+# engine implement the same thresholds, so these must not drift)
+TRACK_HZ = 8.0
+N_KPTS = 17
+FRONT_THIRD_Y = 3.25   # landing this far up the court is a front-court shot
+DEEP_Y = 6.5           # landing/striking behind this is the back third
+POSE_CONF_LOW = 0.25   # below this the court position is only a rough fix.
+                       # Calibrated to the ankle-score distribution this
+                       # pipeline actually produces (median ~0.35): the old
+                       # 0.5 sat above p75 and flagged nearly every shot,
+                       # which made typeConfidence a constant carrying no signal.
+SHOT_BASE_CONF = 0.8
+# NUL cannot appear in any value this pipeline emits, so the placeholder that
+# holds `tracks` open during pretty-printing can never collide with real data
+TRACKS_TOKEN = "\u0000tracks\u0000"
 
 # COCO-17 indices
 L_SHO, R_SHO, L_HIP, R_HIP = 5, 6, 11, 12
@@ -181,10 +200,11 @@ def detect_players(raw_dets, H_px2court):
     cands = []
     for det in raw_dets:
         k, s = det["kpts"], det["scores"]
-        ank = []
+        ank, ank_conf = [], []
         for j in (L_ANK, R_ANK):
             if s[j] > KPT_CONF:
                 ank.append(k[j])
+                ank_conf.append(float(s[j]))
         if not ank:
             continue
         ankle_px = np.mean(ank, axis=0)
@@ -201,6 +221,8 @@ def detect_players(raw_dets, H_px2court):
             "kpts": k, "scores": s, "ankle_px": ankle_px,
             "torso_val": det.get("torso_val"),
             "court": (float(np.clip(cx, 0, COURT_W)), float(np.clip(cy, 0, COURT_L))),
+            # the court fix is only as good as the ankles it was projected from
+            "pos_conf": float(np.mean(ank_conf)),
             "area": float(w * h), "bbox_h": float(h),
         })
     cands.sort(key=lambda c: -c["area"])
@@ -346,6 +368,146 @@ def nearest_tracked(track_frames, times, t, pid, max_dt=0.6):
         if dt < best_dt and pid in track_frames[i]:
             best_i, best_dt = i, dt
     return best_i
+
+
+# ---------------------------------------------------------------- schema v2: tracks
+def build_tracks(times, track_frames, width, height):
+    """Sampled COCO-17 keypoints for the app's skeleton overlay.
+
+    Coordinates are normalized against the analysed frame so the app can scale
+    them onto whatever size it renders the video at, and rounded to 3 dp because
+    at 8 Hz x 2 players x 51 numbers the raw floats would dominate a file the
+    phone has to keep on disk. Keypoints the pose model places just outside the
+    frame are clamped rather than dropped — the app draws the skeleton inside
+    the video box, and a limb at -0.02 would land on the surrounding chrome.
+    """
+    if width <= 0 or height <= 0:
+        return []
+    # the sampler targets SAMPLE_FPS but lands wherever the source fps divides,
+    # so decimate only when it overshoots 8 Hz by a real margin
+    min_dt = 0.75 / TRACK_HZ
+    out, last_t = [], None
+    for i, t in enumerate(times):
+        if last_t is not None and t - last_t < min_dt:
+            continue
+        players = []
+        for pid in ("A", "B"):
+            det = track_frames[i].get(pid)
+            if det is None:
+                continue
+            k, s = det["kpts"], det["scores"]
+            if len(k) < N_KPTS or len(s) < N_KPTS:
+                continue
+            flat = []
+            for j in range(N_KPTS):
+                # _unit() and not a bare clamp: min/max PROPAGATE nan, and
+                # json.dumps then writes a bare NaN token — Python reads that
+                # back happily but the app's JSON.parse throws on it, which
+                # would make the whole analysis unopenable on the phone.
+                flat.append(_unit(float(k[j][0]) / width if width else 0.0))
+                flat.append(_unit(float(k[j][1]) / height if height else 0.0))
+                flat.append(_unit(s[j]))
+            players.append({"id": pid, "k": flat})
+        if not players:
+            continue  # nobody detected: a sample with an empty p[] is pure overhead
+        out.append({"t": round(float(t), 3), "p": players})
+        last_t = t
+    return out
+
+
+# ---------------------------------------------------------------- schema v2: shot type
+def high_contact(det):
+    """Did the striker meet the ball above the shoulder? — the volley signature.
+
+    Image y grows downward, so "above" is the smaller y. Only the higher of the
+    two wrists matters; a shoulder hidden behind the body falls back to the
+    other one, which is close enough for an above/below test.
+    """
+    k, s = det["kpts"], det["scores"]
+    if len(k) < N_KPTS or len(s) < N_KPTS:
+        return False
+    pair = None
+    for wri, sho in ((L_WRI, L_SHO), (R_WRI, R_SHO)):
+        if s[wri] >= KPT_CONF and (pair is None or k[wri][1] < k[pair[0]][1]):
+            pair = (wri, sho)
+    if pair is None:
+        return False
+    wri, sho = pair
+    if s[sho] < KPT_CONF:
+        sho = R_SHO if sho == L_SHO else L_SHO
+        if s[sho] < KPT_CONF:
+            return False
+    return float(k[wri][1]) < float(k[sho][1])
+
+
+def _unit(value):
+    """Clamp to [0, 1], mapping non-finite input to 0 so the JSON stays valid."""
+    v = float(value)
+    if not math.isfinite(v):
+        return 0.0
+    return round(min(max(v, 0.0), 1.0), 3)
+
+
+def _half(x):
+    """-1 / 0 / +1 relative to the half-court line."""
+    return (x > MID_X) - (x < MID_X)
+
+
+def classify_shot(is_serve, contact_high, striker, land):
+    """Shot type from the striker/landing geometry, per the schema v2 rules.
+
+    There is deliberately no "lob" class: without ball tracking a lob and a
+    drive share the same striker/landing pair, and a confident wrong label is
+    worse than none.
+    """
+    if is_serve:
+        return "serve"
+    if contact_high and land is not None:
+        return "volley"
+    if land is None:
+        return "unknown"
+    sx, sy = striker
+    lx, ly = land
+    if ly < FRONT_THIRD_Y:
+        # off the side wall from the back corner and across — that is a boast
+        if sy > DEEP_Y and _half(sx) != _half(lx):
+            return "boast"
+        return "drop"
+    if _half(sx) == 0 or _half(lx) == 0:
+        # dead on the half-court line: the side that separates a drive from a
+        # cross-court is exactly what we cannot read here
+        return "unknown"
+    # Past the front third the depth no longer changes the name — a ball driven
+    # to mid-court is still a drive — so the side alone decides. Rule 5's old
+    # deep-only test left ~46% of shots unlabelled on well-calibrated footage,
+    # because retrieval positions cluster in the 3.25-6.5 m band it excluded.
+    return "drive" if _half(sx) == _half(lx) else "crossCourt"
+
+
+def shot_confidence(shot_type, striker_conf, land_conf):
+    if shot_type == "unknown":
+        return 0.0
+    conf = SHOT_BASE_CONF
+    # geometry is the whole basis of the label, so a shaky court fix at either
+    # end halves the claim
+    if any(c is not None and c < POSE_CONF_LOW for c in (striker_conf, land_conf)):
+        conf *= 0.5
+    return round(min(max(conf, 0.0), 1.0), 3)
+
+
+def dump_analysis(analysis, path):
+    """Write analysis.json pretty-printed, except `tracks` — one sample per line.
+
+    indent=2 puts every number of a 51-element keypoint array on its own line,
+    which inflates the file the phone stores by roughly an order of magnitude.
+    """
+    tracks = analysis.get("tracks")
+    text = json.dumps(dict(analysis, tracks=TRACKS_TOKEN) if tracks else analysis, indent=2)
+    if tracks:
+        body = ",\n".join("    " + json.dumps(s, separators=(",", ":")) for s in tracks)
+        text = text.replace(json.dumps(TRACKS_TOKEN), "[\n" + body + "\n  ]", 1)
+    with open(path, "w") as f:
+        f.write(text + "\n")
 
 
 # ---------------------------------------------------------------- analytics
@@ -563,7 +725,7 @@ def main():
     # real swings peak >= ~2 bbox-heights/s, bounces/walking < ~1.9)
     WRIST_PEAK_GATE = 1.9
     ANKLE_GATE = 0.30   # meters moved over the window (fallback signal)
-    shots_raw = []      # (t, striker_pid, court_pos)
+    shots_raw = []      # (t, striker_pid, court_pos, track_frame_index)
     n_gated = 0
     for t in onsets:
         lo = max(0, int(np.searchsorted(times, t - WRIST_WIN_S)))
@@ -593,7 +755,7 @@ def main():
         i = nearest_tracked(track_frames, times, t, pid)
         if i is None:
             continue
-        shots_raw.append((float(t), pid, track_frames[i][pid]["court"]))
+        shots_raw.append((float(t), pid, track_frames[i][pid]["court"], i))
     if n_gated:
         notes.append(f"{n_gated} audio onsets rejected by the player-activity gate "
                      "(likely neighbouring courts, voices or bounces)")
@@ -614,10 +776,22 @@ def main():
     placements = {"A": [], "B": []}  # ordered cells per striker
     for r in rallies:
         for k in range(len(r) - 1):
-            t_k, pid_k, _pos_k = r[k]
-            _t_n, _pid_n, pos_n = r[k + 1]  # opponent's retrieval position
+            t_k, pid_k, pos_k, idx_k = r[k]
+            _t_n, pid_n, pos_n, idx_n = r[k + 1]  # opponent's retrieval position
             cell = cell_of(*pos_n)
-            shots_out.append({"tSec": round(t_k, 2), "player": pid_k, "cell": cell})
+            # both indices came from nearest_tracked for that player, so the
+            # detection behind each end of the shot is always there
+            striker_det = track_frames[idx_k][pid_k]
+            land_det = track_frames[idx_n][pid_n]
+            shot_type = classify_shot(k == 0, high_contact(striker_det), pos_k, pos_n)
+            shots_out.append({
+                "tSec": round(t_k, 2),
+                "player": pid_k,
+                "cell": cell,
+                "type": shot_type,
+                "typeConfidence": shot_confidence(shot_type, striker_det["pos_conf"],
+                                                  land_det["pos_conf"]),
+            })
             placements[pid_k].append(cell)
 
     total_strikes = sum(len(r) for r in rallies)
@@ -659,9 +833,11 @@ def main():
             "predictability": entropy_predictability(placements[pid]),
         })
 
+    tracks = build_tracks(times, track_frames, width, height)
+
     rally_lens = [len(r) for r in rallies]
     analysis = {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "video": {
             "source": meta.get("source", os.path.basename(args.video)),
             "license": meta.get("license", "unknown"),
@@ -678,6 +854,7 @@ def main():
             "longestRally": max(rally_lens) if rally_lens else 0,
         },
         "shots": shots_out,
+        "tracks": tracks,
         "quality": {
             "framesAnalyzed": frames_analyzed,
             "bothPlayersDetectedPct": round(both_pct, 1),
@@ -685,8 +862,8 @@ def main():
             "notes": notes,
         },
     }
-    with open(os.path.join(args.out, "analysis.json"), "w") as f:
-        json.dump(analysis, f, indent=2)
+    analysis_path = os.path.join(args.out, "analysis.json")
+    dump_analysis(analysis, analysis_path)
 
     # ---------------- verification artifacts ----------------
     colors = {"A": (80, 220, 80), "B": (80, 120, 255)}
@@ -735,6 +912,9 @@ def main():
     fig.savefig(os.path.join(args.out, "onsets.png"), dpi=110)
     plt.close(fig)
 
+    shot_types = {}
+    for s in shots_out:
+        shot_types[s["type"]] = shot_types.get(s["type"], 0) + 1
     print(json.dumps({
         "framesAnalyzed": frames_analyzed,
         "bothPlayersDetectedPct": round(both_pct, 1),
@@ -745,6 +925,9 @@ def main():
         "placedShots": len(shots_out),
         "shotsA": players[0]["shots"], "shotsB": players[1]["shots"],
         "tTimeA": players[0]["tTimePct"], "tTimeB": players[1]["tTimePct"],
+        "shotTypes": shot_types,
+        "trackSamples": len(tracks),
+        "analysisBytes": os.path.getsize(analysis_path),
     }, indent=2))
 
 

@@ -4,7 +4,8 @@
  * match). Every percentage, count, and pattern label on the analysis screen
  * renders through here so the unit tests pin the exact strings.
  */
-import { COURT_CELLS, type CourtCell } from "./types";
+import type { ShotTypeCount } from "./shots";
+import { COURT_CELLS, type CourtCell, type ShotType } from "./types";
 
 const CELL_LABELS: Record<CourtCell, string> = {
   frontLeft: "Front left",
@@ -13,11 +14,42 @@ const CELL_LABELS: Record<CourtCell, string> = {
   backRight: "Back right",
 };
 
+/** Display name plus the two count forms — "1 drop" / "5 drops". */
+const SHOT_TYPE_LABELS: Record<ShotType, { name: string; one: string; many: string }> = {
+  serve: { name: "Serve", one: "serve", many: "serves" },
+  drive: { name: "Drive", one: "drive", many: "drives" },
+  crossCourt: { name: "Cross-court", one: "cross-court", many: "cross-courts" },
+  drop: { name: "Drop", one: "drop", many: "drops" },
+  boast: { name: "Boast", one: "boast", many: "boasts" },
+  volley: { name: "Volley", one: "volley", many: "volleys" },
+  // The classifier says "unknown" when the evidence is genuinely ambiguous;
+  // the UI says so plainly rather than dressing it up as a shot class.
+  unknown: { name: "Unclassified", one: "unclassified", many: "unclassified" },
+};
+
 const CELL_NAME_PATTERN = new RegExp(`\\b(${COURT_CELLS.join("|")})\\b`, "g");
 
 /** "frontLeft" → "Front left". */
 export function cellLabel(cell: CourtCell): string {
   return CELL_LABELS[cell];
+}
+
+/** "crossCourt" → "Cross-court"; the em dash stands in for an unlabelled shot. */
+export function shotTypeLabel(type: ShotType | undefined): string {
+  return type === undefined ? "—" : SHOT_TYPE_LABELS[type].name;
+}
+
+/**
+ * A player's classified shots as one line: "12 drives · 5 drops · 3 boasts".
+ * Empty when nothing is classified, so the caller can drop the whole row.
+ */
+export function formatShotTypeBreakdown(counts: readonly ShotTypeCount[]): string {
+  return counts
+    .map(({ type, count }) => {
+      const labels = SHOT_TYPE_LABELS[type];
+      return `${formatCount(count)} ${count === 1 ? labels.one : labels.many}`;
+    })
+    .join(" · ");
 }
 
 /** Fraction 0..1 → whole-percent label: 0.62 → "62%". Clamps garbage into 0–100%. */

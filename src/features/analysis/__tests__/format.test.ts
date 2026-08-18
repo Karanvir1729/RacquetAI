@@ -1,4 +1,12 @@
-import { cellLabel, formatCount, formatPercent, heatOpacity, prettyPattern } from "../format";
+import {
+  cellLabel,
+  formatCount,
+  formatPercent,
+  formatShotTypeBreakdown,
+  heatOpacity,
+  prettyPattern,
+  shotTypeLabel,
+} from "../format";
 
 describe("formatPercent", () => {
   it("renders a fraction as a whole percent", () => {
@@ -36,6 +44,35 @@ describe("cellLabel", () => {
     expect(cellLabel("frontRight")).toBe("Front right");
     expect(cellLabel("backLeft")).toBe("Back left");
     expect(cellLabel("backRight")).toBe("Back right");
+  });
+});
+
+describe("shotTypeLabel", () => {
+  it("labels every shot class", () => {
+    expect(shotTypeLabel("serve")).toBe("Serve");
+    expect(shotTypeLabel("crossCourt")).toBe("Cross-court");
+    expect(shotTypeLabel("boast")).toBe("Boast");
+    expect(shotTypeLabel("unknown")).toBe("Unclassified");
+  });
+
+  it("shows a dash for a shot the writer never typed (v1 data)", () => {
+    expect(shotTypeLabel(undefined)).toBe("—");
+  });
+});
+
+describe("formatShotTypeBreakdown", () => {
+  it("renders the counts as one line, singular at one", () => {
+    expect(
+      formatShotTypeBreakdown([
+        { type: "drive", count: 12 },
+        { type: "drop", count: 5 },
+        { type: "boast", count: 1 },
+      ]),
+    ).toBe("12 drives · 5 drops · 1 boast");
+  });
+
+  it("is empty when nothing is classified, so the caller can drop the row", () => {
+    expect(formatShotTypeBreakdown([])).toBe("");
   });
 });
 
