@@ -94,6 +94,9 @@ export default function RootLayout() {
             {/* Match analysis — reached from Library cards, never the tab bar
                 (href: null hides it there); see features/analysis. */}
             <Tabs.Screen name="analysis" options={{ href: null }} />
+            {/* Score keeper — the courtside scoreboard, pushed from the
+                Library's card. Two tabs is the shape of the app. */}
+            <Tabs.Screen name="referee" options={{ href: null }} />
             {/* Import & analyze flow — reached from the Library's import card. */}
             <Tabs.Screen name="import-analysis" options={{ href: null }} />
             {/* RacquetIQ Pro — pushed from the import card once the free

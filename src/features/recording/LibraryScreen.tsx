@@ -20,6 +20,7 @@ import { HowItWorksCard } from "./HowItWorksCard";
 import { ImportAnalysisCard } from "./ImportAnalysisCard";
 import { ImportedAnalysesSection } from "./ImportedAnalysesSection";
 import { PlayerModal } from "./PlayerModal";
+import { ScoreKeeperCard } from "./ScoreKeeperCard";
 import { deleteRecording } from "./storage";
 import { useRecordings } from "./useRecordings";
 import type { RecordingEntry } from "./types";
@@ -86,6 +87,7 @@ export function LibraryScreen() {
         // Import & analyze sits beside it: analyzing existing footage needs no
         // recordings at all.
         <View style={styles.emptyWrap}>
+          <ScoreKeeperCard />
           <DemoAnalysisCard />
           <ImportAnalysisCard />
           <ImportedAnalysesSection />
@@ -106,6 +108,7 @@ export function LibraryScreen() {
           contentContainerStyle={styles.list}
           ListHeaderComponent={
             <View style={styles.listHeader}>
+              <ScoreKeeperCard />
               <DemoAnalysisCard />
               <ImportAnalysisCard />
               <ImportedAnalysesSection />
