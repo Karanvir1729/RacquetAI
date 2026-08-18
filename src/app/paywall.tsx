@@ -21,7 +21,7 @@ import {
  */
 export default function PaywallRoute() {
   const { entitlement, loading, purchasingAvailable } = useSubscriptionStatus();
-  const storePrices = useStorePrices();
+  const storePrices = useStorePrices(purchasingAvailable);
   return (
     <PaywallScreen
       entitlement={entitlement}
@@ -39,10 +39,15 @@ export default function PaywallRoute() {
  * answers — the screen falls back to its built-in USD labels, so a slow or
  * unreachable store shows the offer rather than an empty card.
  */
-function useStorePrices(): Partial<Record<PlanId, string>> | undefined {
+function useStorePrices(configured: boolean): Partial<Record<PlanId, string>> | undefined {
   const [prices, setPrices] = useState<Partial<Record<PlanId, string>>>();
 
+  // Keyed on `configured`, not [] — this screen can mount before the root
+  // layout's configure() effect has run, and a one-shot fetch would then miss
+  // the store forever and quote the built-in USD labels to every storefront,
+  // which is the exact failure this price lookup exists to prevent.
   useEffect(() => {
+    if (!configured) return;
     let cancelled = false;
     void (async () => {
       const result = await loadPackages();
@@ -56,7 +61,7 @@ function useStorePrices(): Partial<Record<PlanId, string>> | undefined {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [configured]);
 
   return prices;
 }

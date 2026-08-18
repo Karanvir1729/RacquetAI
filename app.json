@@ -65,14 +65,14 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "RacquetAI uses the camera to record your matches so you can review them and, later, have them scored automatically.",
-          "microphonePermission": "RacquetAI records match audio along with the video so playback includes the sound of the rally."
+          "cameraPermission": "RacquetIQ uses the camera to record your matches so you can review them and have them analyzed on this device.",
+          "microphonePermission": "RacquetIQ records match audio with the video because the analysis listens for the sound of ball strikes to find your shots and rallies."
         }
       ],
       [
         "expo-media-library",
         {
-          "savePhotosPermission": "RacquetAI saves finished match recordings to your photo library so your footage stays yours outside the app."
+          "savePhotosPermission": "RacquetIQ saves finished match recordings to your photo library so your footage stays yours outside the app."
         }
       ],
       "expo-video"

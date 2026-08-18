@@ -120,6 +120,20 @@ export const PURCHASES_UNAVAILABLE =
   "In-app purchasing isn't available in this build — the App Store connection isn't configured yet. " +
   "Nothing is locked: keep using RacquetIQ as normal.";
 
+/**
+ * Shown the moment the store says a purchase completed, BEFORE (and regardless
+ * of whether) the entitlement read confirms it.
+ *
+ * The wording stops short of "you are subscribed" on purpose: what we know is
+ * that the store completed the transaction, not that we could read the
+ * entitlement back — an unreadable CustomerInfo leaves that at "unknown". So it
+ * confirms the charge, which is the part the user needs to hear immediately,
+ * and points at Restore as the way to settle anything that still looks locked.
+ */
+export const PURCHASE_CONFIRMED =
+  "Purchase complete — thank you. RacquetIQ Pro is being applied to this Apple ID. " +
+  "If anything still looks locked in a moment, tap Restore purchases below.";
+
 export const SUBSCRIBED_TITLE = "You're subscribed";
 export const SUBSCRIBED_BODY =
   "RacquetIQ Pro is active on this Apple ID. Analyse as many matches as you like.";

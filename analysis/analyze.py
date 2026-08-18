@@ -56,6 +56,51 @@ POSE_CONF_LOW = 0.25   # below this the court position is only a rough fix.
                        # 0.5 sat above p75 and flagged nearly every shot,
                        # which made typeConfidence a constant carrying no signal.
 SHOT_BASE_CONF = 0.8
+
+# ---- appearance re-identification (shared spec with the Swift engine) ----
+# Torso patch geometry, in units of the subject's own torso length, so the patch
+# shrinks with distance instead of swallowing the background at the back wall.
+APP_CENTER_F = 0.45     # patch centre, fraction of the way shoulders -> hips
+APP_HALF_H_F = 0.34     # half-height = this x torso length
+APP_HALF_W_F = 0.36     # half-width  = this x effective shoulder width
+APP_MIN_SHO_W_F = 0.35  # shoulders seen edge-on collapse to ~0 px wide; floor the
+                        # width at this x torso length so the patch never degenerates
+APP_MIN_TORSO_PX = 8.0  # below this the torso is too few pixels to characterise
+APP_MIN_PIXELS = 24     # clipped patch must still hold this many pixels
+APP_MIN_INSIDE = 0.5    # ... and this fraction of its unclipped area
+# Descriptor = (r, g, L): rg-chromaticity of the patch median plus its luma
+# relative to the frame's own exposure. Chromaticity is already invariant to
+# illumination scale; L is invariant to a global auto-exposure shift.
+APP_CHROMA_W = 32.0     # 1 / the within-person spread of each component, averaged
+APP_LUMA_W = 2.6        # over the three audit clips (tools/identity_audit.py
+                        # --calibrate). For two classes with roughly diagonal
+                        # covariance, standardising this way makes plain
+                        # Euclidean distance the right discriminant.
+                        # Keep BOTH halves: luma usually carries the most
+                        # (per-clip separability 5.1 / 1.6 / 6.3) because these
+                        # players wear dark navy against white, but on the clip
+                        # where luma is weakest, chroma is the strongest single
+                        # component (r = 2.1 against luma's 1.6). Colour is what
+                        # rescues two players of similar brightness.
+APP_LAMBDA = 0.5        # appearance weight in the association cost. Swept against
+                        # an oracle-primed association test over all three clips
+                        # (tools/identity_audit.py --calibrate): re-acquisition
+                        # error after an occlusion gap falls from 15.5% at
+                        # lambda=0 to a flat 2.2-2.7% plateau spanning 0.2-1.5,
+                        # while adjacent frames stay at 1 error in 4365. 0.5 is
+                        # the centre of that plateau rather than the grid minimum
+                        # (0.35, better by 2 decisions in 1018 -- noise), so the
+                        # value does not depend on where the grid was sampled.
+APP_EMA_ALPHA = 0.05    # template EMA rate: ~20 samples (2.5 s) time constant
+APP_SEP_MIN_M = 1.2     # players must be this far apart on court to trust identity
+APP_BOX_OVERLAP_MAX = 0.15   # ... and their pixel boxes may not overlap more
+APP_MARGIN_MIN = 0.35        # ... and the keep/swap decision must be this decisive
+APP_LEARN_MARGIN = 0.0       # ... and the detection must already look more like the
+                             # template it is about to update than like the other one
+POS_SCALE_M = 0.75      # metres of plausible motion between samples at 8 fps
+POS_SPEED_MS = 3.0      # position uncertainty growth while an identity is unseen
+POS_NEUTRAL = 3.0       # cost charged against an identity with no known position
+
 # NUL cannot appear in any value this pipeline emits, so the placeholder that
 # holds `tracks` open during pretty-printing can never collide with real data
 TRACKS_TOKEN = "\u0000tracks\u0000"
@@ -194,6 +239,150 @@ def build_alignments(directs, steps):
     return out, 100.0 * anchored / max(n, 1)
 
 
+# ---------------------------------------------------------------- appearance
+def frame_exposure_ref(frame):
+    """Median grey level of the whole frame, the exposure the patch is read against.
+
+    Downsampled 8x first: the median of a 107x60 image is the same number for
+    this purpose and costs ~1% of the full-resolution sort.
+    """
+    small = cv2.resize(frame, (0, 0), fx=0.125, fy=0.125, interpolation=cv2.INTER_AREA)
+    return float(np.median(cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)))
+
+
+def torso_patch_box(kpts, scores, width, height):
+    """Axis-aligned torso patch (x0, y0, x1, y1) clipped to the frame, or None.
+
+    Sized from the subject's own torso, so a player at the back wall and the same
+    player at the front wall yield patches covering the same piece of shirt.
+    """
+    if any(scores[j] <= KPT_CONF for j in (L_SHO, R_SHO, L_HIP, R_HIP)):
+        return None
+    sho = 0.5 * (kpts[L_SHO] + kpts[R_SHO])
+    hip = 0.5 * (kpts[L_HIP] + kpts[R_HIP])
+    torso_len = float(np.hypot(*(hip - sho)))
+    if torso_len < APP_MIN_TORSO_PX:
+        return None
+    cx, cy = sho + APP_CENTER_F * (hip - sho)
+    sho_w = float(np.hypot(*(kpts[L_SHO] - kpts[R_SHO])))
+    half_w = APP_HALF_W_F * max(sho_w, APP_MIN_SHO_W_F * torso_len)
+    half_h = APP_HALF_H_F * torso_len
+    x0, x1 = int(round(cx - half_w)), int(round(cx + half_w))
+    y0, y1 = int(round(cy - half_h)), int(round(cy + half_h))
+    full = max((x1 - x0) * (y1 - y0), 1)
+    x0, y0 = max(0, x0), max(0, y0)
+    x1, y1 = min(width, x1), min(height, y1)
+    if x1 <= x0 or y1 <= y0:
+        return None
+    inside = (x1 - x0) * (y1 - y0)
+    # a patch mostly off-frame describes the frame edge, not the player
+    if inside < APP_MIN_PIXELS or inside < APP_MIN_INSIDE * full:
+        return None
+    return x0, y0, x1, y1
+
+
+def torso_appearance(frame, kpts, scores, exposure_ref):
+    """Appearance descriptor (r, g, L) for one detection, or None.
+
+    The patch is reduced by a per-channel MEDIAN: a racquet, an arm or a line of
+    background crossing the patch moves a mean but not a median. (r, g) is
+    rg-chromaticity, invariant to how brightly the patch happens to be lit; L is
+    log luma relative to the frame's own median grey, so a camera auto-exposure
+    step shifts every player equally and cancels.
+    """
+    h, w = frame.shape[:2]
+    box = torso_patch_box(kpts, scores, w, h)
+    if box is None:
+        return None
+    x0, y0, x1, y1 = box
+    med = np.median(frame[y0:y1, x0:x1].reshape(-1, 3), axis=0)
+    b, g, r = float(med[0]), float(med[1]), float(med[2])
+    total = b + g + r
+    if total < 1e-6:
+        return None
+    lum = total / 3.0
+    return (r / total, g / total,
+            float(math.log((lum + 1.0) / (max(exposure_ref, 0.0) + 1.0))))
+
+
+def appearance_distance(u, v):
+    """Weighted Euclidean distance between two (r, g, L) descriptors."""
+    dr = APP_CHROMA_W * (u[0] - v[0])
+    dg = APP_CHROMA_W * (u[1] - v[1])
+    dl = APP_LUMA_W * (u[2] - v[2])
+    return math.sqrt(dr * dr + dg * dg + dl * dl)
+
+
+def keypoint_box(kpts, scores):
+    """Pixel bounding box over confidently-placed keypoints, or None."""
+    vis = kpts[scores > KPT_CONF]
+    if len(vis) < 2:
+        return None
+    return (float(vis[:, 0].min()), float(vis[:, 1].min()),
+            float(vis[:, 0].max()), float(vis[:, 1].max()))
+
+
+def fill_appearance(video_path, times, raw_frames, fps, duration):
+    """Add `app` to every cached detection by re-decoding the video.
+
+    Used to upgrade a v2 pose cache without re-running pose inference. The
+    sampling arithmetic is the same as pass 1's, so sampled frame j lines up with
+    raw_frames[j]; that is asserted rather than assumed, because silently pairing
+    a player's keypoints with a different frame's pixels would poison every
+    descriptor while looking perfectly healthy.
+    """
+    cap = cv2.VideoCapture(video_path)
+    stride = max(1, round(fps / SAMPLE_FPS))
+    j = idx = 0
+    while j < len(times):
+        ok, frame = cap.read()
+        if not ok:
+            break
+        if idx % stride:
+            idx += 1
+            continue
+        t = idx / fps
+        if t > duration:
+            break
+        if abs(t - times[j]) > 1e-6:
+            cap.release()
+            raise RuntimeError(
+                f"pose cache does not line up with {video_path} at sample {j} "
+                f"(cache t={times[j]:.4f}s, decode t={t:.4f}s). Delete "
+                "pose_cache_v2.pkl and re-run to rebuild it from scratch.")
+        exposure = frame_exposure_ref(frame)
+        for det in raw_frames[j]:
+            det["app"] = torso_appearance(frame, det["kpts"], det["scores"], exposure)
+        j += 1
+        idx += 1
+        if j % 400 == 0:
+            print(f"  ... appearance {t:.0f}s / {duration:.0f}s")
+    cap.release()
+    if j < len(times):
+        raise RuntimeError(f"video ended after {j} of {len(times)} cached samples")
+    n_app = sum(1 for f in raw_frames for d in f if d.get("app") is not None)
+    n_det = sum(len(f) for f in raw_frames)
+    print(f"appearance: {n_app}/{n_det} detections described "
+          f"({100.0 * n_app / max(n_det, 1):.1f}%)")
+
+
+def box_overlap(a, b):
+    """Intersection area over the smaller box's area; 0 when either is missing.
+
+    Overlap-over-min rather than IoU because the question is "is one player in
+    front of the other", and a small player fully in front of a large one has a
+    low IoU but an overlap of 1.
+    """
+    if a is None or b is None:
+        return 0.0
+    ix = max(0.0, min(a[2], b[2]) - max(a[0], b[0]))
+    iy = max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
+    inter = ix * iy
+    small = min(max(a[2] - a[0], 0.0) * max(a[3] - a[1], 0.0),
+                max(b[2] - b[0], 0.0) * max(b[3] - b[1], 0.0))
+    return inter / small if small > 0 else 0.0
+
+
 # ---------------------------------------------------------------- pose + tracking
 def detect_players(raw_dets, H_px2court):
     """Filter raw pose detections to in-court players; keep the 2 biggest."""
@@ -220,6 +409,8 @@ def detect_players(raw_dets, H_px2court):
         cands.append({
             "kpts": k, "scores": s, "ankle_px": ankle_px,
             "torso_val": det.get("torso_val"),
+            "app": det.get("app"),
+            "box": keypoint_box(k, s),
             "court": (float(np.clip(cx, 0, COURT_W)), float(np.clip(cy, 0, COURT_L))),
             # the court fix is only as good as the ankles it was projected from
             "pos_conf": float(np.mean(ank_conf)),
@@ -230,45 +421,124 @@ def detect_players(raw_dets, H_px2court):
 
 
 class TwoTracker:
-    """Nearest-neighbor 2-ID association on court positions with a swap guard."""
+    """2-ID association by total cost over both pairings: normalised court
+    distance + APP_LAMBDA x appearance distance to a per-identity template.
+
+    Position alone is a coin flip exactly when it matters — the moment two
+    players cross or occlude each other — and a wrong call there persists,
+    because the next frame's position prior now agrees with the mistake. The
+    shirt does not become ambiguous during a crossing, so appearance is what
+    breaks the tie. Templates are learned only on frames where identity is not
+    in doubt, so an ambiguous overlap can never teach a template the wrong
+    player and make the swap permanent.
+    """
 
     def __init__(self):
         self.pos = {"A": None, "B": None}
+        self.seen_t = {"A": None, "B": None}   # time of that position fix
+        self.tmpl = {"A": None, "B": None}     # EMA appearance template
 
-    def update(self, dets):
+    def update(self, dets, t=None):
         out = {}
         if len(dets) == 0:
             return out
         if self.pos["A"] is None and self.pos["B"] is None:
-            # first sight: leftmost player becomes A
+            # first sight: leftmost player becomes A (unchanged convention)
             dets = sorted(dets, key=lambda d: d["court"][0])
             out["A"] = dets[0]
             if len(dets) > 1:
                 out["B"] = dets[1]
+            if len(out) == 2 and self._unoccluded(out["A"], out["B"]):
+                # nothing to protect yet: at first sight the convention *defines*
+                # which player is A, so these descriptors cannot be the wrong ones
+                for pid, d in out.items():
+                    self.tmpl[pid] = d["app"]
         elif len(dets) == 1:
             d = dets[0]
-            da = self._dist("A", d)
-            db = self._dist("B", d)
-            out["A" if da <= db else "B"] = d
+            # appearance only helps here if it can speak about both identities
+            use_app = d["app"] is not None and all(self.tmpl[p] is not None
+                                                   for p in ("A", "B"))
+            ca = self._cost("A", d, t, use_app)
+            cb = self._cost("B", d, t, use_app)
+            out["A" if ca <= cb else "B"] = d
         else:
             d0, d1 = dets[0], dets[1]
-            keep = self._dist("A", d0) + self._dist("B", d1)
-            swap = self._dist("A", d1) + self._dist("B", d0)
-            # swap guard: prefer current identities unless swapping is clearly better
-            if swap < keep * 0.7:
+            # Include the appearance term only where it is symmetric across the
+            # two pairings. With two templates it compares one detection against
+            # both identities; with two descriptors it compares one identity
+            # against both detections. With one of each the term would appear in
+            # `keep` and not in `swap`, which is a bias, not evidence.
+            use_app = (all(d["app"] is not None for d in (d0, d1))
+                       or all(self.tmpl[p] is not None for p in ("A", "B")))
+            keep = (self._cost("A", d0, t, use_app) + self._cost("B", d1, t, use_app))
+            swap = (self._cost("A", d1, t, use_app) + self._cost("B", d0, t, use_app))
+            if swap < keep:
                 out["A"], out["B"] = d1, d0
             else:
                 out["A"], out["B"] = d0, d1
+            if abs(keep - swap) >= APP_MARGIN_MIN and self._unoccluded(out["A"], out["B"]):
+                self._learn(out)
         for pid, d in out.items():
             self.pos[pid] = d["court"]
+            self.seen_t[pid] = t
         return out
 
-    def _dist(self, pid, det):
-        if self.pos[pid] is None:
-            return 3.0  # neutral prior
+    def _unoccluded(self, da, db):
+        """Is this a frame where the two detections are unambiguously two people?"""
+        if da["app"] is None or db["app"] is None:
+            return False
+        if math.hypot(da["court"][0] - db["court"][0],
+                      da["court"][1] - db["court"][1]) < APP_SEP_MIN_M:
+            return False
+        return box_overlap(da.get("box"), db.get("box")) <= APP_BOX_OVERLAP_MAX
+
+    def _learn(self, out):
+        """EMA the templates towards this frame -- but only if appearance already
+        agrees with the assignment.
+
+        Being unoccluded says the two detections are two different people; it does
+        not say the labels are on the right ones. If the tracker is running
+        swapped, every frame after the swap looks perfectly clean, and a template
+        that learns from those frames walks onto the other player within a couple
+        of seconds and makes the swap permanent -- the exact failure this whole
+        change exists to remove. So a detection may only teach a template it
+        already resembles more than it resembles the other one; when the labels
+        are wrong the templates simply stop learning, stay correct, and go on
+        voting to swap back at the next re-acquisition.
+        """
+        other = {"A": "B", "B": "A"}
+        for pid, d in out.items():
+            mine = self.tmpl[pid]
+            if mine is None:
+                self.tmpl[pid] = d["app"]
+                continue
+            theirs = self.tmpl[other[pid]]
+            if theirs is not None:
+                if (appearance_distance(d["app"], mine) + APP_LEARN_MARGIN
+                        > appearance_distance(d["app"], theirs)):
+                    continue
+            a = APP_EMA_ALPHA
+            self.tmpl[pid] = tuple((1.0 - a) * mine[i] + a * d["app"][i]
+                                   for i in range(3))
+
+    def _cost(self, pid, det, t, use_app):
+        cost = self._pos_cost(pid, det, t)
+        if use_app and det["app"] is not None and self.tmpl[pid] is not None:
+            cost += APP_LAMBDA * appearance_distance(det["app"], self.tmpl[pid])
+        return cost
+
+    def _pos_cost(self, pid, det, t):
+        """Court distance in units of how far this identity could plausibly have
+        moved since it was last seen — a 2 m jump is damning after 1/8 s and
+        meaningless after 4 s of being lost behind the other player."""
         p = self.pos[pid]
+        if p is None:
+            return POS_NEUTRAL
         q = det["court"]
-        return math.hypot(p[0] - q[0], p[1] - q[1])
+        gap = 0.0
+        if t is not None and self.seen_t[pid] is not None:
+            gap = max(0.0, t - self.seen_t[pid])
+        return math.hypot(p[0] - q[0], p[1] - q[1]) / (POS_SCALE_M + POS_SPEED_MS * gap)
 
 
 # ---------------------------------------------------------------- audio
@@ -628,13 +898,30 @@ def main():
     H_ref2court = cv2.getPerspectiveTransform(src, dst)
 
     # ---------------- pass 1: pose + alignment observations (cached) ----------------
-    cache_path = os.path.join(args.out, "pose_cache_v2.pkl")
+    # v3 = v2 plus the per-detection appearance descriptor. The filename carries
+    # the version so a v2 cache, which has no descriptors, can never be picked up
+    # silently and quietly turn the tracker back into position-only.
+    cache_path = os.path.join(args.out, "pose_cache_v3.pkl")
+    legacy_path = os.path.join(args.out, "pose_cache_v2.pkl")
     if os.path.exists(cache_path):
         with open(cache_path, "rb") as f:
             blob = pickle.load(f)
         times, raw_frames = blob["times"], blob["raw_frames"]
         directs, steps = blob["directs"], blob["steps"]
         print(f"pose cache hit: {len(times)} frames")
+    elif os.path.exists(legacy_path):
+        # Upgrade in place: pose inference is the expensive half (~20 min/clip)
+        # and it is already done; only the pixels are missing, so re-decode and
+        # read the descriptors off the frames the cached keypoints point at.
+        with open(legacy_path, "rb") as f:
+            blob = pickle.load(f)
+        times, raw_frames = blob["times"], blob["raw_frames"]
+        directs, steps = blob["directs"], blob["steps"]
+        print(f"pose cache v2 hit: {len(times)} frames; adding appearance ...")
+        fill_appearance(args.video, times, raw_frames, fps, duration)
+        with open(cache_path, "wb") as f:
+            pickle.dump({"times": times, "raw_frames": raw_frames,
+                         "directs": directs, "steps": steps}, f)
     else:
         from rtmlib import Body
         body = Body(mode="balanced", backend="onnxruntime", device="cpu")
@@ -655,6 +942,7 @@ def main():
                 break
             H_dir, n_dir, H_step = aligner.observe(frame)
             kpts, scores = body(frame)
+            exposure = frame_exposure_ref(frame)
             dets = []
             for i in range(len(kpts)):
                 k, s = kpts[i], scores[i]
@@ -664,7 +952,8 @@ def main():
                     ty = int(np.mean([k[j][1] for j in (L_SHO, R_SHO, L_HIP, R_HIP)]))
                     if 0 <= tx < width and 0 <= ty < height:
                         tv = float(frame[ty, tx].mean())
-                dets.append({"kpts": k, "scores": s, "torso_val": tv})
+                dets.append({"kpts": k, "scores": s, "torso_val": tv,
+                             "app": torso_appearance(frame, k, s, exposure)})
             times.append(t)
             raw_frames.append(dets)
             directs.append((H_dir, n_dir))
@@ -689,7 +978,7 @@ def main():
         H_align = aligns[i]
         H_px2court = H_ref2court @ H_align
         dets = detect_players(raw_frames[i], H_px2court)
-        tracked = tracker.update(dets)
+        tracked = tracker.update(dets, times[i])
         for pid, d in tracked.items():
             d["H_align"] = H_align
             if d.get("torso_val") is not None:

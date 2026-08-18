@@ -65,6 +65,17 @@ sets `NSAppTransportSecurity.NSAllowsArbitraryLoads: true` to allow it. When tha
 video of identifiable people crosses the network unencrypted. Separately, that server keeps every
 uploaded video indefinitely — there is no cleanup code in `analysis/server.py`.
 
+Two details that make this worse than it reads, both now stated in Privacy Policy §3:
+
+- **It is the full-size original that goes over the wire.** `compressForUpload`
+  (`features/analysis/deviceClient.ts`) does the ~960×540 export *through the native analyzer* and
+  returns the untouched original URI when that module is unavailable — which is exactly the condition
+  that routes the import to the server in the first place. So on the only path that reaches the
+  server, there is no compression: full resolution, full length, full audio.
+- **The upload carries the video's filename** in `X-Filename` (`importClient.ts`), and the server
+  stores it in the job record (`sourceName` in `analysis/server.py`). Camera-roll names are usually
+  innocuous; user-renamed files are not always.
+
 Three defensible outcomes; pick one deliberately before submitting:
 
 - **Put the server behind HTTPS**, drop `NSAllowsArbitraryLoads`, add a retention/cleanup job — then
@@ -192,11 +203,11 @@ Defaults to unanswered, and unanswered blocks submission. The answers below foll
 
 | Category → Data type | Collected | Linked to identity | Used for tracking | Purpose | Why |
 |---|---|---|---|---|---|
-| Purchases → **Purchase History** | Yes | **No** | No | App Functionality | RevenueCat receives the App Store transaction to decide entitlement |
-| Identifiers → **User ID** | Yes | **No** | No | App Functionality | RevenueCat's randomly generated anonymous app user id |
-| Identifiers → **Device ID** | Yes | **No** | No | App Functionality | The RevenueCat SDK collects the vendor identifier (IDFV) by default |
-| User Content → **Photos or Videos** | **Only if the server fallback ships** | No | No | App Functionality | The fallback uploads the match video to our server |
-| User Content → **Audio Data** | **Only if the server fallback ships** | No | No | App Functionality | The uploaded video carries its audio track, which the analysis uses |
+| Purchases → **Purchase History** | Yes | **No** | No | App Functionality | RevenueCat receives the App Store transaction to decide entitlement — Privacy Policy §6 |
+| Identifiers → **User ID** | Yes | **No** | No | App Functionality | RevenueCat's randomly generated anonymous app user id — Privacy Policy §6 |
+| Identifiers → **Device ID** | Yes | **No** | No | App Functionality | The RevenueCat SDK collects the vendor identifier (IDFV) by default — **disclosed in Privacy Policy §6**; the two documents agree, keep them that way |
+| User Content → **Photos or Videos** | **Yes** (the fallback is in this binary) | No | No | App Functionality | The fallback uploads the match video — the *full-size original*, see §0.3 — to our server |
+| User Content → **Audio Data** | **Yes** (the fallback is in this binary) | No | No | App Functionality | The uploaded video carries its audio track, which the analysis uses |
 
 **Declare nothing else.** Specifically:
 
@@ -206,8 +217,12 @@ Defaults to unanswered, and unanswered blocks submission. The answers below foll
 - **Contact Info, Health, Location, Contacts, Search History, Browsing History, Sensitive Info —
   none.** The app has no accounts and asks for none of it.
 - **Recordings and analyses that stay on the device are not collected**, which is why the User
-  Content rows are conditional on the server fallback (§0.3). **If you remove the fallback, remove
-  those two rows and the app collects only purchase data.**
+  Content rows exist only because of the server fallback (§0.3). The fallback **is compiled into the
+  binary you are submitting** and fires without asking the user, so those rows are **Yes** today.
+  **If you remove the fallback, remove those two rows and the app collects only purchase data.**
+- **The upload also carries the video's filename** (`X-Filename`, retained server-side as the job's
+  `sourceName`). Apple has no data type for it; it is disclosed in Privacy Policy §3, which is where
+  it belongs. Do not let it fall out of the policy if the header ever changes.
 - [ ] **Tracking: No.** No ad SDK, no cross-app identifier, no data shared with data brokers →
       **no ATT prompt is required**, and adding one would itself be a problem.
 - [ ] Verify the current RevenueCat App Privacy guidance before filing — their SDK's collected fields

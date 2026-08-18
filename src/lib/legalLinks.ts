@@ -1,8 +1,13 @@
 /**
  * The two legal pages App Review requires a subscription screen to link:
  * the Terms of Use (EULA) and the Privacy Policy. This is the ONE place they
- * are written down — the paywall reads them, and filling them in at launch is
- * a single edit here (docs/07 §3 is the submission gate).
+ * are written down — nothing else in the app hard-codes a legal URL, and
+ * LegalFooter.tsx renders LEGAL_LINKS as it finds it. Replacing the two `null`s
+ * below with published https URLs is the WHOLE change: each row turns from
+ * struck-through-and-inert into a live tappable link, and the "not published
+ * yet" note removes itself (isPublished / hasUnpublishedLegalLink drive both).
+ * Guideline 3.1.2 requires FUNCTIONAL links here, so tap both rows on the built
+ * paywall before capturing screenshots — docs/legal/README.md §2.1.
  *
  * `url: null` means "not published yet" — the same convention the old Settings
  * LINKS rows used. The row still renders, visibly disabled, with a note, because

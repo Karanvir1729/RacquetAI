@@ -1,12 +1,14 @@
 // Stats.swift — pure-Foundation port of analyze.py's tracking + analytics:
-// court geometry, two-player nearest-neighbour tracker with swap guard,
+// court geometry, the two-player appearance+position re-identification tracker,
 // striker attribution helpers, rally split, retrieval-proxy placement,
 // 12x8 coverage heatmap, T-time, transition-entropy predictability, shot-type
 // classification, the COCO-17 keypoint track writer, and the analysis.json
 // (schemaVersion 2) builder + shape validator.
 //
 // No AVFoundation/Vision/Expo imports so the whole file compiles standalone
-// for off-device unit checks (see the scratchpad check harness).
+// for off-device unit checks (see the scratchpad check harness). The one part
+// that needs real pixels — reading the torso patch out of a CVPixelBuffer —
+// lives in Appearance.swift; everything here works on numbers already sampled.
 
 import Foundation
 
@@ -48,6 +50,58 @@ enum AnalyzerParams {
   static let onsetMedianHalfWinS = 1.0 // sliding-window half width for median/MAD
 }
 
+/// Appearance re-identification — the shared spec with analysis/analyze.py.
+/// Every constant here is the Swift spelling of the identically-named Python
+/// constant; the two engines must produce the same identities on the same
+/// footage, so these must not drift.
+enum AppearanceParams {
+  // Torso patch geometry, in units of the subject's own torso length, so the
+  // patch shrinks with distance instead of swallowing the background at the
+  // back wall.
+  static let centerF = 0.45 // APP_CENTER_F: patch centre, shoulders -> hips
+  static let halfHF = 0.34 // APP_HALF_H_F: half-height = this x torso length
+  static let halfWF = 0.36 // APP_HALF_W_F: half-width = this x shoulder width
+  static let minShoulderWF = 0.35 // APP_MIN_SHO_W_F: shoulders seen edge-on collapse
+  // to ~0 px wide; floor the width at this x torso length so the patch never degenerates
+  static let minTorsoPx = 8.0 // APP_MIN_TORSO_PX
+  static let minPixels = 24 // APP_MIN_PIXELS: clipped patch must hold this many pixels
+  static let minInside = 0.5 // APP_MIN_INSIDE: ... and this fraction of its unclipped area
+
+  // Descriptor = (r, g, L): rg-chromaticity of the patch median plus its luma
+  // relative to the frame's own exposure. The weights are 1 / the within-person
+  // spread of each component, averaged over the three audit clips
+  // (analysis/tools/identity_audit.py --calibrate). For two classes with roughly
+  // diagonal covariance, standardising this way makes plain Euclidean distance
+  // the right discriminant. Both halves earn their place: luma usually carries
+  // the most (per-clip separability 5.1 / 1.6 / 6.3) because these players wear
+  // dark navy against white, but on the clip where luma is weakest, chroma r is
+  // the strongest single component (2.1 against luma's 1.6).
+  static let chromaW = 32.0 // APP_CHROMA_W
+  static let lumaW = 2.6 // APP_LUMA_W
+
+  /// APP_LAMBDA: appearance weight in the association cost. Swept against an
+  /// oracle-primed association test over all three audit clips: re-acquisition
+  /// error after an occlusion gap falls from 15.5% at lambda=0 to a flat
+  /// 2.2-2.7% plateau spanning 0.2-1.5, while adjacent frames stay at 1 error
+  /// in 4365. 0.5 is the centre of that plateau rather than the grid minimum
+  /// (0.35, better by 2 decisions in 1018 — noise), so the value does not
+  /// depend on where the grid was sampled.
+  static let lambda = 0.5
+  static let emaAlpha = 0.05 // APP_EMA_ALPHA: ~20 samples (2.5 s) time constant
+  static let separationMinM = 1.2 // APP_SEP_MIN_M: players this far apart to trust identity
+  static let boxOverlapMax = 0.15 // APP_BOX_OVERLAP_MAX: ... and boxes may not overlap more
+  static let marginMin = 0.35 // APP_MARGIN_MIN: ... and keep/swap must be this decisive
+  static let learnMargin = 0.0 // APP_LEARN_MARGIN: ... and the detection must already
+  // look more like the template it is about to update than like the other one
+}
+
+/// Position half of the association cost.
+enum PositionParams {
+  static let scaleM = 0.75 // POS_SCALE_M: metres of plausible motion between samples at 8 fps
+  static let speedMS = 3.0 // POS_SPEED_MS: uncertainty growth while an identity is unseen
+  static let neutral = 3.0 // POS_NEUTRAL: charged against an identity with no known position
+}
+
 /// schema v2 shot classification. The app, the Python engine and this engine
 /// all implement the same thresholds, so these must not drift.
 enum ShotClass {
@@ -81,6 +135,148 @@ struct JointPoint {
   var conf: Double
 }
 
+/// One detection's shirt, as three numbers.
+///
+/// `r` and `g` are the rg-chromaticity of the torso patch's per-channel median,
+/// which is invariant to how brightly that patch happens to be lit. `l` is the
+/// log of the patch luma over the frame's own median grey, so a camera
+/// auto-exposure step moves every player equally and cancels.
+struct Appearance: Equatable {
+  var r: Double
+  var g: Double
+  var l: Double
+}
+
+/// Weighted Euclidean distance between two descriptors (appearance_distance).
+func appearanceDistance(_ u: Appearance, _ v: Appearance) -> Double {
+  let dr = AppearanceParams.chromaW * (u.r - v.r)
+  let dg = AppearanceParams.chromaW * (u.g - v.g)
+  let dl = AppearanceParams.lumaW * (u.l - v.l)
+  return (dr * dr + dg * dg + dl * dl).squareRoot()
+}
+
+/// Axis-aligned pixel rect, half-open in both axes: x0..<x1, y0..<y1.
+struct PixelRect: Equatable {
+  var x0: Int
+  var y0: Int
+  var x1: Int
+  var y1: Int
+  var width: Int { x1 - x0 }
+  var height: Int { y1 - y0 }
+}
+
+/// Pixel bounding box over confidently-placed keypoints.
+struct BBox: Equatable {
+  var minX: Double
+  var minY: Double
+  var maxX: Double
+  var maxY: Double
+  var area: Double { max(maxX - minX, 0) * max(maxY - minY, 0) }
+}
+
+/// Port of keypoint_box: bbox over keypoints scoring above KPT_CONF, nil when
+/// fewer than two are visible.
+func keypointBox(_ joints: [String: JointPoint]) -> BBox? {
+  let visible = joints.values.filter { $0.conf > AnalyzerParams.kptConf }
+  guard visible.count >= 2 else { return nil }
+  let xs = visible.map { $0.x }
+  let ys = visible.map { $0.y }
+  guard let xMin = xs.min(), let xMax = xs.max(),
+        let yMin = ys.min(), let yMax = ys.max() else { return nil }
+  return BBox(minX: xMin, minY: yMin, maxX: xMax, maxY: yMax)
+}
+
+/// Port of box_overlap: intersection area over the SMALLER box's area, 0 when
+/// either box is missing.
+///
+/// Overlap-over-min rather than IoU because the question is "is one player in
+/// front of the other", and a small player fully in front of a large one has a
+/// low IoU but an overlap of 1.
+func boxOverlap(_ a: BBox?, _ b: BBox?) -> Double {
+  guard let a, let b else { return 0 }
+  let ix = max(0, min(a.maxX, b.maxX) - max(a.minX, b.minX))
+  let iy = max(0, min(a.maxY, b.maxY) - max(a.minY, b.minY))
+  let smaller = min(a.area, b.area)
+  return smaller > 0 ? (ix * iy) / smaller : 0
+}
+
+/// Port of torso_patch_box: the axis-aligned patch of shirt to sample, clipped
+/// to the frame, or nil when it cannot be trusted.
+///
+/// Sized from the subject's own torso, so a player at the back wall and the
+/// same player at the front wall yield patches covering the same piece of
+/// shirt. `scaleX`/`scaleY` map the joint coordinate space onto the pixel
+/// buffer's own resolution; they are 1 whenever the two agree.
+func torsoPatchBox(
+  joints: [String: JointPoint],
+  width: Int,
+  height: Int,
+  scaleX: Double = 1,
+  scaleY: Double = 1
+) -> PixelRect? {
+  func torsoJoint(_ name: String) -> (x: Double, y: Double)? {
+    guard let j = joints[name], j.conf > AnalyzerParams.kptConf else { return nil }
+    return (j.x * scaleX, j.y * scaleY)
+  }
+  // Any of the four torso corners missing and there is no patch to speak of.
+  guard let lSho = torsoJoint("leftShoulder"), let rSho = torsoJoint("rightShoulder"),
+        let lHip = torsoJoint("leftHip"), let rHip = torsoJoint("rightHip") else { return nil }
+
+  let shoX = 0.5 * (lSho.x + rSho.x)
+  let shoY = 0.5 * (lSho.y + rSho.y)
+  let hipX = 0.5 * (lHip.x + rHip.x)
+  let hipY = 0.5 * (lHip.y + rHip.y)
+  let torsoLen = ((hipX - shoX) * (hipX - shoX) + (hipY - shoY) * (hipY - shoY)).squareRoot()
+  guard torsoLen >= AppearanceParams.minTorsoPx else { return nil }
+
+  let cx = shoX + AppearanceParams.centerF * (hipX - shoX)
+  let cy = shoY + AppearanceParams.centerF * (hipY - shoY)
+  let shoDX = lSho.x - rSho.x
+  let shoDY = lSho.y - rSho.y
+  let shoW = (shoDX * shoDX + shoDY * shoDY).squareRoot()
+  let halfW = AppearanceParams.halfWF * max(shoW, AppearanceParams.minShoulderWF * torsoLen)
+  let halfH = AppearanceParams.halfHF * torsoLen
+
+  // Python rounds half-to-even (int(round(x))); match it so the two engines
+  // pick the same pixels on the same footage.
+  func r2i(_ v: Double) -> Int {
+    guard v.isFinite else { return 0 }
+    return Int(v.rounded(.toNearestOrEven))
+  }
+  var x0 = r2i(cx - halfW)
+  var x1 = r2i(cx + halfW)
+  var y0 = r2i(cy - halfH)
+  var y1 = r2i(cy + halfH)
+  // Unclipped area, measured BEFORE clipping: it is the denominator that says
+  // how much of the intended patch actually landed on the frame.
+  let full = max((x1 - x0) * (y1 - y0), 1)
+  x0 = max(0, x0)
+  y0 = max(0, y0)
+  x1 = min(width, x1)
+  y1 = min(height, y1)
+  guard x1 > x0, y1 > y0 else { return nil }
+  let inside = (x1 - x0) * (y1 - y0)
+  // A patch mostly off-frame describes the frame edge, not the player.
+  guard inside >= AppearanceParams.minPixels,
+        Double(inside) >= AppearanceParams.minInside * Double(full) else { return nil }
+  return PixelRect(x0: x0, y0: y0, x1: x1, y1: y1)
+}
+
+/// Build the descriptor from a patch's per-channel medians (0-255) and the
+/// frame's exposure reference. Port of the tail of torso_appearance.
+func appearanceFromMedians(
+  b: Double, g: Double, r: Double, exposureRef: Double
+) -> Appearance? {
+  let total = b + g + r
+  guard total >= 1e-6 else { return nil } // a pure-black patch has no chromaticity
+  let lum = total / 3.0
+  return Appearance(
+    r: r / total,
+    g: g / total,
+    l: log((lum + 1.0) / (max(exposureRef, 0.0) + 1.0))
+  )
+}
+
 struct PlayerDetection {
   var joints: [String: JointPoint]
   var court: (x: Double, y: Double) // meters, clamped into court bounds
@@ -90,6 +286,12 @@ struct PlayerDetection {
   /// confidence of the anchor (ankles, or the hip fallback). Drives the
   /// shot-type confidence discount, nothing upstream.
   var posConf: Double = 0
+  /// Shirt descriptor, nil when the torso patch could not be read (low-confidence
+  /// keypoints, patch off-frame, player too small). The tracker degrades to
+  /// position-only for that frame rather than guessing.
+  var app: Appearance?
+  /// Visible-keypoint pixel box, used only to tell "in front of" from "beside".
+  var box: BBox?
 }
 
 /// Port of detect_players: filter raw poses to in-court players (ankle
@@ -135,53 +337,173 @@ func detectPlayers(
       ),
       area: bboxW * bboxH,
       bboxH: bboxH,
-      posConf: anchor.map { $0.conf }.reduce(0, +) / Double(anchor.count)
+      posConf: anchor.map { $0.conf }.reduce(0, +) / Double(anchor.count),
+      app: nil, // filled by TorsoAppearanceSampler while the frame is still in hand
+      // Same visible set the area came from, so this is keypoint_box by construction
+      // (>= 6 visible joints here, and keypoint_box only needs 2).
+      box: BBox(minX: xMin, minY: yMin, maxX: xMax, maxY: yMax)
     ))
   }
   candidates.sort { $0.area > $1.area }
   return Array(candidates.prefix(2))
 }
 
-/// Port of TwoTracker: nearest-neighbour 2-ID association on court positions
-/// with a swap guard (swap only when clearly better: swapCost < keepCost*0.7).
+/// Port of TwoTracker: 2-ID association by TOTAL cost over both pairings —
+/// normalised court distance + APP_LAMBDA x appearance distance to a
+/// per-identity template.
+///
+/// Position alone is a coin flip exactly when it matters — the moment two
+/// players cross or occlude each other — and a wrong call there persists,
+/// because the next frame's position prior now agrees with the mistake. The
+/// shirt does not become ambiguous during a crossing, so appearance is what
+/// breaks the tie. Templates are learned only on frames where identity is not
+/// in doubt, so an ambiguous overlap can never teach a template the wrong
+/// player and make the swap permanent.
+///
+/// There is deliberately no `swap < keep * 0.7` guard any more: comparing the
+/// two total costs is the decision, and an arbitrary multiplier on top of it
+/// only biases which coin flip wins.
 final class TwoTracker {
-  private var pos: [String: (Double, Double)] = [:]
+  private var pos: [String: (x: Double, y: Double)] = [:]
+  private var seenT: [String: Double] = [:] // time of that position fix
+  private var tmpl: [String: Appearance] = [:] // EMA appearance template
 
-  func update(_ dets: [PlayerDetection]) -> [String: PlayerDetection] {
+  private static let ids = ["A", "B"]
+  private static func other(_ pid: String) -> String { pid == "A" ? "B" : "A" }
+
+  func update(_ dets: [PlayerDetection], t: Double) -> [String: PlayerDetection] {
     var out: [String: PlayerDetection] = [:]
     guard !dets.isEmpty else { return out }
+
     if pos["A"] == nil && pos["B"] == nil {
-      // First sight: leftmost player becomes A.
-      let sorted = dets.sorted { $0.court.x < $1.court.x }
-      out["A"] = sorted[0]
-      if sorted.count > 1 { out["B"] = sorted[1] }
+      // First sight: leftmost player becomes A (unchanged convention). At most
+      // two detections arrive, so an explicit compare beats a sort and keeps
+      // the area order as the tie-break, exactly as Python's stable sort does.
+      let ordered = (dets.count > 1 && dets[1].court.x < dets[0].court.x)
+        ? [dets[1], dets[0]]
+        : dets
+      out["A"] = ordered[0]
+      if ordered.count > 1 { out["B"] = ordered[1] }
+      // Nothing to protect yet: at first sight the leftmost convention *defines*
+      // which player is A, so these descriptors cannot be the wrong ones.
+      if let a = out["A"], let b = out["B"], unoccluded(a, b),
+         let aApp = a.app, let bApp = b.app {
+        tmpl["A"] = aApp
+        tmpl["B"] = bApp
+      }
     } else if dets.count == 1 {
       let d = dets[0]
-      out[dist("A", d) <= dist("B", d) ? "A" : "B"] = d
+      // Appearance only helps here if it can speak about both identities.
+      let useApp = d.app != nil && tmpl["A"] != nil && tmpl["B"] != nil
+      let ca = cost("A", d, t, useApp)
+      let cb = cost("B", d, t, useApp)
+      out[ca <= cb ? "A" : "B"] = d
+      // and no learning: one detection never proves who the other one is.
     } else {
       let d0 = dets[0]
       let d1 = dets[1]
-      let keep = dist("A", d0) + dist("B", d1)
-      let swap = dist("A", d1) + dist("B", d0)
-      if swap < keep * 0.7 {
+      // Include the appearance term only where it is symmetric across the two
+      // pairings. With two templates it compares one detection against both
+      // identities; with two descriptors it compares one identity against both
+      // detections. With one of each the term would land in `keep` and not in
+      // `swap`, which is a bias, not evidence.
+      let useApp = (d0.app != nil && d1.app != nil)
+        || (tmpl["A"] != nil && tmpl["B"] != nil)
+      let keep = cost("A", d0, t, useApp) + cost("B", d1, t, useApp)
+      let swap = cost("A", d1, t, useApp) + cost("B", d0, t, useApp)
+      if swap < keep {
         out["A"] = d1
         out["B"] = d0
       } else {
         out["A"] = d0
         out["B"] = d1
       }
+      if let a = out["A"], let b = out["B"],
+         abs(keep - swap) >= AppearanceParams.marginMin, unoccluded(a, b) {
+        learn(out)
+      }
     }
+
     for (pid, d) in out {
-      pos[pid] = (d.court.x, d.court.y)
+      pos[pid] = d.court
+      seenT[pid] = t
     }
     return out
   }
 
-  private func dist(_ pid: String, _ det: PlayerDetection) -> Double {
-    guard let p = pos[pid] else { return 3.0 } // neutral prior
-    return ((p.0 - det.court.x) * (p.0 - det.court.x)
-      + (p.1 - det.court.y) * (p.1 - det.court.y)).squareRoot()
+  /// Is this a frame where the two detections are unambiguously two people?
+  private func unoccluded(_ da: PlayerDetection, _ db: PlayerDetection) -> Bool {
+    guard da.app != nil, db.app != nil else { return false }
+    let dx = da.court.x - db.court.x
+    let dy = da.court.y - db.court.y
+    guard (dx * dx + dy * dy).squareRoot() >= AppearanceParams.separationMinM else {
+      return false
+    }
+    return boxOverlap(da.box, db.box) <= AppearanceParams.boxOverlapMax
   }
+
+  /// EMA the templates towards this frame — but only if appearance already
+  /// agrees with the assignment.
+  ///
+  /// Being unoccluded says the two detections are two different people; it does
+  /// not say the labels are on the right ones. If the tracker is running
+  /// swapped, every frame after the swap looks perfectly clean, and a template
+  /// that learns from those frames walks onto the other player within a couple
+  /// of seconds and makes the swap permanent — the exact failure this whole
+  /// change exists to remove. So a detection may only teach a template it
+  /// already resembles more than it resembles the other one; when the labels
+  /// are wrong the templates simply stop learning, stay correct, and go on
+  /// voting to swap back at the next re-acquisition.
+  ///
+  /// A then B, in that order: B is compared against a template A may have just
+  /// moved, which is what the Python reference does.
+  private func learn(_ out: [String: PlayerDetection]) {
+    for pid in Self.ids {
+      guard let det = out[pid], let app = det.app else { continue }
+      guard let mine = tmpl[pid] else {
+        tmpl[pid] = app // initialise
+        continue
+      }
+      if let theirs = tmpl[Self.other(pid)],
+         appearanceDistance(app, mine) + AppearanceParams.learnMargin
+         > appearanceDistance(app, theirs) {
+        continue // appearance disagrees with the label: refuse to learn
+      }
+      let a = AppearanceParams.emaAlpha
+      tmpl[pid] = Appearance(
+        r: (1 - a) * mine.r + a * app.r,
+        g: (1 - a) * mine.g + a * app.g,
+        l: (1 - a) * mine.l + a * app.l
+      )
+    }
+  }
+
+  private func cost(
+    _ pid: String, _ det: PlayerDetection, _ t: Double, _ useApp: Bool
+  ) -> Double {
+    var c = positionCost(pid, det, t)
+    if useApp, let app = det.app, let template = tmpl[pid] {
+      c += AppearanceParams.lambda * appearanceDistance(app, template)
+    }
+    return c
+  }
+
+  /// Court distance in units of how far this identity could plausibly have
+  /// moved since it was last seen — a 2 m jump is damning after 1/8 s and
+  /// meaningless after 4 s of being lost behind the other player.
+  private func positionCost(_ pid: String, _ det: PlayerDetection, _ t: Double) -> Double {
+    guard let p = pos[pid] else { return PositionParams.neutral }
+    let gap = seenT[pid].map { max(0, t - $0) } ?? 0
+    let dx = p.x - det.court.x
+    let dy = p.y - det.court.y
+    return (dx * dx + dy * dy).squareRoot()
+      / (PositionParams.scaleM + PositionParams.speedMS * gap)
+  }
+
+  // MARK: Introspection (checks only)
+
+  /// The learned templates, for the off-device harness. Not used by the pipeline.
+  var templates: [String: Appearance] { tmpl }
 }
 
 // MARK: - Small math helpers

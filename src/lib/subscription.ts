@@ -25,6 +25,7 @@
  * live in their own files.
  */
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { AppState, type AppStateStatus } from "react-native";
 import { useFocusEffect } from "expo-router";
 
 import {
@@ -105,16 +106,21 @@ export function readApiKey(): string | null {
 let entitlement: EntitlementState = "unknown";
 const listeners = new Set<() => void>();
 
-function setEntitlement(next: EntitlementState): void {
-  if (next === entitlement) return;
-  entitlement = next;
-  for (const listener of listeners) {
+/** Tell every subscriber. One bad listener must not stop the others. */
+function notify(subscribers: Set<() => void>): void {
+  for (const listener of subscribers) {
     try {
       listener();
     } catch {
-      // One bad subscriber must not stop the others being told.
+      // Swallowed on purpose — see above.
     }
   }
+}
+
+function setEntitlement(next: EntitlementState): void {
+  if (next === entitlement) return;
+  entitlement = next;
+  notify(listeners);
 }
 
 export function getEntitlement(): EntitlementState {
@@ -132,10 +138,35 @@ export function subscribeEntitlement(listener: () => void): () => void {
 
 let sdk: PurchasesSdk | null = null;
 let configured = false;
+const configListeners = new Set<() => void>();
 
 /** True once the SDK loaded AND a key was found. False = unconfigured. */
 export function isSubscriptionConfigured(): boolean {
   return configured;
+}
+
+/**
+ * Watch the configured flag. It flips at most once per launch — from the root
+ * layout's effect — but that happens AFTER the first frame, so any screen that
+ * mounts in between has to be told rather than left holding a stale `false`.
+ */
+export function subscribeConfigured(listener: () => void): () => void {
+  configListeners.add(listener);
+  return () => configListeners.delete(listener);
+}
+
+/**
+ * The live configured flag. Read through useSyncExternalStore, not called
+ * during render, because a paywall that mounts before configure() runs would
+ * otherwise render "purchasing unavailable" permanently: nothing else in its
+ * props changes when configuration completes, so nothing would re-render it.
+ */
+export function useIsSubscriptionConfigured(): boolean {
+  return useSyncExternalStore(
+    subscribeConfigured,
+    isSubscriptionConfigured,
+    isSubscriptionConfigured,
+  );
 }
 
 /**
@@ -157,6 +188,9 @@ export function configure(
   }
   sdk = loaded;
   configured = true;
+  // Both singletons are set before anyone is told, so a listener that
+  // immediately calls loadPackages() finds a usable SDK.
+  notify(configListeners);
   // Renewals, expirations and purchases made outside this session arrive here.
   try {
     loaded.addCustomerInfoUpdateListener?.((info) => {
@@ -315,6 +349,41 @@ export function useEntitlement(): EntitlementState {
   return useSyncExternalStore(subscribeEntitlement, getEntitlement, getEntitlement);
 }
 
+/**
+ * Re-read the entitlement whenever the app returns to the foreground.
+ *
+ * Subscribing, cancelling and expiring all happen OUTSIDE this app — in
+ * Settings › Subscriptions, or on another device — and that trip backgrounds
+ * RacquetIQ without ever unfocusing the screen the user left, so a focus effect
+ * never fires on the way back. Without this, a subscription bought in Settings
+ * stays invisible (and a cancelled one stays honoured) until a relaunch.
+ *
+ * Never awaited and never throws: refresh() resolves to "unknown" on any
+ * failure, and "unknown" blocks nobody.
+ */
+export function useForegroundEntitlementRefresh(): void {
+  useEffect(() => {
+    const onChange = (state: AppStateStatus) => {
+      // Unconfigured builds have nothing to ask; refresh() would only rewrite
+      // the "unknown" that is already there.
+      if (state === "active" && isSubscriptionConfigured()) void refresh();
+    };
+    try {
+      const subscription = AppState.addEventListener("change", onChange);
+      return () => {
+        try {
+          subscription.remove();
+        } catch {
+          // A host without a real AppState (tests, web): nothing to detach.
+        }
+      };
+    } catch {
+      // AppState unavailable — the focus effects below still cover navigation.
+      return undefined;
+    }
+  }, []);
+}
+
 export interface SubscriptionStatus {
   entitlement: EntitlementState;
   /** True only while the FIRST entitlement read of the session is in flight. */
@@ -332,8 +401,12 @@ let refreshedOnce = false;
  */
 export function useSubscriptionStatus(): SubscriptionStatus {
   const entitlementState = useEntitlement();
-  const purchasingAvailable = isSubscriptionConfigured();
+  // Subscribed to, not sampled: configure() runs in the root layout's effect,
+  // which can land after this screen's first render.
+  const purchasingAvailable = useIsSubscriptionConfigured();
   const [firstReadDone, setFirstReadDone] = useState(refreshedOnce);
+
+  useForegroundEntitlementRefresh();
 
   useEffect(() => {
     if (!purchasingAvailable) return;
@@ -377,6 +450,10 @@ export function useAnalysisQuota(): AnalysisQuota {
   const entitlementState = useEntitlement();
   const [used, setUsed] = useState(readFreeAnalysesUsed);
 
+  // The gate is on this card, so it must also notice a subscription bought (or
+  // cancelled) while the app was in the background — focus alone misses that.
+  useForegroundEntitlementRefresh();
+
   useFocusEffect(
     useCallback(() => {
       setUsed(readFreeAnalysesUsed());
@@ -400,4 +477,5 @@ export function resetSubscriptionForTests(): void {
   refreshedOnce = false;
   entitlement = "unknown";
   listeners.clear();
+  configListeners.clear();
 }

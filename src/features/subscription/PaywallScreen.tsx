@@ -24,7 +24,7 @@ import { Card } from "@/components/Card";
 import { LoadingState } from "@/components/LoadingState";
 import { Screen } from "@/components/Screen";
 import { ScreenHeader } from "@/components/ScreenHeader";
-import { selection as selectionHaptic } from "@/lib/haptics";
+import { notifySuccess, selection as selectionHaptic } from "@/lib/haptics";
 import { colors, MIN_TOUCH_TARGET, spacing, type } from "@/theme/tokens";
 
 import { LegalFooter } from "./LegalFooter";
@@ -33,6 +33,7 @@ import {
   MONTHLY_PLAN,
   PAYWALL_SUBTITLE,
   PAYWALL_TITLE,
+  PURCHASE_CONFIRMED,
   PURCHASES_UNAVAILABLE,
   restoreMessage,
   subscribeLabel,
@@ -87,6 +88,15 @@ export function PaywallScreen({
   const [busy, setBusy] = useState<"purchase" | "restore" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  /**
+   * The store said a purchase completed, in THIS session. Held separately from
+   * `entitlement` because the two can disagree: a completed purchase whose
+   * CustomerInfo comes back unreadable leaves the entitlement at "unknown"
+   * (lib/subscription returns `{status:"purchased", entitlement:"unknown"}`),
+   * and a screen that only reacts to the entitlement would then sit there
+   * unchanged after the user was charged.
+   */
+  const [purchased, setPurchased] = useState(false);
 
   const storeReady = purchasingAvailable ?? true;
   const canBuy = storeReady && typeof purchase === "function";
@@ -112,10 +122,22 @@ export function PaywallScreen({
     const outcome = await runPurchase(purchase, plan.id);
     setBusy(null);
     // A cancel stays silent by design: the user closed the sheet themselves, and
-    // an error on top of that reads as a bug. A success needs no banner either —
-    // the entitlement prop flips and the subscribed card takes over.
-    if (outcome.status === "failed") setError(outcome.message);
-    else if (outcome.status === "unavailable") setError(PURCHASES_UNAVAILABLE);
+    // an error on top of that reads as a bug.
+    if (outcome.status === "purchased") {
+      // Confirm the charge from the OUTCOME, never by waiting for the
+      // entitlement to flip — see `purchased` above. Money left the user's
+      // Apple ID; the screen has to move even if the read-back is unreadable.
+      setPurchased(true);
+      notifySuccess();
+    } else if (outcome.status === "failed") {
+      setError(outcome.message);
+    } else if (outcome.status === "unavailable") {
+      // A NOTICE, not an error, and identical to the restore path's treatment
+      // of the same outcome: "unavailable" means this build cannot reach the
+      // store at all — nothing was attempted, nothing broke, and nothing is
+      // locked. Red danger copy would report a fault that does not exist.
+      setNotice(PURCHASES_UNAVAILABLE);
+    }
   };
 
   const restore = async () => {
@@ -145,6 +167,7 @@ export function PaywallScreen({
         <PurchaseAction
           loading={loading}
           subscribed={subscribed}
+          confirmed={purchased}
           canBuy={canBuy}
           plan={
             storePrices?.[plan.id] === undefined
@@ -202,16 +225,26 @@ function CloseRow({ onPress }: { onPress: () => void }) {
 interface PurchaseActionProps {
   loading: boolean;
   subscribed: boolean;
+  /** A purchase completed in this session, whatever the entitlement read said. */
+  confirmed: boolean;
   canBuy: boolean;
   plan: PaywallPlan;
   busy: "purchase" | "restore" | null;
   onSubscribe: () => void;
 }
 
-/** The buy slot: spinner, nothing (already Pro), the CTA, or the plain reason why not. */
+/**
+ * The buy slot: spinner, nothing (already Pro), the receipt for a purchase just
+ * made, the CTA, or the plain reason why not.
+ *
+ * The confirmation takes the CTA's place rather than sitting next to it — a
+ * "Subscribe — $79.99 per year" button still on screen under the words
+ * "purchase complete" invites a second tap at the worst possible moment.
+ */
 function PurchaseAction({
   loading,
   subscribed,
+  confirmed,
   canBuy,
   plan,
   busy,
@@ -219,6 +252,13 @@ function PurchaseAction({
 }: PurchaseActionProps) {
   if (loading) return <LoadingState caption={CHECKING_ENTITLEMENT} />;
   if (subscribed) return null;
+  if (confirmed) {
+    return (
+      <Card style={styles.confirmCard}>
+        <Text style={styles.confirmText}>{PURCHASE_CONFIRMED}</Text>
+      </Card>
+    );
+  }
   if (!canBuy) {
     return (
       <Card style={styles.noticeCard}>
@@ -247,6 +287,8 @@ const styles = StyleSheet.create({
   body: { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl },
   noticeCard: { backgroundColor: colors.cardRaised },
   noticeText: { ...type.caption, color: colors.textDim, lineHeight: 18 },
+  confirmCard: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
+  confirmText: { ...type.body, color: colors.text, lineHeight: 22 },
   error: { ...type.caption, color: colors.danger, lineHeight: 18 },
   notice: { ...type.caption, color: colors.accentText, lineHeight: 18 },
   later: { minHeight: MIN_TOUCH_TARGET, alignItems: "center", justifyContent: "center" },

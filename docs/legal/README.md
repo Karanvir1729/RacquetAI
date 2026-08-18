@@ -38,16 +38,26 @@ when no trial exists and mandatory when one does.
 `Karanvir1729/RacquetAI` is already a **public** repo, so GitHub Pages is free and needs no new
 account. Pages can serve from the repo root or from `/docs`; `/docs` is what we want.
 
-### 1.1 The internal docs are already kept out of the published site
+### 1.1 The internal docs are kept out of the published site
 
 Serving `/docs` would otherwise publish the architecture notes, the submission runbook, and the
-planning board at a URL you are about to hand to an App Store reviewer. Two files already handle
-that, so there is nothing to write:
+planning board at a URL you are about to hand to an App Store reviewer. Two files handle that:
 
-- **`docs/_config.yml`** excludes every `docs/`-root markdown file, `docs/planning/`, and this
-  README, leaving only `docs/legal/`. Anything new added at `docs/` root is excluded automatically;
-  a new **public** page must go under `docs/legal/` and carry front matter.
+- **`docs/_config.yml`** excludes the internal `docs/`-root markdown files **by name**,
+  `docs/planning/`, and this README — leaving `docs/legal/` as the whole published site.
 - **`docs/legal/index.md`** is the landing page at `/legal/`.
+
+> **Why by name, and not `"*.md"`.** Jekyll matches `exclude` patterns with Ruby's `File.fnmatch`
+> *without* `FNM_PATHNAME`, so `*` crosses `/`: `File.fnmatch?("*.md", "legal/privacy-policy.md")`
+> is **true**. An earlier `_config.yml` excluded `"*.md"` on the assumption that it matched the
+> `docs/` root only, which quietly unpublished both legal pages — the site would have built fine and
+> served 404s at exactly the two URLs the paywall links to. Never reintroduce a `*` here. When you
+> add a new internal doc at `docs/` root, add its filename to `exclude`; when you add a new public
+> page, put it under `docs/legal/` with front matter and change nothing.
+
+After the first Pages build, confirm **both** halves of that rule in a private window: the two legal
+URLs must render, and `…/RacquetAI/app-store-submission.md` (or any other internal doc path) must
+**404**.
 
 The two legal files already carry the YAML front matter (`title` + `permalink`) that makes Jekyll
 render them as HTML — **without front matter GitHub Pages serves raw Markdown**, which browsers
@@ -105,6 +115,40 @@ paywall is the only screen that can carry these links; it already reads them fro
 `src/lib/legalLinks.ts`, so publishing the pages and pasting the two URLs there is the whole job. A
 subscription screen without a working Terms and Privacy link is a Guideline 3.1.2 rejection.
 
+### 2.1 Turning the paywall links on — one file, two lines
+
+`src/lib/legalLinks.ts` is the **single** place these URLs exist in the app. Nothing else in the
+codebase hard-codes a legal URL; the paywall footer imports `LEGAL_LINKS` from it and renders
+whatever it finds.
+
+```ts
+// src/lib/legalLinks.ts — before
+export const TERMS_OF_USE: LegalLink = { label: "Terms of Use (EULA)", url: null };
+export const PRIVACY_POLICY: LegalLink = { label: "Privacy Policy", url: null };
+
+// after (paste your two published URLs; keep the labels)
+export const TERMS_OF_USE: LegalLink = {
+  label: "Terms of Use (EULA)",
+  url: "https://karanvir1729.github.io/RacquetAI/legal/terms-of-use/",
+};
+export const PRIVACY_POLICY: LegalLink = {
+  label: "Privacy Policy",
+  url: "https://karanvir1729.github.io/RacquetAI/legal/privacy-policy/",
+};
+```
+
+Editing those two lines is the entire change. On the next build the paywall automatically:
+
+1. renders each row as a live, tappable, underlined link instead of a struck-through disabled one
+   (`isPublished` accepts only an absolute `http(s)` URL, so a half-pasted value stays disabled
+   rather than opening nothing); and
+2. **drops the "these pages go live before the App Store release" note**, which
+   `hasUnpublishedLegalLink()` shows only while a URL is still missing.
+
+No other file changes, and no rebuild step beyond the normal one. Then, on the built screen: tap both
+rows and confirm each opens the right public page — that is the Guideline 3.1.2 check, and it is the
+last thing to do before capturing paywall screenshots.
+
 ---
 
 ## 3. Keeping the documents true
@@ -114,6 +158,22 @@ These are code-derived documents. Re-read them whenever any of the following cha
 
 - the analysis server host, its region, or the fact that it is a fallback (`jobContract.ts`,
   `backend.ts`)
+- **what is actually uploaded** (`compressForUpload` in `features/analysis/deviceClient.ts`). Today it
+  returns the *original* URI whenever the native analyzer is unavailable — which is precisely the
+  condition that selects the server fallback — so the fallback normally uploads the **full-size
+  original**. Privacy Policy §3 says so in those words. If compression is ever moved out of the
+  native analyzer, or made to run on the fallback path, that bullet becomes wrong and must change.
+- **what is sent alongside the video** (`uploadFileName` / the `X-Filename` header in
+  `features/analysis/importClient.ts`, retained by `analysis/server.py` as the job's `sourceName`).
+  Removing or adding a header changes Privacy Policy §3.
+- the microphone purpose string in `app.json`. It must keep describing the *real* use — the analyser
+  detecting ball strikes from audio (`modules/racquet-analyzer/ios/Audio.swift`) — and match Privacy
+  Policy §2. A purpose string is shown to the user at the permission prompt, so an inaccurate one is
+  a misrepresentation, not a copy nit.
+- a **RevenueCat key shipping** (`EXPO_PUBLIC_REVENUECAT_IOS_KEY` / `extra.revenueCatIosKey`). With no
+  key the SDK is never configured and makes no network call; with one it calls out at launch and
+  collects the IDFV. Privacy Policy §6 and the App Privacy **Device ID** row are written for the
+  key-present case, which is the paid release.
 - the server moving to HTTPS (deletes a paragraph from Privacy Policy §3)
 - server-side retention actually being implemented (rewrites Privacy Policy §3 and §10)
 - adding any analytics, crash-reporting SDK, account system, or sharing feature — each one changes

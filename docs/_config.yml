@@ -4,13 +4,30 @@
 # engineering document and must not be published at a URL handed to an App Store
 # reviewer, so the exclude list keeps the site to the legal pages only.
 #
-# "*.md" matches the docs/ root files only — fnmatch's * does not cross "/", so
-# docs/legal/*.md is unaffected. Anything new added at docs/ root is excluded
-# automatically; a new PUBLIC page must live under docs/legal/ with front matter.
+# DO NOT put a "*" pattern in this list. Jekyll matches `exclude` with Ruby's
+# File.fnmatch WITHOUT FNM_PATHNAME, so "*" crosses directory separators:
+# File.fnmatch?("*.md", "legal/privacy-policy.md") => true. A previous version of
+# this file excluded "*.md" believing it matched the docs/ root only, and that
+# silently unpublished the two pages this site exists to serve — the exact
+# failure that becomes a Guideline 3.1.2 rejection (paywall links to a 404).
+# Verify with: ruby -e 'p File.fnmatch?("*.md", "legal/privacy-policy.md")'
+#
+# The internal docs are therefore excluded BY NAME. Rule for whoever adds a file:
+#   - a new INTERNAL doc at docs/ root  -> add its exact filename below, and
+#     confirm it 404s on the published site;
+#   - a new PUBLIC page                 -> put it in docs/legal/ with front
+#     matter (title + permalink) and add nothing here.
 title: RacquetIQ
 description: Legal documents for the RacquetIQ iOS app.
 theme: jekyll-theme-minimal
 exclude:
-  - "*.md"
+  - 01-architecture.md
+  - 02-daybot-infra-heritage.md
+  - 03-ai-scoring-plan.md
+  - 04-branding.md
+  - 05-testing.md
+  - 06-decisions.md
+  - 07-app-store-prep.md
+  - app-store-submission.md
   - planning
   - legal/README.md
