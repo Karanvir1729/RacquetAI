@@ -411,6 +411,8 @@ describe("when a human corrects it", () => {
     // the board.
     await seek(callAt(3));
     await press(tree, HAND_BACK);
+    // And it resumes playing on its own — taking over paused the footage.
+    expect(player().play).toHaveBeenCalled();
     await seek(callAt(4));
     expect(saved()?.events ?? []).toHaveLength(4);
   });

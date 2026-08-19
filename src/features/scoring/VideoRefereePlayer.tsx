@@ -245,6 +245,13 @@ export function VideoRefereePlayer({
     calledRef.current = calledBy(result.rallies, timeRef.current);
     setCalled(calledRef.current);
     onReattach();
+    // Taking over paused the footage; handing back should not leave the user
+    // hunting for the native play control to finish the exchange.
+    try {
+      player.play();
+    } catch {
+      // Not ready yet — the next tap on the native controls resumes it.
+    }
   };
 
   const skipToNextRally = () => {
