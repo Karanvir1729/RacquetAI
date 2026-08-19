@@ -51,7 +51,8 @@ export default function Upgrade() {
   const [params] = useSearchParams();
   const canceled = params.get("canceled") === "1";
   const [busyPlan, setBusyPlan] = useState<Plan | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // The failure belongs to one plan's card, so it has to carry which one.
+  const [error, setError] = useState<{ plan: Plan; message: string } | null>(null);
 
   useEffect(() => trackEvent("page_view", { page: "upgrade" }), []);
 
@@ -61,7 +62,7 @@ export default function Upgrade() {
     try {
       await startCheckout(plan);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Checkout failed.");
+      setError({ plan, message: err instanceof Error ? err.message : "Checkout failed." });
       setBusyPlan(null);
     }
   }
@@ -114,12 +115,28 @@ export default function Upgrade() {
             </ul>
 
             <div className="mt-8">
-              {session ? (
+              {error !== null && error.plan === entry.plan ? (
+                <p className="rq-caption mb-3" role="alert" style={{ color: "var(--rq-danger)" }}>
+                  {error.message}
+                </p>
+              ) : null}
+              {loading ? (
+                // Auth settles a beat after paint; hold the CTA's geometry and
+                // label rather than letting a different button pop in under it.
                 <Button
                   size="md"
                   className="w-full"
                   variant={entry.featured ? "primary" : "secondary"}
-                  disabled={busyPlan !== null || loading}
+                  disabled
+                >
+                  {`Subscribe — ${entry.price} ${entry.cadence}`}
+                </Button>
+              ) : session ? (
+                <Button
+                  size="md"
+                  className="w-full"
+                  variant={entry.featured ? "primary" : "secondary"}
+                  disabled={busyPlan !== null}
                   onClick={() => void subscribe(entry.plan)}
                 >
                   {busyPlan === entry.plan ? "Opening Stripe…" : `Subscribe — ${entry.price} ${entry.cadence}`}
@@ -139,13 +156,7 @@ export default function Upgrade() {
         ))}
       </div>
 
-      {error !== null ? (
-        <p className="rq-caption mt-6 text-center" role="alert" style={{ color: "var(--rq-danger)" }}>
-          {error}
-        </p>
-      ) : null}
-
-      <p className="rq-caption mt-10 text-center" style={{ color: "var(--rq-text-faint)" }}>
+      <p className="rq-caption mt-10 text-center" style={{ color: "var(--rq-text-dim)" }}>
         Subscriptions renew until cancelled. In the iOS app, the same account unlocks Pro.
       </p>
     </Section>

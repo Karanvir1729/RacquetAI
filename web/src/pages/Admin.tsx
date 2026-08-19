@@ -169,9 +169,16 @@ export default function Admin() {
         <div>
           <p className="rq-eyebrow">Operators only</p>
           <h1 className="rq-h2 mt-3">RacquetIQ metrics</h1>
-          <p className="rq-caption mt-2" style={{ color: "var(--rq-text-faint)" }}>
+          <p className="rq-caption mt-2" style={{ color: "var(--rq-text-dim)" }}>
             Generated {when(metrics.generatedAt)} · Stripe test mode
           </p>
+          {/* A failed refresh leaves the last good figures on screen; say so,
+              or the operator reads stale revenue as current. */}
+          {error !== null ? (
+            <p className="rq-caption mt-1" role="alert" style={{ color: "var(--rq-danger)" }}>
+              {error} Showing the figures from the last successful load.
+            </p>
+          ) : null}
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" disabled={busy} onClick={() => void load(creds)}>
@@ -204,13 +211,13 @@ export default function Admin() {
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card className="p-6">
-          <h2 className="rq-h3 text-[17px]">Signups — last 30 days</h2>
+          <h2 className="rq-h4">Signups — last 30 days</h2>
           <div className="mt-4">
             <DailyBars points={metrics.signupsByDay} ariaLabel="Signups per day, last 30 days" />
           </div>
         </Card>
         <Card className="p-6">
-          <h2 className="rq-h3 text-[17px]">Events — last 30 days</h2>
+          <h2 className="rq-h4">Events — last 30 days</h2>
           <div className="mt-4">
             <DailyBars points={metrics.eventsByDay} ariaLabel="Events per day, last 30 days" />
           </div>
@@ -219,10 +226,10 @@ export default function Admin() {
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card className="p-6">
-          <h2 className="rq-h3 text-[17px]">Events by type</h2>
+          <h2 className="rq-h4">Events by type</h2>
           <div className="mt-4">
             {metrics.eventsByType.length === 0 ? (
-              <p className="rq-caption" style={{ color: "var(--rq-text-faint)" }}>
+              <p className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
                 Nothing tracked yet.
               </p>
             ) : (
@@ -232,41 +239,49 @@ export default function Admin() {
             )}
           </div>
           <Hairline className="my-5" />
-          <h2 className="rq-h3 text-[17px]">By platform</h2>
+          <h2 className="rq-h4">By platform</h2>
           <div className="mt-4">
-            <CountBars
-              rows={metrics.eventsByPlatform.map((row) => ({
-                label: row.platform,
-                count: row.count,
-              }))}
-            />
+            {metrics.eventsByPlatform.length === 0 ? (
+              <p className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
+                Nothing tracked yet.
+              </p>
+            ) : (
+              <CountBars
+                rows={metrics.eventsByPlatform.map((row) => ({
+                  label: row.platform,
+                  count: row.count,
+                }))}
+              />
+            )}
           </div>
         </Card>
 
         <Card className="p-6">
-          <h2 className="rq-h3 text-[17px]">Purchases</h2>
+          <h2 className="rq-h4">Purchases</h2>
           <div className="mt-4 overflow-x-auto">
             {metrics.purchases.length === 0 ? (
-              <p className="rq-caption" style={{ color: "var(--rq-text-faint)" }}>
+              <p className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
                 No checkouts yet.
               </p>
             ) : (
-              <table className="w-full text-left">
+              // w-full alone lets the columns crush before the overflow-x
+              // container ever scrolls — the min-width is what engages it.
+              <table className="w-full min-w-[30rem] text-left">
                 <thead>
-                  <tr className="rq-label" style={{ color: "var(--rq-text-faint)" }}>
+                  <tr className="rq-label" style={{ color: "var(--rq-text-dim)" }}>
                     <th className="pb-2 pr-4 font-semibold">Plan</th>
-                    <th className="pb-2 pr-4 font-semibold">Amount</th>
+                    <th className="whitespace-nowrap pb-2 pr-4 font-semibold">Amount</th>
                     <th className="pb-2 pr-4 font-semibold">Status</th>
-                    <th className="pb-2 font-semibold">When</th>
+                    <th className="whitespace-nowrap pb-2 font-semibold">When</th>
                   </tr>
                 </thead>
                 <tbody className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
                   {metrics.purchases.map((row, index) => (
                     <tr key={index} className="border-t" style={{ borderColor: "var(--rq-line)" }}>
                       <td className="py-2 pr-4">{row.plan ?? "—"}</td>
-                      <td className="py-2 pr-4">{row.amount_total !== null ? money(row.amount_total) : "—"}</td>
+                      <td className="whitespace-nowrap py-2 pr-4">{row.amount_total !== null ? money(row.amount_total) : "—"}</td>
                       <td className="py-2 pr-4">{row.status ?? "—"}</td>
-                      <td className="py-2">{when(row.created_at)}</td>
+                      <td className="whitespace-nowrap py-2">{when(row.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -278,50 +293,62 @@ export default function Admin() {
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card className="p-6">
-          <h2 className="rq-h3 text-[17px]">Newest users</h2>
+          <h2 className="rq-h4">Newest users</h2>
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="rq-label" style={{ color: "var(--rq-text-faint)" }}>
-                  <th className="pb-2 pr-4 font-semibold">Email</th>
-                  <th className="pb-2 pr-4 font-semibold">Provider</th>
-                  <th className="pb-2 font-semibold">Joined</th>
-                </tr>
-              </thead>
-              <tbody className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
-                {metrics.recentUsers.map((row, index) => (
-                  <tr key={index} className="border-t" style={{ borderColor: "var(--rq-line)" }}>
-                    <td className="max-w-[14rem] truncate py-2 pr-4">{row.email ?? "—"}</td>
-                    <td className="py-2 pr-4">{row.provider ?? "—"}</td>
-                    <td className="py-2">{when(row.createdAt)}</td>
+            {metrics.recentUsers.length === 0 ? (
+              <p className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
+                No users yet.
+              </p>
+            ) : (
+              <table className="w-full min-w-[26rem] text-left">
+                <thead>
+                  <tr className="rq-label" style={{ color: "var(--rq-text-dim)" }}>
+                    <th className="pb-2 pr-4 font-semibold">Email</th>
+                    <th className="pb-2 pr-4 font-semibold">Provider</th>
+                    <th className="whitespace-nowrap pb-2 font-semibold">Joined</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
+                  {metrics.recentUsers.map((row, index) => (
+                    <tr key={index} className="border-t" style={{ borderColor: "var(--rq-line)" }}>
+                      <td className="max-w-[14rem] truncate py-2 pr-4">{row.email ?? "—"}</td>
+                      <td className="py-2 pr-4">{row.provider ?? "—"}</td>
+                      <td className="whitespace-nowrap py-2">{when(row.createdAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </Card>
 
         <Card className="p-6">
-          <h2 className="rq-h3 text-[17px]">Latest events</h2>
+          <h2 className="rq-h4">Latest events</h2>
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="rq-label" style={{ color: "var(--rq-text-faint)" }}>
-                  <th className="pb-2 pr-4 font-semibold">Event</th>
-                  <th className="pb-2 pr-4 font-semibold">Platform</th>
-                  <th className="pb-2 font-semibold">When</th>
-                </tr>
-              </thead>
-              <tbody className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
-                {metrics.recentEvents.slice(0, 12).map((row, index) => (
-                  <tr key={index} className="border-t" style={{ borderColor: "var(--rq-line)" }}>
-                    <td className="py-2 pr-4">{row.event}</td>
-                    <td className="py-2 pr-4">{row.platform}</td>
-                    <td className="py-2">{when(row.created_at)}</td>
+            {metrics.recentEvents.length === 0 ? (
+              <p className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
+                Nothing tracked yet.
+              </p>
+            ) : (
+              <table className="w-full min-w-[26rem] text-left">
+                <thead>
+                  <tr className="rq-label" style={{ color: "var(--rq-text-dim)" }}>
+                    <th className="pb-2 pr-4 font-semibold">Event</th>
+                    <th className="pb-2 pr-4 font-semibold">Platform</th>
+                    <th className="whitespace-nowrap pb-2 font-semibold">When</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
+                  {metrics.recentEvents.slice(0, 12).map((row, index) => (
+                    <tr key={index} className="border-t" style={{ borderColor: "var(--rq-line)" }}>
+                      <td className="py-2 pr-4">{row.event}</td>
+                      <td className="py-2 pr-4">{row.platform}</td>
+                      <td className="whitespace-nowrap py-2">{when(row.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </Card>
       </div>

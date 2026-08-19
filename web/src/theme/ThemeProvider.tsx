@@ -54,6 +54,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     document.documentElement.style.colorScheme = theme;
+
+    // The browser chrome has to follow the *chosen* theme, so `index.html`
+    // carries one un-media-keyed <meta name="theme-color"> and it is painted
+    // here — read off --rq-bg rather than restated, so the canvas colour lives
+    // in exactly one place.
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      const canvas = getComputedStyle(document.documentElement)
+        .getPropertyValue("--rq-bg")
+        .trim();
+      if (canvas) meta.setAttribute("content", canvas);
+    }
   }, [theme]);
 
   // Follow the OS until the visitor makes an explicit choice.

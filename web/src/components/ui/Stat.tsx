@@ -12,21 +12,23 @@ export function Stat({
   unit,
   hint,
   className,
+  reserveTwoLines = false,
 }: {
   label: string;
   value: ReactNode;
   unit?: string;
   hint?: ReactNode;
   className?: string;
+  /**
+   * Hold two lines of label height even when the label fits on one, so a row of
+   * stats keeps its values on a shared baseline when a long label wraps at
+   * 375px. Opt-in: most callers pass one-word labels and would only gain a gap.
+   */
+  reserveTwoLines?: boolean;
 }) {
   return (
     <div className={cn("min-w-0", className)}>
-      <p
-        className="text-[11px] font-extrabold uppercase"
-        style={{ letterSpacing: "0.14em", color: "var(--rq-text-faint)" }}
-      >
-        {label}
-      </p>
+      <p className={cn("rq-micro-label", reserveTwoLines && "min-h-[2.9em]")}>{label}</p>
       <p className="rq-num mt-1.5 flex items-baseline gap-1 text-[28px] font-extrabold leading-none">
         {value}
         {unit ? (

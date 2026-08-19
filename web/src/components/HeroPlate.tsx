@@ -38,7 +38,7 @@ export function HeroPlate({ onFilled }: { onFilled?: () => void }) {
               {HERO_PLAYER.label} · coverage
             </p>
           </div>
-          <p className="rq-num text-[12.5px]" style={{ color: "var(--rq-text-faint)" }}>
+          <p className="rq-num text-[12.5px]" style={{ color: "var(--rq-text-dim)" }}>
             {HERO_MATCH.durationLabel} of match footage · {HERO_MATCH.shots} shots detected
           </p>
         </div>
@@ -85,12 +85,7 @@ export function HeroPlate({ onFilled }: { onFilled?: () => void }) {
             </div>
 
             <div>
-              <p
-                className="text-[11px] font-extrabold uppercase"
-                style={{ letterSpacing: "0.14em", color: "var(--rq-text-faint)" }}
-              >
-                Where the shots landed
-              </p>
+              <p className="rq-micro-label">Where the shots landed</p>
               <div className="mt-2 grid grid-cols-2 gap-1.5">
                 {cells.map((cell) => {
                   const share = busiest > 0 ? cell.value / busiest : 0;
@@ -110,7 +105,7 @@ export function HeroPlate({ onFilled }: { onFilled?: () => void }) {
                         {cell.value}
                         <span
                           className="ml-1 text-[11px] font-semibold"
-                          style={{ color: "var(--rq-text-faint)" }}
+                          style={{ color: "var(--rq-text-dim)" }}
                         >
                           {placementTotal > 0
                             ? `${Math.round((cell.value / placementTotal) * 100)}%`

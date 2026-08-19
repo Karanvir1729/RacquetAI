@@ -53,15 +53,30 @@ export function Card({
  * The accent icon chip that sits at the top of most cards: a rounded square of
  * `--rq-accent-soft` tinted `--rq-accent-text` (never `--rq-accent`, which is
  * unreadable as ink on a light surface).
+ *
+ * `tone="danger"` is the same chip in the status palette, for the cards that
+ * report a failure rather than a feature.
  */
-export function IconChip({ children, className }: { children: ReactNode; className?: string }) {
+export function IconChip({
+  children,
+  className,
+  tone = "accent",
+}: {
+  children: ReactNode;
+  className?: string;
+  tone?: "accent" | "danger";
+}) {
   return (
     <span
       className={cn(
         "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-rq-sm",
         className,
       )}
-      style={{ background: "var(--rq-accent-soft)", color: "var(--rq-accent-text)" }}
+      style={
+        tone === "danger"
+          ? { background: "var(--rq-danger-soft)", color: "var(--rq-danger)" }
+          : { background: "var(--rq-accent-soft)", color: "var(--rq-accent-text)" }
+      }
     >
       {children}
     </span>

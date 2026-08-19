@@ -69,7 +69,7 @@ export default function CheckoutSuccess() {
       <div className="mx-auto max-w-md">
         <Card className="p-6 text-center sm:p-8">
           <div className="flex justify-center">
-            <IconChip>
+            <IconChip tone={phase.kind === "failed" ? "danger" : "accent"}>
               {phase.kind === "confirming" ? (
                 <LoaderCircle className="h-5 w-5 animate-spin" />
               ) : phase.kind === "done" ? (
@@ -80,24 +80,30 @@ export default function CheckoutSuccess() {
             </IconChip>
           </div>
 
-          <h1 className="rq-h3 mt-5">
-            {phase.kind === "confirming"
-              ? "Confirming with Stripe…"
-              : phase.kind === "done"
-                ? "You're on RacquetIQ Pro"
-                : "Purchase not confirmed"}
-          </h1>
+          {/* The outcome arrives after a round-trip to the server, so announce
+              it rather than leaving a screen reader on the spinner's copy. */}
+          <div aria-live="polite">
+            <h1 className="rq-h3 mt-5">
+              {phase.kind === "confirming"
+                ? "Confirming with Stripe…"
+                : phase.kind === "done"
+                  ? "You're on RacquetIQ Pro"
+                  : "Purchase not confirmed"}
+            </h1>
 
-          <p className="rq-lead mt-3 text-[15px]">
-            {phase.kind === "confirming" ? "One moment — verifying the checkout session." : null}
-            {phase.kind === "done" && phase.plan !== null
-              ? `${phase.plan === "yearly" ? "Annual" : "Monthly"} plan active. Every analysis is now unlimited, here and in the iOS app.`
-              : null}
-            {phase.kind === "done" && phase.plan === null
-              ? "Payment confirmed and your subscription is recorded. Sign in on any device to see it."
-              : null}
-            {phase.kind === "failed" ? phase.reason : null}
-          </p>
+            <p className="rq-lead mt-3 text-[15px]">
+              {phase.kind === "confirming" ? "One moment — verifying the checkout session." : null}
+              {phase.kind === "done" && phase.plan !== null
+                ? `${phase.plan === "yearly" ? "Annual" : "Monthly"} plan active. Every analysis is now unlimited, here and in the iOS app.`
+                : null}
+              {phase.kind === "done" && phase.plan === null
+                ? "Payment confirmed and your subscription is recorded. Sign in on any device to see it."
+                : null}
+              {phase.kind === "failed" ? (
+                <span style={{ color: "var(--rq-danger)" }}>{phase.reason}</span>
+              ) : null}
+            </p>
+          </div>
 
           <div className="mt-7 flex flex-col gap-3">
             {phase.kind === "done" ? (

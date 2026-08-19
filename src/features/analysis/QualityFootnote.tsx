@@ -36,5 +36,5 @@ export function QualityFootnote({ quality }: QualityFootnoteProps) {
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.xs, paddingHorizontal: spacing.xs },
-  line: { ...type.caption, color: colors.textFaint },
+  line: { ...type.caption, color: colors.textDim },
 });

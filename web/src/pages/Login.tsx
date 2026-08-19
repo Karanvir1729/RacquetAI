@@ -34,7 +34,9 @@ export default function Login() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
+  // Which path is in flight, not merely whether one is: a single boolean would
+  // spin and disable the Google button and the email form together.
+  const [busy, setBusy] = useState<"google" | "email" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -44,14 +46,14 @@ export default function Login() {
 
   async function submitEmail(event: FormEvent) {
     event.preventDefault();
-    setBusy(true);
+    setBusy("email");
     setError(null);
     setNotice(null);
     const problem =
       mode === "signin"
         ? await signInWithEmail(email, password)
         : await signUpWithEmail(email, password);
-    setBusy(false);
+    setBusy(null);
     if (problem === "confirm") {
       setNotice("Account created — confirm it from the email we sent, then sign in.");
       setMode("signin");
@@ -62,11 +64,16 @@ export default function Login() {
     }
   }
 
-  // Success navigates the whole page to Google; only failures come back here.
+  // Success navigates the whole page to Google; only failures come back here,
+  // which is also the only case that has a button left to un-busy.
   async function submitGoogle() {
+    setBusy("google");
     setError(null);
     const problem = await signInWithGoogle(next);
-    if (problem) setError(problem);
+    if (problem) {
+      setError(problem);
+      setBusy(null);
+    }
   }
 
   return (
@@ -78,13 +85,19 @@ export default function Login() {
         </h1>
 
         <Card className="mt-8 p-6 sm:p-8">
-          <Button size="md" className="w-full" onClick={() => void submitGoogle()}>
-            <GoogleMark className="h-5 w-5" /> Continue with Google
+          <Button
+            size="md"
+            className="w-full"
+            disabled={busy !== null}
+            onClick={() => void submitGoogle()}
+          >
+            <GoogleMark className="h-5 w-5" />{" "}
+            {busy === "google" ? "Opening Google…" : "Continue with Google"}
           </Button>
 
           <div className="my-6 flex items-center gap-3">
             <Hairline className="flex-1" />
-            <span className="rq-caption" style={{ color: "var(--rq-text-faint)" }}>
+            <span className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
               or with email
             </span>
             <Hairline className="flex-1" />
@@ -122,8 +135,8 @@ export default function Login() {
               </p>
             ) : null}
 
-            <Button type="submit" size="md" variant="secondary" disabled={busy}>
-              {busy ? "One moment…" : mode === "signin" ? "Sign in" : "Create account"}
+            <Button type="submit" size="md" variant="secondary" disabled={busy !== null}>
+              {busy === "email" ? "One moment…" : mode === "signin" ? "Sign in" : "Create account"}
             </Button>
           </form>
 
@@ -142,7 +155,7 @@ export default function Login() {
           </button>
         </Card>
 
-        <p className="rq-caption mt-6 text-center" style={{ color: "var(--rq-text-faint)" }}>
+        <p className="rq-caption mt-6 text-center" style={{ color: "var(--rq-text-dim)" }}>
           Accounts power subscriptions and sync. Analysing a match still works without one.
         </p>
       </div>

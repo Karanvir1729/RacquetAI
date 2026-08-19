@@ -78,7 +78,7 @@ export default function RootLayout() {
             screenOptions={{
               headerShown: false,
               tabBarActiveTintColor: colors.accent,
-              tabBarInactiveTintColor: colors.textFaint,
+              tabBarInactiveTintColor: colors.textDim,
               tabBarStyle: {
                 backgroundColor: colors.panel,
                 borderTopColor: colors.line,

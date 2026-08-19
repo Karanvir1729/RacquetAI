@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
+import { Card } from "@/components/Card";
 import { Segmented } from "@/components/Segmented";
 import { trackEvent } from "@/lib/appEvents";
 import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens";
@@ -44,7 +45,7 @@ export function EngineSettingsCard() {
   }
 
   return (
-    <View style={styles.card}>
+    <Card>
       <Text style={styles.title}>Analysis engine</Text>
       <Text style={styles.dim}>
         On-device keeps footage on the phone but can be slow. A server does the heavy lifting
@@ -93,7 +94,7 @@ export function EngineSettingsCard() {
           </Text>
         </>
       ) : null}
-    </View>
+    </Card>
   );
 }
 
@@ -112,7 +113,7 @@ function PresetChip({
       accessibilityLabel={label}
       accessibilityState={{ selected: active }}
       onPress={onPress}
-      style={[styles.chip, active && styles.chipActive]}
+      style={({ pressed }) => [styles.chip, active && styles.chipActive, pressed && styles.pressed]}
     >
       <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>{label}</Text>
     </Pressable>
@@ -120,14 +121,6 @@ function PresetChip({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.card,
-    borderColor: colors.line,
-    borderWidth: 1,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
   title: { ...type.heading, color: colors.text },
   dim: { ...type.caption, color: colors.textDim },
   input: {
@@ -153,4 +146,5 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
   chipLabel: { ...type.label, color: colors.textDim },
   chipLabelActive: { color: colors.accentText },
+  pressed: { opacity: 0.7 },
 });

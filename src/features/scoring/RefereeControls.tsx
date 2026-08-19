@@ -151,8 +151,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  // Wraps rather than truncates: at the largest Dynamic Type sizes three
+  // pill buttons no longer fit one 375pt line, and a clipped "Stop watching"
+  // is worse than a second row.
   actions: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "center",
     gap: spacing.sm,
     paddingVertical: spacing.sm,
@@ -163,6 +167,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xs,
     minHeight: MIN_TOUCH_TARGET,
+    minWidth: MIN_TOUCH_TARGET,
+    flexShrink: 1,
     paddingHorizontal: spacing.md,
     borderRadius: radius.pill,
     backgroundColor: colors.card,
@@ -170,6 +176,6 @@ const styles = StyleSheet.create({
     borderColor: colors.line2,
   },
   actionDisabled: { opacity: 0.35 },
-  actionLabel: { ...type.label, color: colors.text },
+  actionLabel: { ...type.label, color: colors.text, flexShrink: 1 },
   pressed: { opacity: 0.7 },
 });

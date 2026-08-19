@@ -92,7 +92,7 @@ export default function Demo() {
               <AlertTriangle className="h-6 w-6" />
             </span>
             <h1 className="rq-h3 mt-4">The sample didn't load</h1>
-            <p className="rq-lead mt-3 text-[15px]">{load.reason}</p>
+            <p className="rq-lead-sm mt-3">{load.reason}</p>
             <div className="mt-7 flex flex-wrap gap-3">
               <ButtonLink to="/analyze" size="md">
                 Analyze your own match

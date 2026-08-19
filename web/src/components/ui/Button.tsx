@@ -31,7 +31,7 @@ const SIZES: Record<ButtonSize, string> = {
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: "bg-rq-accent text-rq-on-accent hover:brightness-105",
   secondary: "bg-rq-accent-soft text-rq-accent-text hover:brightness-110",
-  outline: "border border-rq-line2 bg-rq-card text-rq-text hover:border-rq-accent",
+  outline: "border border-rq-line2 bg-rq-card text-rq-text hover:border-rq-accent-text",
   ghost: "text-rq-dim hover:text-rq-text",
 };
 

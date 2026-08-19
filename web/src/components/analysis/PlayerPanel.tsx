@@ -8,6 +8,36 @@ import { Card, Hairline } from "@/components/ui/Card";
 import { Meter, Stat } from "@/components/ui/Stat";
 
 /**
+ * Names the busiest cell of a coverage heatmap the way a coach would: row 0 is
+ * the front-wall end (the contract in analysis/types.ts) and columns run left
+ * to right. Thirds rather than exact cells, because the grid's resolution is
+ * not fixed — and a centre column gets no side, because calling it left would
+ * be a guess. Null when the heatmap is empty, in which case the caller says
+ * nothing about location at all.
+ */
+function busiestRegion(rows: number, cols: number, values: readonly number[]): string | null {
+  if (rows <= 0 || cols <= 0) return null;
+  let bestIndex = -1;
+  let best = 0;
+  for (let index = 0; index < rows * cols; index += 1) {
+    const value = values[index] ?? 0;
+    if (value > best) {
+      best = value;
+      bestIndex = index;
+    }
+  }
+  if (bestIndex < 0) return null;
+
+  const depths = ["front", "middle", "back"] as const;
+  const row = Math.floor(bestIndex / cols);
+  const depth = depths[Math.min(2, Math.floor(((row + 0.5) / rows) * 3))] ?? "middle";
+  const lane = ((bestIndex % cols) + 0.5) / cols;
+  if (lane < 0.4) return `${depth} left`;
+  if (lane > 0.6) return `${depth} right`;
+  return depth;
+}
+
+/**
  * Everything measured about one player, in one card: coverage on the court
  * plan, T-time, predictability, the shot mix and the placement quadrants.
  *
@@ -26,6 +56,15 @@ export function PlayerPanel({
 }) {
   const counts = countShotTypes(shots, player.id);
   const { predictability, coverageHeatmap } = player;
+
+  // Two of these render side by side, so the plan has to say WHOSE court it is
+  // — and where the heat actually fell, rather than a sentence that would be
+  // spoken identically over both players.
+  const region = busiestRegion(coverageHeatmap.rows, coverageHeatmap.cols, coverageHeatmap.values);
+  const coverageLabel =
+    region === null
+      ? `Court plan of where ${player.label} spent their time`
+      : `Court plan of where ${player.label} spent their time — heaviest in the ${region} of the court`;
 
   return (
     <Card className="flex flex-col p-5 sm:p-6">
@@ -46,18 +85,14 @@ export function PlayerPanel({
         {/* Coverage. Same court plan the landing hero uses, on this player's
             own heatmap — the site has exactly one way of drawing a court. */}
         <div>
-          <p
-            className="text-[11px] font-extrabold uppercase"
-            style={{ letterSpacing: "0.14em", color: "var(--rq-text-faint)" }}
-          >
-            Coverage
-          </p>
+          <p className="rq-micro-label">Coverage</p>
           <div className="mt-3 flex justify-center">
             <div style={{ height: "clamp(220px, 40vw, 300px)", aspectRatio: "64 / 97.5" }}>
               <CourtPlan
                 rows={coverageHeatmap.rows}
                 cols={coverageHeatmap.cols}
                 values={coverageHeatmap.values}
+                ariaLabel={coverageLabel}
               />
             </div>
           </div>
@@ -98,12 +133,7 @@ export function PlayerPanel({
           </div>
 
           <div>
-            <p
-              className="text-[11px] font-extrabold uppercase"
-              style={{ letterSpacing: "0.14em", color: "var(--rq-text-faint)" }}
-            >
-              Where the shots landed
-            </p>
+            <p className="rq-micro-label">Where the shots landed</p>
             <div className="mt-3">
               <PlacementGrid placement={player.placement} />
             </div>
@@ -116,12 +146,7 @@ export function PlayerPanel({
       </div>
 
       <div className="mt-6">
-        <p
-          className="text-[11px] font-extrabold uppercase"
-          style={{ letterSpacing: "0.14em", color: "var(--rq-text-faint)" }}
-        >
-          Shot mix
-        </p>
+        <p className="rq-micro-label">Shot mix</p>
         <div className="mt-3">
           <ShotTypeBars counts={counts} />
         </div>

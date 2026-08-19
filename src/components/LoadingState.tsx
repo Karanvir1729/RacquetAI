@@ -19,7 +19,7 @@ interface LoadingStateProps {
 export function LoadingState({ caption, fill = false }: LoadingStateProps) {
   return (
     <View style={[styles.wrap, fill && styles.fill]}>
-      <ActivityIndicator color={colors.accent} />
+      <ActivityIndicator color={colors.accentText} />
       {caption ? <Text style={styles.caption}>{caption}</Text> : null}
     </View>
   );

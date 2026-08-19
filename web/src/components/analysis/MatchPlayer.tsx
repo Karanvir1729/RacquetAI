@@ -2,6 +2,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Expand,
+  Minimize,
   Pause,
   Play,
   RotateCcw,
@@ -36,6 +37,15 @@ import { useElementSize } from "@/lib/useElementSize";
 const TICK_HZ = 25;
 const SKIP_SEC = 5;
 const SPEEDS = [0.5, 1, 2];
+
+/**
+ * How much of the viewport height the picture may take while fullscreen.
+ *
+ * The video box is `w-full` with the footage's own aspect ratio, so on a 16:9
+ * display it would be exactly viewport-height on its own and push the transport
+ * — the reason fullscreen encloses more than the picture — below the fold.
+ */
+const FULLSCREEN_VIDEO_MAX_VH = 72;
 
 /** Cycle the speed chip: 0.5 → 1 → 2 → 0.5. */
 function nextSpeed(current: number): number {
@@ -72,6 +82,7 @@ export function MatchPlayer({ analysis, videoSrc, caption }: MatchPlayerProps) {
   const [showSkeleton, setShowSkeleton] = useState(true);
   const [speed, setSpeed] = useState<number>(1);
   const [failed, setFailed] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
 
   const { video, shots, tracks } = analysis;
   const duration = video.durationSec > 0 ? video.durationSec : 1;
@@ -163,182 +174,216 @@ export function MatchPlayer({ analysis, videoSrc, caption }: MatchPlayerProps) {
     else void element.requestFullscreen?.().catch(() => undefined);
   }, []);
 
+  // `document.fullscreenElement` read during render is not reactive: without
+  // this listener nothing repaints when the state changes, so the shell would
+  // keep its transparent background and the icon would stay on Expand — including
+  // when the user leaves fullscreen with Escape rather than the button.
+  useEffect(() => {
+    const sync = () => setFullscreen(document.fullscreenElement === shellRef.current);
+    sync();
+    document.addEventListener("fullscreenchange", sync);
+    return () => document.removeEventListener("fullscreenchange", sync);
+  }, []);
+
   const progress = Math.max(0, Math.min(1, time / duration));
+  const noVideo = videoSrc === null || failed;
+  const skeletonLabel = showSkeleton ? "Hide the pose skeleton" : "Show the pose skeleton";
 
   return (
     <Card className="overflow-hidden" style={{ boxShadow: "var(--rq-lift-shadow)" }}>
-      <div ref={shellRef} className="relative" style={{ background: "var(--rq-court-floor)" }}>
-        <div
-          ref={boxRef}
-          className="relative w-full"
-          style={{ aspectRatio: `${aspect}`, background: "var(--rq-court-floor)" }}
-        >
-          {videoSrc !== null && !failed ? (
-            <video
-              ref={videoRef}
-              src={videoSrc}
-              className="absolute inset-0 h-full w-full object-contain"
-              playsInline
-              preload="metadata"
-              onPlay={() => setPlaying(true)}
-              onPause={() => setPlaying(false)}
-              onError={() => setFailed(true)}
-              onLoadedMetadata={(event) => {
-                event.currentTarget.playbackRate = speed;
-              }}
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
-              <p className="rq-caption max-w-sm">
-                {failed
-                  ? "This browser could not play the video file. The measurements below are unaffected."
-                  : "No video is attached to this analysis — the measurements below still apply."}
-              </p>
-            </div>
-          )}
-
-          <PoseOverlay
-            tracks={tracks}
-            videoSize={{ width: video.width, height: video.height }}
-            box={boxSize}
-            timeSec={time}
-            visible={showSkeleton && videoSrc !== null && !failed}
-          />
-
-          {tracks === undefined ? (
-            <div className="pointer-events-none absolute right-3 top-3">
-              <span
-                className="rounded-rq-sm border px-2.5 py-1.5 text-[11px] font-bold backdrop-blur-md"
-                style={{
-                  borderColor: "var(--rq-line-2)",
-                  background: "var(--rq-chip)",
-                  color: "var(--rq-text-dim)",
-                }}
-              >
-                No pose track in this file
-              </span>
-            </div>
-          ) : null}
-        </div>
-
-        {/* The live read-out. Over the frame from `sm` up, where there is room
-            in the corner; on a phone it drops below the picture instead, because
-            a two-line badge at 375px covers the players it is describing. It
-            never unmounts — it holds its slot between shots so the layout does
-            not jump on every contact. */}
-        <div className="pointer-events-none px-3 pb-3 sm:absolute sm:left-3 sm:top-3 sm:max-w-[calc(100%-1.5rem)] sm:p-0">
-          <ShotBadge shot={activeShot} analysis={analysis} />
-        </div>
-      </div>
-
-      <Hairline />
-
-      {/* ---- scrubber -------------------------------------------------- */}
-      <div className="px-4 pt-4 sm:px-5">
-        <div className="relative">
-          {/* Shot ticks, behind the control. Player A above the line, B below,
-              so a rally reads as an exchange rather than a picket fence. */}
-          <div className="pointer-events-none absolute inset-x-0 top-1/2 h-8 -translate-y-1/2">
-            {sortedShots.map((shot, index) => (
-              <span
-                key={`${shot.tSec}-${index}`}
-                className="absolute w-px"
-                style={{
-                  left: `${Math.max(0, Math.min(1, shot.tSec / duration)) * 100}%`,
-                  top: shot.player === "A" ? 0 : "50%",
-                  height: "50%",
-                  background: PLAYER_DOT[shot.player],
-                  opacity: shot === activeShot ? 1 : 0.34,
+      {/* The fullscreen element is the whole player, not the picture: studying a
+          rally is exactly when the transport, the shot ticks and the way back
+          out are needed, and a fullscreen <video> box takes all three off the
+          screen. Transparent by default, so it needs the page ground painted on
+          it or the browser fills the surround with black. */}
+      <div ref={shellRef} style={fullscreen ? { background: "var(--rq-bg)" } : undefined}>
+        <div className="relative" style={{ background: "var(--rq-court-floor)" }}>
+          <div
+            ref={boxRef}
+            className="relative w-full"
+            style={{
+              aspectRatio: `${aspect}`,
+              background: "var(--rq-court-floor)",
+              maxHeight: fullscreen ? `${FULLSCREEN_VIDEO_MAX_VH}vh` : undefined,
+            }}
+          >
+            {videoSrc !== null && !failed ? (
+              <video
+                ref={videoRef}
+                src={videoSrc}
+                className="absolute inset-0 h-full w-full object-contain"
+                playsInline
+                preload="metadata"
+                onPlay={() => setPlaying(true)}
+                onPause={() => setPlaying(false)}
+                onError={() => setFailed(true)}
+                onLoadedMetadata={(event) => {
+                  event.currentTarget.playbackRate = speed;
                 }}
               />
-            ))}
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
+                <p className="rq-caption max-w-sm">
+                  {failed
+                    ? "This browser could not play the video file. The measurements below are unaffected."
+                    : "No video is attached to this analysis — the measurements below still apply."}
+                </p>
+              </div>
+            )}
+
+            <PoseOverlay
+              tracks={tracks}
+              videoSize={{ width: video.width, height: video.height }}
+              box={boxSize}
+              timeSec={time}
+              visible={showSkeleton && videoSrc !== null && !failed}
+            />
+
+            {tracks === undefined ? (
+              <div className="pointer-events-none absolute right-3 top-3">
+                <span
+                  className="rounded-rq-sm border px-2.5 py-1.5 text-[11px] font-bold backdrop-blur-md"
+                  style={{
+                    borderColor: "var(--rq-line-2)",
+                    background: "var(--rq-chip)",
+                    color: "var(--rq-text-dim)",
+                  }}
+                >
+                  No pose track in this file
+                </span>
+              </div>
+            ) : null}
           </div>
-          <input
-            className="rq-scrub relative w-full"
-            type="range"
-            min={0}
-            max={duration}
-            step={0.05}
-            value={time}
-            onChange={(event) => seek(Number(event.target.value))}
-            aria-label="Seek through the match"
-            aria-valuetext={formatClock(time)}
-            style={{ "--rq-scrub-progress": `${progress * 100}%` } as CSSProperties}
-          />
+
+          {/* The live read-out. Over the frame from `sm` up, where there is room
+              in the corner; on a phone it drops below the picture instead, because
+              a two-line badge at 375px covers the players it is describing. It
+              never unmounts — it holds its slot between shots so the layout does
+              not jump on every contact. */}
+          <div className="pointer-events-none px-3 pb-3 sm:absolute sm:left-3 sm:top-3 sm:max-w-[calc(100%-1.5rem)] sm:p-0">
+            <ShotBadge shot={activeShot} analysis={analysis} />
+          </div>
         </div>
 
-        <div className="mt-1 flex items-center justify-between">
-          <span className="rq-num text-[12.5px]" style={{ color: "var(--rq-text-dim)" }}>
-            {formatClock(time)}
-          </span>
-          <span className="rq-num text-[12.5px]" style={{ color: "var(--rq-text-faint)" }}>
-            {formatClock(duration)}
-          </span>
+        <Hairline />
+
+        {/* ---- scrubber -------------------------------------------------- */}
+        <div className="px-4 pt-4 sm:px-5">
+          <div className="relative">
+            {/* Shot ticks, behind the control. Player A above the line, B below,
+                so a rally reads as an exchange rather than a picket fence. */}
+            <div className="pointer-events-none absolute inset-x-0 top-1/2 h-8 -translate-y-1/2">
+              {sortedShots.map((shot, index) => (
+                <span
+                  key={`${shot.tSec}-${index}`}
+                  className="absolute w-px"
+                  style={{
+                    left: `${Math.max(0, Math.min(1, shot.tSec / duration)) * 100}%`,
+                    top: shot.player === "A" ? 0 : "50%",
+                    height: "50%",
+                    background: PLAYER_DOT[shot.player],
+                    opacity: shot === activeShot ? 1 : 0.34,
+                  }}
+                />
+              ))}
+            </div>
+            <input
+              className="rq-scrub relative w-full"
+              type="range"
+              min={0}
+              max={duration}
+              step={0.05}
+              value={time}
+              onChange={(event) => seek(Number(event.target.value))}
+              aria-label="Seek through the match"
+              aria-valuetext={formatClock(time)}
+              style={{ "--rq-scrub-progress": `${progress * 100}%` } as CSSProperties}
+            />
+          </div>
+
+          <div className="mt-1 flex items-center justify-between">
+            <span className="rq-num text-[12.5px]" style={{ color: "var(--rq-text-dim)" }}>
+              {formatClock(time)}
+            </span>
+            <span className="rq-num text-[12.5px]" style={{ color: "var(--rq-text-dim)" }}>
+              {formatClock(duration)}
+            </span>
+          </div>
         </div>
-      </div>
 
-      {/* ---- transport --------------------------------------------------- */}
-      <div className="flex flex-wrap items-center gap-2 px-4 pb-4 pt-2 sm:px-5">
-        <TransportButton
-          onClick={toggle}
-          label={playing ? "Pause" : "Play"}
-          disabled={videoSrc === null || failed}
-          primary
-        >
-          {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-        </TransportButton>
-        <TransportButton onClick={() => seek(time - SKIP_SEC)} label={`Back ${SKIP_SEC} seconds`}>
-          <RotateCcw style={{ width: 18, height: 18 }} />
-        </TransportButton>
-        <TransportButton onClick={() => stepShot(-1)} label="Previous detected shot">
-          <ChevronLeft className="h-5 w-5" />
-        </TransportButton>
-        <TransportButton onClick={() => stepShot(1)} label="Next detected shot">
-          <ChevronRight className="h-5 w-5" />
-        </TransportButton>
-
-        <div className="ml-auto flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setSpeed(nextSpeed)}
-            className="rq-num inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-rq-sm border px-3 text-[13px] font-extrabold"
-            style={{
-              borderColor: "var(--rq-line)",
-              background: "var(--rq-card)",
-              color: "var(--rq-text-dim)",
-            }}
-            aria-label={`Playback speed ${speed}x — tap to change`}
+        {/* ---- transport --------------------------------------------------- */}
+        <div className="flex flex-wrap items-center gap-2 px-4 pb-4 pt-2 sm:px-5">
+          <TransportButton
+            onClick={toggle}
+            label={playing ? "Pause" : "Play"}
+            disabled={noVideo}
+            primary
           >
-            {speed}×
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowSkeleton((value) => !value)}
-            aria-pressed={showSkeleton}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-rq-sm border px-3 text-[13px] font-extrabold"
-            style={{
-              borderColor: showSkeleton ? "var(--rq-accent-line)" : "var(--rq-line)",
-              background: showSkeleton ? "var(--rq-accent-soft)" : "var(--rq-card)",
-              color: showSkeleton ? "var(--rq-accent-text)" : "var(--rq-text-dim)",
-            }}
-          >
-            <ScanLine className="h-4 w-4" />
-            <span className="hidden sm:inline">Skeleton</span>
-          </button>
-          <TransportButton onClick={goFullscreen} label="Full screen">
-            <Expand className="h-5 w-5" />
+            {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </TransportButton>
-        </div>
-      </div>
+          <TransportButton onClick={() => seek(time - SKIP_SEC)} label={`Back ${SKIP_SEC} seconds`}>
+            <RotateCcw style={{ width: 18, height: 18 }} />
+          </TransportButton>
+          <TransportButton onClick={() => stepShot(-1)} label="Previous detected shot">
+            <ChevronLeft className="h-5 w-5" />
+          </TransportButton>
+          <TransportButton onClick={() => stepShot(1)} label="Next detected shot">
+            <ChevronRight className="h-5 w-5" />
+          </TransportButton>
 
-      {caption !== undefined ? (
-        <>
-          <Hairline />
-          <p className="px-4 py-3 text-[12.5px] sm:px-5" style={{ color: "var(--rq-text-faint)" }}>
-            {caption}
-          </p>
-        </>
-      ) : null}
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSpeed(nextSpeed)}
+              className="rq-num inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-rq-sm border px-3 text-[13px] font-extrabold"
+              style={{
+                borderColor: "var(--rq-line)",
+                background: "var(--rq-card)",
+                color: "var(--rq-text-dim)",
+              }}
+              aria-label={`Playback speed ${speed}x — tap to change`}
+            >
+              {speed}×
+            </button>
+            {/* The label is hidden below `sm`, so the accessible name has to come
+                from the attribute — and it names the state, since this is the one
+                control on the page nothing else explains. */}
+            <button
+              type="button"
+              onClick={() => setShowSkeleton((value) => !value)}
+              aria-pressed={showSkeleton}
+              aria-label={skeletonLabel}
+              title={skeletonLabel}
+              disabled={noVideo}
+              className={cn(
+                "inline-flex min-h-[44px] items-center gap-2 rounded-rq-sm border px-3 text-[13px] font-extrabold transition-opacity",
+                noVideo && "pointer-events-none opacity-40",
+              )}
+              style={{
+                borderColor: showSkeleton ? "var(--rq-accent-line)" : "var(--rq-line)",
+                background: showSkeleton ? "var(--rq-accent-soft)" : "var(--rq-card)",
+                color: showSkeleton ? "var(--rq-accent-text)" : "var(--rq-text-dim)",
+              }}
+            >
+              <ScanLine className="h-4 w-4" />
+              <span className="hidden sm:inline">Skeleton</span>
+            </button>
+            <TransportButton
+              onClick={goFullscreen}
+              label={fullscreen ? "Leave full screen" : "Full screen"}
+            >
+              {fullscreen ? <Minimize className="h-5 w-5" /> : <Expand className="h-5 w-5" />}
+            </TransportButton>
+          </div>
+        </div>
+
+        {caption !== undefined ? (
+          <>
+            <Hairline />
+            <p className="rq-caption px-4 py-3 sm:px-5">{caption}</p>
+          </>
+        ) : null}
+      </div>
     </Card>
   );
 }
@@ -419,7 +464,7 @@ function ShotBadge({ shot, analysis }: { shot: ShotEvent | null; analysis: Match
             {shot.type === undefined ? cellLabel(shot.cell) : `${shotTypeLabel(shot.type)} · ${cellLabel(shot.cell).toLowerCase()}`}
           </span>
           {shot.typeConfidence !== undefined ? (
-            <span className="rq-num text-[11px] font-bold" style={{ color: "var(--rq-text-faint)" }}>
+            <span className="rq-num text-[11px] font-bold" style={{ color: "var(--rq-text-dim)" }}>
               {formatPercent(shot.typeConfidence)} conf.
             </span>
           ) : null}

@@ -17,8 +17,27 @@
  * icons must read `--rq-accent-text`, which deepens to Court Green (#1F6B4A)
  * in light mode. Same discipline as Daybot's `--db-accent-text`.
  *
+ * Say it the short way: **Optic is a FILL.** Anything that is INK — a label, a
+ * glyph, a border, a stroke, a spinner, a focus ring — takes `--rq-accent-text`
+ * (or `--rq-data` for a data mark). Optic measures 1.10:1 on Chalk Wash, so an
+ * accent-inked element in light mode is not "subtle", it is absent.
+ *
+ * The ink ramp is THREE tiers and each has a job:
+ *   --rq-text        headings, values, anything at full strength
+ *   --rq-text-dim    EVERY other readable thing — body copy, captions, hints,
+ *                    the label of an enabled control
+ *   --rq-text-faint  disabled, pending, placeholder and watermark ONLY
+ * Faint measures 2.72:1 on the light canvas, which is under the 4.5:1 floor and
+ * is legal only because WCAG exempts genuinely inactive components. The moment
+ * faint carries something the user has to read, that exemption stops applying —
+ * so an unreached step's number stays faint, its description does not.
+ *
  * `data-theme` lives on <html> (not on a wrapper div as in Daybot) so the body
  * canvas, overscroll gutter and form controls follow the theme too.
+ *
+ * The type scale gained three rungs the components kept hand-typing between the
+ * old ones: `--rq-fs-h4` (18px card headings), `--rq-fs-body-sm` (15px dense
+ * copy) and `--rq-fs-micro` (11px caps labels, tracked with `--rq-ls-caps-tight`).
  */
 
 :root[data-theme="dark"] {
@@ -177,14 +196,20 @@
   --rq-fs-display: clamp(30px, 4.4vw, 44px);
   --rq-fs-title: clamp(21px, 2.4vw, 26px);
   --rq-fs-lead: clamp(17px, 1.4vw, 19px);
+  --rq-fs-h4: 18px;
   --rq-fs-body: 16px;
+  --rq-fs-body-sm: 15px;
   --rq-fs-label: 14px;
   --rq-fs-caption: 12.5px;
+  --rq-fs-micro: 11px;
 
   --rq-ls-hero: -0.045em;
   --rq-ls-display: -0.03em;
   --rq-ls-title: -0.02em;
   --rq-ls-caps: 0.2em;
+  /* Tighter caps tracking, for the 11px micro label: 0.2em at that size pulls
+     a two-word label apart. */
+  --rq-ls-caps-tight: 0.14em;
 
   --rq-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }

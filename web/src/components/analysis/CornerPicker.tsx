@@ -37,7 +37,14 @@ import { useElementSize } from "@/lib/useElementSize";
  *    finger — the thumb is already covering that part of the screen.
  */
 
-const LOUPE_PX = 116;
+/**
+ * The loupe's diameter, scaled to the frame it sits on. A flat 116px disc
+ * covers most of the picture on a 375px phone — the width where the
+ * magnification is needed most — so it shrinks with the stage instead.
+ */
+const LOUPE_MAX_PX = 116;
+const LOUPE_MIN_PX = 84;
+const LOUPE_OF_FRAME = 0.3;
 const LOUPE_ZOOM = 3.5;
 /** Arrow-key step, in normalized units: ~1 pixel of an 854-wide frame. */
 const NUDGE = 0.0012;
@@ -56,6 +63,8 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
   const frameElementRef = useRef<HTMLDivElement | null>(null);
   const [imageSize, setImageSize] = useState<Size | null>(null);
   const [imageFailed, setImageFailed] = useState(false);
+  /** Bumped to remount the <img> and ask for the frame again. */
+  const [attempt, setAttempt] = useState(0);
   /** Committed corners, in CORNER_ORDER. */
   const [points, setPoints] = useState<Point[]>([]);
   const [draft, setDraft] = useState<Point | null>(null);
@@ -164,10 +173,24 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
     setPoints((current) => current.slice(0, -1));
   };
 
-  const startOver = () => {
+  const clearMarks = () => {
     if (submitting) return;
     setPoints([]);
     setDraft(null);
+  };
+
+  /**
+   * A dropped image request is not a dead end: polling has stopped by the time
+   * this step renders, so without a retry a multi-minute upload is stranded
+   * behind a Confirm that can never enable.
+   *
+   * The retry rides on a local counter rather than a cache-busted `frameSrc`
+   * because that is a PROP, and the effect above wipes every mark the moment it
+   * changes — a retry that touched it would silently clear the user's work.
+   */
+  const retryFrame = () => {
+    setImageFailed(false);
+    setAttempt((current) => current + 1);
   };
 
   const submit = () => {
@@ -196,6 +219,12 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
 
   const activePoint = draft ?? null;
   const loupeOnLeft = activePoint !== null && activePoint.x > 0.55;
+  const loupePx =
+    frameSize === null
+      ? LOUPE_MAX_PX
+      : Math.round(
+          Math.max(LOUPE_MIN_PX, Math.min(LOUPE_MAX_PX, frameSize.width * LOUPE_OF_FRAME)),
+        );
 
   return (
     <Card className="overflow-hidden">
@@ -206,7 +235,7 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
             ? "All four corners placed."
             : `Place the ${nextCell === undefined ? "" : cellLabel(nextCell).toLowerCase()} floor corner`}
         </h2>
-        <p className="rq-lead mt-3 text-[15px]">
+        <p className="rq-lead-sm mt-3">
           {complete
             ? "Check the outline traces the court floor, then start the analysis."
             : "Tap or drag on the frame, fine-tune with the loupe or the arrow keys, then confirm. A corner that sits off the edge of the picture goes in the hatched margin — the pipeline expects that and does not clamp it."}
@@ -247,15 +276,19 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
             style={{ aspectRatio: imageSize === null ? "16 / 9" : `${imageSize.width} / ${imageSize.height}` }}
           >
             {imageFailed ? (
-              <div className="absolute inset-0 flex items-center justify-center rounded-rq-sm border p-6 text-center"
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-rq-sm border p-6 text-center"
                 style={{ borderColor: "var(--rq-line)", background: "var(--rq-card)" }}>
                 <p className="rq-caption max-w-xs">
-                  The reference frame could not be loaded from the server. It becomes available as
-                  soon as the job reaches the corner-marking stage.
+                  The reference frame didn't load. Nothing is lost — the job is still on the
+                  server and the frame is still there to fetch.
                 </p>
+                <Button size="sm" variant="outline" onClick={retryFrame}>
+                  <RotateCcw className="h-4 w-4" /> Try the frame again
+                </Button>
               </div>
             ) : (
               <img
+                key={attempt}
                 ref={measureImage}
                 src={frameSrc}
                 alt="A frame from the middle of your match, for marking the court corners"
@@ -329,6 +362,7 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
               frameSize={frameSize}
               imageSize={imageSize}
               onLeft={loupeOnLeft}
+              size={loupePx}
             />
           ) : null}
         </div>
@@ -361,7 +395,7 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
             Arrow keys nudge · Enter confirms
           </button>
 
-          <p className="rq-num text-[12px]" style={{ color: "var(--rq-text-faint)" }}>
+          <p className="rq-num text-[12px]" style={{ color: "var(--rq-text-dim)" }}>
             {draft === null
               ? `${index} of 4 placed`
               : `x ${draft.x.toFixed(3)} · y ${draft.y.toFixed(3)}`}
@@ -412,10 +446,10 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
           <Button
             size="md"
             variant="ghost"
-            onClick={startOver}
+            onClick={clearMarks}
             disabled={(points.length === 0 && draft === null) || submitting}
           >
-            <RotateCcw className="h-4 w-4" /> Start over
+            <RotateCcw className="h-4 w-4" /> Clear marks
           </Button>
         </div>
 
@@ -535,12 +569,15 @@ function Loupe({
   frameSize,
   imageSize,
   onLeft,
+  size,
 }: {
   src: string;
   point: Point;
   frameSize: Size;
   imageSize: Size;
   onLeft: boolean;
+  /** Diameter in px, sized to the frame by the caller. */
+  size: number;
 }) {
   const view = normalizedToView(point, frameSize, imageSize);
   if (view === null) return null;
@@ -557,8 +594,8 @@ function Loupe({
     <div
       className="pointer-events-none absolute z-10 overflow-hidden rounded-full"
       style={{
-        width: LOUPE_PX,
-        height: LOUPE_PX,
+        width: size,
+        height: size,
         top: 10,
         left: onLeft ? 10 : undefined,
         right: onLeft ? undefined : 10,
@@ -568,16 +605,16 @@ function Loupe({
         backgroundImage: `url("${src}")`,
         backgroundRepeat: "no-repeat",
         backgroundSize: `${drawnWidth}px ${drawnHeight}px`,
-        backgroundPosition: `${LOUPE_PX / 2 - insideX}px ${LOUPE_PX / 2 - insideY}px`,
+        backgroundPosition: `${size / 2 - insideX}px ${size / 2 - insideY}px`,
       }}
     >
       <span
         className="absolute"
-        style={{ left: 0, top: LOUPE_PX / 2, width: "100%", height: 1, background: "var(--rq-overlay-a)", opacity: 0.85 }}
+        style={{ left: 0, top: size / 2, width: "100%", height: 1, background: "var(--rq-overlay-a)", opacity: 0.85 }}
       />
       <span
         className="absolute"
-        style={{ top: 0, left: LOUPE_PX / 2, height: "100%", width: 1, background: "var(--rq-overlay-a)", opacity: 0.85 }}
+        style={{ top: 0, left: size / 2, height: "100%", width: 1, background: "var(--rq-overlay-a)", opacity: 0.85 }}
       />
     </div>
   );

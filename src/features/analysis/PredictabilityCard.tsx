@@ -44,10 +44,10 @@ const styles = StyleSheet.create({
   track: {
     height: 6,
     borderRadius: radius.pill,
-    backgroundColor: colors.accentSoft,
+    backgroundColor: colors.line,
     overflow: "hidden",
   },
-  fill: { height: "100%", borderRadius: radius.pill, backgroundColor: colors.accent },
+  fill: { height: "100%", borderRadius: radius.pill, backgroundColor: colors.data },
   pattern: { ...type.body, color: colors.text },
   detail: { ...type.caption, color: colors.textDim },
 });

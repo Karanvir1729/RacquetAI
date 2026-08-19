@@ -8,10 +8,12 @@
  */
 import { useState } from "react";
 import { Modal, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/Button";
 import { Segmented } from "@/components/Segmented";
 import { selection as selectionHaptic } from "@/lib/haptics";
+import { column, FORM_MAX_WIDTH } from "@/theme/layout";
 import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens";
 
 import { DEFAULT_PLAYER_NAMES, PlayerNames } from "./announce";
@@ -30,6 +32,7 @@ interface NewMatchSheetProps {
 export function NewMatchSheet({ visible, initialNames, onStart, onClose }: NewMatchSheetProps) {
   const [draft, setDraft] = useState<PlayerNames>(initialNames);
   const [firstServer, setFirstServer] = useState<Side>("A");
+  const insets = useSafeAreaInsets();
 
   const start = () => {
     onStart({
@@ -58,55 +61,59 @@ export function NewMatchSheet({ visible, initialNames, onStart, onClose }: NewMa
             (components/Screen.tsx): it scrolls the focused field into view
             instead of just shrinking the frame around it. */}
         <ScrollView
-          contentContainerStyle={styles.content}
+          // The sheet covers the status bar, so its top pad is the real inset —
+          // a fixed one either collides with the notch or floats on a flat top.
+          contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.lg }]}
           keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
         >
-          <Text style={styles.title}>New match</Text>
-          <Text style={styles.caption}>
-            Best of 5 games, PAR-11 — first to 11 points, win by two.
-          </Text>
+          <View style={styles.column}>
+            <Text style={styles.title}>New match</Text>
+            <Text style={styles.caption}>
+              Best of 5 games, PAR-11 — first to 11 points, win by two.
+            </Text>
 
-          {SIDES.map((side) => (
-            <View key={side} style={styles.field}>
-              <Text style={styles.label}>{side === "A" ? "Player A" : "Player B"}</Text>
-              <TextInput
-                style={styles.input}
-                value={draft[side]}
-                onChangeText={(text) => setDraft((current) => ({ ...current, [side]: text }))}
-                placeholder={DEFAULT_PLAYER_NAMES[side]}
-                placeholderTextColor={colors.textFaint}
-                maxLength={MAX_PLAYER_NAME_LENGTH}
-                autoCapitalize="words"
-                autoCorrect={false}
-                returnKeyType="done"
-                accessibilityLabel={`Name for player ${side}`}
+            {SIDES.map((side) => (
+              <View key={side} style={styles.field}>
+                <Text style={styles.label}>{side === "A" ? "Player A" : "Player B"}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={draft[side]}
+                  onChangeText={(text) => setDraft((current) => ({ ...current, [side]: text }))}
+                  placeholder={DEFAULT_PLAYER_NAMES[side]}
+                  placeholderTextColor={colors.textFaint}
+                  maxLength={MAX_PLAYER_NAME_LENGTH}
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                  returnKeyType="done"
+                  accessibilityLabel={`Name for player ${side}`}
+                />
+              </View>
+            ))}
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Serves first</Text>
+              <Segmented
+                options={[
+                  { key: "A" as const, label: sanitizePlayerName(draft.A, DEFAULT_PLAYER_NAMES.A) },
+                  { key: "B" as const, label: sanitizePlayerName(draft.B, DEFAULT_PLAYER_NAMES.B) },
+                ]}
+                value={firstServer}
+                onChange={setFirstServer}
               />
             </View>
-          ))}
 
-          <View style={styles.field}>
-            <Text style={styles.label}>Serves first</Text>
-            <Segmented
-              options={[
-                { key: "A" as const, label: sanitizePlayerName(draft.A, DEFAULT_PLAYER_NAMES.A) },
-                { key: "B" as const, label: sanitizePlayerName(draft.B, DEFAULT_PLAYER_NAMES.B) },
-              ]}
-              value={firstServer}
-              onChange={setFirstServer}
+            <Button label="Start match" onPress={start} />
+            <Button
+              label="Cancel"
+              variant="secondary"
+              onPress={() => {
+                selectionHaptic();
+                onClose();
+              }}
+              haptic="none"
             />
           </View>
-
-          <Button label="Start match" onPress={start} />
-          <Button
-            label="Cancel"
-            variant="secondary"
-            onPress={() => {
-              selectionHaptic();
-              onClose();
-            }}
-            haptic="none"
-          />
         </ScrollView>
       </View>
     </Modal>
@@ -115,7 +122,10 @@ export function NewMatchSheet({ visible, initialNames, onStart, onClose }: NewMa
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: spacing.lg, paddingTop: spacing.xl * 2, gap: spacing.md },
+  content: { padding: spacing.lg },
+  // The gap lives on the column, not the content container, so the fields keep
+  // their spacing while the column stays centred and narrow on iPad.
+  column: { ...column(FORM_MAX_WIDTH), gap: spacing.md },
   title: { ...type.title, color: colors.text },
   caption: { ...type.caption, color: colors.textDim },
   field: { gap: spacing.xs },

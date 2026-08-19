@@ -72,11 +72,11 @@ function LegalLinkItem({ link }: { link: LegalLink }) {
 
 const styles = StyleSheet.create({
   freeNote: { ...type.caption, color: colors.textDim, lineHeight: 18 },
-  disclosure: { ...type.caption, color: colors.textFaint, lineHeight: 18 },
+  disclosure: { ...type.caption, color: colors.textDim, lineHeight: 18 },
   legalRow: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: spacing.md },
   legalLink: { minHeight: MIN_TOUCH_TARGET, justifyContent: "center" },
   legalLabel: { ...type.label, color: colors.accentText, textDecorationLine: "underline" },
   legalLabelOff: { ...type.label, color: colors.textFaint, textDecorationLine: "line-through" },
-  legalNote: { ...type.caption, color: colors.textFaint, lineHeight: 18 },
+  legalNote: { ...type.caption, color: colors.textDim, lineHeight: 18 },
   pressed: { opacity: 0.7 },
 });

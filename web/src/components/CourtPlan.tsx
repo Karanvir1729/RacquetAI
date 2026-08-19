@@ -28,9 +28,22 @@ interface CourtPlanProps {
   values: readonly number[];
   className?: string;
   onFilled?: () => void;
+  /**
+   * What the chart is, spoken. The default says nothing about WHERE the heat
+   * sits, because that is the one thing this component cannot know — callers
+   * with real data should pass a label derived from it.
+   */
+  ariaLabel?: string;
 }
 
-export function CourtPlan({ rows, cols, values, className, onFilled }: CourtPlanProps) {
+export function CourtPlan({
+  rows,
+  cols,
+  values,
+  className,
+  onFilled,
+  ariaLabel = "Court plan with the floor shaded where the player spent their time",
+}: CourtPlanProps) {
   const reduced = useReducedMotion();
   const cellW = COURT_W / cols;
   const cellH = COURT_L / rows;
@@ -49,7 +62,7 @@ export function CourtPlan({ rows, cols, values, className, onFilled }: CourtPlan
       viewBox={`-2 -2 ${COURT_W + 4} ${COURT_L + 4}`}
       className={cn("h-full w-full", className)}
       role="img"
-      aria-label="Court plan showing where the player spent their time — heaviest just behind the T"
+      aria-label={ariaLabel}
     >
       {/* Floor */}
       <rect
@@ -133,7 +146,7 @@ export function CourtPlan({ rows, cols, values, className, onFilled }: CourtPlan
         fontSize="3.4"
         fontWeight="700"
         letterSpacing="0.6"
-        fill="var(--rq-text-faint)"
+        fill="var(--rq-text-dim)"
       >
         BACK WALL
       </text>
@@ -144,7 +157,7 @@ export function CourtPlan({ rows, cols, values, className, onFilled }: CourtPlan
         fontSize="3.4"
         fontWeight="700"
         letterSpacing="0.6"
-        fill="var(--rq-text-faint)"
+        fill="var(--rq-text-dim)"
       >
         FRONT WALL
       </text>

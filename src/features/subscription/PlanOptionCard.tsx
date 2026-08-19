@@ -49,7 +49,7 @@ export function PlanOptionCard({
           <Ionicons
             name={selected ? "radio-button-on" : "radio-button-off"}
             size={22}
-            color={selected ? colors.accent : colors.textFaint}
+            color={selected ? colors.accentText : colors.textFaint}
           />
           <View style={styles.text}>
             <View style={styles.titleRow}>
@@ -73,7 +73,7 @@ export function PlanOptionCard({
 
 const styles = StyleSheet.create({
   card: { minHeight: MIN_TOUCH_TARGET + spacing.lg },
-  cardSelected: { borderColor: colors.accent, backgroundColor: colors.accentSoft },
+  cardSelected: { borderColor: colors.accentText, backgroundColor: colors.accentSoft },
   row: { flexDirection: "row", alignItems: "center", gap: spacing.md, padding: spacing.xs },
   text: { flex: 1, gap: 2 },
   titleRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },

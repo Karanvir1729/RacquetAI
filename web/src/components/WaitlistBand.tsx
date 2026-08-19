@@ -43,52 +43,58 @@ export function WaitlistBand() {
 
       <Reveal delay={0.08}>
         <Card className="mx-auto mt-10 max-w-xl p-6 sm:p-8">
-          {joined ? (
-            <div className="flex flex-col items-center gap-3 py-4 text-center" role="status">
-              <CheckCircle2 className="h-9 w-9" style={{ color: "var(--rq-accent-text)" }} />
-              <p className="rq-h3 text-[19px]">You&rsquo;re on the list.</p>
-              <p className="rq-body max-w-sm text-[15px]" style={{ color: "var(--rq-text-dim)" }}>
-                One email when early access reaches you — that is the whole deal.
-              </p>
-            </div>
-          ) : (
-            <form className="flex flex-col gap-4" onSubmit={(event) => void submit(event)}>
-              <Field
-                label="Email"
-                id="rq-waitlist-email"
-                type="email"
-                autoComplete="email"
-                required
-                maxLength={320}
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-              <Field
-                label="Club (optional)"
-                id="rq-waitlist-club"
-                type="text"
-                autoComplete="organization"
-                maxLength={120}
-                placeholder="Where you play"
-                value={club}
-                onChange={(event) => setClub(event.target.value)}
-              />
-
-              {error !== null ? (
-                <p className="rq-caption" style={{ color: "var(--rq-danger)" }} role="alert">
-                  {error}
+          {/* The live region wraps the whole card body and is mounted from the
+              first render. Announcing the success copy from a node that only
+              appears on submit is unreliable — a screen reader has to have been
+              watching the region before the content arrives. */}
+          <div aria-live="polite">
+            {joined ? (
+              <div className="flex flex-col items-center gap-3 py-4 text-center">
+                <CheckCircle2 className="h-9 w-9" style={{ color: "var(--rq-accent-text)" }} />
+                <p className="rq-h3 text-[19px]">You&rsquo;re on the list.</p>
+                <p className="rq-body max-w-sm text-[15px]" style={{ color: "var(--rq-text-dim)" }}>
+                  One email when early access reaches you — that is the whole deal.
                 </p>
-              ) : null}
+              </div>
+            ) : (
+              <form className="flex flex-col gap-4" onSubmit={(event) => void submit(event)}>
+                <Field
+                  label="Email"
+                  id="rq-waitlist-email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  maxLength={320}
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+                <Field
+                  label="Club (optional)"
+                  id="rq-waitlist-club"
+                  type="text"
+                  autoComplete="organization"
+                  maxLength={120}
+                  placeholder="Where you play"
+                  value={club}
+                  onChange={(event) => setClub(event.target.value)}
+                />
 
-              <Button type="submit" size="md" disabled={busy}>
-                {busy ? "One moment…" : "Join the waitlist"}
-              </Button>
+                {error !== null ? (
+                  <p className="rq-caption" style={{ color: "var(--rq-danger)" }} role="alert">
+                    {error}
+                  </p>
+                ) : null}
 
-              <p className="rq-caption text-center" style={{ color: "var(--rq-text-faint)" }}>
-                No spam and no sharing — one email when early access opens.
-              </p>
-            </form>
-          )}
+                <Button type="submit" size="md" disabled={busy}>
+                  {busy ? "One moment…" : "Join the waitlist"}
+                </Button>
+
+                <p className="rq-caption text-center">
+                  No spam and no sharing — one email when early access opens.
+                </p>
+              </form>
+            )}
+          </div>
         </Card>
       </Reveal>
     </Section>

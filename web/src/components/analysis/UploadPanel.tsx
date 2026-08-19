@@ -24,6 +24,8 @@ import { cn } from "@/lib/cn";
  */
 
 const ACCEPT = ".mp4,.mov,video/mp4,video/quicktime";
+/** Ties the rejection message to the file input while one is showing. */
+const REJECTED_ID = "rq-upload-rejected";
 
 function isSupported(file: File): boolean {
   return /\.(mp4|mov)$/i.test(file.name);
@@ -63,7 +65,7 @@ export function UploadPanel({ apiBase, onApiBaseChange, onStart }: UploadPanelPr
       <div className="px-5 pt-5 sm:px-6 sm:pt-6">
         <p className="rq-eyebrow">Step 1 · Upload</p>
         <h2 className="rq-h3 mt-2">Give it a match to look at</h2>
-        <p className="rq-lead mt-3 text-[15px]">
+        <p className="rq-lead-sm mt-3">
           One camera, fixed, behind or above the court, with both players and the floor in shot.
           .mp4 or .mov. The server downscales to 854px wide before anything else, so a phone
           recording is fine.
@@ -71,6 +73,14 @@ export function UploadPanel({ apiBase, onApiBaseChange, onStart }: UploadPanelPr
       </div>
 
       <div className="p-5 sm:p-6">
+        {/* The whole zone opens the picker, as its own mobile copy promises. No
+            `role="button"` or tabIndex though: this div CONTAINS the real
+            <button> and the <input>, so making it a button too would nest
+            interactive controls, add a second tab stop and give the picker an
+            accessible name the length of the panel. The inner button is the
+            keyboard and screen-reader path. Both children stop the click from
+            bubbling, because `input.click()` bubbles too — without that this
+            handler would re-enter itself. */}
         <div
           onDragOver={(event) => {
             event.preventDefault();
@@ -78,8 +88,9 @@ export function UploadPanel({ apiBase, onApiBaseChange, onStart }: UploadPanelPr
           }}
           onDragLeave={() => setOver(false)}
           onDrop={onDrop}
+          onClick={() => inputRef.current?.click()}
           className={cn(
-            "rounded-rq-md border-2 border-dashed p-6 text-center transition-colors duration-200 sm:p-10",
+            "cursor-pointer rounded-rq-md border-2 border-dashed p-6 text-center transition-colors duration-200 sm:p-10",
           )}
           style={{
             borderColor: over ? "var(--rq-accent)" : "var(--rq-line-2)",
@@ -102,6 +113,8 @@ export function UploadPanel({ apiBase, onApiBaseChange, onStart }: UploadPanelPr
             type="file"
             accept={ACCEPT}
             className="sr-only"
+            aria-describedby={rejected === null ? undefined : REJECTED_ID}
+            onClick={(event) => event.stopPropagation()}
             onChange={(event) => {
               take(event.target.files?.[0]);
               // Let the same file be re-picked after a cancelled run.
@@ -109,7 +122,14 @@ export function UploadPanel({ apiBase, onApiBaseChange, onStart }: UploadPanelPr
             }}
           />
           <div className="mt-5 flex justify-center">
-            <Button size="md" variant="outline" onClick={() => inputRef.current?.click()}>
+            <Button
+              size="md"
+              variant="outline"
+              onClick={(event) => {
+                event.stopPropagation();
+                inputRef.current?.click();
+              }}
+            >
               <FolderOpen className="h-4 w-4" /> Choose a file
             </Button>
           </div>
@@ -117,6 +137,8 @@ export function UploadPanel({ apiBase, onApiBaseChange, onStart }: UploadPanelPr
 
         {rejected !== null ? (
           <p
+            id={REJECTED_ID}
+            role="alert"
             className="mt-4 rounded-rq-sm border px-3 py-2.5 text-[13px] font-semibold"
             style={{
               borderColor: "var(--rq-danger)",
@@ -138,7 +160,7 @@ export function UploadPanel({ apiBase, onApiBaseChange, onStart }: UploadPanelPr
             </span>
             <div className="min-w-0 grow">
               <p className="truncate text-[14px] font-bold">{file.name}</p>
-              <p className="rq-num text-[12.5px]" style={{ color: "var(--rq-text-faint)" }}>
+              <p className="rq-num text-[12.5px]" style={{ color: "var(--rq-text-dim)" }}>
                 {formatBytes(file.size)}
               </p>
             </div>
@@ -220,12 +242,14 @@ function ServerSettings({
           className="inline-flex items-center gap-1.5 rounded-rq-pill px-2 py-0.5 text-[11px] font-bold"
           style={{
             background: "var(--rq-card-raised)",
-            color: reachable === true ? "var(--rq-accent-text)" : "var(--rq-text-faint)",
+            color: reachable === true ? "var(--rq-accent-text)" : "var(--rq-text-dim)",
           }}
         >
           <span
             className="inline-block h-1.5 w-1.5 rounded-full"
             style={{
+              // The pip is the only genuinely pending thing here — the word
+              // beside it is a status the user has to be able to read.
               background:
                 reachable === null
                   ? "var(--rq-text-faint)"
@@ -236,7 +260,7 @@ function ServerSettings({
           />
           {reachable === null ? "checking" : reachable ? "reachable" : "not reachable"}
         </span>
-        <span className="ml-auto text-[12.5px]" style={{ color: "var(--rq-text-faint)" }}>
+        <span className="ml-auto text-[12.5px]" style={{ color: "var(--rq-text-dim)" }}>
           {open ? "Hide" : "Change"}
         </span>
       </button>

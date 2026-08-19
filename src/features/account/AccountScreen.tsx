@@ -10,6 +10,7 @@ import { AppState, StyleSheet, Text, TextInput, View, type AppStateStatus } from
 import { useFocusEffect, useRouter } from "expo-router";
 
 import { Button } from "@/components/Button";
+import { Card } from "@/components/Card";
 import { Screen } from "@/components/Screen";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { EngineSettingsCard } from "@/features/analysis/EngineSettingsCard";
@@ -24,6 +25,9 @@ import {
 import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens";
 
 import { fetchBillingStatus, type BillingStatus, type Plan } from "./billingClient";
+
+/** Which sign-in is in flight, so one spinner never spins both buttons. */
+type Pending = "apple" | "email" | null;
 
 const PLAN_LABEL: Record<Plan, string> = {
   monthly: "RacquetIQ Pro — $9.99 / month",
@@ -52,7 +56,7 @@ function SignInCard() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<Pending>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,10 +70,10 @@ function SignInCard() {
   }, []);
 
   const runApple = useCallback(async () => {
-    setBusy(true);
+    setPending("apple");
     setError(null);
     const result = await signInWithApple();
-    setBusy(false);
+    setPending(null);
     if (result.status === "failed") setError(result.message);
   }, []);
 
@@ -78,47 +82,55 @@ function SignInCard() {
       setError("Email and password, both.");
       return;
     }
-    setBusy(true);
+    setPending("email");
     setError(null);
     const result =
       mode === "signin"
         ? await signInWithEmail(email.trim(), password)
         : await signUpWithEmail(email.trim(), password);
-    setBusy(false);
+    setPending(null);
     if (result.status === "failed") setError(result.message);
   }, [email, password, mode]);
 
   return (
-    <View style={styles.card}>
+    <Card>
       {appleAvailable ? (
         <Button
           label=" Continue with Apple"
           onPress={() => void runApple()}
-          loading={busy}
+          loading={pending === "apple"}
         />
       ) : null}
 
       <Text style={styles.divider}>{appleAvailable ? "or with email" : "Sign in with email"}</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor={colors.textFaint}
-        autoCapitalize="none"
-        autoComplete="email"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor={colors.textFaint}
-        secureTextEntry
-        autoComplete={mode === "signin" ? "current-password" : "new-password"}
-        value={password}
-        onChangeText={setPassword}
-      />
+      <View style={styles.field}>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor={colors.textFaint}
+          autoCapitalize="none"
+          autoComplete="email"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          accessibilityLabel="Email"
+        />
+      </View>
+      <View style={styles.field}>
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor={colors.textFaint}
+          secureTextEntry
+          autoComplete={mode === "signin" ? "current-password" : "new-password"}
+          value={password}
+          onChangeText={setPassword}
+          accessibilityLabel="Password"
+        />
+      </View>
 
       {error !== null ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -126,7 +138,7 @@ function SignInCard() {
         label={mode === "signin" ? "Sign in" : "Create account"}
         variant="secondary"
         onPress={() => void runEmail()}
-        loading={busy}
+        loading={pending === "email"}
       />
       <Text
         style={styles.switchMode}
@@ -137,7 +149,7 @@ function SignInCard() {
       >
         {mode === "signin" ? "New here? Create an account" : "Already have an account? Sign in"}
       </Text>
-    </View>
+    </Card>
   );
 }
 
@@ -186,7 +198,7 @@ function SignedInCard({ email }: { email: string }) {
 
   return (
     <>
-      <View style={styles.card}>
+      <Card>
         <Text style={styles.email}>{email}</Text>
         <Text style={styles.dim}>
           {billing?.active
@@ -203,10 +215,10 @@ function SignedInCard({ email }: { email: string }) {
             server (see Analysis engine below).
           </Text>
         ) : null}
-      </View>
+      </Card>
 
       {billing !== null && !billing.active ? (
-        <View style={styles.card}>
+        <Card>
           <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
           <Text style={styles.dim}>
             Unlimited analyses, $9.99 a month or $79.99 a year. In the app, subscriptions go
@@ -214,7 +226,7 @@ function SignedInCard({ email }: { email: string }) {
             up here.
           </Text>
           <Button label="See Pro plans" onPress={() => router.push("/paywall")} />
-        </View>
+        </Card>
       ) : null}
 
       <Button label="Sign out" variant="danger" onPress={() => void signOutUser()} />
@@ -223,20 +235,14 @@ function SignedInCard({ email }: { email: string }) {
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.card,
-    borderColor: colors.line,
-    borderWidth: 1,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
   divider: {
     ...type.caption,
-    color: colors.textFaint,
+    color: colors.textDim,
     textAlign: "center",
     marginVertical: spacing.xs,
   },
+  field: { gap: spacing.xs },
+  label: { ...type.label, color: colors.textDim },
   input: {
     minHeight: MIN_TOUCH_TARGET,
     borderRadius: radius.sm,

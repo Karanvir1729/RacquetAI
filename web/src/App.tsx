@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BrowserRouter, Outlet, Route, Routes, useLocation } from "react-router-dom";
 
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { AuthProvider } from "@/lib/auth";
@@ -48,8 +49,10 @@ function Layout() {
     <div className="flex min-h-screen flex-col">
       <ScrollToTarget />
       <SiteHeader />
-      <main className="flex-1">
-        <Outlet />
+      <main id="main" className="flex-1">
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
       <SiteFooter />
     </div>

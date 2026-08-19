@@ -36,7 +36,7 @@ export function PlacementGrid({ placement }: { placement: Placement }) {
                 {count}
                 <span
                   className="ml-1.5 text-[11px] font-semibold"
-                  style={{ color: "var(--rq-text-faint)" }}
+                  style={{ color: "var(--rq-text-dim)" }}
                 >
                   {total > 0 ? `${Math.round((count / total) * 100)}%` : "—"}
                 </span>

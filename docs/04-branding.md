@@ -1,10 +1,17 @@
 # 04 — Branding
 
-The RacquetAI identity: palette, mark, type, and the asset pipeline that turns
+The RacquetIQ identity: palette, mark, type, and the asset pipeline that turns
 four SVGs into every PNG the app ships.
 
-Owned by **feat/branding**. `src/theme/tokens.ts` is the machine-readable copy
-of the palette below and the two are expected to agree hex for hex.
+The product ships as **RacquetIQ** (`expo.name`, the web wordmark). The repo,
+the Expo `slug` and the URL `scheme` are all still `racquetai` and are staying
+that way — they are load-bearing for EAS builds and store linkage, and renaming
+them buys nothing a user can see.
+
+Owned by **feat/branding**. The palette below has two machine-readable copies —
+`src/theme/tokens.ts` for the app and `web/src/styles/tokens.css` for the web —
+and this doc plus both files are expected to agree hex for hex. A colour changed
+in one is a colour changed in all three.
 
 ---
 
@@ -68,16 +75,34 @@ by `DynamicColorIOS`. Android pins the dark column (see the note in that file).
 | `accent` | `#D8FA3C` | `#D8FA3C` |
 | `accentText` | `#EBFF8C` | `#1F6B4A` |
 | `accentSoft` | `rgba(216,250,60,0.12)` | `rgba(31,107,74,0.12)` |
+| `accentLine` ᵂ | `rgba(216,250,60,0.32)` | `rgba(31,107,74,0.26)` |
+| `data` | `#D8FA3C` | `#1F6B4A` |
 | `onAccent` | `#06130E` | `#06130E` |
 | `glow` | `rgba(216,250,60,0.35)` | `rgba(31,107,74,0.22)` |
 | `danger` | `#FF6B6B` | `#C62F26` |
 | `dangerSoft` | `rgba(255,107,107,0.12)` | `rgba(198,47,38,0.10)` |
+| `scrim` | `rgba(0,0,0,0.60)` | `rgba(6,19,14,0.45)` |
 | `surfaceWhite` | `#FFFFFF` (both) | |
 | `inkOnWhite` | `#06130E` (both) | |
+| `overlayA` | `#D8FA3C` (both) | |
+| `overlayB` | `#FFFFFF` (both) | |
+| `overlayCasing` | `#06130E` (both) | |
+
+ᵂ `accentLine` currently exists only on the web, as `--rq-accent-line`; the app
+has no equivalent yet. Every other row is in both token files.
 
 `accent` is the one token that does **not** flip: a tennis ball is the same
 colour in both themes, and Optic holds up as a *fill* on either canvas. It is
-only as text that it breaks, which is what `accentText` exists for.
+only as text that it breaks, which is what `accentText` exists for — and
+`data` is the same substitution for a mark that is drawn rather than typed
+(heat cells, meter fills, the T), because Optic at low opacity on a white
+canvas is nothing at all.
+
+The **overlay trio** does not flip either, and for a different reason. Those
+three paint the pose skeleton *on the video*, not on the page: a squash court
+is a bright wall and a pale floor whichever theme the user picked, so the
+figures have to hold up against the footage. Wire one of them to a page token
+and the skeleton disappears over a dark-shirted player in light mode.
 
 ### Contrast
 
@@ -104,11 +129,16 @@ Measured WCAG 2.1 ratios for the pairings that actually occur:
 That last row is the whole reason `accentText` exists. Optic on a light
 surface is invisible; reach for Court Green instead.
 
-`textFaint` is the **disabled/pending tier** — "Coming soon" rows, inactive tab
-labels, placeholder metadata — and it sits below AA on light on purpose, because
-it marks unavailable controls, which WCAG exempts. Never set body copy, a value
-the user has to read, or the label of an *enabled* control in `textFaint`; that
-is what `textDim` is for.
+`textFaint` is the **disabled/pending tier** — "Coming soon" rows, placeholder
+text, an unreached step's number, a dimmed pip, a watermark — and it sits below
+AA on light on purpose, because it marks unavailable controls, which WCAG
+exempts. Never set body copy, a value the user has to read, or the label of an
+*enabled* control in `textFaint`; that is what `textDim` is for.
+
+An unselected tab label is **not** an exception. The tab is tappable, so it is
+an enabled control and takes `textDim` — unselected means not-current, not
+unavailable. The ramp is three tiers and stays three tiers: `text` primary,
+`textDim` secondary and readable, `textFaint` genuinely inactive.
 
 ---
 
@@ -182,10 +212,16 @@ Its shape: display/title are weight 800 with tight negative tracking (−1.2 /
 600. Scores and timers should use the display and title steps — the tabular
 feel comes from the weight and tracking, not from a different family.
 
-**The wordmark** is the same face at weight 700, tracked −6 at 168 units
-(≈ −0.036 em), which sets "RacquetAI" as one word. "Racquet" is Chalk, "AI" is
-Optic. The colour break is the *only* separation: no space, no second capital
-in the middle, no camel-case gap.
+**The wordmark** is "RacquetIQ" — the name the product ships under (`expo.name`
+in app.json, and what `web/src/components/brand/Mark.tsx` renders). It is the
+same face at weight 800, tracked ≈ −0.035 em, which sets the name as one word.
+"Racquet" takes `text` and "IQ" takes `accentText`, so the accent half deepens
+to Court Green on light instead of vanishing; Optic itself is never used here,
+because a wordmark is ink. The colour break is the *only* separation: no space,
+no second capital in the middle, no camel-case gap.
+
+The expo `slug` and `scheme` are still `racquetai`. Leave them — they are the
+EAS project and store linkage, not brand surface.
 
 ---
 
@@ -201,7 +237,7 @@ All generated from `assets/brand/src/` into `assets/brand/`.
 | `mark-mono.svg` | One flat colour, no string bed. Android monochrome, notification silhouette, embroidery, 1-bit print. |
 | `icon.svg` | App-icon composition: Court Ink field lit from the top, one Optic bloom behind the sweet spot, mark at 72% ink. |
 | `splash.svg` | Splash composition: mark at 64% ink with a soft Optic halo that fades to alpha 0 inside the canvas. |
-| `wordmark.svg` | Horizontal lockup, mark + "RacquetAI". |
+| `wordmark.svg` | Horizontal lockup, mark + "RacquetIQ". |
 
 An SVG cannot reference a shape in another file (librsvg will not resolve
 cross-document references), so four of these embed a **copy** of the mark's
@@ -298,7 +334,7 @@ To change something:
 | --- | --- |
 | Mark geometry | `mark.svg`, then mirror into the other masters and re-run |
 | Icon background | `icon.svg` only |
-| A palette colour | `src/theme/tokens.ts` **and** the SVG masters **and** the tables above, then re-run |
+| A palette colour | `src/theme/tokens.ts` **and** `web/src/styles/tokens.css` **and** the SVG masters **and** the tables above, then re-run |
 | Asset size or a new deliverable | the `DELIVERABLES` array in `scripts/generate-assets.mjs` |
 
 Two things to know about the pipeline:

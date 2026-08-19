@@ -32,11 +32,23 @@ export function DailyBars({ points, height = 140, ariaLabel }: DailyBarsProps) {
   const first = points[0];
   const last = points[points.length - 1];
 
+  // A chart that announces only its own title tells a screen-reader user
+  // nothing — read out the shape of the series instead.
+  const total = points.reduce((sum, point) => sum + point.count, 0);
+  const peak = points.reduce<DayPoint | undefined>(
+    (best, point) => (best === undefined || point.count > best.count ? point : best),
+    undefined,
+  );
+  const description =
+    peak !== undefined && last !== undefined
+      ? `${ariaLabel}. ${total} in total, peaking at ${peak.count} on ${peak.day}; most recently ${last.count} on ${last.day}.`
+      : `${ariaLabel}. No data yet.`;
+
   return (
     <div className="relative">
       <svg
         role="img"
-        aria-label={ariaLabel}
+        aria-label={description}
         viewBox={`0 0 ${width} ${height}`}
         className="block w-full"
         onMouseLeave={() => setHover(null)}
@@ -89,10 +101,10 @@ export function DailyBars({ points, height = 140, ariaLabel }: DailyBarsProps) {
       </svg>
 
       <div className="mt-1 flex justify-between">
-        <span className="rq-caption" style={{ color: "var(--rq-text-faint)" }}>
+        <span className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
           {first ? first.day.slice(5) : ""}
         </span>
-        <span className="rq-caption" style={{ color: "var(--rq-text-faint)" }}>
+        <span className="rq-caption" style={{ color: "var(--rq-text-dim)" }}>
           {last ? last.day.slice(5) : ""}
         </span>
       </div>
@@ -162,7 +174,7 @@ export function StatTile({ label, value, hint }: { label: string; value: string;
         {value}
       </p>
       {hint ? (
-        <p className="rq-caption mt-1" style={{ color: "var(--rq-text-faint)" }}>
+        <p className="rq-caption mt-1" style={{ color: "var(--rq-text-dim)" }}>
           {hint}
         </p>
       ) : null}

@@ -1,5 +1,5 @@
-import { BadgeCheck, CreditCard, LogOut } from "lucide-react";
-import { useEffect, useState } from "react";
+import { BadgeCheck, CreditCard, LoaderCircle, LogOut } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -23,23 +23,46 @@ export default function Account() {
 
   useEffect(() => trackEvent("page_view", { page: "account" }), []);
 
-  useEffect(() => {
-    if (!session) return;
-    let cancelled = false;
+  // Every run claims a token; a response only lands if its token is still the
+  // current one, so a retry — or an unmount — discards whatever is in flight.
+  const attempt = useRef(0);
+
+  const loadBilling = useCallback(() => {
+    const mine = ++attempt.current;
+    setBilling(null);
     setBillingError(false);
     fetchBillingStatus()
       .then((status) => {
-        if (!cancelled) setBilling(status);
+        if (mine === attempt.current) setBilling(status);
       })
       .catch(() => {
-        if (!cancelled) setBillingError(true);
+        if (mine === attempt.current) setBillingError(true);
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [session]);
+  }, []);
 
-  if (loading) return null;
+  useEffect(() => {
+    if (!session) return;
+    loadBilling();
+    return () => {
+      attempt.current += 1;
+    };
+  }, [session, loadBilling]);
+
+  if (loading) {
+    return (
+      <Section divider={false} className="flex-1">
+        <div className="mx-auto max-w-2xl">
+          <Card className="flex items-center justify-center gap-3 p-6 sm:p-8">
+            <LoaderCircle
+              className="h-5 w-5 animate-spin"
+              style={{ color: "var(--rq-text-dim)" }}
+            />
+            <span className="rq-lead">Restoring your session…</span>
+          </Card>
+        </div>
+      </Section>
+    );
+  }
   if (!session) return <Navigate to="/login?next=/account" replace />;
 
   const user = session.user;
@@ -69,9 +92,12 @@ export default function Account() {
               <h2 className="rq-h3">Subscription</h2>
               <p className="rq-lead mt-2 text-[15px]">
                 {billing === null && !billingError ? "Checking your plan…" : null}
-                {billingError
-                  ? "Could not reach the billing server. Start it locally or point the site at one on the Analyze page."
-                  : null}
+                {billingError ? (
+                  <span role="alert" style={{ color: "var(--rq-danger)" }}>
+                    Could not reach the billing server. Start it locally or point the site at one on
+                    the Analyze page.
+                  </span>
+                ) : null}
                 {billing !== null && billing.active
                   ? PLAN_LABEL[billing.plan ?? ""] ?? "RacquetIQ Pro — active"
                   : null}
@@ -79,13 +105,18 @@ export default function Account() {
                   ? "Free — recording, the library, and 3 analyses of your own videos."
                   : null}
               </p>
+              {billingError ? (
+                <Button variant="outline" size="sm" className="mt-5" onClick={loadBilling}>
+                  Try again
+                </Button>
+              ) : null}
               {billing !== null && !billing.active ? (
                 <ButtonLink to="/upgrade" size="md" className="mt-5">
                   Upgrade to Pro
                 </ButtonLink>
               ) : null}
               {billing !== null && billing.active ? (
-                <p className="rq-caption mt-4" style={{ color: "var(--rq-text-faint)" }}>
+                <p className="rq-caption mt-4" style={{ color: "var(--rq-text-dim)" }}>
                   Test-mode subscription — manage or cancel it from the Stripe sandbox dashboard.
                 </p>
               ) : null}

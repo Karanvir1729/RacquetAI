@@ -38,6 +38,23 @@ export function SiteHeader() {
       className="sticky top-0 z-50 border-b backdrop-blur-xl"
       style={{ borderColor: "var(--rq-line)", background: "var(--rq-header)" }}
     >
+      {/* First focusable thing on every page: hidden until it is tabbed to.
+          It drops BELOW the header rather than sitting inside it — at top-3 it
+          landed on the wordmark, and an opaque chip narrower than the word it
+          covers leaves the tail ("etIQ") sticking out, which reads as broken
+          text rather than as a control. */}
+      <a
+        href="#main"
+        className="sr-only rounded-rq-sm border px-4 focus:not-sr-only focus:absolute focus:left-5 focus:top-full focus:z-50 focus:mt-2 focus:inline-flex focus:min-h-[44px] focus:items-center"
+        style={{
+          borderColor: "var(--rq-line)",
+          background: "var(--rq-card)",
+          color: "var(--rq-text)",
+        }}
+      >
+        Skip to content
+      </a>
+
       <div className="mx-auto flex max-w-shell items-center justify-between gap-3 px-5 py-3 sm:px-6 lg:px-8">
         <Link
           to="/"
@@ -52,10 +69,7 @@ export function SiteHeader() {
             <a
               key={item.href}
               href={item.href}
-              className="rq-label transition-colors duration-200"
-              style={{ color: "var(--rq-text-dim)" }}
-              onMouseEnter={(event) => (event.currentTarget.style.color = "var(--rq-text)")}
-              onMouseLeave={(event) => (event.currentTarget.style.color = "var(--rq-text-dim)")}
+              className="rq-label text-rq-dim transition-colors duration-200 hover:text-rq-text focus-visible:text-rq-text"
             >
               {item.label}
             </a>
@@ -80,7 +94,7 @@ export function SiteHeader() {
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
             aria-label={open ? "Close menu" : "Open menu"}
-            className="flex h-11 w-11 items-center justify-center rounded-rq-sm border md:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-rq-sm border transition-transform duration-200 ease-rq hover:scale-105 md:hidden"
             style={{
               borderColor: "var(--rq-line)",
               background: "var(--rq-card)",

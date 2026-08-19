@@ -11,6 +11,7 @@
  * players, and "no let" is the one squash rule everybody argues about.
  */
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/Button";
 import { Segmented } from "@/components/Segmented";
@@ -38,6 +39,7 @@ export function AppealSheet({
   onRule,
   onClose,
 }: AppealSheetProps) {
+  const insets = useSafeAreaInsets();
   const opponent = OTHER_SIDE[appealer];
   const rulings: { key: LetRuling; label: string; caption: string }[] = [
     { key: "let", label: "Let", caption: "Rally replayed — no point, same server" },
@@ -49,7 +51,12 @@ export function AppealSheet({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       {/* Tapping the scrim dismisses: no ruling is the safe default here. */}
       <Pressable style={styles.scrim} accessibilityLabel="Dismiss" onPress={onClose} />
-      <View style={styles.sheet}>
+      {/* The Cancel button sits on the bottom edge, so the pad below it is the
+          home-indicator inset where there is one and the old fixed pad where
+          there isn't. */}
+      <View
+        style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.md) + spacing.md }]}
+      >
         <Text style={styles.title}>Interference call</Text>
         <Text style={styles.caption}>Who asked for the let?</Text>
         <Segmented
@@ -98,7 +105,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
     padding: spacing.md,
-    paddingBottom: spacing.xl,
     gap: spacing.sm,
   },
   title: { ...type.heading, color: colors.text },

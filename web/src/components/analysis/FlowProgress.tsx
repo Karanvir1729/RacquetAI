@@ -23,7 +23,7 @@ export function StepRail({ active }: { active: number }) {
         const done = index < active;
         const current = index === active;
         return (
-          <li key={step} className="flex items-center gap-3">
+          <li key={step} className="flex items-center gap-3" aria-current={current ? "step" : undefined}>
             <span className="flex items-center gap-2">
               <span
                 className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold"
@@ -33,7 +33,17 @@ export function StepRail({ active }: { active: number }) {
                   border: "1px solid var(--rq-line)",
                 }}
               >
-                {done ? <Check className="h-3.5 w-3.5" /> : index + 1}
+                {/* The tick is the only thing marking a step done, so the state
+                    it carries goes to assistive tech as words instead. `current`
+                    needs no such span — aria-current already says it. */}
+                {done ? (
+                  <>
+                    <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span className="sr-only">Completed</span>
+                  </>
+                ) : (
+                  index + 1
+                )}
               </span>
               <span
                 className="text-[12.5px] font-bold"

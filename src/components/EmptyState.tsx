@@ -25,7 +25,7 @@ export function EmptyState({
   title,
   caption,
   icon = "tennisball-outline",
-  iconColor = colors.accent,
+  iconColor = colors.accentText,
 }: EmptyStateProps) {
   return (
     <View style={styles.wrap}>

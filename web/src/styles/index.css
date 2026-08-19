@@ -16,6 +16,15 @@
     html {
       scroll-behavior: auto;
     }
+
+    /* Only the full-page colour cross-fade on theme toggle. Deliberately NOT a
+       blanket `* { animation: none }` — the site stops its own motion per case
+       (Reveal, CourtPlan, .rq-indeterminate), and freezing every animation
+       would park the checkout spinner beside "Confirming with Stripe…" as a
+       static glyph, which reads as a hang. */
+    body {
+      transition: none;
+    }
   }
 
   body {
@@ -40,8 +49,12 @@
     color: var(--rq-on-accent);
   }
 
+  /* The ring is INK, so it takes --rq-accent-text, not --rq-accent. Optic is
+     1.10:1 on Chalk Wash — the site's only keyboard affordance was invisible in
+     light mode. On light it is now Court Green and passes; on ink it goes very
+     slightly paler (#EBFF8C, 17.35:1 against 15.95:1), which costs nothing. */
   :focus-visible {
-    outline: 2px solid var(--rq-accent);
+    outline: 2px solid var(--rq-accent-text);
     outline-offset: 3px;
     border-radius: 4px;
   }
@@ -99,11 +112,44 @@
     font-weight: 600;
   }
 
+  /* Dim, not faint: captions carry the product's honesty copy — the hero
+     caveat, the quality footnote, the licence line — and the ink ramp reserves
+     faint for disabled, placeholder and watermark. */
   .rq-caption {
     font-size: var(--rq-fs-caption);
     line-height: 1.5;
     font-weight: 400;
-    color: var(--rq-text-faint);
+    color: var(--rq-text-dim);
+  }
+
+  .rq-h4 {
+    font-size: var(--rq-fs-h4);
+    line-height: 1.25;
+    letter-spacing: var(--rq-ls-title);
+    font-weight: 800;
+  }
+
+  .rq-body-sm {
+    font-size: var(--rq-fs-body-sm);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  /* .rq-lead in the smaller size. It exists as its own class because .rq-lead
+     carries a colour — a small lead without it would jump to full-strength ink. */
+  .rq-lead-sm {
+    font-size: var(--rq-fs-body-sm);
+    line-height: 1.6;
+    font-weight: 400;
+    color: var(--rq-text-dim);
+  }
+
+  .rq-micro-label {
+    font-size: var(--rq-fs-micro);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: var(--rq-ls-caps-tight);
+    color: var(--rq-text-dim);
   }
 
   .rq-eyebrow {

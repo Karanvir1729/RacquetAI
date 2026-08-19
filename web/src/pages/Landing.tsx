@@ -186,6 +186,7 @@ function HeroHeadline({ lit }: { lit: boolean }) {
 
 function FaqRow({ item, index }: { item: { q: string; a: ReactNode }; index: number }) {
   const [open, setOpen] = useState(index === 0);
+  const answerId = `rq-faq-answer-${index}`;
   return (
     <Reveal delay={index * 0.04}>
       <Card
@@ -196,7 +197,8 @@ function FaqRow({ item, index }: { item: { q: string; a: ReactNode }; index: num
           type="button"
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
-          className="flex w-full items-center justify-between gap-4 p-5 text-left"
+          aria-controls={answerId}
+          className="flex w-full items-center justify-between gap-4 p-5 text-left transition-colors duration-200 hover:bg-rq-raised"
         >
           <span className="rq-label text-[15px]">{item.q}</span>
           <span style={{ color: "var(--rq-accent-text)" }}>
@@ -204,7 +206,7 @@ function FaqRow({ item, index }: { item: { q: string; a: ReactNode }; index: num
           </span>
         </button>
         {open ? (
-          <p className="rq-body px-5 pb-5 text-[15px]" style={{ color: "var(--rq-text-dim)" }}>
+          <p id={answerId} className="rq-body-sm px-5 pb-5" style={{ color: "var(--rq-text-dim)" }}>
             {item.a}
           </p>
         ) : null}
@@ -258,10 +260,7 @@ export default function Landing() {
 
             <a
               href="#waitlist"
-              className="rq-caption mt-4 inline-flex min-h-[44px] items-center transition-colors duration-200"
-              style={{ color: "var(--rq-text-dim)" }}
-              onMouseEnter={(event) => (event.currentTarget.style.color = "var(--rq-text)")}
-              onMouseLeave={(event) => (event.currentTarget.style.color = "var(--rq-text-dim)")}
+              className="rq-caption mt-4 inline-flex min-h-[44px] items-center transition-colors duration-200 hover:text-rq-text focus-visible:text-rq-text"
             >
               No analysis server to point it at? Join the early-access waitlist ↓
             </a>
@@ -295,14 +294,9 @@ export default function Landing() {
             <Reveal key={step.title} delay={index * 0.08} className="h-full">
               <Card className="flex h-full flex-col p-6">
                 <IconChip>{step.icon}</IconChip>
-                <p
-                  className="mt-5 text-[12px] font-extrabold uppercase"
-                  style={{ letterSpacing: "0.16em", color: "var(--rq-text-faint)" }}
-                >
-                  Step {index + 1}
-                </p>
-                <h3 className="rq-h3 mt-1.5 text-[19px]">{step.title}</h3>
-                <p className="rq-body mt-2.5 text-[15px]" style={{ color: "var(--rq-text-dim)" }}>
+                <p className="rq-micro-label mt-5">Step {index + 1}</p>
+                <h3 className="rq-h4 mt-1.5">{step.title}</h3>
+                <p className="rq-body-sm mt-2.5" style={{ color: "var(--rq-text-dim)" }}>
                   {step.body}
                 </p>
               </Card>
@@ -325,8 +319,8 @@ export default function Landing() {
             <Reveal key={item.title} delay={index * 0.06} className="h-full">
               <Card className="flex h-full flex-col p-6">
                 <IconChip>{item.icon}</IconChip>
-                <h3 className="rq-h3 mt-4 text-[18px]">{item.title}</h3>
-                <p className="rq-body mt-2.5 text-[15px]" style={{ color: "var(--rq-text-dim)" }}>
+                <h3 className="rq-h4 mt-4">{item.title}</h3>
+                <p className="rq-body-sm mt-2.5" style={{ color: "var(--rq-text-dim)" }}>
                   {item.body}
                 </p>
               </Card>
@@ -353,22 +347,49 @@ export default function Landing() {
 
           <Reveal delay={0.08}>
             <Card className="p-6 sm:p-7">
+              {/* Every stat reserves two label lines: at 375px "Both players
+                  seen" wraps and its neighbours do not, which would drop one
+                  number off the row's shared baseline — on the one card whose
+                  argument is that these numbers line up as evidence. */}
               <div className="grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-3">
-                <Stat label="Footage" value={HERO_MATCH.durationLabel} hint="minutes analysed" />
-                <Stat label="Shots detected" value={HERO_MATCH.shots} hint="across both players" />
-                <Stat label="Rallies" value={HERO_MATCH.rallies} hint="longest 59 shots" />
+                <Stat
+                  label="Footage"
+                  value={HERO_MATCH.durationLabel}
+                  hint="minutes analysed"
+                  reserveTwoLines
+                />
+                <Stat
+                  label="Shots detected"
+                  value={HERO_MATCH.shots}
+                  hint="across both players"
+                  reserveTwoLines
+                />
+                <Stat
+                  label="Rallies"
+                  value={HERO_MATCH.rallies}
+                  hint="longest 59 shots"
+                  reserveTwoLines
+                />
                 <Stat
                   label="Frames sampled"
                   value={HERO_MATCH.framesAnalyzed.toLocaleString("en")}
                   hint="pose-tracked"
+                  reserveTwoLines
                 />
                 <Stat
                   label="Both players seen"
                   value={HERO_MATCH.bothPlayersDetectedPct}
                   unit="%"
                   hint="of sampled frames"
+                  reserveTwoLines
                 />
-                <Stat label="Resolution" value="854" unit="×480" hint="the hard case" />
+                <Stat
+                  label="Resolution"
+                  value="854"
+                  unit="×480"
+                  hint="the hard case"
+                  reserveTwoLines
+                />
               </div>
               <p className="rq-caption mt-7">
                 Every analysis ships with this footnote attached — frames measured, how often both
@@ -398,8 +419,8 @@ export default function Landing() {
                   style={{ background: "var(--rq-line-2)" }}
                 />
                 <div>
-                  <h3 className="rq-h3 text-[18px]">{limit.title}</h3>
-                  <p className="rq-body mt-2 text-[15px]" style={{ color: "var(--rq-text-dim)" }}>
+                  <h3 className="rq-h4">{limit.title}</h3>
+                  <p className="rq-body-sm mt-2" style={{ color: "var(--rq-text-dim)" }}>
                     {limit.body}
                   </p>
                 </div>

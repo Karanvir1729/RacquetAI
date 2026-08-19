@@ -11,7 +11,7 @@ interface CoverageGridProps {
 
 /**
  * Court-coverage heatmap: rows x cols cells tinted by normalized presence.
- * Tint is the accent token at interpolated opacity — no computed hex — so the
+ * Tint is the data token at interpolated opacity — no computed hex — so the
  * map restyles itself with the palette on both themes. Row 0 renders at the
  * top = front wall (contract order), and square cells keep the 8x12 grid at a
  * squash court's 2:3 footprint.
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   wall: { ...type.caption, color: colors.textFaint, textAlign: "center" },
   grid: { width: "100%", maxWidth: 220, alignSelf: "center", gap: 2 },
   row: { flexDirection: "row", gap: 2 },
-  cell: { flex: 1, aspectRatio: 1, borderRadius: 3, backgroundColor: colors.accent },
+  cell: { flex: 1, aspectRatio: 1, borderRadius: 3, backgroundColor: colors.data },
   shortLine: {
     position: "absolute",
     left: 0,

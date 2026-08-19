@@ -17,9 +17,17 @@
  *
  * Rules that matter:
  * - Accent fills always carry `onAccent` (ink) text.
- * - Accent-coloured TEXT on light surfaces must use `accentText` (deep green),
- *   never `accent` — optic yellow reads fine as a fill but is illegible as
- *   light-mode text.
+ * - Optic is a FILL, never ink. `accent` measures 1.1:1 on the light canvas, so
+ *   anything that is ink — text, an icon glyph, a border, a stroke, a spinner —
+ *   reads `accentText`, and a data mark (heat cell, meter fill, the T) reads
+ *   `data`. Both deepen to Court Green on light; `accent` does not flip.
+ * - The ink ramp is three tiers and stays three tiers. `text` is primary,
+ *   `textDim` is secondary and readable, `textFaint` is the disabled/pending
+ *   tier — placeholders, an unreached step's number, a dimmed pip, a watermark.
+ *   `textFaint` is 2.7:1 on light, which is legal ONLY because WCAG exempts
+ *   genuinely inactive components. Never set body copy, a value the user has to
+ *   read, or the label of an *enabled* control in `textFaint`; that is what
+ *   `textDim` is for.
  */
 import { DynamicColorIOS, Platform, type ColorValue } from "react-native";
 
@@ -50,6 +58,11 @@ export const colors = {
   accent: dyn("#D8FA3C", "#D8FA3C"),
   accentText: dyn("#EBFF8C", "#1F6B4A"),
   accentSoft: dyn("rgba(216,250,60,0.12)", "rgba(31,107,74,0.12)"),
+  // Data ink — heat cells, meter fills, the T marker. A thin or low-opacity
+  // mark cannot use `accent`: Optic at 12% on a white canvas is nothing at all.
+  // This is the accent's *data* form, and like `accentText` it deepens to Court
+  // Green on light. Same rule, different surface.
+  data: dyn("#D8FA3C", "#1F6B4A"),
   onAccent: dyn("#06130E", "#06130E"),
   glow: dyn("rgba(216,250,60,0.35)", "rgba(31,107,74,0.22)"),
 
@@ -63,6 +76,18 @@ export const colors = {
   // literal white surfaces that must NOT flip with the theme (switch thumbs)
   surfaceWhite: "#FFFFFF" as ColorValue,
   inkOnWhite: "#06130E" as ColorValue,
+
+  // Overlay ink — the pose skeleton drawn ON THE VIDEO, not on the page. These
+  // three are identical in both themes on purpose: a squash court is a bright
+  // wall and a pale floor whichever theme the user picked, so the figures have
+  // to hold up against the footage, not against the app canvas. Wire player B
+  // to `text` and the skeleton looks right on dark and turns near-black over a
+  // dark-shirted player on light — the same figure, invisible, because a page
+  // token was used to paint something that is not on the page. Chalk on Optic
+  // with an ink casing works over both. Do NOT make these a dyn() pair.
+  overlayA: "#D8FA3C" as ColorValue,
+  overlayB: "#FFFFFF" as ColorValue,
+  overlayCasing: "#06130E" as ColorValue,
 } as const;
 
 export const spacing = {

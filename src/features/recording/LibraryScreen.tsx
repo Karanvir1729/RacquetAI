@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
+import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/EmptyState";
 import { LoadingState } from "@/components/LoadingState";
@@ -78,15 +79,18 @@ export function LibraryScreen() {
             icon="alert-circle-outline"
             iconColor={colors.danger}
             title="Couldn't read recordings"
-            caption="Something went wrong reading the recordings folder. Switch tabs and back to retry."
+            caption="Something went wrong reading the recordings folder."
           />
+          <Button label="Try again" onPress={reload} />
         </View>
       ) : recordings.length === 0 ? (
         // The demo teaser stays visible even with zero recordings — it is the
         // only way to see what analysis looks like before recording anything.
         // Import & analyze sits beside it: analyzing existing footage needs no
         // recordings at all.
-        <View style={styles.emptyWrap}>
+        // Scrollable: the cards plus the imported-analyses list can outgrow a
+        // small phone, and a fixed frame puts the bottom of it out of reach.
+        <ScrollView contentContainerStyle={styles.emptyWrap}>
           <ScoreKeeperCard />
           <DemoAnalysisCard />
           <ImportAnalysisCard />
@@ -99,7 +103,7 @@ export function LibraryScreen() {
               caption="Recordings you capture on the Record tab land here for playback and, later, scoring."
             />
           </View>
-        </View>
+        </ScrollView>
       ) : (
         <FlatList
           data={recordings}
@@ -212,9 +216,12 @@ function RecordingRow({ entry, onPlay, onDelete }: RecordingRowProps) {
 }
 
 const styles = StyleSheet.create({
-  centerFill: { flex: 1, justifyContent: "center", padding: spacing.md },
-  emptyWrap: { flex: 1, padding: spacing.md, gap: spacing.sm },
-  emptyCenter: { flex: 1, justifyContent: "center" },
+  centerFill: { flex: 1, justifyContent: "center", padding: spacing.md, gap: spacing.md },
+  // flexGrow, not flex: as a scroll content container it must be free to grow
+  // past the frame. The centre block grows into the leftover space when the
+  // cards leave any, and keeps its own height when they don't.
+  emptyWrap: { flexGrow: 1, padding: spacing.md, gap: spacing.sm },
+  emptyCenter: { flexGrow: 1, justifyContent: "center" },
   flatList: { flex: 1 },
   list: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
   listHeader: { gap: spacing.sm },

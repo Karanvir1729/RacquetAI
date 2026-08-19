@@ -26,7 +26,7 @@ export function PermissionGate({ canAskAgain, onRequest }: PermissionGateProps) 
       <View style={styles.body}>
         <EmptyState
           icon={canAskAgain ? "videocam-outline" : "videocam-off-outline"}
-          iconColor={canAskAgain ? colors.accent : colors.danger}
+          iconColor={canAskAgain ? colors.accentText : colors.danger}
           title={canAskAgain ? "Camera & microphone access" : "Camera access is off"}
           caption={
             canAskAgain

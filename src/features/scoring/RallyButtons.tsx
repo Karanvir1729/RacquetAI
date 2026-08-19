@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.lg,
     borderWidth: 2,
-    borderColor: colors.accent,
+    borderColor: colors.accentText,
     backgroundColor: colors.accentSoft,
   },
   // Inverted rather than dimmed: a tap this important should be unmistakable

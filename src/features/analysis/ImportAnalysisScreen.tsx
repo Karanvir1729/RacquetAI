@@ -171,31 +171,37 @@ function StepsProgress({ steps, stepIndex, progressPct, message }: StepsProgress
                     : "ellipse-outline"
               }
               size={16}
-              color={index <= stepIndex ? colors.accent : colors.textFaint}
+              color={index <= stepIndex ? colors.accentText : colors.textFaint}
             />
-            <Text style={[styles.stepLabel, index === stepIndex && styles.stepLabelActive]}>
+            <Text
+              style={[
+                styles.stepLabel,
+                index < stepIndex && styles.stepLabelDone,
+                index === stepIndex && styles.stepLabelActive,
+              ]}
+            >
               {label}
               {index === stepIndex && progressPct !== null ? ` · ${Math.round(progressPct)}%` : ""}
             </Text>
           </View>
         ))}
       </View>
-      <ProgressBar pct={progressPct} />
+      {/* No percentage to show: a bar parked at 12% reads as a stall, so the
+          spinner carries the current step instead. */}
+      {progressPct === null ? (
+        <LoadingState caption={steps[stepIndex]} />
+      ) : (
+        <ProgressBar pct={progressPct} />
+      )}
       {message ? <Text style={styles.serverMessage}>{message}</Text> : null}
     </View>
   );
 }
 
-function ProgressBar({ pct }: { pct: number | null }) {
+function ProgressBar({ pct }: { pct: number }) {
   return (
     <View style={styles.track}>
-      <View
-        style={[
-          styles.fill,
-          { width: pct === null ? "12%" : `${Math.min(100, Math.max(0, pct))}%` },
-          pct === null && styles.fillIndeterminate,
-        ]}
-      />
+      <View style={[styles.fill, { width: `${Math.min(100, Math.max(0, pct))}%` }]} />
     </View>
   );
 }
@@ -214,7 +220,10 @@ const styles = StyleSheet.create({
   centerFill: { flex: 1, justifyContent: "center", gap: spacing.lg },
   steps: { gap: spacing.sm, alignSelf: "center" },
   stepRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  // Not reached yet: pending, so faint is the right tier. A step already done
+  // is copy the user reads back, so it steps up to dim.
   stepLabel: { ...type.body, color: colors.textFaint },
+  stepLabelDone: { color: colors.textDim },
   stepLabelActive: { ...type.bodyStrong, color: colors.text },
   serverMessage: { ...type.caption, color: colors.textDim, textAlign: "center" },
   track: {
@@ -223,7 +232,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.line,
     overflow: "hidden",
   },
-  fill: { flex: 1, borderRadius: radius.pill, backgroundColor: colors.accent },
-  fillIndeterminate: { opacity: 0.5 },
+  // A meter fill is a data mark, not a surface: `data` deepens on light where
+  // `accent` would vanish into the canvas.
+  fill: { flex: 1, borderRadius: radius.pill, backgroundColor: colors.data },
   pressed: { opacity: 0.7 },
 });

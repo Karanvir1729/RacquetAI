@@ -9,7 +9,7 @@
  * not assume it is a first run.
  */
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -24,6 +24,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "@/components/Button";
 import { selection as selectionHaptic } from "@/lib/haptics";
+import { column, CONTENT_MAX_WIDTH } from "@/theme/layout";
 import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens";
 
 import { TUTORIAL_STEPS, type TutorialStep } from "./steps";
@@ -38,6 +39,10 @@ export function TutorialScreen({ onDone }: TutorialScreenProps) {
   const scrollRef = useRef<ScrollView>(null);
   const [index, setIndex] = useState(0);
   const last = TUTORIAL_STEPS.length - 1;
+  // A page is as wide as the capped column, not the window — the pager lives
+  // inside that column on iPad (layout.ts / ADR-002), so paging off the raw
+  // window width would land every swipe between two steps.
+  const pageWidth = Math.min(width, CONTENT_MAX_WIDTH);
 
   const goTo = useCallback(
     (next: number) => {
@@ -45,69 +50,82 @@ export function TutorialScreen({ onDone }: TutorialScreenProps) {
       selectionHaptic();
       // Drive the scroll; onMomentumScrollEnd reconciles `index` either way,
       // so a programmatic jump and a swipe cannot disagree.
-      scrollRef.current?.scrollTo({ x: clamped * width, animated: true });
+      scrollRef.current?.scrollTo({ x: clamped * pageWidth, animated: true });
       setIndex(clamped);
     },
-    [last, width],
+    [last, pageWidth],
   );
 
   const onMomentumEnd = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       // Guard against a zero width on the very first layout pass.
-      if (width <= 0) return;
-      const next = Math.round(event.nativeEvent.contentOffset.x / width);
+      if (pageWidth <= 0) return;
+      const next = Math.round(event.nativeEvent.contentOffset.x / pageWidth);
       setIndex(Math.min(Math.max(next, 0), last));
     },
-    [last, width],
+    [last, pageWidth],
   );
+
+  // Rotating an iPad or resizing a Split View changes the page width under a
+  // scroll offset that was measured against the old one, which leaves the pager
+  // parked between two steps. Re-anchor on the current step when it changes —
+  // and only then, or this would fight the animated scroll in goTo.
+  const anchoredWidth = useRef(pageWidth);
+  useEffect(() => {
+    if (anchoredWidth.current === pageWidth || pageWidth <= 0) return;
+    anchoredWidth.current = pageWidth;
+    scrollRef.current?.scrollTo({ x: index * pageWidth, animated: false });
+  }, [index, pageWidth]);
 
   return (
     <SafeAreaView style={styles.root}>
-      <View style={styles.topBar}>
-        <Text style={styles.progress}>
-          {index + 1} of {TUTORIAL_STEPS.length}
-        </Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Skip the tutorial"
-          onPress={onDone}
-          hitSlop={spacing.sm}
-          style={({ pressed }) => [styles.skip, pressed && styles.pressed]}
+      <View style={styles.column}>
+        <View style={styles.topBar}>
+          <Text style={styles.progress}>
+            {index + 1} of {TUTORIAL_STEPS.length}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Skip the tutorial"
+            onPress={onDone}
+            hitSlop={spacing.sm}
+            style={({ pressed }) => [styles.skip, pressed && styles.pressed]}
+          >
+            <Text style={styles.skipLabel}>Skip</Text>
+          </Pressable>
+        </View>
+
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={onMomentumEnd}
+          style={styles.pager}
         >
-          <Text style={styles.skipLabel}>Skip</Text>
-        </Pressable>
-      </View>
+          {TUTORIAL_STEPS.map((step) => (
+            <StepPage key={step.title} step={step} width={pageWidth} />
+          ))}
+        </ScrollView>
 
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={onMomentumEnd}
-        style={styles.pager}
-      >
-        {TUTORIAL_STEPS.map((step) => (
-          <StepPage key={step.title} step={step} width={width} />
-        ))}
-      </ScrollView>
+        <View style={styles.dots}>
+          {TUTORIAL_STEPS.map((step, i) => (
+            <View key={step.title} style={[styles.dot, i === index && styles.dotActive]} />
+          ))}
+        </View>
 
-      <View style={styles.dots}>
-        {TUTORIAL_STEPS.map((step, i) => (
-          <View key={step.title} style={[styles.dot, i === index && styles.dotActive]} />
-        ))}
-      </View>
-
-      <View style={styles.actions}>
-        {index > 0 ? (
+        <View style={styles.actions}>
+          {index > 0 ? (
+            <View style={styles.actionSlot}>
+              <Button label="Back" variant="secondary" onPress={() => goTo(index - 1)} />
+            </View>
+          ) : null}
           <View style={styles.actionSlot}>
-            <Button label="Back" variant="secondary" onPress={() => goTo(index - 1)} />
+            <Button
+              label={index === last ? "Start analysing" : "Next"}
+              onPress={index === last ? onDone : () => goTo(index + 1)}
+            />
           </View>
-        ) : null}
-        <View style={styles.actionSlot}>
-          <Button
-            label={index === last ? "Start analysing" : "Next"}
-            onPress={index === last ? onDone : () => goTo(index + 1)}
-          />
         </View>
       </View>
     </SafeAreaView>
@@ -153,6 +171,7 @@ function StepPage({ step, width }: { step: TutorialStep; width: number }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
+  column: { ...column(CONTENT_MAX_WIDTH), flex: 1 },
   topBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -160,7 +179,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     minHeight: MIN_TOUCH_TARGET,
   },
-  progress: { ...type.caption, color: colors.textFaint },
+  progress: { ...type.caption, color: colors.textDim },
   skip: { minHeight: MIN_TOUCH_TARGET, justifyContent: "center", paddingHorizontal: spacing.xs },
   skipLabel: { ...type.label, color: colors.accentText },
   pager: { flex: 1 },

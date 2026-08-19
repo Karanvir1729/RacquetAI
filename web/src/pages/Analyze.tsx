@@ -206,7 +206,11 @@ export default function Analyze() {
                 <AlertTriangle className="h-6 w-6" />
               </span>
               <h2 className="rq-h3 mt-4">That didn't work</h2>
-              <p className="rq-lead mt-3 text-[15px]">{stage.message}</p>
+              {/* On the message alone — role="alert" on the Card would announce
+                  the heading, the job id and both buttons as one utterance. */}
+              <p className="rq-lead-sm mt-3" role="alert">
+                {stage.message}
+              </p>
               {stage.jobId !== null ? (
                 <p className="rq-num rq-caption mt-3">Job {stage.jobId}</p>
               ) : null}
