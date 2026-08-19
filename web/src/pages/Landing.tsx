@@ -17,6 +17,7 @@ import {
 import { useCallback, useState, type ReactNode } from "react";
 
 import { HeroPlate } from "@/components/HeroPlate";
+import { WaitlistBand } from "@/components/WaitlistBand";
 import { ButtonLink } from "@/components/ui/Button";
 import { Card, IconChip } from "@/components/ui/Card";
 import { AccentBadge, Chip } from "@/components/ui/Chip";
@@ -39,7 +40,7 @@ const STEPS = [
   {
     icon: <Upload className="h-5 w-5" />,
     title: "Upload the match",
-    body: "Drag in a squash match filmed from behind the court — a phone wedged on the balcony rail is enough. One file, one upload, no account.",
+    body: "Drag in a squash match filmed from behind the court — a phone wedged on the balcony rail is enough. One file, one upload, no account required.",
   },
   {
     icon: <MousePointerClick className="h-5 w-5" />,
@@ -129,7 +130,7 @@ const FAQ: Array<{ q: string; a: ReactNode }> = [
   },
   {
     q: "What happens to my video?",
-    a: "The browser uploads it to the analysis server this site is pointed at, the server processes it and hands back an analysis file. There is no account, no public gallery, and nothing is posted anywhere.",
+    a: "The browser uploads it to the analysis server this site is pointed at, the server processes it and hands back an analysis file. No account is required to analyse, there is no public gallery, and nothing is posted anywhere.",
   },
   {
     q: "Is this the same thing as the iOS app?",
@@ -255,7 +256,17 @@ export default function Landing() {
               </ButtonLink>
             </div>
 
-            <div className="mt-7 flex flex-wrap justify-center gap-2">
+            <a
+              href="#waitlist"
+              className="rq-caption mt-4 inline-flex min-h-[44px] items-center transition-colors duration-200"
+              style={{ color: "var(--rq-text-dim)" }}
+              onMouseEnter={(event) => (event.currentTarget.style.color = "var(--rq-text)")}
+              onMouseLeave={(event) => (event.currentTarget.style.color = "var(--rq-text-dim)")}
+            >
+              No analysis server to point it at? Join the early-access waitlist ↓
+            </a>
+
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
               {["Squash only", "Your own footage", "No live tracking", "Works on a phone"].map(
                 (label) => (
                   <Chip key={label}>{label}</Chip>
@@ -436,6 +447,9 @@ export default function Landing() {
           </div>
         </div>
       </Section>
+
+      {/* ── Waitlist ─────────────────────────────────────────────────────── */}
+      <WaitlistBand />
     </>
   );
 }

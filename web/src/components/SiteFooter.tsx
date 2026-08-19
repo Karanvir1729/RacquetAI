@@ -28,6 +28,9 @@ export function SiteFooter() {
           <a href="/#faq" className={FOOTER_LINK} style={{ color: "var(--rq-text-dim)" }}>
             FAQ
           </a>
+          <a href="/#waitlist" className={FOOTER_LINK} style={{ color: "var(--rq-text-dim)" }}>
+            Join the waitlist
+          </a>
         </nav>
       </div>
       <div className="mx-auto max-w-shell px-5 pb-8 sm:px-6 lg:px-8">
