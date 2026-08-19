@@ -43,6 +43,11 @@ import { selection as selectionHaptic } from "@/lib/haptics";
 import { formatClock } from "@/lib/format";
 import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens";
 
+import { PoseOverlay, PLAYER_COLORS } from "@/features/analysis/PoseOverlay";
+import { nearestTrackIndex } from "@/features/analysis/pose";
+import type { Size } from "@/features/analysis/letterbox";
+import type { PlayerId, TrackFrame } from "@/features/analysis/types";
+
 import { PlayerNames } from "./announce";
 import type { SpeechWatcher } from "./speech";
 import { ScoreEvent } from "./types";
@@ -53,7 +58,7 @@ import {
   nextRallyStart,
   playbackNote,
 } from "./videoPlayback";
-import { VideoRefereeResult } from "./videoReferee";
+import { PlayerBinding, sideForPlayer, VideoRefereeResult } from "./videoReferee";
 import { videoLoadCall } from "./useVideoReferee";
 
 /**
@@ -65,12 +70,16 @@ import { videoLoadCall } from "./useVideoReferee";
 const DUCKED_VOLUME = 0.15;
 
 /**
- * How often the playhead is sampled. Coarser than the analysis screen's
- * 0.125 s — this screen follows RALLY ENDS, which are seconds apart, not pose
- * frames at 8 Hz, and every tick is a bridge crossing. A quarter second is
- * imperceptible on a call that is already a beat behind the last strike.
+ * How often the playhead is sampled.
+ *
+ * Following only RALLY ENDS, a quarter second is plenty — they are seconds
+ * apart and every tick is a bridge crossing. With pose tracks to draw, the
+ * skeletons are the thing on screen and they are sampled at ~8 Hz, so the
+ * tick matches MatchVideoCard's 0.125 s; anything coarser makes the figures
+ * stutter behind the players they are pinned to.
  */
-const TIME_UPDATE_INTERVAL_SEC = 0.25;
+const RALLY_TICK_SEC = 0.25;
+const POSE_TICK_SEC = 0.125;
 
 const KEEP_AWAKE_TAG = "racquetiq-referee-video";
 
@@ -117,6 +126,16 @@ interface VideoRefereePlayerProps {
   detached: boolean;
   /** Short phone: the video gives back height the scoreboard cannot spare. */
   compact: boolean;
+  /**
+   * Pose samples to draw over the footage, when the analysis carries them
+   * (schema v2). Null hides the whole overlay layer — a v1 analysis plays
+   * exactly as before.
+   */
+  tracks: readonly TrackFrame[] | null;
+  /** The ANALYSED frame size, for letterboxing the overlay onto the box. */
+  videoSize: Size | null;
+  /** Which tracker identity is which side — the legend follows the swap. */
+  binding: PlayerBinding;
   /** Hand scoring back to the video from wherever the playhead now is. */
   onReattach: () => void;
   /**
@@ -136,13 +155,17 @@ export function VideoRefereePlayer({
   muted,
   detached,
   compact,
+  tracks,
+  videoSize,
+  binding,
   onReattach,
   onSync,
 }: VideoRefereePlayerProps) {
+  const hasTracks = tracks !== null && tracks.length > 0;
   const player = useVideoPlayer(videoUri, (instance) => {
     instance.loop = false;
     instance.muted = false;
-    instance.timeUpdateEventInterval = TIME_UPDATE_INTERVAL_SEC;
+    instance.timeUpdateEventInterval = hasTracks ? POSE_TICK_SEC : RALLY_TICK_SEC;
     // See the file comment: expo-video's iOS default takes the audio session
     // exclusively, which stops the user's music the moment this mounts.
     instance.audioMixingMode = "mixWithOthers";
@@ -157,6 +180,14 @@ export function VideoRefereePlayer({
   const calledRef = useRef(0);
   /** Where the playhead was last seen, so reattaching can resume from it. */
   const timeRef = useRef(0);
+  // The overlay pieces, the MatchVideoCard recipe: the measured box for
+  // letterboxing, and an INDEX into the track samples rather than the raw
+  // time, so a tick that lands on the same sample re-renders nothing. Seeded
+  // at t=0 so the poster frame already carries skeletons.
+  const [boxSize, setBoxSize] = useState<Size | null>(null);
+  const [frameIndex, setFrameIndex] = useState<number | null>(() =>
+    hasTracks ? nearestTrackIndex(tracks, 0) : null,
+  );
 
   // `useEventListener` keeps the newest listener in a ref, so this inline arrow
   // sees the current props on every tick and never goes stale — the same
@@ -170,6 +201,7 @@ export function VideoRefereePlayer({
     // zero rallies and yank the score back to 0-0 for a frame.
     if (!Number.isFinite(currentTime)) return;
     timeRef.current = currentTime;
+    if (hasTracks) setFrameIndex(nearestTrackIndex(tracks, currentTime));
     // A human has taken over. The playhead keeps moving — they may well be
     // re-watching the rally they just corrected — but it no longer touches the
     // score, or the next crossing would quietly undo their correction.
@@ -274,14 +306,44 @@ export function VideoRefereePlayer({
 
   return (
     <View style={styles.wrap}>
-      <View style={[styles.videoBox, { maxHeight: compact ? 128 : 168 }]}>
+      <View
+        style={[styles.videoBox, { maxHeight: compact ? 128 : 168 }]}
+        onLayout={(event) => {
+          const { width, height } = event.nativeEvent.layout;
+          setBoxSize({ width, height });
+        }}
+      >
         <VideoView
           player={player}
           style={StyleSheet.absoluteFill}
           contentFit="contain"
           nativeControls
         />
+        {/* Non-interactive by construction (PoseOverlay), so the native
+            transport controls underneath still take every touch. */}
+        {hasTracks && videoSize !== null ? (
+          <PoseOverlay
+            frame={frameIndex !== null ? (tracks[frameIndex] ?? null) : null}
+            videoSize={videoSize}
+            boxSize={boxSize}
+          />
+        ) : null}
       </View>
+      {hasTracks ? (
+        <View style={styles.legend}>
+          {(["A", "B"] as PlayerId[]).map((id) => (
+            <View key={id} style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: PLAYER_COLORS[id] }]} />
+              <Text style={styles.legendLabel} numberOfLines={1}>
+                {/* The tracker's "A" maps through the SAME binding the score
+                    uses, so Swap players recolors these names in step with
+                    the rallies it re-awards. */}
+                {names[sideForPlayer(id, binding)]}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
       <View style={styles.row}>
         <Text style={styles.note} numberOfLines={2}>
           {detached
@@ -344,5 +406,9 @@ const styles = StyleSheet.create({
     minHeight: MIN_TOUCH_TARGET * 0.75,
   },
   skipLabel: { ...type.caption, color: colors.accentText },
+  legend: { flexDirection: "row", gap: spacing.md, alignItems: "center" },
+  legendItem: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendLabel: { ...type.caption, color: colors.textDim },
   pressed: { opacity: 0.7 },
 });

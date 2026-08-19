@@ -33,6 +33,12 @@ import { isPlayable, loadVideoAnalysis, unscorableReason, VideoSource } from "./
 export interface VideoRefereeState {
   source: VideoSource | null;
   result: VideoRefereeResult | null;
+  /**
+   * The analysis behind the result, kept whole: the player draws the pose
+   * skeletons from `analysis.tracks` and letterboxes them against
+   * `analysis.video`. Null exactly when `result` is.
+   */
+  analysis: MatchAnalysis | null;
   /** Why the chosen source could not be scored, in a sentence for the user. */
   problem: string | null;
   binding: PlayerBinding;
@@ -80,6 +86,7 @@ export function useVideoReferee({
   const [state, setState] = useState<VideoRefereeState>({
     source: null,
     result: null,
+    analysis: null,
     problem: null,
     binding: DEFAULT_PLAYER_BINDING,
     firstServer: "A",
@@ -95,11 +102,11 @@ export function useVideoReferee({
       const analysis = loadAnalysis(source);
       const problem = unscorableReason(analysis);
       if (analysis === null || problem !== null) {
-        setState({ source, result: null, problem, binding, firstServer });
+        setState({ source, result: null, analysis: null, problem, binding, firstServer });
         return;
       }
       const result = refereeVideo(analysis.shots, { binding, firstServer });
-      setState({ source, result, problem: null, binding, firstServer });
+      setState({ source, result, analysis, problem: null, binding, firstServer });
       onLoad({ names, firstServer }, result, isPlayable(source));
     },
     [loadAnalysis, names, onLoad],
@@ -124,7 +131,14 @@ export function useVideoReferee({
   );
 
   const clear = useCallback(
-    () => setState((previous) => ({ ...previous, source: null, result: null, problem: null })),
+    () =>
+      setState((previous) => ({
+        ...previous,
+        source: null,
+        result: null,
+        analysis: null,
+        problem: null,
+      })),
     [],
   );
 

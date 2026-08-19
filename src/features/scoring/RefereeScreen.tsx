@@ -350,6 +350,9 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
               muted={match.muted}
               detached={detached}
               compact={compact}
+              tracks={video.analysis?.tracks ?? null}
+              videoSize={video.analysis?.video ?? null}
+              binding={video.binding}
               onReattach={() => setDetached(false)}
               onSync={match.syncVideoEvents}
             />

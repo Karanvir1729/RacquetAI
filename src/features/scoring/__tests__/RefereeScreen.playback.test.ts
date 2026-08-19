@@ -111,15 +111,28 @@ function shotsFrom(rallies: string[]): ShotEvent[] {
   return shots;
 }
 
-function analysisWith(shots: ShotEvent[]): MatchAnalysis {
+/** 17 keypoints x [x, y, conf], all confidently at one spot — a pose blob. */
+function poseValues(x: number, y: number): number[] {
+  return Array.from({ length: 17 }, () => [x, y, 0.9]).flat();
+}
+
+function analysisWith(shots: ShotEvent[], withTracks = false): MatchAnalysis {
   return {
-    schemaVersion: 1,
+    schemaVersion: withTracks ? 2 : 1,
     video: { durationSec: 600, width: 1920, height: 1080, fps: 30 },
     court: { cells: [] },
     players: [],
     rallies: { count: 0, avgShotsPerRally: 0, longestRally: 0 },
     shots,
     quality: { framesAnalyzed: 100, bothPlayersDetectedPct: 90, audioAvailable: true, notes: [] },
+    ...(withTracks
+      ? {
+          tracks: [
+            { t: 0, p: [{ id: "A", k: poseValues(0.3, 0.5) }, { id: "B", k: poseValues(0.7, 0.5) }] },
+            { t: 5, p: [{ id: "A", k: poseValues(0.4, 0.5) }] },
+          ],
+        }
+      : {}),
   } as unknown as MatchAnalysis;
 }
 
@@ -374,6 +387,35 @@ describe("hearing the call over the match audio", () => {
     expect(player().volume).toBeLessThan(0.5);
     await press(tree, UNDO);
     expect(player().volume).toBe(1);
+  });
+});
+
+describe("the players are highlighted", () => {
+  it("draws the pose overlay and names each skeleton, when the analysis has tracks", async () => {
+    mockSources.analysis = analysisWith(shotsFrom(RALLIES), true);
+    const tree = await mount();
+    await watchVideo(tree);
+    const rendered = text(tree);
+    // The legend maps the tracker's colors onto the scoreboard's names.
+    expect(rendered).toContain("Player A");
+    expect(rendered).toContain("Player B");
+    // Pose frames arrive at ~8 Hz, so the playhead is sampled to match.
+    expect(player().timeUpdateEventInterval).toBe(0.125);
+  });
+
+  it("keeps the coarser tick when there is nothing to draw", async () => {
+    const tree = await mount();
+    await watchVideo(tree);
+    expect(player().timeUpdateEventInterval).toBe(0.25);
+  });
+
+  it("keeps scoring while following the skeletons", async () => {
+    mockSources.analysis = analysisWith(shotsFrom(RALLIES), true);
+    const tree = await mount();
+    await watchVideo(tree);
+    await seek(callAt(1));
+    expect(saved()?.events ?? []).toHaveLength(1);
+    expect(speech.__spoken.at(-1)).toBe("One, love.");
   });
 });
 
