@@ -67,3 +67,13 @@ export function loadAnalysisBackend(): AnalysisBackend {
     return DEFAULT_ANALYSIS_BACKEND;
   }
 }
+
+/** Persist the engine choice. Read on the next import; never throws. */
+export function saveAnalysisBackend(backend: AnalysisBackend): void {
+  try {
+    configFile().write(JSON.stringify({ v: 1, backend }, null, 2));
+  } catch {
+    // Not being able to persist the preference is survivable — the toggle
+    // simply reverts to the previous value next launch.
+  }
+}

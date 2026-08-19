@@ -7,3 +7,5 @@ soundfile
 matplotlib
 scipy
 flask
+stripe
+requests

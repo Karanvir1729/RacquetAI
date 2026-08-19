@@ -1,0 +1,11 @@
+# Keep secrets and bulk artifacts out of the ACR build context —
+# `az acr build` uploads everything not listed here (it ignores .gitignore).
+.env
+.env.*
+.venv/
+jobs/
+out/
+samples/
+eval/
+__pycache__/
+*.log

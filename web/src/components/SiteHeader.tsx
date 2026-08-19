@@ -6,12 +6,14 @@ import { Wordmark } from "@/components/brand/Mark";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ButtonLink } from "@/components/ui/Button";
 import { Hairline } from "@/components/ui/Card";
+import { useAuth } from "@/lib/auth";
 
 const NAV = [
   { href: "/#how", label: "How it works" },
   { href: "/#readout", label: "What you get" },
   { href: "/#limits", label: "Limits" },
   { href: "/#faq", label: "FAQ" },
+  { href: "/#waitlist", label: "Waitlist" },
 ];
 
 /**
@@ -24,6 +26,9 @@ const NAV = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { session } = useAuth();
+  const accountHref = session ? "/account" : "/login";
+  const accountLabel = session ? "Account" : "Sign in";
 
   // Any navigation closes the menu — including same-page anchor jumps.
   useEffect(() => setOpen(false), [location.pathname, location.hash]);
@@ -59,6 +64,14 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          <ButtonLink
+            to={accountHref}
+            size="sm"
+            variant="ghost"
+            className="hidden md:inline-flex"
+          >
+            {accountLabel}
+          </ButtonLink>
           <ButtonLink to="/analyze" size="sm" className="hidden sm:inline-flex">
             Analyze a match
           </ButtonLink>
@@ -93,6 +106,13 @@ export function SiteHeader() {
                 {item.label}
               </a>
             ))}
+            <Link
+              to={accountHref}
+              className="rq-label flex min-h-[48px] items-center"
+              style={{ color: "var(--rq-text-dim)" }}
+            >
+              {accountLabel}
+            </Link>
             <ButtonLink to="/analyze" size="md" className="my-3 w-full">
               Analyze a match
             </ButtonLink>

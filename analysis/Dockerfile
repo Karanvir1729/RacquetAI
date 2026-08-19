@@ -13,7 +13,7 @@ RUN python -m venv .venv \
   && .venv/bin/pip install --no-cache-dir -U pip \
   && .venv/bin/pip install --no-cache-dir -r requirements.txt
 
-COPY analyze.py server.py ./
+COPY analyze.py server.py platform_api.py ./
 COPY tools ./tools
 
 # Pre-download the RTMPose ONNX weights so the first uploaded job does not pay

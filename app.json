@@ -15,6 +15,7 @@
     "ios": {
       "bundleIdentifier": "com.racquetai.app",
       "supportsTablet": true,
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UISupportedInterfaceOrientations~ipad": [
@@ -53,6 +54,7 @@
       "favicon": "./assets/brand/favicon.png"
     },
     "plugins": [
+      "expo-apple-authentication",
       "expo-router",
       [
         "expo-splash-screen",

@@ -8,6 +8,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { TutorialScreen } from "@/features/onboarding/TutorialScreen";
+import { trackEvent } from "@/lib/appEvents";
+import { initAuth } from "@/lib/auth";
 import { installCrashGuard, reportLastFatalError } from "@/lib/crashGuard";
 import { hasSeenTutorial, markTutorialSeen } from "@/lib/onboarding";
 import {
@@ -60,6 +62,14 @@ export default function RootLayout() {
     if (configureSubscriptions()) void refreshEntitlement();
   }, []);
 
+  // Supabase session restore + the one metrics ping per cold start. Both are
+  // fire-and-forget: an unreachable network leaves the app signed out and
+  // untracked, never broken.
+  useEffect(() => {
+    initAuth();
+    trackEvent("app_open");
+  }, []);
+
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={styles.root}>
@@ -90,6 +100,10 @@ export default function RootLayout() {
             <Tabs.Screen
               name="library"
               options={{ title: "Library", tabBarIcon: tabIcon("albums") }}
+            />
+            <Tabs.Screen
+              name="account"
+              options={{ title: "Account", tabBarIcon: tabIcon("person-circle") }}
             />
             {/* Match analysis — reached from Library cards, never the tab bar
                 (href: null hides it there); see features/analysis. */}

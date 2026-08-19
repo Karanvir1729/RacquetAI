@@ -40,6 +40,8 @@ import uuid
 
 from flask import Flask, jsonify, request, send_file
 
+from platform_api import platform_bp
+
 ANALYSIS_DIR = os.path.dirname(os.path.abspath(__file__))
 JOBS_DIR = os.path.join(ANALYSIS_DIR, "jobs")
 VENV_PY = os.path.join(ANALYSIS_DIR, ".venv", "bin", "python")
@@ -61,6 +63,7 @@ PROGRESS_RE = re.compile(r"\.\.\.\s*([\d.]+)s\s*/\s*([\d.]+)s")
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 4 * 1024 * 1024 * 1024  # 4 GB uploads
+app.register_blueprint(platform_bp)  # /billing/* + /admin/* (platform_api.py)
 
 jobs = {}          # jobId -> dict (see _new_job)
 jobs_lock = threading.Lock()
@@ -262,7 +265,8 @@ def _cors(resp):
     resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     # X-Filename rides on the raw-body upload the web client uses; omitting it
     # here makes the browser preflight fail and every cross-origin upload dies.
-    resp.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Filename"
+    # Authorization carries Supabase tokens (/billing) and admin basic auth.
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Filename, Authorization"
     return resp
 
 

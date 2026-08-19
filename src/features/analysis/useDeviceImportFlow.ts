@@ -131,6 +131,10 @@ export function useDeviceImportFlow(videoUri: string | null): ImportFlow {
   );
 
   useEffect(() => {
+    // Keeping the latest callback in a ref (the "useEvent" pattern) is a
+    // legitimate effect-time ref write; the immutability rule can't tell it
+    // apart from a render-time mutation.
+    // eslint-disable-next-line react-hooks/immutability
     submitCornersRef.current = submitCorners;
   }, [submitCorners]);
 

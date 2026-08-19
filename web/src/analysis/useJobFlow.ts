@@ -28,6 +28,8 @@ import {
 import type { CourtCorners, JobState } from "./jobContract";
 import type { MatchAnalysis } from "./types";
 
+import { trackEvent } from "@/lib/events";
+
 /** How often to ask the server where it has got to. */
 const POLL_MS = 1500;
 /**
@@ -93,6 +95,7 @@ export function useJobFlow(): JobFlow {
   const start = useCallback(
     (file: File) => {
       const run = (runRef.current += 1);
+      trackEvent("analysis_uploaded", { bytes: file.size });
       setStage({ kind: "uploading", fileName: file.name, fileBytes: file.size, fraction: 0 });
 
       const handle = uploadVideo(apiBase, file, (fraction) => {

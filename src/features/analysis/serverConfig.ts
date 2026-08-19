@@ -36,3 +36,22 @@ export function loadServerBaseUrl(): string {
   }
 }
 
+/**
+ * Persist a base-URL override; an empty or unusable value clears the override
+ * so the default comes back. Returns the URL now in force. Never throws.
+ */
+export function saveServerBaseUrl(input: string): string {
+  const normalized = normalizeBaseUrl(input);
+  try {
+    const file = configFile();
+    if (normalized === null) {
+      if (file.exists) file.delete();
+      return DEFAULT_SERVER_BASE_URL;
+    }
+    file.write(JSON.stringify({ v: 1, baseUrl: normalized }, null, 2));
+    return normalized;
+  } catch {
+    return normalized ?? DEFAULT_SERVER_BASE_URL;
+  }
+}
+

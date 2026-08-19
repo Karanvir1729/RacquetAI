@@ -47,12 +47,24 @@ az acr build -r "$ACR" -t "$IMAGE_TAG" "$SCRIPT_DIR" -o none
 echo "==> Starting container ($CPU vCPU / ${MEMORY}GB)"
 ACR_USER=$(az acr credential show -n "$ACR" --query username -o tsv)
 ACR_PASS=$(az acr credential show -n "$ACR" --query 'passwords[0].value' -o tsv)
+# Platform secrets (Stripe billing + admin metrics) ride along from
+# analysis/.env when it exists; without it the /billing and /admin endpoints
+# answer 503 and the analysis endpoints work exactly as before.
+PLATFORM_ENV_ARGS=()
+if [[ -f "$SCRIPT_DIR/.env" ]]; then
+  PLATFORM_ENV_ARGS+=(--secure-environment-variables)
+  while IFS='=' read -r key value; do
+    [[ "$key" =~ ^[A-Z_]+$ && -n "$value" ]] && PLATFORM_ENV_ARGS+=("${key}=${value}")
+  done < "$SCRIPT_DIR/.env"
+fi
+
 az container create -g "$RG" -n "$CONTAINER" \
   --image "${ACR}.azurecr.io/${IMAGE_TAG}" \
   --registry-login-server "${ACR}.azurecr.io" \
   --registry-username "$ACR_USER" --registry-password "$ACR_PASS" \
   --cpu "$CPU" --memory "$MEMORY" --ports 8082 --os-type Linux \
-  --dns-name-label "$DNS_LABEL" --restart-policy Always -o none
+  --dns-name-label "$DNS_LABEL" --restart-policy Always \
+  "${PLATFORM_ENV_ARGS[@]}" -o none
 
 URL="http://${DNS_LABEL}.${LOC}.azurecontainer.io:8082"
 echo
