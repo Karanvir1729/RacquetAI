@@ -9,15 +9,15 @@
  * of DynamicColorIOS, so it pins the dark palette until an Appearance-listener
  * pass is done (app.json android.userInterfaceStyle matches).
  *
- * The palette is Court Ink (#06130E) canvas, Chalk text, and one electric
- * accent — Optic (#D8FA3C), the tennis-ball colour. These hex values are the
+ * The palette is Court Ink (#06130E) canvas, Chalk text, and one deep
+ * accent — Optic (#7CBF3F), the ball in court light. These hex values are the
  * same ones the brand SVGs in assets/brand/src/ are drawn with; changing a
  * colour here means regenerating the assets. NEVER hardcode a colour in a
  * component — every colour in the app is read from this file.
  *
  * Rules that matter:
  * - Accent fills always carry `onAccent` (ink) text.
- * - Optic is a FILL, never ink. `accent` measures 1.1:1 on the light canvas, so
+ * - Optic is a FILL, never ink. `accent` measures 2.1:1 on the light canvas, so
  *   anything that is ink — text, an icon glyph, a border, a stroke, a spinner —
  *   reads `accentText`, and a data mark (heat cell, meter fill, the T) reads
  *   `data`. Both deepen to Court Green on light; `accent` does not flip.
@@ -55,16 +55,16 @@ export const colors = {
   watermark: dyn("rgba(255,255,255,0.06)", "rgba(6,19,14,0.08)"),
 
   // brand accent (Optic — the fill is constant; accent TEXT deepens on light)
-  accent: dyn("#D8FA3C", "#D8FA3C"),
-  accentText: dyn("#EBFF8C", "#1F6B4A"),
-  accentSoft: dyn("rgba(216,250,60,0.12)", "rgba(31,107,74,0.12)"),
+  accent: dyn("#7CBF3F", "#7CBF3F"),
+  accentText: dyn("#A6D47D", "#1F6B4A"),
+  accentSoft: dyn("rgba(124,191,63,0.12)", "rgba(31,107,74,0.12)"),
   // Data ink — heat cells, meter fills, the T marker. A thin or low-opacity
   // mark cannot use `accent`: Optic at 12% on a white canvas is nothing at all.
   // This is the accent's *data* form, and like `accentText` it deepens to Court
   // Green on light. Same rule, different surface.
-  data: dyn("#D8FA3C", "#1F6B4A"),
+  data: dyn("#7CBF3F", "#1F6B4A"),
   onAccent: dyn("#06130E", "#06130E"),
-  glow: dyn("rgba(216,250,60,0.35)", "rgba(31,107,74,0.22)"),
+  glow: dyn("rgba(124,191,63,0.35)", "rgba(31,107,74,0.22)"),
 
   // recording indicator + status
   danger: dyn("#FF6B6B", "#C62F26"),
@@ -85,7 +85,7 @@ export const colors = {
   // dark-shirted player on light — the same figure, invisible, because a page
   // token was used to paint something that is not on the page. Chalk on Optic
   // with an ink casing works over both. Do NOT make these a dyn() pair.
-  overlayA: "#D8FA3C" as ColorValue,
+  overlayA: "#7CBF3F" as ColorValue,
   overlayB: "#FFFFFF" as ColorValue,
   overlayCasing: "#06130E" as ColorValue,
 } as const;
@@ -135,13 +135,13 @@ export const cardShadow = {
  * Accent halo (offset-0 glow). iOS `shadow*` props don't render on Android and
  * `elevation` cannot produce a centered glow, so Android uses the RN 0.76+
  * `boxShadow` string — iOS keeps its original shadow rendering untouched.
- * The rgb below is Optic #D8FA3C spelled out in decimal: a boxShadow string
+ * The rgb below is Optic #7CBF3F spelled out in decimal: a boxShadow string
  * cannot read a `DynamicColorIOS` token, so this literal is the one place the
  * accent is duplicated. Change it whenever `colors.accent` changes.
  */
 export function accentGlow(opacity: number, radiusPx: number, offsetY = 0) {
   return Platform.OS === "android"
-    ? { boxShadow: `0 ${offsetY}px ${radiusPx}px rgba(216,250,60,${opacity})` }
+    ? { boxShadow: `0 ${offsetY}px ${radiusPx}px rgba(124,191,63,${opacity})` }
     : {
         shadowColor: colors.accent,
         shadowOpacity: opacity,
