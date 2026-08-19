@@ -49,3 +49,4 @@ __pycache__/
 analysis/out/**/pose_cache*.pkl
 # regenerable measurement cache written by analysis/tools/identity_audit.py
 analysis/out/**/identity_gt_v1.pkl
+analysis/eval/ball_align_cache/

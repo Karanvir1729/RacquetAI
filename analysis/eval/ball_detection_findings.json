@@ -1,0 +1,526 @@
+{
+ "schema": "ball_detection_v1",
+ "date": "2026-08-18",
+ "groundTruth": {
+  "file": "eval/ball_labels_v1.json",
+  "labelledFrames": 156,
+  "humanVisible": 59,
+  "fairFrames": 84,
+  "cleanNullFrames": 48,
+  "note": "recall is denominated in the 59 frames a human could see the ball in; a detector cannot find what is behind a body"
+ },
+ "biasDisclosures": [
+  "Labels were placed with a 3-frame difference aid, and every detector here is built on that same difference, so RECALL is an optimistic ceiling. False-positive rates are unbiased -- the labeller never enumerated non-ball movers.",
+  "Hand filter thresholds (area, extent, darkness, elongation) were chosen from these labels' own feature statistics, so detectors A, A', B and B2 are tuned on test.",
+  "Detector L is reported under leave-one-segment-out; L' is the same model graded in-sample and is shown only to size the optimism.",
+  "eval/ball_nested_cv.json is the only figure with NOTHING about the held-out segment used -- weights and threshold are both chosen on the other 12 segments."
+ ],
+ "candidateGenerator": {
+  "ballInCandidateSet": [
+   54,
+   59
+  ],
+  "medianRankOfTrueBall": 2,
+  "p90Rank": 10,
+  "candidatesPerFrame": 159,
+  "generatorMisses": 5,
+  "generatorMissCause": "all five are motion-blur streaks",
+  "conclusion": "generation is not the bottleneck; RANKING is"
+ },
+ "nestedCV": {
+  "budget": 0.05,
+  "frames": 156,
+  "fp": {
+   "all": 10,
+   "null": 1
+  },
+  "byTol": {
+   "3.0": {
+    "tp": 21,
+    "npos": 59,
+    "ci": [
+     0.2,
+     0.55
+    ]
+   },
+   "5.0": {
+    "tp": 26,
+    "npos": 59,
+    "ci": [
+     0.2835820895522388,
+     0.6607142857142857
+    ]
+   },
+   "8.0": {
+    "tp": 30,
+    "npos": 59,
+    "ci": [
+     0.3225806451612903,
+     0.75
+    ]
+   }
+  },
+  "perSegment": {
+   "3.0": {
+    "archive_match2#0": [
+     2,
+     11
+    ],
+    "archive_match2#1": [
+     2,
+     12
+    ],
+    "archive_match3#0": [
+     3,
+     4
+    ],
+    "archive_match4#0": [
+     8,
+     12
+    ],
+    "archive_match4#1": [
+     1,
+     8
+    ],
+    "archive_match4#2": [
+     5,
+     12
+    ]
+   },
+   "5.0": {
+    "archive_match2#0": [
+     3,
+     11
+    ],
+    "archive_match2#1": [
+     3,
+     12
+    ],
+    "archive_match3#0": [
+     3,
+     4
+    ],
+    "archive_match4#0": [
+     10,
+     12
+    ],
+    "archive_match4#1": [
+     2,
+     8
+    ],
+    "archive_match4#2": [
+     5,
+     12
+    ]
+   },
+   "8.0": {
+    "archive_match2#0": [
+     3,
+     11
+    ],
+    "archive_match2#1": [
+     3,
+     12
+    ],
+    "archive_match3#0": [
+     3,
+     4
+    ],
+    "archive_match4#0": [
+     11,
+     12
+    ],
+    "archive_match4#1": [
+     5,
+     8
+    ],
+    "archive_match4#2": [
+     5,
+     12
+    ]
+   }
+  }
+ },
+ "chanceControl": {
+  "test": "labels permuted within segment, 2000 draws",
+  "tol8": {
+   "observed": 28,
+   "nullMean": 7.66,
+   "p": "<0.0005"
+  },
+  "tol5": {
+   "observed": 24,
+   "nullMean": 4.09,
+   "p": "<0.0005"
+  },
+  "note": "detections are far above chance, but a 8 px disc around a 2-3 px ball earns ~13% by chance, so the 5 px figure is the one to quote"
+ },
+ "resolution": {
+  "detectorLadder": {
+   "854x480 (native)": {
+    "dthr": 8,
+    "inset": 54,
+    "pos": 59,
+    "ncand": 12.070512820512821,
+    "medrank": 2.5
+   },
+   "640x360": {
+    "dthr": 6,
+    "inset": 48,
+    "pos": 59,
+    "ncand": 11.66025641025641,
+    "medrank": 3.0
+   },
+   "512x288 (TrackNetV2 input)": {
+    "dthr": 6,
+    "inset": 43,
+    "pos": 59,
+    "ncand": 10.173076923076923,
+    "medrank": 3.0
+   },
+   "427x240": {
+    "dthr": 5,
+    "inset": 33,
+    "pos": 59,
+    "ncand": 9.916666666666666,
+    "medrank": 5.0
+   }
+  },
+  "hiresComparison": {
+   "conditions": [
+    "mp4_480",
+    "hires_480 (encode control)",
+    "hires_1080"
+   ],
+   "ballInCandSet": [
+    "22/25",
+    "22/25",
+    "21/25"
+   ],
+   "pairedTest": "1080p found 0 frames that 480p missed; exact p=1.000",
+   "sample": "25 labelled-visible frames, 3 segments, one clip",
+   "conclusion": "resolution does NOT help this detector, which is the opposite of its effect on the human labeller (8/12 -> 12/12). The human was perception-limited; the detector is discrimination-limited, and more pixels buy signal, not separability."
+  }
+ },
+ "bounceReadiness": {
+  "detections": 28,
+  "runs": 8,
+  "runLengthHistogram": {
+   "1": 2,
+   "2": 2,
+   "3": 2,
+   "5": 1,
+   "11": 1
+  },
+  "runsGE3": 4,
+  "runsGE6": 1,
+  "visibleByBackground": {
+   "frontWall": 36,
+   "floor": 16,
+   "sideWall": 3,
+   "glass": 2,
+   "mullion": 1,
+   "redLine": 1
+  },
+  "conclusion": "a bounce is found by fitting motion either side of an instant, which needs a run of >=6 frames spanning it. Across 84 frames of live play exactly ONE such run exists, and it is on the front wall, not the floor."
+ },
+ "verdict": "NOT FEASIBLE for the events the product needs (floor bounces, landing point, two-bounce refereeing). Ball detection itself is real and well above chance, but it arrives too sparsely and too unevenly to time an instant.",
+ "detectorCurves": {
+  "A_diff": {
+   "thr": 121.0,
+   "tp": 1,
+   "fp": 0,
+   "npos": 59,
+   "recall": 0.01694915254237288,
+   "fp_per_frame": 0.0,
+   "null_fp_per_frame": 0.0,
+   "prec": 1.0,
+   "loc_med": 1.2136462948654845,
+   "per_seg": {
+    "archive_match2#0": [
+     0,
+     11
+    ],
+    "archive_match2#1": [
+     1,
+     12
+    ],
+    "archive_match3#0": [
+     0,
+     4
+    ],
+    "archive_match4#0": [
+     0,
+     12
+    ],
+    "archive_match4#1": [
+     0,
+     8
+    ],
+    "archive_match4#2": [
+     0,
+     12
+    ]
+   }
+  },
+  "Aprime_diff_compact": {
+   "thr": 121.0,
+   "tp": 1,
+   "fp": 0,
+   "npos": 59,
+   "recall": 0.01694915254237288,
+   "fp_per_frame": 0.0,
+   "null_fp_per_frame": 0.0,
+   "prec": 1.0,
+   "loc_med": 1.2136462948654845,
+   "per_seg": {
+    "archive_match2#0": [
+     0,
+     11
+    ],
+    "archive_match2#1": [
+     1,
+     12
+    ],
+    "archive_match3#0": [
+     0,
+     4
+    ],
+    "archive_match4#0": [
+     0,
+     12
+    ],
+    "archive_match4#1": [
+     0,
+     8
+    ],
+    "archive_match4#2": [
+     0,
+     12
+    ]
+   }
+  },
+  "B_streak": {
+   "thr": 105.33333587646484,
+   "tp": 1,
+   "fp": 0,
+   "npos": 59,
+   "recall": 0.01694915254237288,
+   "fp_per_frame": 0.0,
+   "null_fp_per_frame": 0.0,
+   "prec": 1.0,
+   "loc_med": 1.2136462948654845,
+   "per_seg": {
+    "archive_match2#0": [
+     0,
+     11
+    ],
+    "archive_match2#1": [
+     1,
+     12
+    ],
+    "archive_match3#0": [
+     0,
+     4
+    ],
+    "archive_match4#0": [
+     0,
+     12
+    ],
+    "archive_match4#1": [
+     0,
+     8
+    ],
+    "archive_match4#2": [
+     0,
+     12
+    ]
+   }
+  },
+  "B2_streak_elong": {
+   "thr": 185.53333892822266,
+   "tp": 0,
+   "fp": 1,
+   "npos": 59,
+   "recall": 0.0,
+   "fp_per_frame": 0.00641025641025641,
+   "null_fp_per_frame": 0.0,
+   "prec": 0.0,
+   "loc_med": null,
+   "per_seg": {
+    "archive_match2#0": [
+     0,
+     11
+    ],
+    "archive_match2#1": [
+     0,
+     12
+    ],
+    "archive_match3#0": [
+     0,
+     4
+    ],
+    "archive_match4#0": [
+     0,
+     12
+    ],
+    "archive_match4#1": [
+     0,
+     8
+    ],
+    "archive_match4#2": [
+     0,
+     12
+    ]
+   }
+  },
+  "L_logreg_loso": {
+   "thr": 6.5384415227990225,
+   "tp": 1,
+   "fp": 0,
+   "npos": 59,
+   "recall": 0.01694915254237288,
+   "fp_per_frame": 0.0,
+   "null_fp_per_frame": 0.0,
+   "prec": 1.0,
+   "loc_med": 0.560886848667614,
+   "per_seg": {
+    "archive_match2#0": [
+     0,
+     11
+    ],
+    "archive_match2#1": [
+     0,
+     12
+    ],
+    "archive_match3#0": [
+     0,
+     4
+    ],
+    "archive_match4#0": [
+     0,
+     12
+    ],
+    "archive_match4#1": [
+     0,
+     8
+    ],
+    "archive_match4#2": [
+     1,
+     12
+    ]
+   }
+  },
+  "Lprime_logreg_insample": {
+   "thr": 6.971485152461995,
+   "tp": 1,
+   "fp": 0,
+   "npos": 59,
+   "recall": 0.01694915254237288,
+   "fp_per_frame": 0.0,
+   "null_fp_per_frame": 0.0,
+   "prec": 1.0,
+   "loc_med": 0.560886848667614,
+   "per_seg": {
+    "archive_match2#0": [
+     0,
+     11
+    ],
+    "archive_match2#1": [
+     0,
+     12
+    ],
+    "archive_match3#0": [
+     0,
+     4
+    ],
+    "archive_match4#0": [
+     0,
+     12
+    ],
+    "archive_match4#1": [
+     0,
+     8
+    ],
+    "archive_match4#2": [
+     1,
+     12
+    ]
+   }
+  },
+  "C_traj_over_A": {
+   "thr": 245.71876541023045,
+   "tp": 1,
+   "fp": 0,
+   "npos": 59,
+   "recall": 0.01694915254237288,
+   "fp_per_frame": 0.0,
+   "null_fp_per_frame": 0.0,
+   "prec": 1.0,
+   "loc_med": 2.0344970291701134,
+   "per_seg": {
+    "archive_match2#0": [
+     0,
+     11
+    ],
+    "archive_match2#1": [
+     1,
+     12
+    ],
+    "archive_match3#0": [
+     0,
+     4
+    ],
+    "archive_match4#0": [
+     0,
+     12
+    ],
+    "archive_match4#1": [
+     0,
+     8
+    ],
+    "archive_match4#2": [
+     0,
+     12
+    ]
+   }
+  },
+  "C_traj_over_L(loso)": {
+   "thr": 10.085943379129818,
+   "tp": 1,
+   "fp": 0,
+   "npos": 59,
+   "recall": 0.01694915254237288,
+   "fp_per_frame": 0.0,
+   "null_fp_per_frame": 0.0,
+   "prec": 1.0,
+   "loc_med": 3.633344772580884,
+   "per_seg": {
+    "archive_match2#0": [
+     0,
+     11
+    ],
+    "archive_match2#1": [
+     0,
+     12
+    ],
+    "archive_match3#0": [
+     0,
+     4
+    ],
+    "archive_match4#0": [
+     1,
+     12
+    ],
+    "archive_match4#1": [
+     0,
+     8
+    ],
+    "archive_match4#2": [
+     0,
+     12
+    ]
+   }
+  }
+ }
+}

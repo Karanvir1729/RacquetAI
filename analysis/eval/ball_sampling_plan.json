@@ -1,0 +1,172 @@
+{
+ "seed": 20260818,
+ "salt": "ball-groundtruth",
+ "segFrames": 12,
+ "fps": 29.97,
+ "source": "eval/breaks_v1.json",
+ "unitOfIndependence": "segment (frames within a segment are correlated)",
+ "clips": {
+  "archive_match2": {
+   "nRalliesEligible": 21,
+   "segments": [
+    {
+     "tSec": 52.997,
+     "rally": 3,
+     "startFrame": 1588,
+     "endFrame": 1599,
+     "seg": "archive_match2#0"
+    },
+    {
+     "tSec": 84.809,
+     "rally": 5,
+     "startFrame": 2542,
+     "endFrame": 2553,
+     "seg": "archive_match2#1"
+    },
+    {
+     "tSec": 117.565,
+     "rally": 7,
+     "startFrame": 3523,
+     "endFrame": 3534,
+     "seg": "archive_match2#2"
+    },
+    {
+     "tSec": 127.222,
+     "rally": 8,
+     "startFrame": 3813,
+     "endFrame": 3824,
+     "seg": "archive_match2#3"
+    },
+    {
+     "tSec": 141.444,
+     "rally": 8,
+     "startFrame": 4239,
+     "endFrame": 4250,
+     "seg": "archive_match2#4"
+    },
+    {
+     "tSec": 398.52,
+     "rally": 19,
+     "startFrame": 11944,
+     "endFrame": 11955,
+     "seg": "archive_match2#5"
+    },
+    {
+     "tSec": 401.357,
+     "rally": 19,
+     "startFrame": 12029,
+     "endFrame": 12040,
+     "seg": "archive_match2#6"
+    }
+   ]
+  },
+  "archive_match3": {
+   "nRalliesEligible": 23,
+   "segments": [
+    {
+     "tSec": 23.12,
+     "rally": 1,
+     "startFrame": 693,
+     "endFrame": 704,
+     "seg": "archive_match3#0"
+    },
+    {
+     "tSec": 32.946,
+     "rally": 2,
+     "startFrame": 987,
+     "endFrame": 998,
+     "seg": "archive_match3#1"
+    },
+    {
+     "tSec": 46.739,
+     "rally": 3,
+     "startFrame": 1401,
+     "endFrame": 1412,
+     "seg": "archive_match3#2"
+    },
+    {
+     "tSec": 159.447,
+     "rally": 12,
+     "startFrame": 4779,
+     "endFrame": 4790,
+     "seg": "archive_match3#3"
+    },
+    {
+     "tSec": 212.313,
+     "rally": 13,
+     "startFrame": 6363,
+     "endFrame": 6374,
+     "seg": "archive_match3#4"
+    },
+    {
+     "tSec": 413.766,
+     "rally": 23,
+     "startFrame": 12401,
+     "endFrame": 12412,
+     "seg": "archive_match3#5"
+    },
+    {
+     "tSec": 433.89,
+     "rally": 24,
+     "startFrame": 13004,
+     "endFrame": 13015,
+     "seg": "archive_match3#6"
+    }
+   ]
+  },
+  "archive_match4": {
+   "nRalliesEligible": 19,
+   "segments": [
+    {
+     "tSec": 86.541,
+     "rally": 2,
+     "startFrame": 2594,
+     "endFrame": 2605,
+     "seg": "archive_match4#0"
+    },
+    {
+     "tSec": 137.139,
+     "rally": 4,
+     "startFrame": 4110,
+     "endFrame": 4121,
+     "seg": "archive_match4#1"
+    },
+    {
+     "tSec": 173.235,
+     "rally": 6,
+     "startFrame": 5192,
+     "endFrame": 5203,
+     "seg": "archive_match4#2"
+    },
+    {
+     "tSec": 233.599,
+     "rally": 8,
+     "startFrame": 7001,
+     "endFrame": 7012,
+     "seg": "archive_match4#3"
+    },
+    {
+     "tSec": 316.574,
+     "rally": 10,
+     "startFrame": 9488,
+     "endFrame": 9499,
+     "seg": "archive_match4#4"
+    },
+    {
+     "tSec": 403.608,
+     "rally": 14,
+     "startFrame": 12096,
+     "endFrame": 12107,
+     "seg": "archive_match4#5"
+    },
+    {
+     "tSec": 409.33,
+     "rally": 14,
+     "startFrame": 12268,
+     "endFrame": 12279,
+     "seg": "archive_match4#6"
+    }
+   ]
+  }
+ }
+}

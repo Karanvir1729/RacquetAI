@@ -1,0 +1,1513 @@
+{
+ "schema": "ball_labels_v1",
+ "labeller": "claude-opus-5, single pass, one labeller (no second opinion, so no inter-rater agreement figure)",
+ "date": "2026-08-18",
+ "plan": "eval/ball_sampling_plan.json (seed 20260818, salt ball-groundtruth)",
+ "unitOfIndependence": "segment. Frames within a 12-frame segment are strongly correlated; any CI must bootstrap over segments, not frames.",
+ "coordinates": "source video pixels at 854x480, origin top-left, ball CENTRE (centre of the streak when motion-blurred)",
+ "readError": "positions were read off rulers printed in source pixels on magnified crops; repeatability is about +/-2 px, which is comparable to the ball itself",
+ "protocol": [
+  "1. Whole-frame aligned dark-residual TRAIL over the segment's 12 frames locates the ball's path, or shows there is no isolated mover.",
+  "2. Where the path is unclear, 3-frame RGB composites (cyan=t-1, magenta=t, yellow=t+1) pin exact per-frame positions.",
+  "3. Every position is then CONFIRMED BY EYE in the raw magnified pixels (>=3.5x nearest-neighbour) before it is written down, and the position is read from the raw crop, not from the composite.",
+  "4. notVisible is only recorded after looking at the raw pixels at >=3.5x where the ball should be."
+ ],
+ "biasDisclosure": "This measures a CUED human: the aid says which neighbourhood to search, then the eye judges the raw pixels. That is the right ceiling for a detector that also has temporal context (frame differencing, or a TrackNet-style 3-frame stack), because such a detector gets the same motion evidence. It is NOT a free-search number and it is NOT a single-still number; a single-frame appearance-only detector faces a harder problem than this figure suggests. The aid is arithmetically a frame difference, so grading a differencing detector against these labels is partly circular and must be stated whenever it is done.",
+ "knownLabellerError": "On archive_match3#0 a static wall blemish was first mis-called as the ball at 2.1x magnification and the real ball 30 px away was missed. The motion aid caught it. The >=3.5x rule in step 4 dates from that error; the two segments labelled before the rule (archive_match2#2, archive_match3#0) were re-checked under it.",
+ "states": {
+  "visible": "a human can put a pixel on the ball in the raw frame",
+  "notVisible": "cannot, for the reason in 'miss'"
+ },
+ "missReasons": {
+  "occludedByPlayer": "ball is behind or against a player's body",
+  "sameColourAsClothing": "ball is over black kit; no separable edge",
+  "darkStructure": "ball crosses a black glass-wall mullion or similar fixed dark structure",
+  "lowContrastOnBrightPanel": "ball over a blown-out bright wall panel",
+  "lowContrast+cameraJolt": "faint, and frame alignment is broken by a camera jolt",
+  "offFrame": "rally is live but the ball is outside the camera's field of view",
+  "cameraOffTarget": "operator is swinging the camera; much of the court is out of shot",
+  "noBallInFlight": "dead ball: nobody is playing a shot in these frames"
+ },
+ "segments": [
+  {
+   "seg": "archive_match2#0",
+   "clip": "archive_match2",
+   "startFrame": 1588,
+   "frames": [
+    {
+     "f": 1588,
+     "s": "visible",
+     "x": 330,
+     "y": 131,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "med"
+    },
+    {
+     "f": 1589,
+     "s": "visible",
+     "x": 341,
+     "y": 124,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 1590,
+     "s": "visible",
+     "x": 352,
+     "y": 121,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 1591,
+     "s": "visible",
+     "x": 360,
+     "y": 121,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "med"
+    },
+    {
+     "f": 1592,
+     "s": "visible",
+     "x": 370,
+     "y": 120,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 1593,
+     "s": "visible",
+     "x": 380,
+     "y": 120,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 1594,
+     "s": "visible",
+     "x": 386,
+     "y": 122,
+     "how": "raw",
+     "look": "streak",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 1595,
+     "s": "visible",
+     "x": 400,
+     "y": 124,
+     "how": "raw",
+     "look": "streak",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 1596,
+     "s": "visible",
+     "x": 419,
+     "y": 122,
+     "how": "raw",
+     "look": "streak",
+     "bg": "frontWall",
+     "conf": "med"
+    },
+    {
+     "f": 1597,
+     "s": "notVisible",
+     "miss": "darkStructure",
+     "note": "crosses the black glass-wall mullion at x~423; motion aid ALSO blank, so the ball is absent from the pixels, not merely missed by the eye",
+     "bg": "mullion",
+     "conf": "high"
+    },
+    {
+     "f": 1598,
+     "s": "visible",
+     "x": 447,
+     "y": 131,
+     "how": "raw",
+     "look": "streak",
+     "bg": "glass",
+     "conf": "med"
+    },
+    {
+     "f": 1599,
+     "s": "visible",
+     "x": 466,
+     "y": 137,
+     "how": "raw",
+     "look": "streak",
+     "bg": "glass",
+     "conf": "med"
+    }
+   ]
+  },
+  {
+   "seg": "archive_match2#1",
+   "clip": "archive_match2",
+   "startFrame": 2542,
+   "frames": [
+    {
+     "f": 2542,
+     "s": "visible",
+     "x": 43,
+     "y": 240,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 10,
+     "bg": "floor",
+     "conf": "med"
+    },
+    {
+     "f": 2543,
+     "s": "visible",
+     "x": 46,
+     "y": 266,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 12,
+     "bg": "floor",
+     "conf": "med"
+    },
+    {
+     "f": 2544,
+     "s": "visible",
+     "x": 45,
+     "y": 296,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 14,
+     "bg": "floor",
+     "conf": "med"
+    },
+    {
+     "f": 2545,
+     "s": "visible",
+     "x": 47,
+     "y": 322,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 14,
+     "bg": "floor",
+     "conf": "med"
+    },
+    {
+     "f": 2546,
+     "s": "visible",
+     "x": 48,
+     "y": 363,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 15,
+     "bg": "floor",
+     "conf": "med"
+    },
+    {
+     "f": 2547,
+     "s": "visible",
+     "x": 50,
+     "y": 396,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 30,
+     "bg": "floor",
+     "conf": "high",
+     "note": "streak runs y378-408 and terminates ON the floor: the bounce happens inside this one exposure"
+    },
+    {
+     "f": 2548,
+     "s": "visible",
+     "x": 52,
+     "y": 401,
+     "how": "raw",
+     "look": "dot",
+     "bg": "floor",
+     "conf": "high"
+    },
+    {
+     "f": 2549,
+     "s": "visible",
+     "x": 56,
+     "y": 388,
+     "how": "raw",
+     "look": "dot",
+     "bg": "floor",
+     "conf": "high"
+    },
+    {
+     "f": 2550,
+     "s": "visible",
+     "x": 50,
+     "y": 379,
+     "how": "raw",
+     "look": "dot",
+     "bg": "floor",
+     "conf": "high"
+    },
+    {
+     "f": 2551,
+     "s": "visible",
+     "x": 52,
+     "y": 370,
+     "how": "raw",
+     "look": "dot",
+     "bg": "floor",
+     "conf": "high",
+     "note": "also visible unaided in the un-zoomed 854x480 full frame"
+    },
+    {
+     "f": 2552,
+     "s": "visible",
+     "x": 54,
+     "y": 361,
+     "how": "raw",
+     "look": "dot",
+     "bg": "floor",
+     "conf": "high"
+    },
+    {
+     "f": 2553,
+     "s": "visible",
+     "x": 57,
+     "y": 352,
+     "how": "raw",
+     "look": "dot",
+     "bg": "floor",
+     "conf": "high"
+    }
+   ],
+   "event": "floor bounce between f2547 and f2548 at approx (51,410)"
+  },
+  {
+   "seg": "archive_match2#2",
+   "clip": "archive_match2",
+   "startFrame": 3523,
+   "frames": [
+    {
+     "f": 3523,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 3524,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 3525,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 3526,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 3527,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 3528,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 3529,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 3530,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 3531,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 3532,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 3533,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 3534,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "med"
+    }
+   ],
+   "note": "striker is mid-swing a couple of metres from the lens and fills a third of the frame. Searched the striker crop, the open floor in front of him, and the whole-frame motion aid: no isolated dark mover anywhere outside the two player silhouettes. conf=med because the search was targeted, not a 6-tile exhaustive sweep of all 12 frames",
+   "falsePositiveNote": "a black round door/scoreboard fitting sits at approx (460,320) in every frame of this clip, ball-sized and ball-coloured; it is static, so motion rejects it, but a single-frame appearance detector would fire on it every frame"
+  },
+  {
+   "seg": "archive_match3#0",
+   "clip": "archive_match3",
+   "startFrame": 693,
+   "frames": [
+    {
+     "f": 693,
+     "s": "visible",
+     "x": 505,
+     "y": 270,
+     "how": "raw",
+     "look": "dot",
+     "bg": "sideWall",
+     "conf": "high"
+    },
+    {
+     "f": 694,
+     "s": "visible",
+     "x": 511,
+     "y": 270,
+     "how": "raw",
+     "look": "dot",
+     "bg": "sideWall",
+     "conf": "high"
+    },
+    {
+     "f": 695,
+     "s": "visible",
+     "x": 517,
+     "y": 270,
+     "how": "raw",
+     "look": "dot",
+     "bg": "sideWall",
+     "conf": "high"
+    },
+    {
+     "f": 696,
+     "s": "visible",
+     "x": 522,
+     "y": 270,
+     "how": "raw",
+     "look": "dot",
+     "bg": "mullion",
+     "conf": "med"
+    },
+    {
+     "f": 697,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "high"
+    },
+    {
+     "f": 698,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "high"
+    },
+    {
+     "f": 699,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "high"
+    },
+    {
+     "f": 700,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "high"
+    },
+    {
+     "f": 701,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "high"
+    },
+    {
+     "f": 702,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "high"
+    },
+    {
+     "f": 703,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "high"
+    },
+    {
+     "f": 704,
+     "s": "notVisible",
+     "miss": "occludedByPlayer",
+     "bg": "player",
+     "conf": "high"
+    }
+   ],
+   "labellerErrorNote": "at 2.1x I first mis-called a STATIC wall blemish at (477,272) as the ball and missed the real ball 30 px away. Caught by the motion aid, which showed the blemish had no colour fringe. All notVisible calls from here on require >=3.5x magnification"
+  },
+  {
+   "seg": "archive_match4#0",
+   "clip": "archive_match4",
+   "startFrame": 2594,
+   "frames": [
+    {
+     "f": 2594,
+     "s": "visible",
+     "x": 396,
+     "y": 268,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 2595,
+     "s": "visible",
+     "x": 396,
+     "y": 265,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 2596,
+     "s": "visible",
+     "x": 393,
+     "y": 263,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 2597,
+     "s": "visible",
+     "x": 390,
+     "y": 262,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 2598,
+     "s": "visible",
+     "x": 388,
+     "y": 262,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 2599,
+     "s": "visible",
+     "x": 386,
+     "y": 262,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 2600,
+     "s": "visible",
+     "x": 383,
+     "y": 263,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 2601,
+     "s": "visible",
+     "x": 383,
+     "y": 266,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 2602,
+     "s": "visible",
+     "x": 378,
+     "y": 269,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 2603,
+     "s": "visible",
+     "x": 373,
+     "y": 276,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 2604,
+     "s": "visible",
+     "x": 370,
+     "y": 279,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 2605,
+     "s": "visible",
+     "x": 368,
+     "y": 286,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    }
+   ],
+   "note": "slow high ball at the apex of a lob, 2-4 px of travel per frame, so no motion blur and a compact dark dot throughout. Best case for detection: pale wall behind, no player within 30 px"
+  },
+  {
+   "seg": "archive_match3#1",
+   "clip": "archive_match3",
+   "startFrame": 987,
+   "inFlight": false,
+   "frames": [
+    {
+     "f": 987,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 988,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 989,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 990,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 991,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 992,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 993,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 994,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 995,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 996,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 997,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    },
+    {
+     "f": 998,
+     "s": "notVisible",
+     "miss": "sameColourAsClothing",
+     "bg": "player",
+     "conf": "med"
+    }
+   ],
+   "note": "DEAD BALL. No ball flight anywhere in the frame across all 12 frames; near player stands with racket raised in a pre-serve stance and the ball is presumed in hand against a black shirt. breaks_v1 counts this stretch as inside a rally, so the project's rally intervals include ball-not-in-flight time",
+   "inFlightFalseReason": "pre-serve stance"
+  },
+  {
+   "seg": "archive_match4#1",
+   "clip": "archive_match4",
+   "startFrame": 4110,
+   "frames": [
+    {
+     "f": 4110,
+     "s": "visible",
+     "x": 312,
+     "y": 97,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 6,
+     "bg": "frontWall",
+     "conf": "med"
+    },
+    {
+     "f": 4111,
+     "s": "visible",
+     "x": 319,
+     "y": 87,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 6,
+     "bg": "frontWall",
+     "conf": "med"
+    },
+    {
+     "f": 4112,
+     "s": "visible",
+     "x": 323,
+     "y": 79,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 6,
+     "bg": "frontWall",
+     "conf": "med"
+    },
+    {
+     "f": 4113,
+     "s": "visible",
+     "x": 331,
+     "y": 72,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 6,
+     "bg": "frontWall",
+     "conf": "med"
+    },
+    {
+     "f": 4114,
+     "s": "visible",
+     "x": 340,
+     "y": 64,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 6,
+     "bg": "frontWall",
+     "conf": "med"
+    },
+    {
+     "f": 4115,
+     "s": "visible",
+     "x": 348,
+     "y": 58,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 6,
+     "bg": "frontWall",
+     "conf": "med"
+    },
+    {
+     "f": 4116,
+     "s": "notVisible",
+     "miss": "lowContrastOnBrightPanel",
+     "bg": "frontWall",
+     "conf": "med"
+    },
+    {
+     "f": 4117,
+     "s": "visible",
+     "x": 373,
+     "y": 47,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 6,
+     "bg": "frontWall",
+     "conf": "low"
+    },
+    {
+     "f": 4118,
+     "s": "visible",
+     "x": 385,
+     "y": 43,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 6,
+     "bg": "frontWall",
+     "conf": "low"
+    },
+    {
+     "f": 4119,
+     "s": "notVisible",
+     "miss": "darkStructure",
+     "bg": "mullion",
+     "conf": "med"
+    },
+    {
+     "f": 4120,
+     "s": "notVisible",
+     "miss": "lowContrast+cameraJolt",
+     "bg": "frontWall",
+     "conf": "low"
+    },
+    {
+     "f": 4121,
+     "s": "notVisible",
+     "miss": "lowContrast+cameraJolt",
+     "bg": "frontWall",
+     "conf": "low"
+    }
+   ],
+   "note": "ball high on the front wall, fast (11-15 px/frame) so every appearance is a 6 px diagonal STREAK, never a dot, and much fainter than the slow ball in match4#0. f4119-4121 also carry a hard camera jolt that wrecks frame alignment"
+  },
+  {
+   "seg": "archive_match2#3",
+   "clip": "archive_match2",
+   "startFrame": 3813,
+   "inFlight": false,
+   "frames": [
+    {
+     "f": 3813,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 3814,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 3815,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 3816,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 3817,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 3818,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 3819,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 3820,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 3821,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 3822,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 3823,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 3824,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    }
+   ],
+   "note": "DEAD BALL. The near player is COMPLETELY static across all 12 frames (zero alignment residual on his body) and the far player is taking a practice swing. Nobody stands still during a rally, so this is a between-points stoppage that breaks_v1 counts as inside rally 8. No isolated dark mover anywhere in the frame.",
+   "inFlightFalseReason": "between points, near player stationary"
+  },
+  {
+   "seg": "archive_match3#2",
+   "clip": "archive_match3",
+   "startFrame": 1401,
+   "inFlight": false,
+   "frames": [
+    {
+     "f": 1401,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 1402,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 1403,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 1404,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 1405,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 1406,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 1407,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 1408,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 1409,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 1410,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 1411,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 1412,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "high"
+    }
+   ],
+   "note": "DEAD BALL, confirmed twice: the whole-frame trail shows no isolated dark mover, and an UNTHRESHOLDED 3-frame composite over the open court (crop 230,120,340,250) at f1402/1405/1408/1411 shows only court-line fringing from the camera pan. Near player walking, far player standing.",
+   "inFlightFalseReason": "between points, players repositioning"
+  },
+  {
+   "seg": "archive_match4#2",
+   "clip": "archive_match4",
+   "startFrame": 5192,
+   "frames": [
+    {
+     "f": 5192,
+     "s": "visible",
+     "x": 274,
+     "y": 237,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 5193,
+     "s": "visible",
+     "x": 271,
+     "y": 240,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 5194,
+     "s": "visible",
+     "x": 267,
+     "y": 244,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 5195,
+     "s": "visible",
+     "x": 263,
+     "y": 250,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 5196,
+     "s": "visible",
+     "x": 259,
+     "y": 257,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 5197,
+     "s": "visible",
+     "x": 254,
+     "y": 265,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 5198,
+     "s": "visible",
+     "x": 249,
+     "y": 274,
+     "how": "raw",
+     "look": "dot",
+     "bg": "redLine",
+     "conf": "med",
+     "note": "sitting on the red service line, which halves the contrast"
+    },
+    {
+     "f": 5199,
+     "s": "visible",
+     "x": 241,
+     "y": 288,
+     "how": "raw",
+     "look": "dot",
+     "bg": "frontWall",
+     "conf": "high"
+    },
+    {
+     "f": 5200,
+     "s": "visible",
+     "x": 234,
+     "y": 303,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 6,
+     "bg": "floor",
+     "conf": "high"
+    },
+    {
+     "f": 5201,
+     "s": "visible",
+     "x": 229,
+     "y": 318,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 8,
+     "bg": "floor",
+     "conf": "high"
+    },
+    {
+     "f": 5202,
+     "s": "visible",
+     "x": 217,
+     "y": 341,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 9,
+     "bg": "floor",
+     "conf": "high"
+    },
+    {
+     "f": 5203,
+     "s": "visible",
+     "x": 210,
+     "y": 365,
+     "how": "raw",
+     "look": "streak",
+     "lenPx": 10,
+     "bg": "floor",
+     "conf": "high"
+    }
+   ],
+   "note": "ball dropping off the front wall and accelerating: 4 px/frame at the start (compact dot) growing to 25 px/frame at the end (10 px streak). Clean pale background, no player within 100 px. The dot-to-streak transition inside a single 12-frame window is the clearest argument against any fixed size/shape filter"
+  },
+  {
+   "seg": "archive_match3#3",
+   "clip": "archive_match3",
+   "startFrame": 4779,
+   "inFlight": null,
+   "frames": [
+    {
+     "f": 4779,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4780,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4781,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4782,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4783,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4784,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4785,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4786,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4787,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4788,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4789,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4790,
+     "s": "notVisible",
+     "miss": "cameraOffTarget",
+     "bg": "n/a",
+     "conf": "med"
+    }
+   ],
+   "note": "CAMERA OFF TARGET. Over these 12 frames the operator swings the camera hard: the frame tilts, the corridor OUTSIDE the court fills the left third, and much of the playing area is out of shot. One player clips the right edge. No isolated dark mover anywhere. Alignment residual glows on every court line, so aligned differencing is also degraded here."
+  },
+  {
+   "seg": "archive_match4#3",
+   "clip": "archive_match4",
+   "startFrame": 7001,
+   "inFlight": true,
+   "frames": [
+    {
+     "f": 7001,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 7002,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 7003,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 7004,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 7005,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 7006,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 7007,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 7008,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 7009,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 7010,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 7011,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    },
+    {
+     "f": 7012,
+     "s": "notVisible",
+     "miss": "offFrame",
+     "bg": "n/a",
+     "conf": "high"
+    }
+   ],
+   "note": "BALL OUT OF SHOT. Full frame at f7006 shows an empty court with a single player clipped by the RIGHT edge, running out of frame. The second player and the ball are outside the field of view. The rally is live; the camera simply is not pointed at it."
+  },
+  {
+   "seg": "archive_match2#4",
+   "clip": "archive_match2",
+   "startFrame": 4239,
+   "inFlight": false,
+   "frames": [
+    {
+     "f": 4239,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4240,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4241,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4242,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4243,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4244,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4245,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4246,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4247,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4248,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4249,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    },
+    {
+     "f": 4250,
+     "s": "notVisible",
+     "miss": "noBallInFlight",
+     "bg": "n/a",
+     "conf": "med"
+    }
+   ],
+   "note": "DEAD BALL. Player stands with racket at rest, second player at the right edge; large camera re-aim across the segment (whole-frame residual). No ball flight anywhere.",
+   "inFlightFalseReason": "between points"
+  }
+ ],
+ "resolutionAddendum": {
+  "source": "1920x1080 QuickTime originals in the same archive.org item as the 854x480 analysis clips. Identical duration (525.2247 s) and identical 30000/1001 timebase, and frames were matched by picture content, so frame indices correspond exactly. Only 40 frames were pulled, by HTTP range request through ffmpeg (25-28 MB), never the 1.36 GB file; the PNGs were deleted afterwards.",
+  "reLabelled": {
+   "archive_match4#1": {
+    "at854x480": {
+     "visible": 8,
+     "of": 12
+    },
+    "at1920x1080": {
+     "visible": 12,
+     "of": 12,
+     "confidence": "11 clear, f4119 marginal beside the mullion"
+    },
+    "framesRecoveredByResolution": [
+     4116,
+     4119,
+     4120,
+     4121
+    ],
+    "note": "every miss in this segment was resolution-limited. The ball is a fast faint streak; at 854x480 the streak's energy is spread so thin it sinks into the wall, and at 1920x1080 the same streak is an obvious dark dash."
+   },
+   "archive_match4#2": {
+    "at854x480": {
+     "visible": 12,
+     "of": 12
+    },
+    "at1920x1080": {
+     "visible": 12,
+     "of": 12
+    },
+    "note": "already saturated at 854x480; resolution buys contrast and footprint, not visibility, when the ball is slow and the background is clean."
+   }
+  },
+  "measured": {
+   "contrastMedian": {
+    "archive_match4#2": {
+     "854x480": 56.5,
+     "1920x1080": 70.0
+    },
+    "archive_match4#1": {
+     "854x480": 8.2,
+     "1920x1080": 33.0
+    }
+   },
+   "extentMedianPx": {
+    "archive_match4#2": {
+     "854x480": 20.5,
+     "1920x1080": 95.5
+    },
+    "archive_match4#1": {
+     "854x480": 11.0,
+     "1920x1080": 46.5
+    }
+   },
+   "ballDarkerThanAllNearbyClutter": {
+    "archive_match4#2": {
+     "854x480": "4/12",
+     "1920x1080": "7/12"
+    },
+    "archive_match4#1": {
+     "854x480": "2/8",
+     "1920x1080": "3/8"
+    }
+   }
+  },
+  "whatResolutionCannotFix": {
+   "occludedByPlayer": 20,
+   "sameColourAsClothing": 12,
+   "offFrame": 12,
+   "cameraOffTarget": 12,
+   "noBallInFlight": 36,
+   "comment": "84 of the 97 not-visible frames in this sample fail for reasons no sensor can fix: the ball is behind a body, outside the frame, or not in flight. Resolution addresses the low-contrast and blur misses, which are 5 frames here plus the faint-but-visible tail."
+  },
+  "downscaleLadder": "eval/ball_resolution_ladder.json - median ball contrast at the same 59 labelled positions: 53 at 854x480, 45 at 640x360, 42 at 427x240, 24 at 256x144. Monotone, and the dot/streak split (82.5 vs 23.0 at native) is far larger than any resolution step in that range."
+ }
+}

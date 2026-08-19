@@ -1,0 +1,822 @@
+{
+ "ALL sampled in-rally frames": {
+  "visible": 59,
+  "of": 156,
+  "rate": 0.3782,
+  "ci95": [
+   0.1538,
+   0.6154
+  ],
+  "segments": 13
+ },
+ "ball in flight AND in shot": {
+  "visible": 59,
+  "of": 84,
+  "rate": 0.7024,
+  "ci95": [
+   0.4167,
+   0.9524
+  ],
+  "segments": 7
+ },
+ "perClip": {
+  "archive_match2": {
+   "visible": 23,
+   "of": 60,
+   "rate": 0.3833,
+   "ci95": [
+    0.0,
+    0.7833
+   ],
+   "segments": 5
+  },
+  "archive_match3": {
+   "visible": 4,
+   "of": 48,
+   "rate": 0.0833,
+   "ci95": [
+    0.0,
+    0.25
+   ],
+   "segments": 4
+  },
+  "archive_match4": {
+   "visible": 32,
+   "of": 48,
+   "rate": 0.6667,
+   "ci95": [
+    0.25,
+    1.0
+   ],
+   "segments": 4
+  }
+ },
+ "missReasons": {
+  "darkStructure": 2,
+  "occludedByPlayer": 20,
+  "sameColourAsClothing": 12,
+  "lowContrastOnBrightPanel": 1,
+  "lowContrast+cameraJolt": 2,
+  "noBallInFlight": 36,
+  "cameraOffTarget": 12,
+  "offFrame": 12
+ },
+ "appearance": {
+  "dot": 36,
+  "streak": 23
+ },
+ "backgroundWhenVisible": {
+  "frontWall": 36,
+  "glass": 2,
+  "floor": 16,
+  "sideWall": 3,
+  "mullion": 1,
+  "redLine": 1
+ },
+ "measured": {
+  "n": 59,
+  "contrastMedian": 53.0,
+  "contrastIQR": [
+   24.5,
+   86.0
+  ],
+  "contrastMin": 0.0,
+  "contrastMax": 123.5,
+  "extentMedian": 16.0,
+  "extentIQR": [
+   8.0,
+   49.0
+  ],
+  "perLook": {
+   "dot": {
+    "n": 36,
+    "contrastMedian": 82.5,
+    "extentMedian": 10.5
+   },
+   "streak": {
+    "n": 23,
+    "contrastMedian": 23.0,
+    "extentMedian": 31.0
+   }
+  }
+ },
+ "measurements": [
+  {
+   "clip": "archive_match2",
+   "f": 1588,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 145.0,
+   "darkest": 115.0,
+   "contrast": 30.0,
+   "extentPx": 3,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 2.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 1589,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 144.0,
+   "darkest": 111.0,
+   "contrast": 33.0,
+   "extentPx": 6,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 81.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 1590,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 144.0,
+   "darkest": 119.0,
+   "contrast": 25.0,
+   "extentPx": 10,
+   "controlContrastMedian": 1.5,
+   "controlContrastMax": 4.5
+  },
+  {
+   "clip": "archive_match2",
+   "f": 1591,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 145.0,
+   "darkest": 116.0,
+   "contrast": 29.0,
+   "extentPx": 8,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 2.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 1592,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 146.0,
+   "darkest": 119.0,
+   "contrast": 27.0,
+   "extentPx": 11,
+   "controlContrastMedian": 2.0,
+   "controlContrastMax": 7.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 1593,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 146.0,
+   "darkest": 111.0,
+   "contrast": 35.0,
+   "extentPx": 8,
+   "controlContrastMedian": 2.0,
+   "controlContrastMax": 75.5
+  },
+  {
+   "clip": "archive_match2",
+   "f": 1594,
+   "look": "streak",
+   "bg_class": "frontWall",
+   "bgLevel": 147.0,
+   "darkest": 123.0,
+   "contrast": 24.0,
+   "extentPx": 14,
+   "controlContrastMedian": 1.5,
+   "controlContrastMax": 31.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 1595,
+   "look": "streak",
+   "bg_class": "frontWall",
+   "bgLevel": 147.0,
+   "darkest": 119.0,
+   "contrast": 28.0,
+   "extentPx": 10,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 71.5
+  },
+  {
+   "clip": "archive_match2",
+   "f": 1596,
+   "look": "streak",
+   "bg_class": "frontWall",
+   "bgLevel": 146.0,
+   "darkest": 85.0,
+   "contrast": 61.0,
+   "extentPx": 57,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 80.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 1598,
+   "look": "streak",
+   "bg_class": "glass",
+   "bgLevel": 139.0,
+   "darkest": 136.0,
+   "contrast": 3.0,
+   "extentPx": 13,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 78.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 1599,
+   "look": "streak",
+   "bg_class": "glass",
+   "bgLevel": 137.5,
+   "darkest": 137.0,
+   "contrast": 0.5,
+   "extentPx": 2,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 65.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2542,
+   "look": "streak",
+   "bg_class": "floor",
+   "bgLevel": 139.0,
+   "darkest": 108.0,
+   "contrast": 31.0,
+   "extentPx": 47,
+   "controlContrastMedian": 2.0,
+   "controlContrastMax": 7.5
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2543,
+   "look": "streak",
+   "bg_class": "floor",
+   "bgLevel": 135.0,
+   "darkest": 53.0,
+   "contrast": 82.0,
+   "extentPx": 33,
+   "controlContrastMedian": 3.0,
+   "controlContrastMax": 78.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2544,
+   "look": "streak",
+   "bg_class": "floor",
+   "bgLevel": 135.0,
+   "darkest": 111.0,
+   "contrast": 24.0,
+   "extentPx": 52,
+   "controlContrastMedian": 3.0,
+   "controlContrastMax": 7.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2545,
+   "look": "streak",
+   "bg_class": "floor",
+   "bgLevel": 137.0,
+   "darkest": 114.0,
+   "contrast": 23.0,
+   "extentPx": 82,
+   "controlContrastMedian": 6.0,
+   "controlContrastMax": 77.5
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2546,
+   "look": "streak",
+   "bg_class": "floor",
+   "bgLevel": 130.0,
+   "darkest": 112.0,
+   "contrast": 18.0,
+   "extentPx": 91,
+   "controlContrastMedian": 6.0,
+   "controlContrastMax": 87.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2547,
+   "look": "streak",
+   "bg_class": "floor",
+   "bgLevel": 127.0,
+   "darkest": 112.0,
+   "contrast": 15.0,
+   "extentPx": 69,
+   "controlContrastMedian": 5.2,
+   "controlContrastMax": 90.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2548,
+   "look": "dot",
+   "bg_class": "floor",
+   "bgLevel": 125.0,
+   "darkest": 18.0,
+   "contrast": 107.0,
+   "extentPx": 57,
+   "controlContrastMedian": 3.8,
+   "controlContrastMax": 19.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2549,
+   "look": "dot",
+   "bg_class": "floor",
+   "bgLevel": 131.0,
+   "darkest": 17.0,
+   "contrast": 114.0,
+   "extentPx": 36,
+   "controlContrastMedian": 7.8,
+   "controlContrastMax": 69.5
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2550,
+   "look": "dot",
+   "bg_class": "floor",
+   "bgLevel": 133.0,
+   "darkest": 19.0,
+   "contrast": 114.0,
+   "extentPx": 42,
+   "controlContrastMedian": 5.0,
+   "controlContrastMax": 80.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2551,
+   "look": "dot",
+   "bg_class": "floor",
+   "bgLevel": 134.0,
+   "darkest": 16.0,
+   "contrast": 118.0,
+   "extentPx": 41,
+   "controlContrastMedian": 5.0,
+   "controlContrastMax": 84.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2552,
+   "look": "dot",
+   "bg_class": "floor",
+   "bgLevel": 134.5,
+   "darkest": 11.0,
+   "contrast": 123.5,
+   "extentPx": 51,
+   "controlContrastMedian": 5.8,
+   "controlContrastMax": 49.0
+  },
+  {
+   "clip": "archive_match2",
+   "f": 2553,
+   "look": "dot",
+   "bg_class": "floor",
+   "bgLevel": 135.0,
+   "darkest": 16.0,
+   "contrast": 119.0,
+   "extentPx": 59,
+   "controlContrastMedian": 3.0,
+   "controlContrastMax": 11.0
+  },
+  {
+   "clip": "archive_match3",
+   "f": 693,
+   "look": "dot",
+   "bg_class": "sideWall",
+   "bgLevel": 126.0,
+   "darkest": 36.0,
+   "contrast": 90.0,
+   "extentPx": 4,
+   "controlContrastMedian": 2.0,
+   "controlContrastMax": 84.0
+  },
+  {
+   "clip": "archive_match3",
+   "f": 694,
+   "look": "dot",
+   "bg_class": "sideWall",
+   "bgLevel": 125.0,
+   "darkest": 28.0,
+   "contrast": 97.0,
+   "extentPx": 4,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 68.5
+  },
+  {
+   "clip": "archive_match3",
+   "f": 695,
+   "look": "dot",
+   "bg_class": "sideWall",
+   "bgLevel": 125.0,
+   "darkest": 42.0,
+   "contrast": 83.0,
+   "extentPx": 4,
+   "controlContrastMedian": 2.0,
+   "controlContrastMax": 42.5
+  },
+  {
+   "clip": "archive_match3",
+   "f": 696,
+   "look": "dot",
+   "bg_class": "mullion",
+   "bgLevel": 124.0,
+   "darkest": 42.0,
+   "contrast": 82.0,
+   "extentPx": 70,
+   "controlContrastMedian": 4.5,
+   "controlContrastMax": 81.5
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2594,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 146.0,
+   "darkest": 64.0,
+   "contrast": 82.0,
+   "extentPx": 4,
+   "controlContrastMedian": 3.8,
+   "controlContrastMax": 119.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2595,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 144.5,
+   "darkest": 34.0,
+   "contrast": 110.5,
+   "extentPx": 4,
+   "controlContrastMedian": 3.2,
+   "controlContrastMax": 107.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2596,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 144.0,
+   "darkest": 24.0,
+   "contrast": 120.0,
+   "extentPx": 24,
+   "controlContrastMedian": 16.8,
+   "controlContrastMax": 98.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2597,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 144.0,
+   "darkest": 33.0,
+   "contrast": 111.0,
+   "extentPx": 62,
+   "controlContrastMedian": 30.2,
+   "controlContrastMax": 101.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2598,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 144.0,
+   "darkest": 33.0,
+   "contrast": 111.0,
+   "extentPx": 44,
+   "controlContrastMedian": 37.2,
+   "controlContrastMax": 112.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2599,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 143.0,
+   "darkest": 36.0,
+   "contrast": 107.0,
+   "extentPx": 44,
+   "controlContrastMedian": 69.8,
+   "controlContrastMax": 109.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2600,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 142.0,
+   "darkest": 45.0,
+   "contrast": 97.0,
+   "extentPx": 64,
+   "controlContrastMedian": 71.5,
+   "controlContrastMax": 113.5
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2601,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 143.0,
+   "darkest": 141.0,
+   "contrast": 2.0,
+   "extentPx": 56,
+   "controlContrastMedian": 43.2,
+   "controlContrastMax": 114.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2602,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 144.0,
+   "darkest": 65.0,
+   "contrast": 79.0,
+   "extentPx": 6,
+   "controlContrastMedian": 4.0,
+   "controlContrastMax": 78.5
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2603,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 142.0,
+   "darkest": 81.0,
+   "contrast": 61.0,
+   "extentPx": 8,
+   "controlContrastMedian": 6.5,
+   "controlContrastMax": 108.5
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2604,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 136.5,
+   "darkest": 67.0,
+   "contrast": 69.5,
+   "extentPx": 23,
+   "controlContrastMedian": 10.0,
+   "controlContrastMax": 110.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 2605,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 132.0,
+   "darkest": 79.0,
+   "contrast": 53.0,
+   "extentPx": 69,
+   "controlContrastMedian": 1.5,
+   "controlContrastMax": 103.5
+  },
+  {
+   "clip": "archive_match4",
+   "f": 4110,
+   "look": "streak",
+   "bg_class": "frontWall",
+   "bgLevel": 155.5,
+   "darkest": 153.0,
+   "contrast": 2.5,
+   "extentPx": 11,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 2.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 4111,
+   "look": "streak",
+   "bg_class": "frontWall",
+   "bgLevel": 157.0,
+   "darkest": 137.0,
+   "contrast": 20.0,
+   "extentPx": 12,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 52.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 4112,
+   "look": "streak",
+   "bg_class": "frontWall",
+   "bgLevel": 158.0,
+   "darkest": 129.0,
+   "contrast": 29.0,
+   "extentPx": 8,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 2.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 4113,
+   "look": "streak",
+   "bg_class": "frontWall",
+   "bgLevel": 158.0,
+   "darkest": 133.0,
+   "contrast": 25.0,
+   "extentPx": 11,
+   "controlContrastMedian": 2.0,
+   "controlContrastMax": 52.5
+  },
+  {
+   "clip": "archive_match4",
+   "f": 4114,
+   "look": "streak",
+   "bg_class": "frontWall",
+   "bgLevel": 160.0,
+   "darkest": 159.0,
+   "contrast": 1.0,
+   "extentPx": 16,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 56.5
+  },
+  {
+   "clip": "archive_match4",
+   "f": 4115,
+   "look": "streak",
+   "bg_class": "frontWall",
+   "bgLevel": 160.0,
+   "darkest": 159.0,
+   "contrast": 1.0,
+   "extentPx": 4,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 66.5
+  },
+  {
+   "clip": "archive_match4",
+   "f": 4117,
+   "look": "streak",
+   "bg_class": "frontWall",
+   "bgLevel": 151.0,
+   "darkest": 137.0,
+   "contrast": 14.0,
+   "extentPx": 61,
+   "controlContrastMedian": 8.5,
+   "controlContrastMax": 134.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 4118,
+   "look": "streak",
+   "bg_class": "frontWall",
+   "bgLevel": 151.0,
+   "darkest": 151.0,
+   "contrast": 0.0,
+   "extentPx": 8,
+   "controlContrastMedian": 5.8,
+   "controlContrastMax": 127.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5192,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 128.0,
+   "darkest": 43.0,
+   "contrast": 85.0,
+   "extentPx": 6,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 78.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5193,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 127.0,
+   "darkest": 40.0,
+   "contrast": 87.0,
+   "extentPx": 4,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 78.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5194,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 126.0,
+   "darkest": 56.0,
+   "contrast": 70.0,
+   "extentPx": 6,
+   "controlContrastMedian": 1.8,
+   "controlContrastMax": 97.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5195,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 126.0,
+   "darkest": 50.0,
+   "contrast": 76.0,
+   "extentPx": 7,
+   "controlContrastMedian": 14.0,
+   "controlContrastMax": 81.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5196,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 125.0,
+   "darkest": 68.0,
+   "contrast": 57.0,
+   "extentPx": 10,
+   "controlContrastMedian": 2.0,
+   "controlContrastMax": 77.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5197,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 126.0,
+   "darkest": 75.0,
+   "contrast": 51.0,
+   "extentPx": 10,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 36.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5198,
+   "look": "dot",
+   "bg_class": "redLine",
+   "bgLevel": 125.0,
+   "darkest": 42.0,
+   "contrast": 83.0,
+   "extentPx": 61,
+   "controlContrastMedian": 1.0,
+   "controlContrastMax": 75.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5199,
+   "look": "dot",
+   "bg_class": "frontWall",
+   "bgLevel": 128.0,
+   "darkest": 83.0,
+   "contrast": 45.0,
+   "extentPx": 44,
+   "controlContrastMedian": 1.8,
+   "controlContrastMax": 75.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5200,
+   "look": "streak",
+   "bg_class": "floor",
+   "bgLevel": 128.0,
+   "darkest": 79.0,
+   "contrast": 49.0,
+   "extentPx": 31,
+   "controlContrastMedian": 1.5,
+   "controlContrastMax": 78.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5201,
+   "look": "streak",
+   "bg_class": "floor",
+   "bgLevel": 126.0,
+   "darkest": 70.0,
+   "contrast": 56.0,
+   "extentPx": 32,
+   "controlContrastMedian": 4.2,
+   "controlContrastMax": 40.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5202,
+   "look": "streak",
+   "bg_class": "floor",
+   "bgLevel": 127.0,
+   "darkest": 89.0,
+   "contrast": 38.0,
+   "extentPx": 37,
+   "controlContrastMedian": 0.8,
+   "controlContrastMax": 6.0
+  },
+  {
+   "clip": "archive_match4",
+   "f": 5203,
+   "look": "streak",
+   "bg_class": "floor",
+   "bgLevel": 125.0,
+   "darkest": 102.0,
+   "contrast": 23.0,
+   "extentPx": 46,
+   "controlContrastMedian": 0.5,
+   "controlContrastMax": 34.0
+  }
+ ],
+ "labelPrecision": {
+  "n": 59,
+  "offsetMedianPx": 2.8284271247461903,
+  "offsetP90Px": 8.305769750051764,
+  "offsetMaxPx": 10.63014581273465,
+  "ballisticRuns": 6,
+  "meanAbsSecondDiffRaw": 2.344642857142857,
+  "meanAbsSecondDiffRefined": 2.5851190476190475
+ }
+}

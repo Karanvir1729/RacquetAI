@@ -1,0 +1,129 @@
+{
+ "seg": "archive_match4#1",
+ "rows": [
+  {
+   "frame": 4110,
+   "state": "visible",
+   "look": "streak",
+   "miss": null,
+   "lo_contrast": 2.5,
+   "lo_extent": 11,
+   "hi_contrast": 30.0,
+   "hi_extent": 44,
+   "lo_ctrl_max": 2.0,
+   "hi_ctrl_max": 3.0
+  },
+  {
+   "frame": 4111,
+   "state": "visible",
+   "look": "streak",
+   "miss": null,
+   "lo_contrast": 20.0,
+   "lo_extent": 12,
+   "hi_contrast": 32.0,
+   "hi_extent": 38,
+   "lo_ctrl_max": 52.0,
+   "hi_ctrl_max": 4.0
+  },
+  {
+   "frame": 4112,
+   "state": "visible",
+   "look": "streak",
+   "miss": null,
+   "lo_contrast": 29.0,
+   "lo_extent": 8,
+   "hi_contrast": 37.0,
+   "hi_extent": 44,
+   "lo_ctrl_max": 3.0,
+   "hi_ctrl_max": 3.0
+  },
+  {
+   "frame": 4113,
+   "state": "visible",
+   "look": "streak",
+   "miss": null,
+   "lo_contrast": 25.0,
+   "lo_extent": 11,
+   "hi_contrast": 34.0,
+   "hi_extent": 51,
+   "lo_ctrl_max": 52.5,
+   "hi_ctrl_max": 64.0
+  },
+  {
+   "frame": 4114,
+   "state": "visible",
+   "look": "streak",
+   "miss": null,
+   "lo_contrast": 1.0,
+   "lo_extent": 16,
+   "hi_contrast": 36.0,
+   "hi_extent": 49,
+   "lo_ctrl_max": 56.5,
+   "hi_ctrl_max": 72.0
+  },
+  {
+   "frame": 4115,
+   "state": "visible",
+   "look": "streak",
+   "miss": null,
+   "lo_contrast": 1.0,
+   "lo_extent": 4,
+   "hi_contrast": 1.0,
+   "hi_extent": 0,
+   "lo_ctrl_max": 66.5,
+   "hi_ctrl_max": 67.0
+  },
+  {
+   "frame": 4116,
+   "state": "notVisible",
+   "look": null,
+   "miss": "lowContrastOnBrightPanel",
+   "note": "no low-res label; inspect the high-res crop by eye"
+  },
+  {
+   "frame": 4117,
+   "state": "visible",
+   "look": "streak",
+   "miss": null,
+   "lo_contrast": 14.0,
+   "lo_extent": 61,
+   "hi_contrast": 70.0,
+   "hi_extent": 108,
+   "lo_ctrl_max": 134.0,
+   "hi_ctrl_max": 126.0
+  },
+  {
+   "frame": 4118,
+   "state": "visible",
+   "look": "streak",
+   "miss": null,
+   "lo_contrast": 0.0,
+   "lo_extent": 8,
+   "hi_contrast": 2.0,
+   "hi_extent": 65,
+   "lo_ctrl_max": 132.0,
+   "hi_ctrl_max": 128.0
+  },
+  {
+   "frame": 4119,
+   "state": "notVisible",
+   "look": null,
+   "miss": "darkStructure",
+   "note": "no low-res label; inspect the high-res crop by eye"
+  },
+  {
+   "frame": 4120,
+   "state": "notVisible",
+   "look": null,
+   "miss": "lowContrast+cameraJolt",
+   "note": "no low-res label; inspect the high-res crop by eye"
+  },
+  {
+   "frame": 4121,
+   "state": "notVisible",
+   "look": null,
+   "miss": "lowContrast+cameraJolt",
+   "note": "no low-res label; inspect the high-res crop by eye"
+  }
+ ]
+}
