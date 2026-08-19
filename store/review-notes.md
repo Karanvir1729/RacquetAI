@@ -12,8 +12,32 @@ Two documents in one file:
 ## Notes for App Review
 
 ```
-RacquetIQ analyses a video of a squash match that the user has already filmed. It is not live
-tracking — nothing happens in real time, and the app never follows the ball.
+RacquetIQ analyses a video of a squash match that the user has already filmed, and keeps
+score with a correctable, spoken PAR-11 scoreboard (the Referee tab). The app never follows
+the ball; every machine-made call is a suggestion a human can beat or correct with one tap.
+
+SIGN-IN IS REQUIRED — DEMO ACCOUNT
+The app requires an account (Sign in with Apple, or email + password). Demo account for
+review:
+  Email:     webtest@racquetiq.dev
+  Password:  (filled in App Store Connect — never committed to this repo)
+Accounts exist because the free-analysis allowance and the Pro subscription are tied to an
+identity across devices and platforms. The account can be deleted in-app: Account tab →
+Delete account.
+
+THE REFEREE TAB, AND WHY YOU CANNOT FULLY REPRODUCE IT AT A DESK
+The Referee tab is a tap-driven squash scoreboard that announces the score out loud. It can
+also watch a match and score rallies itself, two ways:
+- "Score a video": pick an analysed match; the app plays the footage, highlights both
+  players, and calls each rally as the playhead reaches it. The demo account has analysed
+  matches ready for this — open Referee → Score a video and pick the top row.
+- "Watch live": the camera watches a real squash court and scores after a visible 4-second
+  countdown a tap always beats. This needs a real court; an attached demo video shows the
+  full flow (see App Review Attachment).
+Automatic scoring is measured at roughly 73% per rally and the app SAYS SO before it scores
+anything: a first-run alert, the caption on the switch, and a spoken warning at the start of
+every armed session. It is off for any user who declines, every call is correctable in one
+tap, and nothing RacquetIQ produces is presented as an official result.
 
 NO FILMING IS NEEDED TO REVIEW THE APP
 Open the Library tab and tap "Demo match analysis" (marked "Sample"). It opens a complete
@@ -30,10 +54,17 @@ wall, breaks that model. This is explained in the 5-page tutorial on first launc
 analysis ends with a footnote stating how much of the match the app could actually detect.
 
 PERMISSIONS
-Camera and microphone are requested only when the user first taps record. Audio is part of
-the recording because the analyser uses the sound of the ball strike to find shots and rally
-boundaries; there is no speech recognition anywhere in the app. Photo library access is
-add-only, and only when the user taps "Save to Photos".
+Camera and microphone are requested when the user first taps record, or when the Referee
+starts watching a court live. Audio matters because the analyser uses the sound of the ball
+strike to find shots and rally boundaries; there is no speech recognition anywhere in the
+app, and live camera frames are analysed in the moment, never saved. Photo library read
+access is used only when the user picks a video to import; write access only on "Save to
+Photos".
+
+NETWORK NOTE (ATS)
+The app allows plain-HTTP connections for one reason: the optional analysis server can be a
+Mac on the user's own local network (http://<local-ip>:8082) or a self-hosted cloud
+container. Account, billing, and subscription traffic is HTTPS (Supabase, RevenueCat).
 
 FREE TIER AND SUBSCRIPTION
 Recording, the library and the bundled demo analysis are always free, as are the user's first
@@ -53,7 +84,7 @@ so please use the three sample squash clips supplied with this submission. Impor
 then tap "Import & analyze" a fourth time and the paywall opens.
 
 CONTACT
-TODO_OPERATOR_SUPPORT_EMAIL
+prokaranvir@gmail.com
 ```
 
 ### What the demo card does _not_ show

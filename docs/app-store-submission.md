@@ -272,7 +272,8 @@ here is what turns an ordinary review into a 2.3.1 "app does not perform as adve
 
 ## 9. App Review Information
 
-- [ ] **Sign-in required: No.** Say it explicitly.
+- [ ] **Sign-in required: YES.** Provide the demo account (webtest@racquetiq.dev) with its
+  password in App Store Connect — the password never goes in this repo.
 - [ ] Contact first/last name, phone, monitored email.
 - [ ] Notes: **hard limit 4000 characters** — count before pasting.
 
@@ -281,7 +282,8 @@ Draft notes (2,054 characters as written — recount after editing; the limit is
 > RacquetIQ analyses squash match video and reports shot placement, court coverage, time at the T,
 > shot types and a predictability score.
 >
-> NO ACCOUNT. There is no sign-in anywhere in the app; nothing to log into.
+> SIGN-IN REQUIRED. Demo account: webtest@racquetiq.dev (password in the App Review
+> Information panel). Account deletion is in-app: Account → Delete account.
 >
 > HOW TO EVALUATE THE ANALYSIS — PLEASE READ. Analysis quality depends almost entirely on how the
 > match was filmed: the camera must be at the back of the court, static, landscape, with the whole

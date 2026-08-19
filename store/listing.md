@@ -80,9 +80,13 @@ Film from behind the court — the gallery, a balcony, or through the back wall.
 
 The analysis then runs on your phone. You do not need a signal at the club.
 
+A REFEREE THAT CALLS THE SCORE
+
+The Referee tab keeps a proper PAR-11 squash score and announces it out loud in the marker's convention. Tap who won each rally — or let it watch: live through the camera, or over a video you have analysed, where it plays the match, highlights both players, and calls each rally as the footage reaches it. Every call it makes is a suggestion you can beat or correct with one tap.
+
 WHAT RACQUETIQ IS NOT
 
-It is not live tracking and it is not a coach. It analyses a clip after the match and reports what it measured. It does not follow the ball, does not keep score, and does not tell you what to change. It is built for squash and nothing else.
+It is not a coach and it does not follow the ball. The analysis reports what it measured; the Referee keeps a PAR-11 score you can always correct — when it scores a rally itself it says so, tells you up front it gets roughly one rally in four wrong, and every call is one tap to fix. Nothing RacquetIQ produces is an official result. It is built for squash and nothing else.
 
 THE FOOTAGE DECIDES THE QUALITY
 

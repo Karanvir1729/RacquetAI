@@ -19,9 +19,13 @@ leaves your device", that is a statement about how the code is built, not a prom
 
 ## The short version
 
-- **There are no accounts.** You never create one, we never issue one, and we hold no profile of you.
-- **There is no analytics SDK, no advertising SDK, and no third-party tracking of any kind.** We do
-  not track you across apps or websites, so the app never shows an App Tracking Transparency prompt.
+- **The app requires an account** — Sign in with Apple or an email address and password. The
+  account is the key to your free-analysis allowance and any subscription; you can delete it, and
+  everything we hold for it, from inside the app at any time (Account → Delete account).
+- **We keep a minimal, first-party record of app usage** — events like "app opened" or "analysis
+  finished", with a timestamp and your account identifier, stored in our own database. No
+  third-party analytics SDK, no advertising SDK, and no tracking across apps or websites, so the
+  app never shows an App Tracking Transparency prompt.
 - **Your recordings and your analyses are stored on your phone**, inside the app's private storage
   area, and are deleted when you delete them or when you delete the app.
 - **Match analysis normally runs entirely on your phone.** *The analysis itself* uses no network
@@ -34,7 +38,7 @@ leaves your device", that is a statement about how the code is built, not a prom
   that upload is the **full-size original file**, with its audio and its filename.
   [What that means in detail is set out below.](#3-when-video-does-leave-your-phone-the-analysis-server-fallback)
 - **Subscription purchases** are processed by Apple. We use RevenueCat to tell the app whether your
-  subscription is active; RevenueCat receives an anonymous identifier, your device's vendor
+  subscription is active; RevenueCat receives an app-generated identifier, your device's vendor
   identifier (IDFV) and your purchase information — not your name and not your videos.
 
 ---
@@ -175,17 +179,36 @@ RacquetIQ Pro is an auto-renewable subscription sold through the App Store.
 - **This is the network connection the app makes that is not about analysis.** The SDK contacts
   RevenueCat when the app starts, and again when you buy or restore a subscription. It sends nothing
   about your matches.
-- **These identifiers are not linked to you.** We do not ask for your name or email, so we cannot
-  connect a purchase to a person. If you reinstall the app, a new anonymous identifier is generated
-  and your purchase is re-associated with it when you restore purchases.
+- **Purchases are linked to your account**, so your subscription follows you across devices and
+  reinstalls when you sign in and restore purchases.
 - **Your videos and analyses are never sent to RevenueCat or to Apple.**
 - We use this data only to decide whether to unlock unlimited analyses, to support you if a purchase
   goes wrong, and to see aggregate subscription totals.
 
+## 6a. Your account and usage events
+
+Signing in creates an account with our authentication provider,
+[Supabase](https://supabase.com/privacy) (a data processor acting on our instructions):
+
+- **What we hold:** your email address (or, with Sign in with Apple, the private relay address
+  Apple gives us), a random account identifier, and sign-in timestamps. With Sign in with Apple we
+  never see your password; with email sign-in we hold only a salted hash of it.
+- **Usage events:** the app records a short first-party event stream — things like "app opened",
+  "signed in", "analysis finished" — as an event name, a timestamp, and your account identifier,
+  in our own database. We use it to understand whether the product works and to operate the
+  free-analysis allowance. It contains no video, no audio, no location, and no advertising
+  identifiers, and it is never shared or sold.
+- **Billing status checks** from the app to our server are authenticated with your account token,
+  so we can answer "is this subscription active?" for you specifically.
+- **Deleting your account** (Account → Delete account, or on request by email) removes the account
+  and profile immediately; usage events are kept only in anonymised form (the link to your account
+  is severed) as aggregate statistics.
+
 ## 7. What we do *not* do
 
 - No advertising, no ad networks, no ad identifiers.
-- No analytics or product-usage telemetry.
+- No third-party analytics SDK. The only product-usage record is the first-party event stream
+  described in [section 6a](#6a-your-account-and-usage-events).
 - No tracking as Apple defines it, so no App Tracking Transparency prompt.
 - No sale or sharing of personal information (as those terms are used in the CCPA/CPRA). We have
   nothing to sell.
@@ -194,7 +217,8 @@ RacquetIQ Pro is an auto-renewable subscription sold through the App Store.
 
 ## 8. Legal bases, and your rights
 
-Because the app has no accounts, almost all of your data exists only on your own device, and you
+Apart from your account, its usage events, and the fallback-upload path above, your data exists
+only on your own device, and you
 exercise your rights directly:
 
 - **Access and portability** — your analyses are plain files on your device; recordings can be
@@ -213,11 +237,13 @@ asked us to perform the analysis for you.
 ## 9. Children
 
 RacquetIQ is not directed at children under 13 and we do not knowingly collect personal information
-from them. The app collects no personal information from any user in the ordinary on-device path.
+from them.
 
 ## 10. Retention
 
 - On your device: until you delete it.
+- Your account and its profile: until you delete the account (in-app, or by email request).
+  Usage events are anonymised at that moment.
 - On the analysis server (fallback path only): until we delete it; no automatic expiry is in place.
   We will delete on request.
 - Purchase records at RevenueCat and Apple: for as long as needed to run and account for the
@@ -225,8 +251,8 @@ from them. The app collects no personal information from any user in the ordinar
 
 ## 11. Changes to this policy
 
-If we change how the app handles data — in particular if we ever add analytics, accounts, or sharing
-— we will update this page and change the "Last updated" date above. Material changes will also be
+If we change how the app handles data — in particular if we ever add third-party analytics or any
+sharing of personal information — we will update this page and change the "Last updated" date above. Material changes will also be
 called out in the app's release notes.
 
 ## 12. Contact
