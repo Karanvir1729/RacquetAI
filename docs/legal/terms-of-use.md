@@ -8,8 +8,8 @@ permalink: /legal/terms-of-use/
 **Last updated:** 17 August 2026
 **Applies to:** the RacquetIQ iOS app (bundle identifier `com.racquetai.app`).
 
-These Terms are a binding agreement between you and **TODO_OPERATOR_LEGAL_ENTITY**
-("we", "us"), TODO_OPERATOR_POSTAL_ADDRESS, TODO_OPERATOR_SUPPORT_EMAIL. By downloading or using
+These Terms are a binding agreement between you and **Daybot Solutions Inc.**
+("we", "us"), reachable at prokaranvir@gmail.com. By downloading or using
 RacquetIQ you accept them. If you do not accept them, do not use the app.
 
 **Apple is not a party to these Terms.** This agreement is concluded between you and us only, not
@@ -41,6 +41,19 @@ camera height and angle, whether the whole floor and all four floor corners are 
 phone stayed still, lighting, and whether the clip has usable audio. Footage that does not follow the
 in-app filming guidance will produce confident-looking numbers that are wrong. Every analysis screen
 shows how much footage was actually measured; read it.
+
+RacquetIQ also keeps score. The **Referee** feature is a scoreboard you can drive by hand, and it
+can watch a match — live through the camera, or by playing back an analysed video — and score
+rallies itself, including announcing the score out loud.
+
+**Machine-made calls are estimates, not officiating.** The rule the referee uses ("the last player
+to strike the ball won the rally") was measured at roughly 73% per rally on hand-labelled footage,
+and the app tells you this before it scores anything. Scoring errors compound across a game. Every
+machine-made call can be corrected or undone in one tap, the countdown before an automatic call can
+always be beaten by a tap, and the feature can be turned off entirely. A score produced or assisted
+by RacquetIQ is not an official result, must not be used as the record of any sanctioned match,
+league fixture, or tournament, and is no substitute for a human marker or referee where the rules of
+play require one.
 
 RacquetIQ is a training aid. It is **not** coaching advice, medical advice, injury-prevention advice
 or fitness advice, and it must not be relied on as any of those. Play within your ability and get
@@ -168,7 +181,7 @@ investigation, defence, settlement and discharge of that claim.**
 
 **We, not Apple, are solely responsible for providing maintenance and support for RacquetIQ.** Apple
 has no obligation whatsoever to furnish any maintenance or support services. Support requests go to
-TODO_OPERATOR_SUPPORT_EMAIL.
+prokaranvir@gmail.com.
 
 ## 11. Legal compliance
 
@@ -192,8 +205,8 @@ own licence, which is credited within the app's source data.
 
 ## 14. Governing law
 
-These Terms are governed by the laws of **TODO_OPERATOR_JURISDICTION** (suggested: the Province of
-Ontario and the federal laws of Canada applicable therein), without regard to conflict-of-laws rules,
+These Terms are governed by the laws of **the Province of Ontario and the federal laws of Canada
+applicable therein**, without regard to conflict-of-laws rules,
 and the courts of that jurisdiction have exclusive jurisdiction — except that if you are a consumer,
 you keep the benefit of any mandatory protections and any right to bring proceedings in the courts of
 the country where you live.
@@ -206,6 +219,5 @@ a change means you accept the updated Terms.
 
 ## 16. Contact
 
-**TODO_OPERATOR_LEGAL_ENTITY**
-TODO_OPERATOR_POSTAL_ADDRESS
-TODO_OPERATOR_SUPPORT_EMAIL
+**Daybot Solutions Inc.**
+prokaranvir@gmail.com

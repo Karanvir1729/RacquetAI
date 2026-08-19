@@ -9,6 +9,8 @@
 import { createElement } from "react";
 import { act, create, type ReactTestRenderer } from "react-test-renderer";
 
+import { AuthGateScreen, useAuthGate } from "../AuthGate";
+
 const authState = { ready: false, session: null as object | null };
 
 jest.mock("@/lib/auth", () => ({
@@ -34,8 +36,6 @@ jest.mock("@/lib/subscription", () => ({
   configure: () => false,
   refresh: async () => {},
 }));
-
-import { AuthGateScreen, useAuthGate } from "../AuthGate";
 
 async function mount(element: React.ReactElement): Promise<ReactTestRenderer> {
   let tree!: ReactTestRenderer;

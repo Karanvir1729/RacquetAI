@@ -21,9 +21,9 @@ Search both files for `TODO_OPERATOR_` and replace every hit. Nothing publishes 
 
 | Placeholder | What it needs | Notes |
 |---|---|---|
-| `TODO_OPERATOR_LEGAL_ENTITY` | The name that sells the app | Must match the seller name in App Store Connect. A sole proprietor's legal name is fine; if you incorporate later, both documents and the ASC seller name change together. |
+| `Daybot Solutions Inc.` | The name that sells the app | Must match the seller name in App Store Connect. A sole proprietor's legal name is fine; if you incorporate later, both documents and the ASC seller name change together. |
 | `TODO_OPERATOR_POSTAL_ADDRESS` | A postal address | Apple's minimum EULA terms require the developer's name **and address** in the EULA. A registered-business or mailing address; think before publishing a home address. |
-| `TODO_OPERATOR_SUPPORT_EMAIL` | A monitored inbox | Reviewers and users both email it. Prefer an address on a domain you control over a personal Gmail — see the note in [../07-app-store-prep.md](../07-app-store-prep.md) §3. |
+| `prokaranvir@gmail.com` | A monitored inbox | Reviewers and users both email it. Prefer an address on a domain you control over a personal Gmail — see the note in [../07-app-store-prep.md](../07-app-store-prep.md) §3. |
 | `TODO_OPERATOR_JURISDICTION` | Governing law | Ontario/Canada is pre-suggested in the Terms; delete the suggestion once decided. |
 | The HTTP/TLS line in the Privacy Policy §3 | Keep it while the analysis server is plain HTTP; delete it the moment the server is behind HTTPS | **Do not delete it while it is still true.** |
 

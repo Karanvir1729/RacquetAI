@@ -8,8 +8,8 @@ permalink: /legal/privacy-policy/
 **Last updated:** 18 August 2026
 **Applies to:** the RacquetIQ iOS app (bundle identifier `com.racquetai.app`), version 1.0 and later.
 
-RacquetIQ is made by **TODO_OPERATOR_LEGAL_ENTITY** ("we", "us"), TODO_OPERATOR_POSTAL_ADDRESS.
-Questions about this policy: **TODO_OPERATOR_SUPPORT_EMAIL**.
+RacquetIQ is made by **Daybot Solutions Inc.** ("we", "us").
+Questions about this policy: **prokaranvir@gmail.com**.
 
 This policy describes exactly what the app does with your video, your audio, and your data. It is
 written against the app's source code rather than from a template — where a section says "never
@@ -71,7 +71,10 @@ change them, and they hold no information about you.)
 
 ## 2. Camera, microphone, and photo library
 
-- **Camera and microphone.** Used only while you are recording a match in the app. Audio is recorded
+- **Camera and microphone.** Used while you are recording a match in the app, and while the
+  Referee feature is watching a court live at your request — there the camera frames are analysed
+  on the phone in the moment and are not saved, and the microphone is used to detect the sound of
+  ball strikes, not to record or transmit conversations. Audio in a saved recording is recorded
   as part of the video **because the analyser uses it to detect ball strikes** — it measures the
   loudness of the recording over time and treats the sharp peaks as shots, which is how it finds
   shot counts and rally boundaries. (If a clip has no usable audio track, the analyser falls back to
@@ -125,7 +128,7 @@ upload, so it is important that you know what it involves:
   **There is no automatic expiry today** — they remain until we delete them.
 - **Who can see it:** only us, as the operator of that server. We do not sell it, share it, use it to
   train anything, or give it to anyone else. We access it only to fix a failed analysis or a bug.
-- **How to have it deleted:** email TODO_OPERATOR_SUPPORT_EMAIL with the approximate date, time, and
+- **How to have it deleted:** email prokaranvir@gmail.com with the approximate date, time, and
   length of the clip and we will find and delete it. There is no in-app control for server-side
   deletion.
 
@@ -198,7 +201,7 @@ exercise your rights directly:
   exported to Photos from the player screen.
 - **Erasure** — delete an individual recording or analysis in the app, or delete the app to remove
   everything at once. For anything held on the analysis server, email us (see section 3).
-- **Objection / restriction / complaint** — write to TODO_OPERATOR_SUPPORT_EMAIL. Users in the EEA
+- **Objection / restriction / complaint** — write to prokaranvir@gmail.com. Users in the EEA
   or UK may also complain to their local data protection authority.
 
 Where the GDPR applies, our legal basis for the very limited processing we do is **performance of a
@@ -228,6 +231,5 @@ called out in the app's release notes.
 
 ## 12. Contact
 
-**TODO_OPERATOR_LEGAL_ENTITY**
-TODO_OPERATOR_POSTAL_ADDRESS
-TODO_OPERATOR_SUPPORT_EMAIL
+**Daybot Solutions Inc.**
+prokaranvir@gmail.com

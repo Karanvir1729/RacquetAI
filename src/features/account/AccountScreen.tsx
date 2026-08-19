@@ -6,15 +6,26 @@
  * shows here via /billing/status, re-read on focus and on foregrounding.
  */
 import { useCallback, useEffect, useState } from "react";
-import { AppState, StyleSheet, Text, TextInput, View, type AppStateStatus } from "react-native";
+import {
+  Alert,
+  AppState,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  type AppStateStatus,
+} from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 
 import { Button } from "@/components/Button";
+import { notifyWarning } from "@/lib/haptics";
 import { Card } from "@/components/Card";
 import { Screen } from "@/components/Screen";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { EngineSettingsCard } from "@/features/analysis/EngineSettingsCard";
 import {
+  deleteAccount,
   isAppleSignInAvailable,
   signInWithApple,
   signInWithEmail,
@@ -221,20 +232,60 @@ function SignedInCard({ email }: { email: string }) {
         <Card>
           <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
           <Text style={styles.dim}>
-            Unlimited analyses, $9.99 a month or $79.99 a year. In the app, subscriptions go
-            through the App Store; on racquetiq.app they go through Stripe — either one shows
-            up here.
+            Unlimited analyses, $9.99 a month or $79.99 a year, renewed through your App Store
+            account.
           </Text>
           <Button label="See Pro plans" onPress={() => router.push("/paywall")} />
         </Card>
       ) : null}
 
       <Button label="Sign out" variant="danger" onPress={() => void signOutUser()} />
+
+      {/* Guideline 5.1.1(v): an app with account creation offers account
+          DELETION in-app, not via a support email. The confirm is explicit
+          about the split that matters: the server copy dies, the files on
+          this phone are the user's and stay. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Delete account"
+        onPress={confirmDeleteAccount}
+        style={({ pressed }) => [styles.deleteRow, pressed && styles.pressed]}
+      >
+        <Text style={styles.deleteLabel}>Delete account</Text>
+      </Pressable>
     </>
   );
 }
 
+function confirmDeleteAccount(): void {
+  notifyWarning();
+  Alert.alert(
+    "Delete your account?",
+    "This permanently deletes your account and everything stored for it on our servers. " +
+      "Recordings and analyses saved on this phone stay on this phone. This cannot be undone.",
+    [
+      { text: "Keep my account", style: "cancel" },
+      {
+        text: "Delete account",
+        style: "destructive",
+        onPress: () => {
+          void deleteAccount().then((result) => {
+            if (result.status === "failed") {
+              Alert.alert("Couldn't delete the account", result.message);
+            }
+            // Success needs no dialog: the gate dropping over the app IS the
+            // confirmation that the account is gone.
+          });
+        },
+      },
+    ],
+  );
+}
+
 const styles = StyleSheet.create({
+  deleteRow: { minHeight: 44, alignItems: "center", justifyContent: "center" },
+  deleteLabel: { ...type.label, color: colors.danger },
+  pressed: { opacity: 0.7 },
   divider: {
     ...type.caption,
     color: colors.textDim,

@@ -146,6 +146,26 @@ export async function signUpWithEmail(email: string, password: string): Promise<
   return { status: "ok" };
 }
 
+/**
+ * Delete the signed-in account, server side, then drop the local session.
+ *
+ * The RPC is a SECURITY DEFINER function that deletes the caller's own
+ * auth.users row (supabase/schema.sql) — profiles cascade away with it and
+ * usage rows are anonymised. App Store guideline 5.1.1(v) requires this to
+ * exist in-app; the confirm step lives in the UI, not here.
+ */
+export async function deleteAccount(): Promise<AuthResult> {
+  const { error } = await supabase.rpc("delete_account");
+  if (error) {
+    return { status: "failed", message: "The account could not be deleted. Try again." };
+  }
+  trackEvent("account_deleted");
+  // The server-side user is gone; sign-out just clears this device. Its own
+  // failure handling applies — worst case the dead session ages out.
+  await signOutUser();
+  return { status: "ok" };
+}
+
 export async function signOutUser(): Promise<void> {
   trackEvent("logout");
   try {

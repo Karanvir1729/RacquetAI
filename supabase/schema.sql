@@ -131,3 +131,26 @@ create policy "purchases: own rows read"
   on public.purchases for select
   using (auth.uid () = user_id);
 -- inserts/updates: service role only (bypasses RLS; no client policy on purpose)
+
+-- ---------------------------------------------------------------------------
+-- Account deletion (App Store guideline 5.1.1(v): an app with account
+-- creation must let the user delete the account from inside the app).
+--
+-- SECURITY DEFINER is the entire mechanism: the function runs as its owner
+-- (postgres), which may delete from auth.users; the caller can only ever
+-- delete THEMSELVES because the row is pinned to auth.uid(). Deleting the
+-- auth user cascades profiles (FK on delete cascade) and nulls the user_id
+-- on app_events and purchases (on delete set null) — usage rows survive as
+-- anonymous aggregates, which is what the privacy policy promises.
+-- ---------------------------------------------------------------------------
+create or replace function public.delete_account()
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  delete from auth.users where id = auth.uid();
+$$;
+
+revoke all on function public.delete_account() from public, anon;
+grant execute on function public.delete_account() to authenticated;
