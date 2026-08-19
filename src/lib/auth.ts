@@ -16,6 +16,12 @@ import { supabase } from "./supabaseClient";
 
 let session: Session | null = null;
 let initialized = false;
+/**
+ * False until the persisted session has been read once. The gate holds a
+ * blank frame rather than the sign-in form until this flips — flashing the
+ * login at every signed-in cold start would read as being logged out.
+ */
+let ready = false;
 const listeners = new Set<() => void>();
 
 function notify(): void {
@@ -35,6 +41,21 @@ function setSession(next: Session | null): void {
 
 export function getSession(): Session | null {
   return session;
+}
+
+function getReady(): boolean {
+  return ready;
+}
+
+function markReady(): void {
+  if (ready) return;
+  ready = true;
+  notify();
+}
+
+/** Has the persisted session been restored yet? */
+export function useAuthReady(): boolean {
+  return useSyncExternalStore(subscribe, getReady, getReady);
 }
 
 function subscribe(listener: () => void): () => void {
@@ -57,7 +78,8 @@ export function initAuth(): void {
   void supabase.auth
     .getSession()
     .then(({ data }) => setSession(data.session))
-    .catch(() => setSession(null));
+    .catch(() => setSession(null))
+    .finally(markReady);
   supabase.auth.onAuthStateChange((event, next) => {
     setSession(next);
     if (event === "SIGNED_IN") trackEvent("login");

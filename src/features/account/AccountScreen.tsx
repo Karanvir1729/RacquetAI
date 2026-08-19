@@ -51,7 +51,7 @@ export function AccountScreen() {
 // Signed out
 // ---------------------------------------------------------------------------
 
-function SignInCard() {
+export function SignInCard() {
   const [appleAvailable, setAppleAvailable] = useState(false);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");

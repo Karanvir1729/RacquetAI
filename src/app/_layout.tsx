@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AuthGateScreen, useAuthGate } from "@/features/account/AuthGate";
 import { TutorialScreen } from "@/features/onboarding/TutorialScreen";
 import { trackEvent } from "@/lib/appEvents";
 import { initAuth } from "@/lib/auth";
@@ -43,6 +44,10 @@ export default function RootLayout() {
   // file, and deferring it to an effect would flash the tab bar before the
   // tutorial on every cold start.
   const [tutorialDone, setTutorialDone] = useState(hasSeenTutorial);
+  // Login gates the whole app: no session, no tabs. The gate is an overlay
+  // for the same reason the tutorial is — the shell must not unmount and
+  // remount every time a session appears or goes away.
+  const gate = useAuthGate();
   const finishTutorial = useCallback(() => {
     markTutorialSeen();
     setTutorialDone(true);
@@ -124,11 +129,18 @@ export default function RootLayout() {
               canvas — force light icons there (app.json android.userInterfaceStyle
               matches). */}
           <StatusBar style={Platform.OS === "ios" ? "auto" : "light"} />
-          {/* Last sibling, absolutely filled: the tutorial covers the shell
-              instead of replacing it, so expo-router's Tabs never unmount and
-              remount underneath it. */}
+          {/* Overlay layers, absolutely filled, covering the shell instead of
+              replacing it so expo-router's Tabs never unmount underneath.
+              Order matters: the login gate sits above the tabs, and the
+              tutorial above the gate — a brand-new user meets the tutorial
+              first, then signs in, then lands in the app. */}
+          {gate.covered ? (
+            <View style={styles.overlayLayer}>
+              <AuthGateScreen />
+            </View>
+          ) : null}
           {tutorialDone ? null : (
-            <View style={styles.tutorialLayer}>
+            <View style={styles.overlayLayer}>
               <TutorialScreen onDone={finishTutorial} />
             </View>
           )}
@@ -140,7 +152,7 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  tutorialLayer: {
+  overlayLayer: {
     position: "absolute",
     top: 0,
     left: 0,
