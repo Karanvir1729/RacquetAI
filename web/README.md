@@ -24,7 +24,7 @@ Three rules, and they are not negotiable:
 1. **Never write a literal colour in a component.** Read a token — `text-rq-dim`,
    `style={{ color: "var(--rq-text-dim)" }}`. Both resolve to the same custom property.
    `tailwind.config.js` binds the `rq-*` colour classes to the variables.
-2. **Accent fill is constant; accent text is not.** `--rq-accent` (Optic `#D8FA3C`) stays the same
+2. **Accent fill is constant; accent text is not.** `--rq-accent` (Optic `#7CBF3F`) stays the same
    in both themes and always carries `--rq-on-accent` ink text. Optic as *text* is illegible on the
    light canvas, so accent-coloured type and icons use `--rq-accent-text`, which deepens to Court
    Green in light mode. Thin data marks — meters, heat cells, the T dot — use `--rq-data`, which

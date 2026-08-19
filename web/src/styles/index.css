@@ -50,9 +50,9 @@
   }
 
   /* The ring is INK, so it takes --rq-accent-text, not --rq-accent. Optic is
-     1.10:1 on Chalk Wash — the site's only keyboard affordance was invisible in
+     2.07:1 on Chalk Wash — the site's only keyboard affordance was invisible in
      light mode. On light it is now Court Green and passes; on ink it goes very
-     slightly paler (#EBFF8C, 17.35:1 against 15.95:1), which costs nothing. */
+     slightly paler (#A6D47D, 11.14:1 against 8.47:1), which costs nothing. */
   :focus-visible {
     outline: 2px solid var(--rq-accent-text);
     outline-offset: 3px;

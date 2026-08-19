@@ -9,7 +9,8 @@
  * changing it there too; the two are expected to agree.
  *
  * The palette: Court Ink (#06130E) canvas, Chalk text, one accent — Optic
- * (#D8FA3C), the ball under floodlight.
+ * (#7CBF3F), the ball in court light — deepened from the old floodlit
+ * #D8FA3C so it reads as a shape on the light canvas, not a highlighter.
  *
  * The rule that bites: `--rq-accent` does NOT flip between themes (a ball is
  * the same colour in both, and Optic holds up as a *fill* on either canvas),
@@ -19,7 +20,7 @@
  *
  * Say it the short way: **Optic is a FILL.** Anything that is INK — a label, a
  * glyph, a border, a stroke, a spinner, a focus ring — takes `--rq-accent-text`
- * (or `--rq-data` for a data mark). Optic measures 1.10:1 on Chalk Wash, so an
+ * (or `--rq-data` for a data mark). Optic measures 2.07:1 on Chalk Wash, so an
  * accent-inked element in light mode is not "subtle", it is absent.
  *
  * The ink ramp is THREE tiers and each has a job:
@@ -68,13 +69,13 @@
   --rq-hero-watermark: rgba(255, 255, 255, 0.07);
 
   /* brand accent — Optic. Fill constant, TEXT deepens on light (see below). */
-  --rq-accent: #d8fa3c;
-  --rq-accent-text: #ebff8c;
-  --rq-accent-soft: rgba(216, 250, 60, 0.12);
-  --rq-accent-line: rgba(216, 250, 60, 0.32);
+  --rq-accent: #7cbf3f;
+  --rq-accent-text: #a6d47d;
+  --rq-accent-soft: rgba(124, 191, 63, 0.12);
+  --rq-accent-line: rgba(124, 191, 63, 0.32);
   --rq-on-accent: #06130e;
-  --rq-glow: rgba(216, 250, 60, 0.35);
-  --rq-glow-soft: rgba(216, 250, 60, 0.14);
+  --rq-glow: rgba(124, 191, 63, 0.35);
+  --rq-glow-soft: rgba(124, 191, 63, 0.14);
   /* The highlight that sweeps across the hero's accent phrase once, when the
      court finishes filling. Chalk on ink; a lighter Court Green on Chalk Wash,
      because a white sweep on a white canvas erases the word mid-animation. */
@@ -89,21 +90,21 @@
   --rq-lift-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
 
   /* the mark: Optic frame + Chalk spark on ink */
-  --rq-mark: #d8fa3c;
+  --rq-mark: #7cbf3f;
   --rq-mark-spark: #ffffff;
 
   /* Data ink — heat cells, meters, the T marker. A thin or low-opacity mark
      cannot use --rq-accent: Optic at 12% on a white canvas is nothing at all.
      This is the accent's *data* form, and like accent text it deepens to Court
      Green on light. Same rule, different surface. */
-  --rq-data: #d8fa3c;
+  --rq-data: #7cbf3f;
   --rq-court-floor: #081a13;
   --rq-court-line: rgba(255, 255, 255, 0.22);
 
   /* Overlay ink — the pose skeleton drawn ON THE VIDEO. See the note beside
      the light-theme copy: these two are deliberately identical in both
      themes. */
-  --rq-overlay-a: #d8fa3c;
+  --rq-overlay-a: #7cbf3f;
   --rq-overlay-b: #ffffff;
   --rq-overlay-casing: #06130e;
 }
@@ -129,7 +130,7 @@
   --rq-watermark: rgba(6, 19, 14, 0.08);
   --rq-hero-watermark: rgba(31, 107, 74, 0.18);
 
-  --rq-accent: #d8fa3c;
+  --rq-accent: #7cbf3f;
   --rq-accent-text: #1f6b4a; /* Court Green — Optic is illegible as light-mode text */
   --rq-accent-soft: rgba(31, 107, 74, 0.12);
   --rq-accent-line: rgba(31, 107, 74, 0.26);
@@ -165,7 +166,7 @@
    * because a page token was used to paint something that is not on the page.
    * Chalk on Optic, with an ink casing, works over both.
    */
-  --rq-overlay-a: #d8fa3c;
+  --rq-overlay-a: #7cbf3f;
   --rq-overlay-b: #ffffff;
   --rq-overlay-casing: #06130e;
 }

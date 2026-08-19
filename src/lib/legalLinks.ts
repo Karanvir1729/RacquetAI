@@ -23,15 +23,21 @@ export interface LegalLink {
   url: string | null;
 }
 
-// TODO(launch): the pages are drafted in docs/legal/ and, once GitHub Pages is
-// switched on for main + /docs, they will serve at:
-//   https://karanvir1729.github.io/RacquetAI/legal/terms-of-use/
-//   https://karanvir1729.github.io/RacquetAI/legal/privacy-policy/
-// They stay null until that is actually true — see docs/legal/README.md, which
-// still has TODO_OPERATOR_ placeholders to fill and Pages to enable. Paste the
-// URLs in only after opening both in a private window.
-export const TERMS_OF_USE: LegalLink = { label: "Terms of Use (EULA)", url: null };
-export const PRIVACY_POLICY: LegalLink = { label: "Privacy Policy", url: null };
+// Published 2026-08-19 from docs/legal/ to the product's Static Web App
+// (web/public/legal/, deployed by web/deploy-azure.sh — the same app that
+// serves the marketing site's Azure copy). The azurestaticapps host rather
+// than racquetiq.app because that domain currently fronts a separate Vercel
+// deployment; move these when the domains are consolidated, and verify both
+// in a private window after any change. No trailing slash — the CDN 308s the
+// slash form.
+export const TERMS_OF_USE: LegalLink = {
+  label: "Terms of Use (EULA)",
+  url: "https://kind-sea-0e4afca0f.7.azurestaticapps.net/legal/terms-of-use",
+};
+export const PRIVACY_POLICY: LegalLink = {
+  label: "Privacy Policy",
+  url: "https://kind-sea-0e4afca0f.7.azurestaticapps.net/legal/privacy-policy",
+};
 
 /** Both links, in the order the paywall shows them. */
 export const LEGAL_LINKS: readonly LegalLink[] = [TERMS_OF_USE, PRIVACY_POLICY];

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RacquetIQ — Privacy Policy</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; background: #F4F7F3; color: #08160F; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  @media (prefers-color-scheme: dark) { body { background: #06130E; color: rgba(255,255,255,0.92); } a { color: #EBFF8C; } }
+  main { max-width: 720px; margin: 0 auto; padding: 48px 20px 96px; }
+  h1 { font-size: 1.9rem; letter-spacing: -0.5px; }
+  h2 { margin-top: 2.2em; font-size: 1.25rem; }
+  a { color: #1F6B4A; }
+  code { font-size: 0.9em; }
+  table { border-collapse: collapse; } td, th { border: 1px solid rgba(128,128,128,0.4); padding: 6px 10px; }
+</style>
+</head>
+<body><main>
+<h1>RacquetIQ — Privacy Policy</h1>
+<p><strong>Last updated:</strong> 18 August 2026
+<strong>Applies to:</strong> the RacquetIQ iOS app (bundle identifier <code>com.racquetai.app</code>), version 1.0 and later.</p>
+<p>RacquetIQ is made by <strong>Daybot Solutions Inc.</strong> (&quot;we&quot;, &quot;us&quot;).
+Questions about this policy: <strong><a href="mailto:prokaranvir@gmail.com">prokaranvir@gmail.com</a></strong>.</p>
+<p>This policy describes exactly what the app does with your video, your audio, and your data. It is
+written against the app&#39;s source code rather than from a template — where a section says &quot;never
+leaves your device&quot;, that is a statement about how the code is built, not a promise of intent.</p>
+<hr>
+<h2>The short version</h2>
+<ul>
+<li><strong>The app requires an account</strong> — Sign in with Apple or an email address and password. The
+account is the key to your free-analysis allowance and any subscription; you can delete it, and
+everything we hold for it, from inside the app at any time (Account → Delete account).</li>
+<li><strong>We keep a minimal, first-party record of app usage</strong> — events like &quot;app opened&quot; or &quot;analysis
+finished&quot;, with a timestamp and your account identifier, stored in our own database. No
+third-party analytics SDK, no advertising SDK, and no tracking across apps or websites, so the
+app never shows an App Tracking Transparency prompt.</li>
+<li><strong>Your recordings and your analyses are stored on your phone</strong>, inside the app&#39;s private storage
+area, and are deleted when you delete them or when you delete the app.</li>
+<li><strong>Match analysis normally runs entirely on your phone.</strong> <em>The analysis itself</em> uses no network
+connection: in that mode your video and its audio are never uploaded, and an analysis completes
+with the phone in airplane mode. That statement is about the analysis, not about the whole app —
+the app does make one other kind of network connection, to check your subscription
+(<a href="#6-subscriptions-and-payments">section 6</a>).</li>
+<li><strong>There is one exception:</strong> if the on-device analyser cannot run on your device, the app falls back
+to uploading the video to our analysis server so the analysis can be produced there. In practice
+that upload is the <strong>full-size original file</strong>, with its audio and its filename.
+<a href="#3-when-video-does-leave-your-phone-the-analysis-server-fallback">What that means in detail is set out below.</a></li>
+<li><strong>Subscription purchases</strong> are processed by Apple. We use RevenueCat to tell the app whether your
+subscription is active; RevenueCat receives an app-generated identifier, your device&#39;s vendor
+identifier (IDFV) and your purchase information — not your name and not your videos.</li>
+</ul>
+<hr>
+<h2>1. What the app stores on your phone</h2>
+<p>Everything in this section is written into the app&#39;s private sandbox on your device. It is not
+visible to other apps, and it is included in an encrypted iCloud/iTunes device backup only if you
+have those backups switched on. None of it is sent to us — with the single exception described in
+<a href="#3-when-video-does-leave-your-phone-the-analysis-server-fallback">section 3</a>, where a video is
+uploaded so that it can be analysed.</p>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>Where</th>
+<th>When it is removed</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Match videos you record in the app</td>
+<td><code>Documents/recordings/&lt;id&gt;.mov</code></td>
+<td>When you delete the recording in the app, or delete the app</td>
+</tr>
+<tr>
+<td>A small metadata file per recording (date, duration, sport)</td>
+<td><code>Documents/recordings/&lt;id&gt;.json</code></td>
+<td>Same as above</td>
+</tr>
+<tr>
+<td>Analyses (shot counts, court placement, coverage heatmap, predictability, rally timings)</td>
+<td><code>Documents/recordings/&lt;id&gt;.analysis.json</code></td>
+<td>When you delete that analysis, or delete the app</td>
+</tr>
+<tr>
+<td>A copy of the video an analysis was produced from, so the analysis screen can play it back</td>
+<td><code>Documents/recordings/&lt;id&gt;.video.*</code></td>
+<td>When you delete that analysis, or delete the app</td>
+</tr>
+<tr>
+<td>Whether you have already seen the first-run tutorial</td>
+<td><code>Documents/onboarding.json</code></td>
+<td>When you delete the app</td>
+</tr>
+<tr>
+<td>A count of how many of your free analyses you have used</td>
+<td><code>Documents/analysis-quota.json</code></td>
+<td>When you delete the app</td>
+</tr>
+<tr>
+<td>Crash diagnostics from a previous run — see <a href="#5-crash-diagnostics">section 5</a></td>
+<td><code>Documents/last-fatal-error.json</code></td>
+<td>Automatically, the next time you open the app</td>
+</tr>
+</tbody></table>
+<p>We do not have access to any of it.</p>
+<p>There are <strong>no user-adjustable privacy settings</strong> in this version: the app has two screens, Record
+and Library, and no settings screen. Anything the app decides about analysis — which engine runs, and
+where the fallback sends a video — it decides for itself, on the rules described in
+<a href="#3-when-video-does-leave-your-phone-the-analysis-server-fallback">section 3</a>. Nothing on this page
+is something you can switch off inside the app.</p>
+<p>(The app still <em>reads</em> two small configuration files, <code>analysis-backend.json</code> and
+<code>analysis-server.json</code>, if a beta build left them on your device. No released version can create or
+change them, and they hold no information about you.)</p>
+<h2>2. Camera, microphone, and photo library</h2>
+<ul>
+<li><strong>Camera and microphone.</strong> Used while you are recording a match in the app, and while the
+Referee feature is watching a court live at your request — there the camera frames are analysed
+on the phone in the moment and are not saved, and the microphone is used to detect the sound of
+ball strikes, not to record or transmit conversations. Audio in a saved recording is recorded
+as part of the video <strong>because the analyser uses it to detect ball strikes</strong> — it measures the
+loudness of the recording over time and treats the sharp peaks as shots, which is how it finds
+shot counts and rally boundaries. (If a clip has no usable audio track, the analyser falls back to
+detecting shots from wrist motion instead.) The app asks for these permissions at the moment you
+first try to record, and the microphone prompt states this same reason.</li>
+<li><strong>We do not transcribe, and do not listen for speech.</strong> The audio is reduced to an energy curve;
+nothing in the app or on the analysis server performs speech recognition.</li>
+<li><strong>Choosing a video to analyse.</strong> The app opens Apple&#39;s system video picker. On iOS this hands the
+app only the single file you choose — the app is not granted access to browse your photo library.</li>
+<li><strong>Saving a recording to Photos.</strong> Only when you tap &quot;Save to Photos&quot;. The app requests <em>add-only</em>
+access, which lets it add that one video and nothing else. It cannot read your library.</li>
+</ul>
+<h2>3. When video <em>does</em> leave your phone: the analysis server fallback</h2>
+<p>RacquetIQ has two analysis engines:</p>
+<p><strong>On-device (the default and normal path).</strong> A native analyser bundled inside the app decodes the
+video, runs Apple&#39;s on-device Vision pose detection, and measures the audio track locally. Nothing is
+uploaded, nothing is transmitted, and analysis works with the phone in airplane mode.</p>
+<p><strong>Analysis server (a fallback).</strong> If the on-device analyser cannot be loaded or run on your device,
+the app instead uploads the video so the analysis can be produced on our server. This is a fallback
+for capability, not a choice you are asked to make each time, and you are not asked to confirm the
+upload, so it is important that you know what it involves:</p>
+<ul>
+<li><strong>What is sent — the whole video file, normally the untouched original.</strong> The app tries to export a
+smaller ~960×540 copy before uploading, but that export is performed by the same on-device analyser
+component that has just been found unavailable. On this path it is therefore normally unavailable
+too, the app falls back to the file it already has, and <strong>what is uploaded is your original
+recording at its full size and resolution, including its audio track</strong>. Treat &quot;we upload the video&quot;
+as meaning exactly that.</li>
+<li><strong>What is sent alongside it:</strong> the <strong>file&#39;s name</strong> — the app puts the video&#39;s original filename in
+an <code>X-Filename</code> header (stripped to letters, digits, dots, hyphens and underscores) and the server
+keeps it. If the filename you picked contains your name, a date, an opponent&#39;s name or anything
+else personal, that text reaches the server as well. Also sent: the four court-corner points you
+tap.</li>
+<li><strong>What is <em>not</em> sent:</strong> no name, no email address, no account identifier, no device identifier and
+no advertising identifier is attached to the upload. The job itself is identified by a random
+string generated on the server.</li>
+<li><strong>Where it goes:</strong> a server we operate at <code>racquetiq-a7682a.eastus.azurecontainer.io</code> (port 8082),
+hosted on Microsoft Azure in the East US region. <strong>Your video is therefore processed in the United
+States.</strong></li>
+<li><strong>How it is protected in transit:</strong> the app currently connects to that server over plain HTTP,
+which means <strong>the upload is not encrypted in transit</strong>.
+<em>(Editorial note for the operator, delete this parenthesis before publishing: this bullet is
+accurate today and must stay until the analysis server is served over HTTPS — see
+<a href="README.md">README.md</a> §0.)</em></li>
+<li><strong>What the server keeps:</strong> the uploaded video, a downscaled copy of it, an extracted audio track, a
+single reference frame image, the resulting analysis file, and a small job record that includes
+<strong>the filename you sent</strong> and the time the job was created. These are kept in a per-job folder.
+<strong>There is no automatic expiry today</strong> — they remain until we delete them.</li>
+<li><strong>Who can see it:</strong> only us, as the operator of that server. We do not sell it, share it, use it to
+train anything, or give it to anyone else. We access it only to fix a failed analysis or a bug.</li>
+<li><strong>How to have it deleted:</strong> email <a href="mailto:prokaranvir@gmail.com">prokaranvir@gmail.com</a> with the approximate date, time, and
+length of the clip and we will find and delete it. There is no in-app control for server-side
+deletion.</li>
+</ul>
+<p>If you would rather no video ever left your phone, the practical answer today is to use a device on
+which the on-device analyser works — which is every supported iPhone in a normal App Store install —
+and to contact us if you see an analysis reported as running on the server.</p>
+<h2>4. Other people in your videos</h2>
+<p>A squash video normally shows at least one other person. RacquetIQ does not identify anyone: it
+detects human body poses to measure movement, and it does not perform face recognition, does not
+build a profile of any player, and cannot tell one match&#39;s players from another&#39;s. You are
+nonetheless responsible for having the right to film the people in your footage — see the
+<a href="/legal/terms-of-use/">Terms of Use</a>.</p>
+<h2>5. Crash diagnostics</h2>
+<p>If the app crashes, it writes the error message and the first part of the technical stack trace to a
+single file inside its own sandbox (<code>Documents/last-fatal-error.json</code>). The next time you open the
+app, it shows you that message in an alert and then deletes the file.</p>
+<p><strong>That diagnostic is never transmitted anywhere.</strong> There is no crash-reporting service in the app.
+Nothing reaches us unless you choose to screenshot the alert and send it to us yourself, which is
+entirely your decision. The file contains a programming error message, not your content.</p>
+<h2>6. Subscriptions and payments</h2>
+<p>RacquetIQ Pro is an auto-renewable subscription sold through the App Store.</p>
+<ul>
+<li><strong>Apple processes the payment.</strong> We never see and never receive your card details, your Apple
+Account credentials, or your billing address. Apple&#39;s handling of that data is governed by
+<a href="https://www.apple.com/legal/privacy/">Apple&#39;s Privacy Policy</a>.</li>
+<li><strong>We use <a href="https://www.revenuecat.com/privacy/">RevenueCat</a></strong> to check whether your subscription is
+active. The RevenueCat SDK inside the app generates a <strong>random anonymous user identifier</strong> and
+sends it, together with the App Store transaction/receipt information for your purchase and basic
+device and platform information (device model, OS version, app version, country), to RevenueCat&#39;s
+servers. RevenueCat is a data processor acting on our instructions.</li>
+<li><strong>It also sends your device&#39;s vendor identifier (IDFV).</strong> This is an identifier Apple gives to us
+as the app&#39;s vendor; it is the same across our apps on your device, it is not the advertising
+identifier, and it is reset when you delete our apps from the device. The RevenueCat SDK collects
+it by default and we do not use it to track you or to link you to anything — but it is a device
+identifier, so we declare it, both here and in the App Store &quot;App Privacy&quot; label under
+<strong>Identifiers → Device ID</strong>.</li>
+<li><strong>This is the network connection the app makes that is not about analysis.</strong> The SDK contacts
+RevenueCat when the app starts, and again when you buy or restore a subscription. It sends nothing
+about your matches.</li>
+<li><strong>Purchases are linked to your account</strong>, so your subscription follows you across devices and
+reinstalls when you sign in and restore purchases.</li>
+<li><strong>Your videos and analyses are never sent to RevenueCat or to Apple.</strong></li>
+<li>We use this data only to decide whether to unlock unlimited analyses, to support you if a purchase
+goes wrong, and to see aggregate subscription totals.</li>
+</ul>
+<h2>6a. Your account and usage events</h2>
+<p>Signing in creates an account with our authentication provider,
+<a href="https://supabase.com/privacy">Supabase</a> (a data processor acting on our instructions):</p>
+<ul>
+<li><strong>What we hold:</strong> your email address (or, with Sign in with Apple, the private relay address
+Apple gives us), a random account identifier, and sign-in timestamps. With Sign in with Apple we
+never see your password; with email sign-in we hold only a salted hash of it.</li>
+<li><strong>Usage events:</strong> the app records a short first-party event stream — things like &quot;app opened&quot;,
+&quot;signed in&quot;, &quot;analysis finished&quot; — as an event name, a timestamp, and your account identifier,
+in our own database. We use it to understand whether the product works and to operate the
+free-analysis allowance. It contains no video, no audio, no location, and no advertising
+identifiers, and it is never shared or sold.</li>
+<li><strong>Billing status checks</strong> from the app to our server are authenticated with your account token,
+so we can answer &quot;is this subscription active?&quot; for you specifically.</li>
+<li><strong>Deleting your account</strong> (Account → Delete account, or on request by email) removes the account
+and profile immediately; usage events are kept only in anonymised form (the link to your account
+is severed) as aggregate statistics.</li>
+</ul>
+<h2>7. What we do <em>not</em> do</h2>
+<ul>
+<li>No advertising, no ad networks, no ad identifiers.</li>
+<li>No third-party analytics SDK. The only product-usage record is the first-party event stream
+described in <a href="#6a-your-account-and-usage-events">section 6a</a>.</li>
+<li>No tracking as Apple defines it, so no App Tracking Transparency prompt.</li>
+<li>No sale or sharing of personal information (as those terms are used in the CCPA/CPRA). We have
+nothing to sell.</li>
+<li>No use of your videos or analyses to train machine-learning models.</li>
+<li>No profiling and no automated decision-making that has a legal effect on you.</li>
+</ul>
+<h2>8. Legal bases, and your rights</h2>
+<p>Apart from your account, its usage events, and the fallback-upload path above, your data exists
+only on your own device, and you
+exercise your rights directly:</p>
+<ul>
+<li><strong>Access and portability</strong> — your analyses are plain files on your device; recordings can be
+exported to Photos from the player screen.</li>
+<li><strong>Erasure</strong> — delete an individual recording or analysis in the app, or delete the app to remove
+everything at once. For anything held on the analysis server, email us (see section 3).</li>
+<li><strong>Objection / restriction / complaint</strong> — write to <a href="mailto:prokaranvir@gmail.com">prokaranvir@gmail.com</a>. Users in the EEA
+or UK may also complain to their local data protection authority.</li>
+</ul>
+<p>Where the GDPR applies, our legal basis for the very limited processing we do is <strong>performance of a
+contract</strong> (producing the analysis you asked for, and delivering the subscription you bought) and our
+<strong>legitimate interest</strong> in keeping the app working and preventing fraud. Where the analysis server
+fallback applies, that processing happens in the United States; we rely on the fact that you have
+asked us to perform the analysis for you.</p>
+<h2>9. Children</h2>
+<p>RacquetIQ is not directed at children under 13 and we do not knowingly collect personal information
+from them.</p>
+<h2>10. Retention</h2>
+<ul>
+<li>On your device: until you delete it.</li>
+<li>Your account and its profile: until you delete the account (in-app, or by email request).
+Usage events are anonymised at that moment.</li>
+<li>On the analysis server (fallback path only): until we delete it; no automatic expiry is in place.
+We will delete on request.</li>
+<li>Purchase records at RevenueCat and Apple: for as long as needed to run and account for the
+subscription, per their own policies.</li>
+</ul>
+<h2>11. Changes to this policy</h2>
+<p>If we change how the app handles data — in particular if we ever add third-party analytics or any
+sharing of personal information — we will update this page and change the &quot;Last updated&quot; date above. Material changes will also be
+called out in the app&#39;s release notes.</p>
+<h2>12. Contact</h2>
+<p><strong>Daybot Solutions Inc.</strong>
+<a href="mailto:prokaranvir@gmail.com">prokaranvir@gmail.com</a></p>
+
+
+</main></body>
+</html>
