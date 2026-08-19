@@ -58,9 +58,12 @@ function friendly(message: string): string {
   return message;
 }
 
-export async function signInWithApple(next = "/account"): Promise<string | null> {
+// Apple sign-in is iOS-only by decision: the native app uses its token flow
+// (src/lib/appleAuth.ts in the Expo app), and no Apple Services ID exists for
+// web OAuth — so the web offers Google + email and nothing that can't work.
+export async function signInWithGoogle(next = "/account"): Promise<string | null> {
   const { error } = await supabase.auth.signInWithOAuth({
-    provider: "apple",
+    provider: "google",
     options: { redirectTo: `${window.location.origin}${next}` },
   });
   return error ? friendly(error.message) : null;
