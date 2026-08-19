@@ -24,21 +24,30 @@ interface TopRowProps {
   /** False in a build without expo-speech — the toggle disappears entirely. */
   speechAvailable: boolean;
   onToggleMute: () => void;
-  onBack: () => void;
+  /**
+   * Null when the screen was opened from its own tab rather than pushed from
+   * the Library card — there is nothing behind it, so the chevron is dropped
+   * rather than left pointing at a screen the tap would not reach.
+   */
+  onBack: (() => void) | null;
 }
 
 export function TopRow({ muted, speechAvailable, onToggleMute, onBack }: TopRowProps) {
   return (
     <View style={styles.topRow}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Back to Library"
-        onPress={onBack}
-        style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-      >
-        <Ionicons name="chevron-back" size={18} color={colors.accentText} />
-        <Text style={styles.backLabel}>Library</Text>
-      </Pressable>
+      {onBack === null ? (
+        <View />
+      ) : (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back to Library"
+          onPress={onBack}
+          style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+        >
+          <Ionicons name="chevron-back" size={18} color={colors.accentText} />
+          <Text style={styles.backLabel}>Library</Text>
+        </Pressable>
+      )}
       {speechAvailable ? (
         <Pressable
           accessibilityRole="switch"
@@ -66,6 +75,14 @@ interface ActionRowProps {
   matchOver: boolean;
   /** True while the camera is on: the third slot becomes "stop watching". */
   watching: boolean;
+  /**
+   * Autopilot's state, and null when this binary cannot watch at all. The
+   * switch on the entry screen is out of reach once the camera takes it over,
+   * and a machine that is scoring points a human cannot stop is the one state
+   * this feature must never be in — so while watching, it also lives here.
+   */
+  autopilot: boolean | null;
+  onToggleAutopilot: () => void;
   onUndo: () => void;
   onAppeal: () => void;
   onNewMatch: () => void;
@@ -76,6 +93,8 @@ export function ActionRow({
   canUndo,
   matchOver,
   watching,
+  autopilot,
+  onToggleAutopilot,
   onUndo,
   onAppeal,
   onNewMatch,
@@ -93,6 +112,22 @@ export function ActionRow({
       ) : matchOver ? null : (
         <ActionButton icon="refresh" label="New match" onPress={onNewMatch} />
       )}
+      {/* A fourth slot, and only while it can matter: the row wraps, so on a
+          375pt phone this drops to its own line rather than squeezing the
+          three controls that are always there. */}
+      {watching && autopilot !== null ? (
+        <ActionButton
+          icon={autopilot ? "flash" : "flash-outline"}
+          label={autopilot ? "Autopilot on" : "Autopilot off"}
+          accessibilityLabel={
+            autopilot
+              ? "Autopilot is on — tap to go back to confirming each rally"
+              : "Autopilot is off — tap to let the camera score rallies on its own"
+          }
+          highlighted={autopilot}
+          onPress={onToggleAutopilot}
+        />
+      ) : null}
     </View>
   );
 }
@@ -100,16 +135,27 @@ export function ActionRow({
 interface ActionButtonProps {
   icon: ComponentProps<typeof Ionicons>["name"];
   label: string;
+  /** Defaults to the label; set it where the label alone is not a sentence. */
+  accessibilityLabel?: string;
+  /** Accent fill, for a control that is currently changing what the app does. */
+  highlighted?: boolean;
   onPress: () => void;
   disabled?: boolean;
 }
 
 /** Secondary courtside action: small, but still a full 44pt target. */
-function ActionButton({ icon, label, onPress, disabled = false }: ActionButtonProps) {
+function ActionButton({
+  icon,
+  label,
+  accessibilityLabel,
+  highlighted = false,
+  onPress,
+  disabled = false,
+}: ActionButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={() => {
@@ -118,12 +164,16 @@ function ActionButton({ icon, label, onPress, disabled = false }: ActionButtonPr
       }}
       style={({ pressed }) => [
         styles.action,
+        highlighted && styles.actionOn,
         pressed && styles.pressed,
         disabled && styles.actionDisabled,
       ]}
     >
-      <Ionicons name={icon} size={18} color={colors.text} />
-      <Text style={styles.actionLabel} numberOfLines={1}>
+      <Ionicons name={icon} size={18} color={highlighted ? colors.onAccent : colors.text} />
+      <Text
+        style={[styles.actionLabel, highlighted && styles.actionLabelOn]}
+        numberOfLines={1}
+      >
         {label}
       </Text>
     </Pressable>
@@ -176,6 +226,8 @@ const styles = StyleSheet.create({
     borderColor: colors.line2,
   },
   actionDisabled: { opacity: 0.35 },
+  actionOn: { backgroundColor: colors.accent, borderColor: colors.accent },
+  actionLabelOn: { color: colors.onAccent },
   actionLabel: { ...type.label, color: colors.text, flexShrink: 1 },
   pressed: { opacity: 0.7 },
 });

@@ -13,8 +13,9 @@
  * of the events (squash.ts), so persisting it as well would create a second
  * source of truth that can disagree with the first after an app update.
  *
- * The mute preference lives in its own file: it outlives any single match, so
- * starting a new one must not silently un-mute the phone.
+ * Preferences (mute, autopilot) live in their own file: they outlive any
+ * single match, so starting a new one must not silently un-mute the phone or
+ * disarm autopilot.
  */
 import { File, Paths } from "expo-file-system";
 
@@ -155,8 +156,26 @@ export function writeStoredMatch(match: StoredMatch): void {
   }
 }
 
-/** Pure: narrow the prefs file to the mute flag, or null. */
-export function parseMutedPref(raw: string): boolean | null {
+/**
+ * The preferences file, whole. Both flags live in ONE file and are always
+ * written together — an earlier version wrote `{v:1, muted}` on every toggle,
+ * so adding a second key naively would silently drop the first one every time
+ * the other was changed.
+ */
+export interface RefereePrefs {
+  muted: boolean;
+  /**
+   * Autopilot: the camera scores the rally itself instead of asking. OFF by
+   * default and deliberately so — at the measured 72.7% ceiling it will put
+   * points on the wrong side, so a human has to choose to hand it the pen.
+   */
+  autopilot: boolean;
+}
+
+export const DEFAULT_PREFS: RefereePrefs = { muted: false, autopilot: false };
+
+/** Pure: narrow the prefs file. Unreadable or unknown-version yields null. */
+export function parseRefereePrefs(raw: string): Partial<RefereePrefs> | null {
   let data: unknown;
   try {
     data = JSON.parse(raw);
@@ -164,7 +183,40 @@ export function parseMutedPref(raw: string): boolean | null {
     return null;
   }
   if (!isRecord(data) || data.v !== 1) return null;
-  return typeof data.muted === "boolean" ? data.muted : null;
+  const prefs: Partial<RefereePrefs> = {};
+  if (typeof data.muted === "boolean") prefs.muted = data.muted;
+  if (typeof data.autopilot === "boolean") prefs.autopilot = data.autopilot;
+  return prefs;
+}
+
+/** Pure: narrow the prefs file to the mute flag, or null. */
+export function parseMutedPref(raw: string): boolean | null {
+  return parseRefereePrefs(raw)?.muted ?? null;
+}
+
+/**
+ * Every preference, with defaults filled in. Announcements default to ON — the
+ * whole point of the screen is that it speaks — and autopilot to OFF.
+ */
+export function readRefereePrefs(): RefereePrefs {
+  try {
+    const file = new File(Paths.document, PREFS_FILE_NAME);
+    if (!file.exists) return DEFAULT_PREFS;
+    return { ...DEFAULT_PREFS, ...parseRefereePrefs(file.textSync()) };
+  } catch {
+    return DEFAULT_PREFS;
+  }
+}
+
+/** Write both flags. Silent on failure: a forgotten preference is a shrug. */
+export function writeRefereePrefs(prefs: RefereePrefs): void {
+  try {
+    const file = new File(Paths.document, PREFS_FILE_NAME);
+    if (!file.exists) file.create();
+    file.write(JSON.stringify({ v: 1, muted: prefs.muted, autopilot: prefs.autopilot }));
+  } catch {
+    // A forgotten preference is a shrug; a crash on a toggle is not.
+  }
 }
 
 /**
@@ -173,22 +225,19 @@ export function parseMutedPref(raw: string): boolean | null {
  * there in the header.
  */
 export function readAnnouncementsMuted(): boolean {
-  try {
-    const file = new File(Paths.document, PREFS_FILE_NAME);
-    if (!file.exists) return false;
-    return parseMutedPref(file.textSync()) ?? false;
-  } catch {
-    return false;
-  }
+  return readRefereePrefs().muted;
 }
 
-/** Remember the mute choice across matches and launches. Silent on failure. */
+/** Remember the mute choice across matches and launches. */
 export function writeAnnouncementsMuted(muted: boolean): void {
-  try {
-    const file = new File(Paths.document, PREFS_FILE_NAME);
-    if (!file.exists) file.create();
-    file.write(JSON.stringify({ v: 1, muted }));
-  } catch {
-    // A forgotten preference is a shrug; a crash on a toggle is not.
-  }
+  writeRefereePrefs({ ...readRefereePrefs(), muted });
+}
+
+/** Is autopilot armed? Defaults to FALSE — see `RefereePrefs.autopilot`. */
+export function readAutopilot(): boolean {
+  return readRefereePrefs().autopilot;
+}
+
+export function writeAutopilot(autopilot: boolean): void {
+  writeRefereePrefs({ ...readRefereePrefs(), autopilot });
 }

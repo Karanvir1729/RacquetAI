@@ -17,13 +17,16 @@ import {
   matchStartCall,
   PlayerNames,
 } from "./announce";
+import { AUTOPILOT_ARMED_CALL } from "./autopilot";
 import { createAnnouncer } from "./speech";
 import {
   readAnnouncementsMuted,
+  readAutopilot,
   readStoredMatch,
   sanitizePlayerName,
   StoredMatch,
   writeAnnouncementsMuted,
+  writeAutopilot,
   writeStoredMatch,
 } from "./storage";
 import { applySquashEvent, reduceSquashEvents } from "./squash";
@@ -43,6 +46,13 @@ export interface RefereeMatch {
   /** The last line announced, shown on screen so muting costs no information. */
   lastCall: string | null;
   muted: boolean;
+  /**
+   * Autopilot: the camera commits its own suggestion after a visible pause
+   * instead of waiting for a tap. Persisted, off by default, and armed only by
+   * a human — see `RefereePrefs.autopilot`.
+   */
+  autopilot: boolean;
+  toggleAutopilot: () => void;
   /** False in a build without expo-speech: the screen hides the mute toggle. */
   speechAvailable: boolean;
   awardRally: (winner: Side) => void;
@@ -50,6 +60,13 @@ export interface RefereeMatch {
   chooseBox: (box: ServeBox) => void;
   undo: () => void;
   startMatch: (setup: MatchSetup) => void;
+  /**
+   * Replace the whole match with a reconstruction — today, a video the app has
+   * refereed end to end. It goes through the same commit path as a tap, so the
+   * result is persisted, undoable one rally at a time, and correctable on the
+   * same buttons; there is no second kind of match in this hook.
+   */
+  loadMatch: (setup: MatchSetup, events: ScoreEvent[], line: string | null) => void;
   toggleMute: () => void;
   /**
    * Speak a line that is NOT a scoring call — today, the court-watcher's
@@ -98,7 +115,14 @@ const RESUME_WINDOW_MS = 6 * 60 * 60 * 1000;
 function resumableMatch(): StoredMatch | null {
   const stored = readStoredMatch();
   if (stored === null) return null;
-  const last = stored.events.at(-1)?.at ?? Date.parse(stored.startedAt);
+  // The LATER of "when this match was started" and "when it was last scored".
+  // Taking the last event alone would drop a refereed video the moment the app
+  // was backgrounded: its rally events are stamped in VIDEO time (seconds from
+  // the start of the footage), which is a moment in 1970, so the match would
+  // look hours stale within a second of being created.
+  const started = Date.parse(stored.startedAt);
+  const lastEvent = stored.events.at(-1)?.at ?? Number.NEGATIVE_INFINITY;
+  const last = Math.max(Number.isFinite(started) ? started : Number.NEGATIVE_INFINITY, lastEvent);
   if (!Number.isFinite(last) || Date.now() - last > RESUME_WINDOW_MS) return null;
   return stored;
 }
@@ -111,6 +135,7 @@ export function useRefereeMatch(): RefereeMatch {
   /** Authoritative between renders; see the note in `commit`. */
   const matchRef = useRef(match);
   const [muted, setMuted] = useState<boolean>(readAnnouncementsMuted);
+  const [autopilot, setAutopilot] = useState<boolean>(readAutopilot);
   const [lastCall, setLastCall] = useState<string | null>(null);
 
   // One announcer for the life of the screen. A lazy useState initializer
@@ -202,6 +227,15 @@ export function useRefereeMatch(): RefereeMatch {
     [announcer, commit],
   );
 
+  const loadMatch = useCallback(
+    (setup: MatchSetup, events: ScoreEvent[], line: string | null) => {
+      announcer.stop();
+      setLastCall(null);
+      commit({ ...createStoredMatch(setup), events }, line);
+    },
+    [announcer, commit],
+  );
+
   const say = useCallback(
     (line: string) => {
       if (muted || line.length === 0) return;
@@ -209,6 +243,16 @@ export function useRefereeMatch(): RefereeMatch {
     },
     [announcer, muted],
   );
+
+  const toggleAutopilot = useCallback(() => {
+    const next = !autopilot;
+    setAutopilot(next);
+    writeAutopilot(next);
+    // Arming it is said out loud, and phrased as a warning rather than a
+    // confirmation: from here the app changes the score by itself, and the two
+    // people on court cannot see the switch from the back of the T.
+    if (next && !muted) announcer.say(AUTOPILOT_ARMED_CALL);
+  }, [announcer, autopilot, muted]);
 
   const toggleMute = useCallback(() => {
     const next = !muted;
@@ -224,12 +268,15 @@ export function useRefereeMatch(): RefereeMatch {
     canUndo: match.events.length > 0,
     lastCall,
     muted,
+    autopilot,
+    toggleAutopilot,
     speechAvailable: announcer.available,
     awardRally,
     ruleAppeal,
     chooseBox,
     undo,
     startMatch,
+    loadMatch,
     toggleMute,
     say,
   };

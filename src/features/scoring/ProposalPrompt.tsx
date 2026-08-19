@@ -16,7 +16,11 @@
  * OUT — "No point", for the measured case where the break was not a rally end
  * at all (1 of 15 inspected breaks was mid-rally).
  *
- * Nothing here runs on a timer. An unanswered question stays unanswered.
+ * Nothing here runs on a timer OF ITS OWN. With autopilot off — the default —
+ * an unanswered question stays unanswered forever. With it on, the screen owns
+ * the clock (useAutopilot) and passes down `countdown`; this file only renders
+ * what that clock says, and the way out ("No point") is in the same place it
+ * always was.
  */
 import { Ionicons } from "@expo/vector-icons";
 import { ComponentProps, useState } from "react";
@@ -42,6 +46,13 @@ interface ProposalPromptProps {
   binding: TrackBinding;
   /** Shots landed after the question was asked — they played on. */
   playResumed: boolean;
+  /**
+   * The autopilot countdown line, or null when a tap is the only thing that
+   * can settle this rally. It replaces the "tap whoever won" subtitle rather
+   * than sitting under it: while a clock is running, what the screen has to
+   * say is what is about to happen and how to stop it.
+   */
+  countdown: string | null;
   onDismiss: () => void;
 }
 
@@ -50,6 +61,7 @@ export function ProposalPrompt({
   names,
   binding,
   playResumed,
+  countdown,
   onDismiss,
 }: ProposalPromptProps) {
   const [detailOpen, setDetailOpen] = useState(false);
@@ -69,8 +81,8 @@ export function ProposalPrompt({
       >
         {question}
       </Text>
-      <Text style={styles.subtitle} numberOfLines={2}>
-        {subtitle}
+      <Text style={countdown === null ? styles.subtitle : styles.countdown} numberOfLines={2}>
+        {countdown ?? subtitle}
       </Text>
 
       {detailOpen ? (
@@ -139,6 +151,9 @@ const styles = StyleSheet.create({
   cardStale: { borderColor: colors.line2, backgroundColor: colors.card },
   question: { ...type.title, color: colors.text },
   subtitle: { ...type.caption, color: colors.textDim },
+  // Louder than the subtitle it replaces: a clock nobody notices is not a
+  // safety rail, it is a countdown to a wrong point.
+  countdown: { ...type.captionStrong, color: colors.accentText },
   detail: {
     gap: spacing.xs,
     paddingTop: spacing.xs,

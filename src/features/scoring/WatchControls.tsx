@@ -1,63 +1,21 @@
 /**
- * The two pieces of chrome around watching: the way in, and the way it says no.
+ * How watching says no.
  *
- * Both exist to keep one promise — the tap-driven referee is the product, and
- * the camera is an accessory to it. So the entry row is an offer, never a mode
- * switch that takes the screen over, and every failure lands the user back on
- * the same working scoreboard with a sentence explaining why.
+ * It exists to keep one promise: the tap-driven referee is the product and the
+ * camera is an accessory to it, so every failure lands the user back on the
+ * same working scoreboard with a sentence explaining why — never on a dead end.
  *
- * The offer never oversells. `WATCH_PITCH` says the app asks and the human
- * decides, because on the measured numbers that is exactly what it does.
+ * The way IN lives in RefereeModes.tsx, next to the video option, because
+ * "watch live" and "score a video" are one choice and belong in one place.
  */
 import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { selection as selectionHaptic } from "@/lib/haptics";
 import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens";
 
-import { WATCH_PITCH } from "./proposal";
 import type { LiveNotice } from "./useLiveReferee";
-
-interface WatchEntryProps {
-  starting: boolean;
-  onStart: () => void;
-}
-
-/** "Watch the court" — offered only when this binary can actually do it. */
-export function WatchEntry({ starting, onStart }: WatchEntryProps) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel="Watch the court with the camera"
-      accessibilityHint={WATCH_PITCH}
-      accessibilityState={{ busy: starting }}
-      disabled={starting}
-      onPress={() => {
-        selectionHaptic();
-        onStart();
-      }}
-      style={({ pressed }) => [styles.entry, pressed && styles.pressed]}
-    >
-      <View style={styles.icon}>
-        <Ionicons name="eye" size={18} color={colors.onAccent} />
-      </View>
-      <View style={styles.entryText}>
-        <Text style={styles.entryTitle} numberOfLines={1}>
-          Watch the court
-        </Text>
-        <Text style={styles.entryCaption} numberOfLines={2}>
-          {WATCH_PITCH}
-        </Text>
-      </View>
-      {starting ? (
-        <ActivityIndicator color={colors.accent} />
-      ) : (
-        <Ionicons name="chevron-forward" size={16} color={colors.textFaint} />
-      )}
-    </Pressable>
-  );
-}
 
 interface NoticeBannerProps {
   notice: LiveNotice;
@@ -101,28 +59,6 @@ export function NoticeBanner({ notice, onDismiss }: NoticeBannerProps) {
 }
 
 const styles = StyleSheet.create({
-  entry: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-    minHeight: MIN_TOUCH_TARGET,
-    padding: spacing.sm,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.line2,
-    backgroundColor: colors.cardRaised,
-  },
-  icon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.accent,
-  },
-  entryText: { flex: 1, gap: 2 },
-  entryTitle: { ...type.bodyStrong, color: colors.text },
-  entryCaption: { ...type.caption, color: colors.textDim },
   notice: {
     flexDirection: "row",
     alignItems: "center",

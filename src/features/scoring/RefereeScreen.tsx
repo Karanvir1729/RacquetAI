@@ -3,11 +3,21 @@
  * a proper PAR-11 squash score and calls it out loud in marker's convention,
  * so two players never have to stop and argue about where they are.
  *
- * Optionally the camera watches too. When it thinks a rally has ended it ASKS
- * — out loud and on screen — and lights up the player it thinks hit last. That
- * is the whole of its authority: a human tap is still the only thing that has
- * ever changed this score, and there is no timer on this screen that can commit
- * an answer on its own.
+ * There are two ways to put a camera on it, and they are the same engine on
+ * two clocks: WATCH LIVE, where the court is in front of the phone now, and
+ * SCORE A VIDEO, where an already-analysed match is refereed end to end
+ * (useVideoReferee) into the same event list the buttons drive.
+ *
+ * Live, when it thinks a rally has ended it ASKS — out loud and on screen — and
+ * lights up the player it thinks hit last. A tap is what scores the point.
+ *
+ * UNLESS AUTOPILOT IS ON, which is the one exception in this feature and is
+ * off until a human turns it on: then a `suggest`-level rally end runs a
+ * visible 4-second countdown and commits itself. Everything about that path is
+ * in autopilot.ts, including why the countdown exists — at the numbers below,
+ * roughly one rally in four is given to the wrong player, so the pause has to
+ * be long enough for somebody standing there to beat it. `ask`-level ends never
+ * autopilot: an unreadable rally stays a question no matter what the switch says.
  *
  * Why it only ever asks, in one number: hand-labelling rally ends on three
  * archive matches put "the last player to hit won the rally" at 8 of 11 —
@@ -34,19 +44,36 @@ import { selection as selectionHaptic } from "@/lib/haptics";
 import { colors, spacing, type } from "@/theme/tokens";
 
 import { AppealSheet } from "./AppealSheet";
+import { AUTOPILOT_TAG, countdownLabel } from "./autopilot";
 import { NewMatchSheet } from "./NewMatchSheet";
 import { proposalCall, proposalLevel } from "./proposal";
 import { ProposalPrompt } from "./ProposalPrompt";
 import { ActionRow, TopRow } from "./RefereeControls";
 import { RallyButtons } from "./RallyButtons";
+import { AutopilotToggle, ModeChooser } from "./RefereeModes";
 import { ScoreBoard } from "./ScoreBoard";
+import { useAutopilot } from "./useAutopilot";
 import { MatchSetup, useRefereeMatch } from "./useRefereeMatch";
 import { useLiveReferee } from "./useLiveReferee";
-import { WatchEntry, NoticeBanner } from "./WatchControls";
+import { useVideoReferee, videoLoadCall } from "./useVideoReferee";
+import { VideoPickerSheet } from "./VideoPickerSheet";
+import { VideoResultBand } from "./VideoResultBand";
+import { NoticeBanner } from "./WatchControls";
 import { WatchPanel } from "./WatchPanel";
 import { LetRuling, OTHER_SIDE, Side } from "./types";
+import { toScoreEvents } from "./videoReferee";
+import { listVideoSources, VideoSource } from "./videoSources";
 
-export function RefereeScreen() {
+interface RefereeScreenProps {
+  /**
+   * True only when the Library's card pushed this screen. On the tab there is
+   * nothing behind it, so the back control is dropped rather than offering a
+   * chevron that lands somewhere the user never came from.
+   */
+  fromLibrary?: boolean;
+}
+
+export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
   const match = useRefereeMatch();
   const live = useLiveReferee();
   const [appealOpen, setAppealOpen] = useState(false);
@@ -54,7 +81,27 @@ export function RefereeScreen() {
   // default the sheet opens on.
   const [appealer, setAppealer] = useState<Side>(OTHER_SIDE[match.score.server]);
   const [setupOpen, setSetupOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [sources, setSources] = useState<VideoSource[]>([]);
+  // Whether the point now on the board was put there by autopilot rather than
+  // by a thumb. Shown beside the call so a player scrolling back can tell
+  // which points nobody confirmed.
+  const [lastByAutopilot, setLastByAutopilot] = useState(false);
   const matchOver = match.score.winner !== null;
+
+  // Refereeing a video loads its rallies into THIS match, so the result is
+  // undoable, correctable on the same buttons, and persisted like any other.
+  const video = useVideoReferee({
+    names: match.names,
+    onLoad: (setup, result) => {
+      setPickerOpen(false);
+      match.loadMatch(
+        { names: setup.names, firstServer: setup.firstServer },
+        toScoreEvents(result),
+        videoLoadCall(result, setup.names),
+      );
+    },
+  });
 
   // A decided match has nothing left to be asked about.
   const proposal = matchOver ? null : live.proposal;
@@ -73,24 +120,51 @@ export function RefereeScreen() {
   // question is answered.
   const showBand = showingCourt && !(compact && proposal !== null);
 
+  // AUTOPILOT. Armed only when the human turned it on AND the camera is
+  // actually watching — a countdown running against a stale question on a
+  // stopped session would award a point for footage nobody is looking at.
+  const autopilot = useAutopilot({
+    proposal,
+    level,
+    enabled: match.autopilot && live.watching,
+    onCommit: (winner) => {
+      live.clearProposal();
+      match.awardRally(winner);
+      setLastByAutopilot(true);
+    },
+  });
+
   // Ask each question out loud exactly ONCE. Keyed on the arrival time rather
   // than on the object, because the proposal is rebuilt whenever the player
   // binding is swapped — re-asking a question the players already heard would
   // sound like a second rally had ended.
   const askedAt = useRef(0);
   const { names, say, score } = match;
+  const autopilotPending = autopilot.pending !== null;
   useEffect(() => {
     if (proposal === null || proposal.at === askedAt.current) return;
     askedAt.current = proposal.at;
+    // Autopilot is about to make the call itself, four seconds from now. Two
+    // spoken lines that close together would collide — the announcer stops the
+    // line in flight before the next one (speech.ts), so the question would be
+    // cut off mid-sentence by the score it was asking about. The countdown is
+    // on screen; the marker's call is what gets spoken.
+    if (autopilotPending) return;
     const line = proposalCall(score, proposal, names, level);
     if (line !== null) say(line);
-  }, [names, proposal, say, score]);
+  }, [autopilotPending, names, proposal, say, score]);
 
-  const goBack = () => {
-    selectionHaptic();
-    if (router.canGoBack()) router.back();
-    else router.replace("/library");
-  };
+  // Referee is its own tab AND a pushed route from the Library card. Pushed,
+  // the chevron goes back where it came from; as a tab there is nothing behind
+  // it, so TopRow drops the control instead of offering a dead one. Note that
+  // `canGoBack()` alone is not the test — inside a tab navigator it is true as
+  // soon as any tab has been visited.
+  const goBack = fromLibrary && router.canGoBack()
+    ? () => {
+        selectionHaptic();
+        router.back();
+      }
+    : null;
 
   // Every path that settles a rally also closes the question, whether it agreed
   // with it or not. A question left standing over a scored point would invite a
@@ -98,11 +172,13 @@ export function RefereeScreen() {
   const award = (winner: Side) => {
     live.clearProposal();
     match.awardRally(winner);
+    setLastByAutopilot(false);
   };
 
   const undo = () => {
     live.clearProposal();
     match.undo();
+    setLastByAutopilot(false);
   };
 
   const openAppeal = () => {
@@ -115,6 +191,18 @@ export function RefereeScreen() {
     setAppealOpen(false);
     live.clearProposal();
     match.ruleAppeal(appealer, ruling);
+  };
+
+  // Listing analyses reads the disk, so it happens on the tap that asks for the
+  // list — never on a render path, where a slow or broken directory would cost
+  // a frame of the scoreboard.
+  const openVideoPicker = () => {
+    try {
+      setSources(listVideoSources());
+    } catch {
+      setSources([]);
+    }
+    setPickerOpen(true);
   };
 
   const openSetup = () => {
@@ -146,6 +234,11 @@ export function RefereeScreen() {
         onBack={goBack}
       />
 
+      {/* ONE band at a time, and the order is what the screen is currently for:
+          the court while watching, the result while a video is loaded, the two
+          ways in otherwise. Stacking them cost more than the 874pt this screen
+          has — it does not scroll, so a fourth block pushes the scoreboard and
+          the rally buttons into each other. */}
       {showingCourt ? (
         // Hidden with `display: none` rather than unmounted, so making room for
         // a question does not tear down and re-attach the native preview layer
@@ -166,19 +259,45 @@ export function RefereeScreen() {
             compact={compact}
           />
         </View>
+      ) : video.result !== null ? (
+        <View style={styles.strip}>
+          <VideoResultBand
+            result={video.result}
+            names={match.names}
+            firstServer={video.firstServer}
+            onSwapPlayers={video.swapPlayers}
+            onSetFirstServer={video.setFirstServer}
+            onClear={video.clear}
+          />
+        </View>
       ) : (
         <>
           <ScreenHeader
-            title="Score keeper"
-            subtitle="You tap who won the rally — it keeps score and calls it out"
+            title="Referee"
+            subtitle="Watch live or score a video — it calls the score out loud"
           />
-          {/* Offered only when this binary can actually watch. A button that
-              opens a broken camera is worse than no button. */}
-          {live.available ? (
+          {/* Two ways in. The live one is hidden on a binary that cannot watch
+              (a button that opens a broken camera is worse than no button);
+              scoring a video needs no camera and is always offered. */}
+          <View style={styles.strip}>
+            <ModeChooser
+              liveAvailable={live.available}
+              autopilot={match.autopilot}
+              starting={live.starting}
+              onWatchLive={live.start}
+              onScoreVideo={openVideoPicker}
+            />
+            {/* Only where it can apply: autopilot is about the live camera
+                deciding rallies, and a video is scored end to end regardless. */}
+            {live.available ? (
+              <AutopilotToggle autopilot={match.autopilot} onToggle={match.toggleAutopilot} />
+            ) : null}
+          </View>
+          {video.problem === null ? null : (
             <View style={styles.strip}>
-              <WatchEntry starting={live.starting} onStart={live.start} />
+              <Text style={styles.problem}>{video.problem}</Text>
             </View>
-          ) : null}
+          )}
         </>
       )}
 
@@ -196,9 +315,16 @@ export function RefereeScreen() {
 
       {proposal === null ? (
         <View style={styles.callRow}>
-          <Text style={styles.call} numberOfLines={2}>
+          {/* Three lines where there is room for them. Everything spoken is
+              also drawn here, so muting costs no information — and a video
+              result is the longest line this screen ever says. A 667pt phone
+              cannot spare the third line and gets the score from the board. */}
+          <Text style={styles.call} numberOfLines={compact ? 2 : 3}>
             {match.lastCall ?? (showingCourt ? WATCHING_HINT : TAPPING_HINT)}
           </Text>
+          {lastByAutopilot && match.lastCall !== null ? (
+            <Text style={styles.callMeta}>{AUTOPILOT_TAG}</Text>
+          ) : null}
           {match.speechAvailable && match.muted ? <Text style={styles.callMeta}>Muted</Text> : null}
         </View>
       ) : (
@@ -208,6 +334,11 @@ export function RefereeScreen() {
             names={match.names}
             binding={live.binding}
             playResumed={live.playResumed}
+            countdown={
+              autopilot.pending === null
+                ? null
+                : countdownLabel(match.names[autopilot.pending], autopilot.seconds)
+            }
             onDismiss={live.clearProposal}
           />
         </View>
@@ -230,6 +361,8 @@ export function RefereeScreen() {
         canUndo={match.canUndo}
         matchOver={matchOver}
         watching={showingCourt}
+        autopilot={live.available ? match.autopilot : null}
+        onToggleAutopilot={match.toggleAutopilot}
         onUndo={undo}
         onAppeal={openAppeal}
         onNewMatch={openSetup}
@@ -243,6 +376,12 @@ export function RefereeScreen() {
         onChangeAppealer={setAppealer}
         onRule={rule}
         onClose={() => setAppealOpen(false)}
+      />
+      <VideoPickerSheet
+        visible={pickerOpen}
+        sources={sources}
+        onPick={video.score}
+        onClose={() => setPickerOpen(false)}
       />
       <NewMatchSheet
         visible={setupOpen}
@@ -271,6 +410,7 @@ const styles = StyleSheet.create({
   },
   call: { ...type.captionStrong, color: colors.textDim, flex: 1 },
   callMeta: { ...type.caption, color: colors.textFaint },
+  problem: { ...type.caption, color: colors.textDim },
   promptArea: { paddingHorizontal: spacing.md, paddingBottom: spacing.sm },
   callArea: { paddingHorizontal: spacing.md },
 });

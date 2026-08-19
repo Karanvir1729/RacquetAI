@@ -1,19 +1,44 @@
 # features/scoring
 
-The **Score keeper** (`/referee`): a courtside squash scoreboard you tap, which keeps a proper
-PAR-11 score and announces it out loud in the marker's convention — so two players mid-match
-never have to stop and argue about where they are.
+The **Referee** (`/referee`): a squash scoreboard that keeps a proper PAR-11 score and announces
+it out loud in the marker's convention — so two players mid-match never have to stop and argue
+about where they are.
 
-It is reached from the Library's "Score keeper" card (`features/recording/ScoreKeeperCard.tsx`,
-which navigates by route only). The route file `src/app/referee.tsx` is a hidden tab
-(`href: null` in `_layout`, like `/analysis`): the app is deliberately two tabs.
+It is the **Referee** tab (`src/app/referee.tsx`, second in `_layout`), and is also still reached
+from the Library's "Score keeper" card (`features/recording/ScoreKeeperCard.tsx`, which navigates
+by route only). Entered from the tab bar there is nothing behind the screen, so `TopRow` drops
+its "‹ Library" chevron (`onBack: null`) rather than offering a control that goes nowhere.
+
+## Two ways in, one engine
+
+`RefereeModes.tsx` offers both on the entry screen:
+
+| | clock | who decides the rally |
+| --- | --- | --- |
+| **Watch live** | the court is in front of the phone now | a tap — or autopilot, if armed |
+| **Score a video** | an analysis already on the phone | the app scores the lot; you correct it |
+
+They share the rally rule (4.5 s of silence ends a rally), the heuristic (the last player to
+strike won it) and the PAR-11 fold. What differs is whether a human is standing there to ask.
+
+A video is refereed by `videoReferee.ts` (pure) over the `shots` of a saved `analysis.json`, and
+the result is loaded into the SAME event list the buttons drive (`useRefereeMatch.loadMatch`) —
+so it is persisted, undoable one rally at a time, and correctable on the same two buttons. There
+is no second kind of match anywhere in this feature.
 
 ## Honesty
 
-This is **human-tapped scoring with spoken output**. The camera may now watch the court and
-*suggest* the winner of a rally (`liveClient.ts`), but nothing scores by itself: every point
-still lands because a person tapped. No copy on this screen — or about it — may imply
-otherwise. "Score keeper" and "referee" are fine; "AI referee" is not.
+Every point on this screen comes from one of three places, and the code keeps them separate:
+
+1. **a tap** — the default, and the only one that carries a human's authority;
+2. **autopilot**, off until a person turns it on, which commits the app's own suggestion after a
+   visible 4-second countdown any tap can beat (`autopilot.ts`, `useAutopilot.ts`);
+3. **a refereed video**, which produces a whole scoreline at once and says so every time it
+   shows one.
+
+The measured accuracy behind 2 and 3 is the same 72.7% per rally, so neither may be described as
+accurate scoring. "Score keeper", "referee" and "autopilot" are fine; "AI referee" is not, and
+neither is any copy that presents a machine-derived scoreline as a result rather than a draft.
 
 ## Watching the court (`liveClient.ts`)
 
@@ -50,6 +75,52 @@ in both halves.
 **At today's numbers most rallies land in `ask` or `propose`, never `confirm`.** The screen must
 therefore keep the manual taps live at all times and stay fully usable with the camera off.
 
+## Autopilot (`autopilot.ts`, `useAutopilot.ts`)
+
+The one path in this feature where a machine changes the score. It is fenced by three rules, all
+measured rather than stylistic, and `RefereeScreen.autopilot.test.ts` pins every one:
+
+1. **Off until a person turns it on.** The switch is on the entry screen (`AutopilotToggle`) and
+   — because that screen is gone once the camera takes it over — also in the courtside action row
+   while watching. A machine scoring points that nobody present can stop is the one state this
+   must never reach.
+2. **Only `suggest`-level ends.** An `ask` — unreadable last striker (21% of real ends), weak
+   confidence, or play that carried on — is never committed, whatever the switch says. Autopilot
+   stops waiting for a tap; it never guesses harder than the evidence.
+3. **A visible countdown any tap beats.** `AUTOPILOT_DELAY_MS` is 4 s: the proposal already
+   arrives ~6 s late, so longer lands the score after the next serve, and shorter is less time
+   than it takes to walk back from the service box. Confirming, correcting and "No point" all
+   cancel it, and each scores exactly once.
+
+With autopilot on the question is **not** spoken — the countdown is on screen and the marker's
+call follows 4 s later, and speech.ts stops the line in flight before starting the next, so
+asking would only get cut off by its own answer. Points it scored are tagged `AUTOPILOT_TAG` on
+the call line, so a player scrolling back can tell which ones nobody confirmed.
+
+## Refereeing a video (`videoReferee.ts`, `videoSources.ts`, `useVideoReferee.ts`)
+
+`refereeVideo(shots)` splits the stream on `RALLY_GAP_SEC` (4.5 s, the native engine's number),
+drops any group under `MIN_RALLY_SHOTS` (a lone onset is a door, a bounce or a ball being picked
+up), awards each rally to the last striker, and folds. It **stops at match point** and counts what
+came after (`ignoredAfterMatch`) rather than scoring the knock-up for the next pair.
+
+**The errors compound, and the copy says so.** Per rally the ceiling is 0.727; a scoreline is a
+fold of those calls, so an 11-rally game is entirely right with probability ~2%. `scorelineNote`
+and `videoResultCall` both call the result a draft to correct, and `VideoResultBand` shows what
+was thrown away. `videoResultCall` reads the standing **leader first**, deliberately not
+`announce.ts`'s server-first marker order: read out once at the end, "Sam ahead, one, two" is
+what the marker's order produces when Sam leads 2-1, and it sounds like the opposite of what it
+means.
+
+Two corrections re-run the whole fold rather than editing it, because both are ways a scoreline
+is wrong that the numbers cannot show: **swap players** (the analyser's "A" is whoever was
+leftmost, so a wrong binding mirrors everything) and **who served first** (nothing in a video
+reveals it, and it shifts every hand-out).
+
+`videoSources.ts` lists ANALYSES, not recordings — a take that was never analysed has no shot
+stream to referee — plus the bundled demo, pinned last and always present, which is what makes
+this half demonstrable on a Simulator with no camera and an empty library.
+
 ## The screen, when it is watching
 
 `useLiveReferee.ts` owns the session; `proposal.ts` owns every word it says; `WatchPanel.tsx`
@@ -66,10 +137,12 @@ mode anyone has to leave — ignoring the suggestions *is* the manual referee.
 
 Consequences of the measurement, in the UI:
 
-- **Nothing commits on a timer.** There is no timeout anywhere on this screen. An unanswered
-  question stays unanswered (pinned by a test that advances a minute of fake time). At 72.7%
-  oracle accuracy an auto-confirm would put the score quietly wrong within a handful of points,
-  with no way for the players to tell which point broke it.
+- **Nothing commits on a timer unless a human armed one.** With autopilot off — the default —
+  there is no timeout anywhere on this screen and an unanswered question stays unanswered
+  (pinned by a test that advances a minute of fake time). Autopilot is the deliberate exception
+  and is described in its own section below; what is NOT allowed, then or now, is a timer the
+  user did not ask for, because at 72.7% oracle accuracy it would put the score quietly wrong
+  within a handful of points with no way for the players to tell which point broke it.
 - **Everything spoken is a question.** `proposalCall` produces "Point to Sam? That would be five,
   three." and never the marker's declarative forms that `announce.ts` reserves for a decision a
   human made — pinned across every score state by `proposal.test.ts`. The question goes through
@@ -150,6 +223,9 @@ the user information.
 
 ## Tests
 
+`videoReferee.test.ts` (the rally split at its boundaries, the fold, the stop at match point, the
+binding, and the wording), `RefereeScreen.autopilot.test.ts` and `RefereeScreen.video.test.ts`
+(both described above, driven through the real screen), plus the originals:
 `squash.test.ts` and `engine.test.ts` (the restored machine and its laws), `announce.test.ts`
 (every spoken line), `storage.test.ts` (round trip + every way a file can be damaged),
 `speech.test.ts` (a missing, malformed or throwing module never breaks scoring),

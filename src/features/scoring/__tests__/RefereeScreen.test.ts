@@ -195,6 +195,25 @@ describe("a match in progress survives the app going away", () => {
     expect(saved()?.events).toHaveLength(2);
   });
 
+  it("resumes a match whose events carry old timestamps", async () => {
+    // A refereed video writes rally events stamped in VIDEO time — seconds
+    // from the start of the footage, which is a moment in 1970. Freshness has
+    // to come from when the match was STARTED in that case, or a scoreline the
+    // app produced a second ago looks decades stale and is silently dropped.
+    const first = await mount();
+    await press(first, A_WON);
+    const stored = JSON.parse(store.get(MATCH_FILE) ?? "{}");
+    stored.events = stored.events.map((event: { at: number }) => ({ ...event, at: 12_000 }));
+    store.set(MATCH_FILE, JSON.stringify(stored));
+    await act(async () => first.unmount());
+
+    const second = await mount();
+    expect(saved()?.events).toHaveLength(1);
+    // The point is still on the board: A won it while serving, so A keeps the
+    // serve and the box alternates. A dropped match would read 0-0 on the right.
+    expect(JSON.stringify(second.toJSON())).toContain("Player A serves · Left box");
+  });
+
   it("says nothing on restore — a resumed screen must not blurt a stale score", async () => {
     const first = await mount();
     await press(first, A_WON);
@@ -212,7 +231,9 @@ describe("the mute toggle", () => {
     await press(tree, "Mute score announcements");
     await press(tree, A_WON);
     expect(speech.__spoken).toEqual([]);
-    expect(store.get(PREFS_FILE)).toBe(JSON.stringify({ v: 1, muted: true }));
+    // Both preferences are written together — autopilot is untouched here and
+    // must survive a mute toggle rather than being dropped from the file.
+    expect(store.get(PREFS_FILE)).toBe(JSON.stringify({ v: 1, muted: true, autopilot: false }));
   });
 
   it("still scores, and still shows the call, while muted", async () => {

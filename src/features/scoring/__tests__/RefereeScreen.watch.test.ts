@@ -236,7 +236,7 @@ describe("starting and stopping", () => {
     const tree = await watching();
     await press(tree, "Stop watching");
     expect(native.stops).toBe(1);
-    expect(text(tree)).toContain("Score keeper");
+    expect(text(tree)).toContain("Referee");
   });
 });
 
@@ -351,7 +351,7 @@ describe("when the detection is doing badly", () => {
     const tree = await watching();
     const rendered = text(tree);
     expect(rendered).toContain("Camera access is off");
-    expect(rendered).toContain("Score keeper");
+    expect(rendered).toContain("Referee");
     expect(findPressable(tree, A_WON)).toBeDefined();
   });
 });

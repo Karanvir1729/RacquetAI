@@ -127,6 +127,15 @@ export function flipBinding(binding: TrackBinding): TrackBinding {
  * `winner` is who the detector thinks struck last, and `recommendation` says
  * how much of the screen should be given to doubting it.
  */
+/**
+ * The measured accuracy ceiling: hand-labelling three archive matches put "the
+ * last player to strike the ball won the rally" at 8 of 11 = 72.7%. Both
+ * halves of the feature quote this number — the live proposal clamps its
+ * confidence to it, and the video referee has nothing better to offer per
+ * rally — so it is defined once rather than typed out twice and drifting.
+ */
+export const HEURISTIC_CEILING = 0.727;
+
 export interface RallyProposal {
   winner: Side | null;
   confidence: number;
@@ -278,7 +287,7 @@ export function parseStrike(value: unknown): LiveStrike | null {
  */
 export function parseRallyEnded(value: unknown): LiveRallyEnded | null {
   if (!isRecord(value)) return null;
-  const ceiling = num(value.ceiling, 0.727);
+  const ceiling = num(value.ceiling, HEURISTIC_CEILING);
   const confidence = Math.min(Math.max(num(value.confidence), 0), ceiling);
   const factors: Record<string, number> = {};
   if (isRecord(value.factors)) {

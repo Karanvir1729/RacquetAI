@@ -1,5 +1,6 @@
 /**
- * Library card that opens the courtside Score keeper (/referee).
+ * Library card that opens the courtside Score keeper (/referee) — the same
+ * screen as the Referee tab, kept here as a second door into it.
  *
  * Lives in features/recording because the Library owns it, and navigates by
  * route only — no import from features/scoring internals (docs/01 rule 2),
@@ -25,7 +26,7 @@ export function ScoreKeeperCard() {
         accessibilityLabel="Open the score keeper — tap who won each rally and hear the score called out"
         onPress={() => {
           selectionHaptic();
-          router.push("/referee");
+          router.push("/referee?from=library");
         }}
         style={({ pressed }) => [styles.body, pressed && styles.pressed]}
       >

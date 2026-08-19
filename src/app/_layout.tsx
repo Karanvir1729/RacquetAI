@@ -31,9 +31,9 @@ function tabIcon(name: IoniconName) {
 }
 
 /**
- * Root layout: error boundary + providers around the two-tab shell — Record
- * and Library, the only two things the app does. Analysis and the import flow
- * are pushed routes (href: null), not tabs. Theme is module-scope tokens
+ * Root layout: error boundary + providers around the tab shell — Record,
+ * Referee, Library and Account. Analysis and the import flow are pushed
+ * routes (href: null), not tabs. Theme is module-scope tokens
  * (src/theme/tokens.ts — DynamicColorIOS pairs), so there is no theme
  * provider to mount; the canvas colour on Tabs + StatusBar is all the
  * "theming" the root has to do.
@@ -98,6 +98,10 @@ export default function RootLayout() {
               options={{ title: "Record", tabBarIcon: tabIcon("videocam") }}
             />
             <Tabs.Screen
+              name="referee"
+              options={{ title: "Referee", tabBarIcon: tabIcon("megaphone") }}
+            />
+            <Tabs.Screen
               name="library"
               options={{ title: "Library", tabBarIcon: tabIcon("albums") }}
             />
@@ -108,9 +112,6 @@ export default function RootLayout() {
             {/* Match analysis — reached from Library cards, never the tab bar
                 (href: null hides it there); see features/analysis. */}
             <Tabs.Screen name="analysis" options={{ href: null }} />
-            {/* Score keeper — the courtside scoreboard, pushed from the
-                Library's card. Two tabs is the shape of the app. */}
-            <Tabs.Screen name="referee" options={{ href: null }} />
             {/* Import & analyze flow — reached from the Library's import card. */}
             <Tabs.Screen name="import-analysis" options={{ href: null }} />
             {/* RacquetIQ Pro — pushed from the import card once the free
