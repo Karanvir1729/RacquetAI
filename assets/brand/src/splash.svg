@@ -19,17 +19,17 @@
       <path d="M 0 -166 C 33.69 -166 61 -130.63 61 -87 C 61 -43.37 33.69 -8 0 -8 C -33.69 -8 -61 -43.37 -61 -87 C -61 -130.63 -33.69 -166 0 -166 Z" />
     </clipPath>
     <radialGradient id="racquetai-halo">
-      <stop offset="0" stop-color="#D8FA3C" stop-opacity="0.22" />
-      <stop offset="0.45" stop-color="#D8FA3C" stop-opacity="0.08" />
-      <stop offset="1" stop-color="#D8FA3C" stop-opacity="0" />
+      <stop offset="0" stop-color="#7CBF3F" stop-opacity="0.22" />
+      <stop offset="0.45" stop-color="#7CBF3F" stop-opacity="0.08" />
+      <stop offset="1" stop-color="#7CBF3F" stop-opacity="0" />
     </radialGradient>
   </defs>
   <circle cx="264.5" cy="186.0" r="228" fill="url(#racquetai-halo)" />
   <!-- @mark-geometry:start -->
   <g transform="translate(238.77 256.70) rotate(20) scale(0.8645)">
-    <ellipse cx="0" cy="-87" rx="78" ry="96" fill="none" stroke="#D8FA3C" stroke-width="34" />
-    <path d="M 66.24 -6 C 28.94 37.16 26 68.4 26 118 L 26 180 C 26 191.05 17.05 200 6 200 L -6 200 C -17.05 200 -26 191.05 -26 180 L -26 118 C -26 68.4 -28.94 37.16 -66.24 -6 Z" fill="#D8FA3C" />
-    <g clip-path="url(#racquetai-bed)" opacity="0.18" stroke="#D8FA3C" stroke-width="2.8" stroke-linecap="round">
+    <ellipse cx="0" cy="-87" rx="78" ry="96" fill="none" stroke="#7CBF3F" stroke-width="34" />
+    <path d="M 66.24 -6 C 28.94 37.16 26 68.4 26 118 L 26 180 C 26 191.05 17.05 200 6 200 L -6 200 C -17.05 200 -26 191.05 -26 180 L -26 118 C -26 68.4 -28.94 37.16 -66.24 -6 Z" fill="#7CBF3F" />
+    <g clip-path="url(#racquetai-bed)" opacity="0.18" stroke="#7CBF3F" stroke-width="2.8" stroke-linecap="round">
       <path d="M -58.5 -183 V 9 M -45.5 -183 V 9 M -32.5 -183 V 9 M -19.5 -183 V 9 M -6.5 -183 V 9 M 6.5 -183 V 9 M 19.5 -183 V 9 M 32.5 -183 V 9 M 45.5 -183 V 9 M 58.5 -183 V 9" />
       <path d="M -78 -158.5 H 78 M -78 -145.5 H 78 M -78 -132.5 H 78 M -78 -119.5 H 78 M -78 -106.5 H 78 M -78 -93.5 H 78 M -78 -80.5 H 78 M -78 -67.5 H 78 M -78 -54.5 H 78 M -78 -41.5 H 78 M -78 -28.5 H 78 M -78 -15.5 H 78" />
     </g>

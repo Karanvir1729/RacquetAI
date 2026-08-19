@@ -38,9 +38,9 @@
   <svg x="-9.2" y="40.5" width="288" height="288" viewBox="0 0 512 512">
     <!-- @mark-geometry:start -->
     <g transform="translate(235.25 256.85) rotate(20) scale(1.0416)">
-      <ellipse cx="0" cy="-87" rx="78" ry="96" fill="none" stroke="#D8FA3C" stroke-width="34" />
-      <path d="M 66.24 -6 C 28.94 37.16 26 68.4 26 118 L 26 180 C 26 191.05 17.05 200 6 200 L -6 200 C -17.05 200 -26 191.05 -26 180 L -26 118 C -26 68.4 -28.94 37.16 -66.24 -6 Z" fill="#D8FA3C" />
-      <g clip-path="url(#racquetai-bed)" opacity="0.18" stroke="#D8FA3C" stroke-width="2.8" stroke-linecap="round">
+      <ellipse cx="0" cy="-87" rx="78" ry="96" fill="none" stroke="#7CBF3F" stroke-width="34" />
+      <path d="M 66.24 -6 C 28.94 37.16 26 68.4 26 118 L 26 180 C 26 191.05 17.05 200 6 200 L -6 200 C -17.05 200 -26 191.05 -26 180 L -26 118 C -26 68.4 -28.94 37.16 -66.24 -6 Z" fill="#7CBF3F" />
+      <g clip-path="url(#racquetai-bed)" opacity="0.18" stroke="#7CBF3F" stroke-width="2.8" stroke-linecap="round">
         <path d="M -58.5 -183 V 9 M -45.5 -183 V 9 M -32.5 -183 V 9 M -19.5 -183 V 9 M -6.5 -183 V 9 M 6.5 -183 V 9 M 19.5 -183 V 9 M 32.5 -183 V 9 M 45.5 -183 V 9 M 58.5 -183 V 9" />
         <path d="M -78 -158.5 H 78 M -78 -145.5 H 78 M -78 -132.5 H 78 M -78 -119.5 H 78 M -78 -106.5 H 78 M -78 -93.5 H 78 M -78 -80.5 H 78 M -78 -67.5 H 78 M -78 -54.5 H 78 M -78 -41.5 H 78 M -78 -28.5 H 78 M -78 -15.5 H 78" />
       </g>
@@ -48,5 +48,5 @@
     </g>
     <!-- @mark-geometry:end -->
   </svg>
-  <text x="270" y="227" font-family="-apple-system, SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif" font-size="168" font-weight="700" letter-spacing="-6" fill="#FFFFFF">Racquet<tspan fill="#D8FA3C">IQ</tspan></text>
+  <text x="270" y="227" font-family="-apple-system, SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif" font-size="168" font-weight="700" letter-spacing="-6" fill="#FFFFFF">Racquet<tspan fill="#7CBF3F">IQ</tspan></text>
 </svg>

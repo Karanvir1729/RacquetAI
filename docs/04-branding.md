@@ -47,8 +47,8 @@ Three rules fall out of that and everything else is detail:
 | **Court Ink** | `#06130E` | The canvas. Near-black with green in it, never neutral grey. Also the ink used *on* Optic. |
 | **Court** | `#0B2119` | The panel one step up from the canvas. |
 | **Court Raised** | `#0C2A1E` | The lit top edge of the court — the top stop of the app-icon gradient, and the dark chip fill. |
-| **Optic** | `#D8FA3C` | The ball under floodlight. The one accent. |
-| **Optic Bright** | `#EBFF8C` | Optic pulled up for *text* on dark, where full Optic vibrates. |
+| **Optic** | `#7CBF3F` | The ball in court light. The one accent. |
+| **Optic Bright** | `#A6D47D` | Optic pulled up for *text* on dark, where full Optic sits too close to the canvas. |
 | **Court Green** | `#1F6B4A` | Optic's stand-in for accent text on light surfaces, where Optic is illegible. |
 | **Chalk** | `#FFFFFF` | Court lines, the spark at the mark's sweet spot, primary text on dark. |
 | **Chalk Wash** | `#F4F7F3` | The light-theme canvas. White with a breath of court green. |
@@ -72,19 +72,19 @@ by `DynamicColorIOS`. Android pins the dark column (see the note in that file).
 | `textDim` | `rgba(255,255,255,0.62)` | `rgba(8,22,15,0.62)` |
 | `textFaint` | `rgba(255,255,255,0.45)` | `rgba(8,22,15,0.42)` |
 | `watermark` | `rgba(255,255,255,0.06)` | `rgba(6,19,14,0.08)` |
-| `accent` | `#D8FA3C` | `#D8FA3C` |
-| `accentText` | `#EBFF8C` | `#1F6B4A` |
-| `accentSoft` | `rgba(216,250,60,0.12)` | `rgba(31,107,74,0.12)` |
-| `accentLine` ᵂ | `rgba(216,250,60,0.32)` | `rgba(31,107,74,0.26)` |
-| `data` | `#D8FA3C` | `#1F6B4A` |
+| `accent` | `#7CBF3F` | `#7CBF3F` |
+| `accentText` | `#A6D47D` | `#1F6B4A` |
+| `accentSoft` | `rgba(124,191,63,0.12)` | `rgba(31,107,74,0.12)` |
+| `accentLine` ᵂ | `rgba(124,191,63,0.32)` | `rgba(31,107,74,0.26)` |
+| `data` | `#7CBF3F` | `#1F6B4A` |
 | `onAccent` | `#06130E` | `#06130E` |
-| `glow` | `rgba(216,250,60,0.35)` | `rgba(31,107,74,0.22)` |
+| `glow` | `rgba(124,191,63,0.35)` | `rgba(31,107,74,0.22)` |
 | `danger` | `#FF6B6B` | `#C62F26` |
 | `dangerSoft` | `rgba(255,107,107,0.12)` | `rgba(198,47,38,0.10)` |
 | `scrim` | `rgba(0,0,0,0.60)` | `rgba(6,19,14,0.45)` |
 | `surfaceWhite` | `#FFFFFF` (both) | |
 | `inkOnWhite` | `#06130E` (both) | |
-| `overlayA` | `#D8FA3C` (both) | |
+| `overlayA` | `#7CBF3F` (both) | |
 | `overlayB` | `#FFFFFF` (both) | |
 | `overlayCasing` | `#06130E` (both) | |
 
@@ -113,10 +113,10 @@ Measured WCAG 2.1 ratios for the pairings that actually occur:
 | Chalk | Court Ink | 19.0:1 | ✅ AAA |
 | `text` dark | `bg` dark | 16.0:1 | ✅ AAA |
 | `text` light | `bg` light | 17.2:1 | ✅ AAA |
-| Optic | Court Ink | 16.0:1 | ✅ AAA |
-| Optic | Court (`panel` dark) | 14.2:1 | ✅ AAA |
-| Court Ink | Optic (`onAccent` on `accent`) | 16.0:1 | ✅ AAA |
-| Optic Bright | Court Ink | 17.4:1 | ✅ AAA |
+| Optic | Court Ink | 8.5:1 | ✅ AAA |
+| Optic | Court (`panel` dark) | 7.5:1 | ✅ AAA |
+| Court Ink | Optic (`onAccent` on `accent`) | 8.5:1 | ✅ AAA |
+| Optic Bright | Court Ink | 11.1:1 | ✅ AAA |
 | Court Green | Chalk Wash | 6.0:1 | ✅ AA |
 | `textDim` dark | `bg` dark | 7.6:1 | ✅ AAA |
 | `textDim` light | `bg` light | 5.0:1 | ✅ AA |
@@ -124,10 +124,11 @@ Measured WCAG 2.1 ratios for the pairings that actually occur:
 | Fault light | Chalk Wash | 5.1:1 | ✅ AA |
 | `textFaint` dark | `bg` dark | 4.5:1 | ⚠️ AA, exactly at the line |
 | `textFaint` light | `bg` light | **2.7:1** | ⚠️ below AA — disabled tier only |
-| **Optic** | **Chalk Wash** | **1.1:1** | ❌ never |
+| **Optic** | **Chalk Wash** | **2.1:1** | ❌ never |
 
-That last row is the whole reason `accentText` exists. Optic on a light
-surface is invisible; reach for Court Green instead.
+That last row is the whole reason `accentText` exists. Deepening Optic moved
+it from 1.1:1 to 2.1:1, which is still nowhere near the 4.5:1 floor — Optic on
+a light surface is unreadable as ink; reach for Court Green instead.
 
 `textFaint` is the **disabled/pending tier** — "Coming soon" rows, placeholder
 text, an unreached step's number, a dimmed pip, a watermark — and it sits below
@@ -192,7 +193,7 @@ lockup feels like one object rather than two.
 ### On light surfaces
 
 The mark's frame is Optic, which is **illegible on a light background**
-(1.1:1 against Chalk Wash). Use `mark-mono.svg` recoloured to Court Ink, or
+(2.1:1 against Chalk Wash). Use `mark-mono.svg` recoloured to Court Ink, or
 place the full-colour mark on a Court Ink tile. Never outline the mark to
 rescue it.
 
@@ -274,7 +275,7 @@ Three constraints are non-obvious and all three are asserted by the generator:
 ```jsonc
 "backgroundColor": "#06130E",             // Court Ink behind everything
 "icon": "./assets/brand/app-icon.png",
-"notification": { "icon": "…/notification-icon.png", "color": "#D8FA3C" },
+"notification": { "icon": "…/notification-icon.png", "color": "#7CBF3F" },
 "android": { "adaptiveIcon": { "backgroundColor": "#06130E", … } },
 "plugins": [["expo-splash-screen", { "backgroundColor": "#06130E",
                                      "image": "./assets/brand/splash.png",
@@ -302,7 +303,7 @@ config plugin and delete the block.
 
 **Don't**
 
-- Don't put Optic text on a light surface (1.1:1).
+- Don't put Optic text on a light surface (2.1:1).
 - Don't recolour the mark's frame to Chalk — the frame carries Optic, and
   Chalk is reserved for the spark. One focal point.
 - Don't rotate, skew, stretch, outline, or add a shadow to the mark; scale it

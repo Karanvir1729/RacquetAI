@@ -10,7 +10,7 @@
     "backgroundColor": "#06130E",
     "notification": {
       "icon": "./assets/brand/notification-icon.png",
-      "color": "#D8FA3C"
+      "color": "#7CBF3F"
     },
     "ios": {
       "bundleIdentifier": "com.racquetai.app",
