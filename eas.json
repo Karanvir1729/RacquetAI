@@ -20,7 +20,10 @@
   "submit": {
     "production": {
       "ios": {
-        "ascAppId": "6802102279"
+        "ascAppId": "6802102279",
+        "ascApiKeyPath": "/Users/karanvirkhanna/.app-store/AuthKey_9D365M9U56.p8",
+        "ascApiKeyIssuerId": "75448db6-2232-4585-b2e1-bc5beaf3cb01",
+        "ascApiKeyId": "9D365M9U56"
       }
     }
   }
