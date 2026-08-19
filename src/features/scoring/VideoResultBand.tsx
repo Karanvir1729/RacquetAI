@@ -25,6 +25,12 @@ interface VideoResultBandProps {
   onSwapPlayers: () => void;
   onSetFirstServer: (side: Side) => void;
   onClear: () => void;
+  /**
+   * True when a player is mounted above this band. The corrections are still
+   * the point; the long note is not, because the video above is already
+   * showing rally-by-rally what it has called.
+   */
+  compact?: boolean;
 }
 
 export function VideoResultBand({
@@ -34,6 +40,7 @@ export function VideoResultBand({
   onSwapPlayers,
   onSetFirstServer,
   onClear,
+  compact = false,
 }: VideoResultBandProps) {
   const scored = result.rallies.length - result.ignoredAfterMatch;
   // Both of these are evidence the rally rule is wrong for this footage, so
@@ -44,6 +51,34 @@ export function VideoResultBand({
   }
   if (result.ignoredAfterMatch > 0) {
     leftovers.push(`${result.ignoredAfterMatch} after match point ignored`);
+  }
+
+  if (compact) {
+    // Under a player: the corrections and nothing else. The heading, the note
+    // and the leftovers are all either drawn or spoken by the player above,
+    // and this screen has no room to say anything twice.
+    return (
+      <View style={styles.actions}>
+        <Action
+          icon="swap-horizontal"
+          label="Swap players"
+          accessibilityLabel="Swap which player the video calls A — mirrors the whole scoreline"
+          onPress={onSwapPlayers}
+        />
+        <Action
+          icon="tennisball-outline"
+          label={`${names[firstServer]} served first`}
+          accessibilityLabel={`${names[firstServer]} served first — tap to switch`}
+          onPress={() => onSetFirstServer(firstServer === "A" ? "B" : "A")}
+        />
+        <Action
+          icon="close"
+          label="Done"
+          accessibilityLabel="Done with this video result — back to the referee options"
+          onPress={onClear}
+        />
+      </View>
+    );
   }
 
   return (
@@ -66,9 +101,11 @@ export function VideoResultBand({
         </Pressable>
       </View>
 
-      <Text style={styles.note} numberOfLines={2}>
-        {scorelineNote(scored)}
-      </Text>
+      {compact ? null : (
+        <Text style={styles.note} numberOfLines={2}>
+          {scorelineNote(scored)}
+        </Text>
+      )}
       {leftovers.length > 0 ? (
         <Text style={styles.leftovers} numberOfLines={1}>
           {leftovers.join(" · ")}

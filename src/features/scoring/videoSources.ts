@@ -16,6 +16,7 @@ import { loadAnalysisForRecording } from "@/features/analysis/storage";
 import { DEMO_ANALYSIS } from "@/features/analysis/demoAnalysis";
 import type { MatchAnalysis } from "@/features/analysis/types";
 import { hasAnalysisSidecar } from "@/lib/analysisSidecar";
+import { readAnalysisVideoRef } from "@/lib/analysisVideo";
 import { listImportedAnalyses } from "@/lib/importedAnalyses";
 import { listRecordings } from "@/features/recording/storage";
 
@@ -30,6 +31,14 @@ export interface VideoSource {
   createdAt: string | null;
   /** Whole seconds, when the source knows; recordings do, imports do not. */
   durationSec: number | null;
+  /**
+   * The footage, when there is any. NULL is ordinary, not an error: the
+   * bundled demo ships stats only, and an import that was analysed on the
+   * server without adopting a copy of the clip has none either. A source
+   * without a video is still scorable — it just cannot be WATCHED being
+   * scored, so the screen folds it in one pass instead.
+   */
+  videoUri: string | null;
 }
 
 export const DEMO_SOURCE: VideoSource = {
@@ -37,6 +46,9 @@ export const DEMO_SOURCE: VideoSource = {
   kind: "demo",
   createdAt: null,
   durationSec: null,
+  // The bundled demo is stats only — AnalysisScreen hides its player for the
+  // same reason. Playing it is not an option this app can offer.
+  videoUri: null,
 };
 
 /**
@@ -55,6 +67,8 @@ export function listVideoSources(): VideoSource[] {
         kind: "recording",
         createdAt: entry.meta.createdAt,
         durationSec: entry.meta.durationSec,
+        // A recording IS its video; the file is right there in the store.
+        videoUri: entry.videoUri,
       });
     }
   } catch {
@@ -68,6 +82,10 @@ export function listVideoSources(): VideoSource[] {
         kind: "imported",
         createdAt: entry.createdAt.toISOString(),
         durationSec: null,
+        // Only imports that adopted a copy of the clip have one. The ref file
+        // is read here, on the tap that opens the picker, rather than on a
+        // render path — it is synchronous disk I/O.
+        videoUri: readAnalysisVideoRef(entry.id),
       });
     }
   } catch {
@@ -92,6 +110,19 @@ export function loadVideoAnalysis(source: VideoSource): MatchAnalysis | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Can this source be watched while it is scored, or only folded in one pass?
+ *
+ * Loose null check and a length test on purpose. "Playable" gates whether the
+ * screen hands a URI to a video player, and the failure it guards against is
+ * a black box with working scrub controls and no error — so anything that is
+ * not definitely a path (undefined from an older stored shape, an empty string
+ * from a ref file written mid-crash) has to read as NOT playable.
+ */
+export function isPlayable(source: VideoSource): boolean {
+  return source.videoUri != null && source.videoUri.length > 0;
 }
 
 /**

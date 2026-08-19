@@ -20,6 +20,17 @@ export interface SpeechOptions {
   language?: string;
   rate?: number;
   pitch?: number;
+  /**
+   * Lifecycle callbacks. Only the Referee's video playback needs them, and it
+   * needs them for one reason: on iOS the video's own audio and the spoken
+   * call go into the SAME audio session and sum at full volume, so a call made
+   * over a squash rally is inaudible under the ball strikes. Knowing when a
+   * line starts and stops is what lets the caller duck the video under it.
+   */
+  onStart?: () => void;
+  onDone?: () => void;
+  onStopped?: () => void;
+  onError?: () => void;
 }
 
 export interface SpeechModule {
@@ -66,6 +77,20 @@ export function loadSpeech(loader: SpeechLoader = defaultLoader): SpeechModule |
  */
 export const ANNOUNCE_OPTIONS: SpeechOptions = { language: "en-US", rate: 0.95, pitch: 1.0 };
 
+/**
+ * Told when the voice starts and stops, so a caller can get out of its way.
+ *
+ * Guaranteed to be balanced: every `onStart` is followed by exactly one
+ * `onEnd`, whatever expo-speech does — including when the line is cancelled by
+ * the next one, when the module throws, and when its callbacks never fire at
+ * all. A caller that ducks audio on start and restores it on end must never be
+ * left holding a permanently quiet video.
+ */
+export interface SpeechWatcher {
+  onStart: () => void;
+  onEnd: () => void;
+}
+
 export interface Announcer {
   /** False when expo-speech is missing — the UI hides the mute toggle. */
   readonly available: boolean;
@@ -73,6 +98,12 @@ export interface Announcer {
   say(text: string): void;
   /** Cut speech off (leaving the screen, muting, starting a new match). */
   stop(): void;
+  /**
+   * Watch the voice. Returns an unsubscribe. At most one watcher is needed
+   * (one screen plays video at a time), so a second call replaces the first
+   * rather than accumulating listeners nobody removes.
+   */
+  watch(watcher: SpeechWatcher): () => void;
 }
 
 /** An announcer that does nothing, for a build without expo-speech. */
@@ -80,7 +111,20 @@ const SILENT: Announcer = {
   available: false,
   say: () => {},
   stop: () => {},
+  watch: () => () => {},
 };
+
+/**
+ * How long a line may hold the duck before it is force-released.
+ *
+ * The belt to the callbacks' braces. `onDone` is delivered by the native
+ * synthesiser, and a build where it never arrives — a module that throws
+ * mid-utterance, a synthesiser killed by an audio interruption — would
+ * otherwise leave the video muted for the rest of the match with no way for
+ * the user to work out why. Comfortably longer than the longest call this app
+ * makes ("Game ball. Hand out. Ten, eight." is about three seconds).
+ */
+const MAX_UTTERANCE_MS = 8000;
 
 /**
  * Wrap a speech module into the announcer the screen uses.
@@ -92,15 +136,56 @@ const SILENT: Announcer = {
  */
 export function createAnnouncer(module: SpeechModule | null = loadSpeech()): Announcer {
   if (module === null) return SILENT;
+
+  let watcher: SpeechWatcher | null = null;
+  // Whether the caller currently believes the voice is speaking. All the
+  // balancing logic hangs off this one flag rather than off the callbacks,
+  // which are the part that can go missing.
+  let speaking = false;
+  let guard: ReturnType<typeof setTimeout> | null = null;
+
+  const end = () => {
+    if (guard !== null) {
+      clearTimeout(guard);
+      guard = null;
+    }
+    if (!speaking) return;
+    speaking = false;
+    watcher?.onEnd();
+  };
+
+  const begin = () => {
+    // A new line while one is in flight is a REPLACEMENT, not a second speaker
+    // — so the duck simply continues rather than ending and restarting, which
+    // would blip the video's volume up for a frame between two calls.
+    if (guard !== null) clearTimeout(guard);
+    guard = setTimeout(end, MAX_UTTERANCE_MS);
+    if (speaking) return;
+    speaking = true;
+    watcher?.onStart();
+  };
+
   return {
     available: true,
     say(text: string) {
       if (text.length === 0) return;
       try {
         module.stop();
-        module.speak(text, ANNOUNCE_OPTIONS);
+        begin();
+        module.speak(text, {
+          ...ANNOUNCE_OPTIONS,
+          // Every terminal callback lands on the same `end`, and `end` is
+          // idempotent: expo-speech delivers exactly one of done/stopped/error
+          // per utterance on iOS, but a platform that delivers two — or none,
+          // hence the guard timer — must still balance.
+          onDone: end,
+          onStopped: end,
+          onError: end,
+        });
       } catch {
-        // A failed announcement must never interrupt scoring.
+        // A failed announcement must never interrupt scoring — and must never
+        // leave the caller ducked for a line that was never spoken.
+        end();
       }
     },
     stop() {
@@ -109,6 +194,18 @@ export function createAnnouncer(module: SpeechModule | null = loadSpeech()): Ann
       } catch {
         // Nothing to do — worst case a sentence finishes on its own.
       }
+      // Not conditional on the module call succeeding: `stop` is what runs when
+      // the screen goes away, and the duck must be released either way.
+      end();
+    },
+    watch(next: SpeechWatcher) {
+      watcher = next;
+      // A watcher installed while a line is already in flight is told at once,
+      // or it would wait for an `onEnd` whose `onStart` it never heard.
+      if (speaking) next.onStart();
+      return () => {
+        if (watcher === next) watcher = null;
+      };
     },
   };
 }

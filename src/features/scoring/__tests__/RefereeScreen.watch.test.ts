@@ -126,11 +126,19 @@ const speech = jest.requireMock("expo-speech") as { __spoken: string[]; stop: je
 const native = mockNative;
 
 const MATCH_FILE = "referee-match.json";
+const PREFS_FILE = "referee-prefs.json";
 
 const RUNNING = { ...native.status };
 
 beforeEach(() => {
   store.clear();
+  // This file is about the screen that ASKS: autopilot off, and disclosed so
+  // no first-run alert stands between the tap and the camera. Autopilot's own
+  // behaviour is pinned in RefereeScreen.autopilot.test.ts.
+  store.set(
+    PREFS_FILE,
+    JSON.stringify({ v: 1, muted: false, autopilot: false, autopilotDisclosed: true }),
+  );
   speech.__spoken.length = 0;
   speech.stop.mockClear();
   native.listeners.clear();

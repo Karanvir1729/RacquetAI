@@ -233,7 +233,9 @@ describe("the mute toggle", () => {
     expect(speech.__spoken).toEqual([]);
     // Both preferences are written together — autopilot is untouched here and
     // must survive a mute toggle rather than being dropped from the file.
-    expect(store.get(PREFS_FILE)).toBe(JSON.stringify({ v: 1, muted: true, autopilot: false }));
+    expect(store.get(PREFS_FILE)).toBe(
+      JSON.stringify({ v: 1, muted: true, autopilot: true, autopilotDisclosed: false }),
+    );
   });
 
   it("still scores, and still shows the call, while muted", async () => {

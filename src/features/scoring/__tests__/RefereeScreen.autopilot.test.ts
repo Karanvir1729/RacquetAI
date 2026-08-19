@@ -17,6 +17,7 @@
  * JS (React.createElement, no JSX) to match the suite's `*.test.ts` pattern.
  */
 import { createElement } from "react";
+import { Alert } from "react-native";
 import { act, create, type ReactTestRenderer } from "react-test-renderer";
 
 import { AUTOPILOT_DELAY_MS } from "../autopilot";
@@ -197,10 +198,25 @@ async function emit(name: string, payload: unknown): Promise<void> {
   });
 }
 
+/**
+ * Seed the preference on disk rather than toggling into it after mount.
+ *
+ * Autopilot is now ON by default, so "armed" is the state the screen starts
+ * in and a toggle would be testing the wrong thing. `autopilotDisclosed` is
+ * seeded true so the first-run alert — pinned separately below — does not
+ * stand between the tap and the camera in every other test here.
+ */
+function seedPrefs(armed: boolean, disclosed = true): void {
+  store.set(
+    PREFS_FILE,
+    JSON.stringify({ v: 1, muted: false, autopilot: armed, autopilotDisclosed: disclosed }),
+  );
+}
+
 /** Arm autopilot (or not) and get the camera running. */
 async function watching(armed: boolean): Promise<ReactTestRenderer> {
+  seedPrefs(armed);
   const tree = await mount();
-  if (armed) await toggle(tree, AUTOPILOT);
   await press(tree, WATCH);
   await act(async () => {});
   return tree;
@@ -214,12 +230,20 @@ async function runCountdown(): Promise<void> {
 }
 
 describe("the switch itself", () => {
-  it("is off until a human turns it on, and says what off means", async () => {
+  it("is armed on a fresh install, and says what that means in errors", async () => {
+    // Nothing seeded: this is a phone that has never opened the screen.
+    const tree = await mount();
+    expect(text(tree)).toContain("one rally in four is wrong");
+  });
+
+  it("says what OFF means once it is turned off", async () => {
+    seedPrefs(false);
     const tree = await mount();
     expect(text(tree)).toContain("Your tap is what scores the point");
   });
 
-  it("warns out loud when it is armed", async () => {
+  it("warns out loud when it is armed by hand mid-session", async () => {
+    seedPrefs(false);
     const tree = await mount();
     await toggle(tree, AUTOPILOT);
     // Said as a warning, not a confirmation: from here the app changes the
@@ -227,11 +251,64 @@ describe("the switch itself", () => {
     expect(speech.__spoken.at(-1)).toContain("I will score each rally myself");
   });
 
-  it("persists, and says what ON means in terms of being wrong", async () => {
+  it("persists being turned off", async () => {
     const tree = await mount();
     await toggle(tree, AUTOPILOT);
-    expect(parseRefereePrefs(store.get(PREFS_FILE) ?? "")?.autopilot).toBe(true);
-    expect(text(tree)).toContain("one rally in four wrong");
+    expect(parseRefereePrefs(store.get(PREFS_FILE) ?? "")?.autopilot).toBe(false);
+    expect(text(tree)).toContain("Your tap is what scores the point");
+  });
+});
+
+/**
+ * The disclosure. Autopilot arriving ON means a first-time user can be
+ * refereed by a machine without ever having been told — unless something says
+ * so, in words, before the first watched rally. This is that something.
+ */
+describe("the first watched session on a new install", () => {
+  it("says what autopilot does, with the error rate, before the camera starts", async () => {
+    const alert = jest.spyOn(Alert, "alert").mockImplementation(() => {});
+    const tree = await mount();
+    await press(tree, WATCH);
+    expect(alert).toHaveBeenCalled();
+    const [title, body] = alert.mock.calls[0] ?? [];
+    expect(title).toContain("Autopilot");
+    expect(body).toContain("one rally in four is wrong");
+    alert.mockRestore();
+  });
+
+  it("starts disarmed when the user says they will tap each point", async () => {
+    const alert = jest
+      .spyOn(Alert, "alert")
+      .mockImplementation((_title, _body, buttons) => {
+        buttons?.find((button) => button.text?.includes("tap each point"))?.onPress?.();
+      });
+    const tree = await mount();
+    await press(tree, WATCH);
+    await act(async () => {});
+    expect(parseRefereePrefs(store.get(PREFS_FILE) ?? "")?.autopilot).toBe(false);
+    // And it still starts watching — the answer was about scoring, not about
+    // whether to turn the camera on.
+    expect(text(tree)).toContain("Watching");
+    alert.mockRestore();
+  });
+
+  it("never asks twice", async () => {
+    const alert = jest
+      .spyOn(Alert, "alert")
+      .mockImplementation((_title, _body, buttons) => {
+        buttons?.find((button) => button.text?.includes("Keep"))?.onPress?.();
+      });
+    const first = await mount();
+    await press(first, WATCH);
+    await act(async () => {});
+    expect(parseRefereePrefs(store.get(PREFS_FILE) ?? "")?.autopilotDisclosed).toBe(true);
+    await act(async () => first.unmount());
+
+    alert.mockClear();
+    const second = await mount();
+    await press(second, WATCH);
+    expect(alert).not.toHaveBeenCalled();
+    alert.mockRestore();
   });
 });
 
@@ -346,6 +423,14 @@ describe("with autopilot on", () => {
     await runCountdown();
     expect(saved()?.events ?? []).toHaveLength(0);
     expect(text(tree)).toContain("playing again");
+  });
+
+  it("says out loud that it is armed, once, when the session starts", async () => {
+    jest.useFakeTimers();
+    await watching(true);
+    // A user who never touched the switch never read its caption. Two players
+    // at the back of the court cannot see the screen at all.
+    expect(speech.__spoken.at(-1)).toContain("I will score each rally myself");
   });
 
   it("stops the clock when autopilot is switched off mid-countdown", async () => {

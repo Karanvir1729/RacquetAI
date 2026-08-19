@@ -40,9 +40,30 @@ Explicit consequences of that definition:
   would destroy trust. We deliver the clip and the three buttons, not the verdict.
 - **Human correction is a first-class feature, not a fallback.** At 90% per-rally accuracy an
   11-7 game (~18 rallies) still contains ~2 errors, and score errors compound. The product
-  promise is *assisted* scoring: the AI drafts the timeline, low-confidence rallies (below
-  `REVIEW_CONFIDENCE_THRESHOLD = 0.75`) are queued for a 5-second confirm/flip review, and the
-  state machine re-folds instantly.
+  promise is *assisted* scoring: the AI drafts the timeline, and every rally is correctable in
+  one tap with the state machine re-folding instantly.
+
+  **Amended (2026-08-19), because what shipped cannot meet the original form of this rule.**
+  It said low-confidence rallies — anything below `REVIEW_CONFIDENCE_THRESHOLD = 0.75` — are
+  queued for a confirm/flip review. That threshold is now unreachable *by construction*: the
+  measured accuracy ceiling for the shipped heuristic is 0.727 (`HEURISTIC_CEILING`, from
+  hand-labelling three archive matches), and `parseRallyEnded` clamps every confidence to it.
+  A 0.75 gate would therefore queue **every** rally, which is the same as having no autopilot
+  and no video scoring at all.
+
+  What replaces it, and why it keeps the promise the rule was written to keep:
+  - a rally is only ever scored automatically at `suggest` level — the engine's `ask` band, the
+    unreadable last striker, and play resuming after the question are all still queued for a
+    human;
+  - live, `AUTOPILOT_DELAY_MS` is a visible countdown any tap beats, so the confirm/flip review
+    still exists — it is just opt-out rather than opt-in;
+  - on a video, every rally is listed and correctable, and one correction detaches playback
+    from the score entirely;
+  - the 0.727 ceiling is quoted to the user wherever a scoreline is produced, and the first
+    watched session on a new install discloses it in words before a point is scored.
+
+  If a future measurement raises the ceiling above 0.75, restore the original gate rather than
+  widening this exception.
 - **Squash's scoring rule is an attribution gift.** Under PAR the rally winner serves next, a
   retained serve must alternate boxes, and a handout gives the new server a box choice. Who
   stands in which service box at the next serve is big, slow, and unoccluded — far easier to

@@ -142,7 +142,9 @@ export function AutopilotToggle({ autopilot, onToggle }: AutopilotToggleProps) {
           />
           <Text style={styles.autopilotTitle}>Autopilot</Text>
         </View>
-        <Text style={styles.autopilotCaption}>
+        {/* Two lines, hard. This screen does not scroll and the scoreboard is
+            immediately below — a third line lands on top of the numerals. */}
+        <Text style={styles.autopilotCaption} numberOfLines={2}>
           {autopilot ? AUTOPILOT_ON_NOTE : AUTOPILOT_OFF_NOTE}
         </Text>
       </View>

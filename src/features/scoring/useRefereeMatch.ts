@@ -18,10 +18,13 @@ import {
   PlayerNames,
 } from "./announce";
 import { AUTOPILOT_ARMED_CALL } from "./autopilot";
-import { createAnnouncer } from "./speech";
+import { createAnnouncer, SpeechWatcher } from "./speech";
 import {
   readAnnouncementsMuted,
   readAutopilot,
+  readAutopilotDisclosed,
+  readRefereePrefs,
+  writeRefereePrefs,
   readStoredMatch,
   sanitizePlayerName,
   StoredMatch,
@@ -53,6 +56,18 @@ export interface RefereeMatch {
    */
   autopilot: boolean;
   toggleAutopilot: () => void;
+  /**
+   * Has this user been shown what autopilot does? It is ON for a new install,
+   * so the first watched session has to say so in words — see
+   * `acknowledgeAutopilot`.
+   */
+  autopilotDisclosed: boolean;
+  /**
+   * Record that the disclosure has been through, with the user's answer.
+   * `keep` false disarms autopilot: being told what it does and saying no is
+   * the whole point of asking.
+   */
+  acknowledgeAutopilot: (keep: boolean) => void;
   /** False in a build without expo-speech: the screen hides the mute toggle. */
   speechAvailable: boolean;
   awardRally: (winner: Side) => void;
@@ -67,7 +82,24 @@ export interface RefereeMatch {
    * same buttons; there is no second kind of match in this hook.
    */
   loadMatch: (setup: MatchSetup, events: ScoreEvent[], line: string | null) => void;
+  /**
+   * Set the event list to exactly `events`, announcing `line`, for a video
+   * that is playing itself out one rally at a time.
+   *
+   * Deliberately NOT `loadMatch` per rally: that stops the announcer and mints
+   * a fresh `startedAt`, so calling it on every tick would cut each call off
+   * mid-word and keep resetting the match's age. A no-op when the list is
+   * already the right length, because ticks arrive four times a second and
+   * most of them change nothing.
+   */
+  syncVideoEvents: (events: ScoreEvent[], line: string | null) => void;
   toggleMute: () => void;
+  /**
+   * Watch the voice — the video player ducks the match audio under a call.
+   * Delegates to the one announcer, so there is no second speech pipeline to
+   * keep in step with mute.
+   */
+  watchSpeech: (watcher: SpeechWatcher) => () => void;
   /**
    * Speak a line that is NOT a scoring call — today, the court-watcher's
    * question. It goes through the SAME announcer as the calls, so a question
@@ -136,6 +168,7 @@ export function useRefereeMatch(): RefereeMatch {
   const matchRef = useRef(match);
   const [muted, setMuted] = useState<boolean>(readAnnouncementsMuted);
   const [autopilot, setAutopilot] = useState<boolean>(readAutopilot);
+  const [autopilotDisclosed, setAutopilotDisclosed] = useState<boolean>(readAutopilotDisclosed);
   const [lastCall, setLastCall] = useState<string | null>(null);
 
   // One announcer for the life of the screen. A lazy useState initializer
@@ -236,12 +269,37 @@ export function useRefereeMatch(): RefereeMatch {
     [announcer, commit],
   );
 
+  const syncVideoEvents = useCallback(
+    (events: ScoreEvent[], line: string | null) => {
+      const current = matchRef.current;
+      // The prefix only ever grows or shrinks; comparing lengths is enough and
+      // costs nothing on the ticks (the majority) where nothing has changed.
+      if (current.events.length === events.length) return;
+      commit({ ...current, events }, line);
+    },
+    [commit],
+  );
+
+  const watchSpeech = useCallback(
+    (watcher: SpeechWatcher) => announcer.watch(watcher),
+    [announcer],
+  );
+
   const say = useCallback(
     (line: string) => {
       if (muted || line.length === 0) return;
       announcer.say(line);
     },
     [announcer, muted],
+  );
+
+  const acknowledgeAutopilot = useCallback(
+    (keep: boolean) => {
+      setAutopilot(keep);
+      setAutopilotDisclosed(true);
+      writeRefereePrefs({ ...readRefereePrefs(), autopilot: keep, autopilotDisclosed: true });
+    },
+    [],
   );
 
   const toggleAutopilot = useCallback(() => {
@@ -270,6 +328,8 @@ export function useRefereeMatch(): RefereeMatch {
     muted,
     autopilot,
     toggleAutopilot,
+    autopilotDisclosed,
+    acknowledgeAutopilot,
     speechAvailable: announcer.available,
     awardRally,
     ruleAppeal,
@@ -277,7 +337,9 @@ export function useRefereeMatch(): RefereeMatch {
     undo,
     startMatch,
     loadMatch,
+    syncVideoEvents,
     toggleMute,
+    watchSpeech,
     say,
   };
 }

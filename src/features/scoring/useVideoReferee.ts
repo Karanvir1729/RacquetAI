@@ -27,7 +27,7 @@ import {
   VideoRefereeResult,
   videoResultCall,
 } from "./videoReferee";
-import { loadVideoAnalysis, unscorableReason, VideoSource } from "./videoSources";
+import { isPlayable, loadVideoAnalysis, unscorableReason, VideoSource } from "./videoSources";
 
 /** A refereed video: what was scored, from where, and how to change it. */
 export interface VideoRefereeState {
@@ -52,8 +52,22 @@ export interface VideoReferee extends VideoRefereeState {
 
 export interface UseVideoRefereeOptions {
   names: PlayerNames;
-  /** Replace the match with these events, announcing `line`. */
-  onLoad: (setup: { names: PlayerNames; firstServer: Side }, result: VideoRefereeResult) => void;
+  /**
+   * Load a scored video into the match.
+   *
+   * `playable` is the difference between the two ways this feature runs. With
+   * footage, the screen PLAYS it and the rallies land one at a time as the
+   * playhead reaches them, so nothing is folded up front — the callback only
+   * resets the match to empty and lets the player fill it. Without footage
+   * there is nothing to watch, so the whole reconstruction is folded at once
+   * and read out as a summary, which is what this feature did before it could
+   * play anything.
+   */
+  onLoad: (
+    setup: { names: PlayerNames; firstServer: Side },
+    result: VideoRefereeResult,
+    playable: boolean,
+  ) => void;
   /** Injectable for tests; the screen never passes it. */
   loadAnalysis?: (source: VideoSource) => MatchAnalysis | null;
 }
@@ -86,7 +100,7 @@ export function useVideoReferee({
       }
       const result = refereeVideo(analysis.shots, { binding, firstServer });
       setState({ source, result, problem: null, binding, firstServer });
-      onLoad({ names, firstServer }, result);
+      onLoad({ names, firstServer }, result, isPlayable(source));
     },
     [loadAnalysis, names, onLoad],
   );

@@ -9,8 +9,12 @@
  * Autopilot is the deliberate exception, and it is fenced by three rules that
  * are all measured, not stylistic:
  *
- * 1. It is OFF until a person turns it on, and the switch says in plain words
- *    what turning it on means.
+ * 1. It is ON for a new install — the app is meant to referee — so the fence
+ *    is DISCLOSURE rather than opt-in: the first watched session on a fresh
+ *    phone says in words what it is about to do, with the error rate, before a
+ *    point is scored, and offers "I'll tap each point" in the same breath. A
+ *    phone that already had this app keeps autopilot off until asked (see
+ *    `readRefereePrefs`), because inheriting a default is not consent.
  * 2. It only ever commits a `suggest`-level proposal. When the engine lands on
  *    `ask` — the last striker was unreadable (21% of real rally ends), the
  *    confidence was below the propose band, or play carried on after the
@@ -81,12 +85,17 @@ export function countdownLabel(name: string, seconds: number): string {
 export const AUTOPILOT_TAG = "Scored by autopilot";
 
 /**
- * The "Watch live" caption while autopilot is armed. `WATCH_PITCH` — "it asks
- * who won, you decide every point" — becomes false the moment the switch is on,
- * and a pitch that is false is the one thing this feature cannot ship.
+ * The "Watch live" caption while autopilot is armed — which, on a new install,
+ * is the FIRST thing anybody reads about this feature. `WATCH_PITCH` — "it
+ * asks who won, you decide every point" — becomes false the moment the switch
+ * is on, and a pitch that is false is the one thing this feature cannot ship.
+ *
+ * It carries the error rate for the same reason: the caption on the switch
+ * carries it, and a user who never touched the switch never read the switch.
  */
 export const AUTOPILOT_PITCH =
-  "It spots the end of a rally and scores it after a countdown you can beat.";
+  "It scores each rally itself after a countdown you can beat. " +
+  "Roughly one in four is wrong.";
 
 export const AUTOPILOT_OFF_NOTE =
   "The camera asks who won each rally. Your tap is what scores the point.";
@@ -97,9 +106,14 @@ export const AUTOPILOT_OFF_NOTE =
  * four" is the same number said in a way a user can act on.
  */
 export const AUTOPILOT_ON_NOTE =
-  "The camera scores each rally on its own after a 4-second countdown. It gets " +
-  "roughly one rally in four wrong, so watch the score and correct it.";
+  "It scores each rally itself after a 4-second countdown you can beat. " +
+  "Roughly one rally in four is wrong — watch the score.";
 
-/** Spoken once, when autopilot is armed mid-match. Warned, not sold. */
+/**
+ * Spoken once whenever a watching session STARTS armed, and again when
+ * somebody arms it mid-match. Warned, not sold — and out loud, because two
+ * players at the back of the court cannot see the screen at all, and on a new
+ * install neither of them chose this.
+ */
 export const AUTOPILOT_ARMED_CALL =
   "Autopilot on. I will score each rally myself — correct me on the buttons.";

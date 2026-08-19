@@ -15,8 +15,8 @@ its "‹ Library" chevron (`onBack: null`) rather than offering a control that g
 
 | | clock | who decides the rally |
 | --- | --- | --- |
-| **Watch live** | the court is in front of the phone now | a tap — or autopilot, if armed |
-| **Score a video** | an analysis already on the phone | the app scores the lot; you correct it |
+| **Watch live** | the court is in front of the phone now | autopilot, unless it has been turned off |
+| **Score a video** | an analysis already on the phone, PLAYING | the app calls each rally as the footage reaches it |
 
 They share the rally rule (4.5 s of silence ends a rally), the heuristic (the last player to
 strike won it) and the PAR-11 fold. What differs is whether a human is standing there to ask.
@@ -26,19 +26,38 @@ the result is loaded into the SAME event list the buttons drive (`useRefereeMatc
 so it is persisted, undoable one rally at a time, and correctable on the same two buttons. There
 is no second kind of match anywhere in this feature.
 
+**With footage, you watch it happen.** `VideoRefereePlayer.tsx` plays the clip and calls each
+rally out loud as the playhead reaches it (`videoPlayback.ts`). Without footage — the bundled
+demo, and any import that never adopted a copy of its clip — the whole reconstruction is folded
+at once and read out as a summary, which is what this did before it could play anything. The two
+paths produce the same events; only the pacing differs.
+
 ## Honesty
 
 Every point on this screen comes from one of three places, and the code keeps them separate:
 
-1. **a tap** — the default, and the only one that carries a human's authority;
-2. **autopilot**, off until a person turns it on, which commits the app's own suggestion after a
-   visible 4-second countdown any tap can beat (`autopilot.ts`, `useAutopilot.ts`);
-3. **a refereed video**, which produces a whole scoreline at once and says so every time it
-   shows one.
+1. **a tap** — the only one that carries a human's authority;
+2. **autopilot**, which commits the app's own suggestion after a visible 4-second countdown any
+   tap can beat (`autopilot.ts`, `useAutopilot.ts`);
+3. **a refereed video**, which calls each rally as the footage reaches it, or folds the lot at
+   once when there is no footage to play.
 
 The measured accuracy behind 2 and 3 is the same 72.7% per rally, so neither may be described as
 accurate scoring. "Score keeper", "referee" and "autopilot" are fine; "AI referee" is not, and
 neither is any copy that presents a machine-derived scoreline as a result rather than a draft.
+
+**Autopilot ships ON**, which moves where the honesty has to live. It used to be carried by the
+act of turning it on; now it is carried by four things that must all stay true:
+
+- the caption a new user reads first (`AUTOPILOT_PITCH`) carries the error rate, not just the
+  capability;
+- the first watched session on a fresh install shows an alert naming the error rate and offering
+  "I'll tap each point", before the camera starts (`RefereeScreen.startWatching`);
+- every armed session says out loud that it is scoring by itself (`AUTOPILOT_ARMED_CALL`) —
+  two players at the back of the court cannot see the screen;
+- a phone that already had this app keeps autopilot OFF (`readRefereePrefs`'s `LEGACY_PREFS`).
+  Inheriting a default is not consent, and one mute toggle would otherwise freeze that inherited
+  `true` into their prefs file forever.
 
 ## Watching the court (`liveClient.ts`)
 
@@ -80,8 +99,9 @@ therefore keep the manual taps live at all times and stay fully usable with the 
 The one path in this feature where a machine changes the score. It is fenced by three rules, all
 measured rather than stylistic, and `RefereeScreen.autopilot.test.ts` pins every one:
 
-1. **Off until a person turns it on.** The switch is on the entry screen (`AutopilotToggle`) and
-   — because that screen is gone once the camera takes it over — also in the courtside action row
+1. **Disclosed before it acts.** It is ON for a new install, so the fence is the disclosure
+   above rather than an opt-in tap. The switch is on the entry screen (`AutopilotToggle`) and —
+   because that screen is gone once the camera takes it over — also in the courtside action row
    while watching. A machine scoring points that nobody present can stop is the one state this
    must never reach.
 2. **Only `suggest`-level ends.** An `ask` — unreadable last striker (21% of real ends), weak
@@ -116,6 +136,38 @@ Two corrections re-run the whole fold rather than editing it, because both are w
 is wrong that the numbers cannot show: **swap players** (the analyser's "A" is whoever was
 leftmost, so a wrong binding mirrors everything) and **who served first** (nothing in a video
 reveals it, and it shifts every hand-out).
+
+## Watching a video referee itself (`videoPlayback.ts`, `VideoRefereePlayer.tsx`)
+
+**The score is a function of the playhead**, never a cursor that only goes forward:
+`scoreAfter(rallies, calledBy(rallies, t), firstServer)`. Scrub back and the score rewinds;
+scrub forward and it catches up in one step; the same second always reads the same. A
+forward-only cursor survives ordinary playback and is then permanently wrong the first time
+anybody drags the scrubber back — with nothing on screen to show it.
+
+- **A call lands `CALL_DELAY_SEC` (1.2 s) after the rally's last strike**, not on it: the point
+  is still visibly ending. Well inside the 4.5 s rally gap, so a call can never slide into the
+  next rally.
+- **One rally crossed → the marker's call, from `buildAnnouncement`** — the same wording a
+  tapped rally produces. More than one crossed in a single tick means a seek, and the honest
+  thing to say then is nothing: the call for the last of them describes a score nobody heard
+  build. Backwards is silent for the same reason.
+- **`playToEnd` takes the whole prefix** and speaks the one-pass summary. The last rally's call
+  can land past the end of the file, and the same analysis must not score lower played than
+  folded.
+- **A human correction detaches it.** Any manual tap, undo or let ruling while a video is
+  attached stops playback writing to the score at all, pauses the footage, and offers to hand it
+  back from wherever the playhead now is. Without that, the next rally crossing silently
+  reinstates the rally they just corrected.
+
+**The audio is not optional.** On iOS the video's own audio and the spoken call go into the same
+session and sum at full volume — and a squash video's audio is ball strikes in the same range as
+a voice, so an un-ducked call is not quiet, it is unintelligible. The announcer therefore reports
+when it starts and stops speaking (`Announcer.watch`, `SpeechWatcher`) and the player drops to
+15% for the length of the line. That contract is **balanced by construction** — an 8-second guard
+timer, plus `stop()`, plus the throw path — because a video left permanently silent is a worse
+bug than the one being fixed. `audioMixingMode: "mixWithOthers"` is separate and also required:
+expo-video's iOS default takes the session exclusively and would stop the user's music.
 
 `videoSources.ts` lists ANALYSES, not recordings — a take that was never analysed has no shot
 stream to referee — plus the bundled demo, pinned last and always present, which is what makes
@@ -224,8 +276,9 @@ the user information.
 ## Tests
 
 `videoReferee.test.ts` (the rally split at its boundaries, the fold, the stop at match point, the
-binding, and the wording), `RefereeScreen.autopilot.test.ts` and `RefereeScreen.video.test.ts`
-(both described above, driven through the real screen), plus the originals:
+binding, and the wording), `videoPlayback.test.ts` (the score as a function of the playhead, and
+what is said when it moves), `RefereeScreen.autopilot.test.ts`, `RefereeScreen.video.test.ts` and
+`RefereeScreen.playback.test.ts` (all three driven through the real screen), plus the originals:
 `squash.test.ts` and `engine.test.ts` (the restored machine and its laws), `announce.test.ts`
 (every spoken line), `storage.test.ts` (round trip + every way a file can be damaged),
 `speech.test.ts` (a missing, malformed or throwing module never breaks scoring),

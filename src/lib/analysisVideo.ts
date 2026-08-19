@@ -3,7 +3,12 @@
  * `<id>.video.<ext>` (a COPY of the source clip — picker URIs point into the
  * OS cache, which iOS may purge, so a bare reference would rot) and
  * `<id>.video.json` holding `{ "videoUri": "file://..." }` for the analysis
- * screen to resolve. A separate ref file — not a field in the analysis
+ * screen to resolve.
+ *
+ * That stored path is ABSOLUTE and therefore not durable on its own: iOS mints
+ * a new container UUID on reinstall and on restore from a backup, so the path
+ * stops resolving while the file itself is untouched. `readAnalysisVideoRef`
+ * recovers by filename and heals the ref — see the note there. A separate ref file — not a field in the analysis
  * sidecar — keeps the sidecar exactly the schemaVersion-1 contract that
  * `parseAnalysis` validates. Missing or unreadable ref simply means "no
  * video" and the analysis screen hides the player.
@@ -59,10 +64,30 @@ export function readAnalysisVideoRef(id: string): string | null {
     }
     const uri = (parsed as { videoUri: string }).videoUri;
     if (uri.length === 0) return null;
-    // A ref whose video has since vanished (cache purge, manual delete) is
-    // "no video", not a broken player.
-    if (uri.startsWith("file:") && !new File(uri).exists) return null;
-    return uri;
+    if (!uri.startsWith("file:")) return uri;
+    if (new File(uri).exists) return uri;
+
+    // The stored path no longer resolves. Before giving up, look for the same
+    // FILENAME in today's recordings directory.
+    //
+    // iOS regenerates the app's container UUID on reinstall and on restore
+    // from a backup, so an absolute path written into this sandbox rots even
+    // though the file is still sitting right there — the same clip, under a
+    // directory with a different name. The recordings store never had this
+    // problem because its sidecar holds a filename and resolves it live
+    // (features/recording/storage.ts); this reader now does the same.
+    const name = uri.split("/").pop();
+    if (name === undefined || name.length === 0) return null;
+    const local = new File(dir, name);
+    if (!local.exists) return null;
+    // Heal the ref in passing, so the next read is one `exists` check again.
+    // Best-effort: a read-only or full disk still returns the working uri.
+    try {
+      writeAnalysisVideoRef(id, local.uri);
+    } catch {
+      // The path below is what matters; persisting it is an optimisation.
+    }
+    return local.uri;
   } catch {
     return null;
   }

@@ -42,9 +42,12 @@ import { SquashScore } from "./types";
  *
  * The native engine's `confirm` band (>= 0.85) is deliberately unreachable: the
  * confidence is capped at the 0.727 measured ceiling, so nothing can ever get
- * there. It is mapped to `suggest` anyway rather than left to fall through,
- * because if a future measurement raises the ceiling the correct behaviour is
- * still "light up the button and ask", never "commit on a timer".
+ * there. It is mapped to `suggest` anyway rather than left to fall through.
+ *
+ * `suggest` is the ONLY level autopilot may commit (autopilot.ts), and that is
+ * the whole of the licence this file grants it: below the propose band, with an
+ * unreadable striker, or with play carrying on afterwards, the answer is a
+ * question to a human no matter what any switch says.
  */
 export type ProposalLevel = "suggest" | "ask";
 
@@ -156,8 +159,12 @@ export function confidenceLine(proposal: RallyProposal): string {
 }
 
 /**
- * The standing disclaimer on the entry point. Deliberately the first thing said
- * about the feature, and deliberately not a boast.
+ * What the entry point says when autopilot is OFF. Deliberately not a boast.
+ *
+ * It is no longer the standing disclaimer: autopilot ships armed, so the
+ * caption a new user reads is `AUTOPILOT_PITCH`, which carries the error rate.
+ * This is the disarmed branch, and it must stay exactly true of that branch —
+ * "you decide every point" is a promise only the tap-driven path can keep.
  */
 export const WATCH_PITCH = "It spots the end of a rally and asks who won. You decide every point.";
 

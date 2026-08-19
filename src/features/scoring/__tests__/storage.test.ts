@@ -12,11 +12,14 @@ import {
   parseMutedPref,
   parseStoredMatch,
   readAnnouncementsMuted,
+  readAutopilotDisclosed,
+  readRefereePrefs,
   readStoredMatch,
   sanitizePlayerName,
   serializeStoredMatch,
   StoredMatch,
   writeAnnouncementsMuted,
+  writeAutopilotDisclosed,
   writeStoredMatch,
 } from "../storage";
 import { reduceSquashEvents } from "../squash";
@@ -41,6 +44,10 @@ jest.mock("expo-file-system", () => {
     textSync(): string {
       const text = store.get(this.key);
       if (text === undefined) throw new Error(`no such file: ${this.key}`);
+      // A file that exists and cannot be read — a different failure from a
+      // file full of junk, and one the prefs reader must not treat as a new
+      // install.
+      if (text === "__throws__") throw new Error(`unreadable: ${this.key}`);
       return text;
     }
   }
@@ -177,5 +184,69 @@ describe("the mute preference", () => {
     expect(parseMutedPref("{{{")).toBeNull();
     expect(parseMutedPref(JSON.stringify({ v: 2, muted: true }))).toBeNull();
     expect(parseMutedPref(JSON.stringify({ v: 1, muted: "yes" }))).toBeNull();
+  });
+});
+
+/**
+ * The autopilot preference, which owns a decision the rest of the app only
+ * reads: whether a machine may change the score without being asked.
+ *
+ * The rule has two halves and the second one is the one that breaks silently.
+ * A NEW install gets autopilot on. A phone that already has this app does NOT
+ * — its prefs file predates the feature and says nothing about it, and folding
+ * that onto the new default would arm autopilot on somebody mid-season without
+ * a tap, a prompt or a word.
+ */
+describe("the autopilot preference", () => {
+  it("is on for a brand-new install, and undisclosed", () => {
+    expect(readRefereePrefs()).toEqual({
+      muted: false,
+      autopilot: true,
+      autopilotDisclosed: false,
+    });
+  });
+
+  it("is OFF for a file written before autopilot existed", () => {
+    // The exact bytes the pre-autopilot build wrote.
+    store.set(PREFS_FILE, JSON.stringify({ v: 1, muted: true }));
+    const prefs = readRefereePrefs();
+    expect(prefs.muted).toBe(true);
+    expect(prefs.autopilot).toBe(false);
+  });
+
+  it("keeps an explicit choice either way", () => {
+    store.set(PREFS_FILE, JSON.stringify({ v: 1, muted: false, autopilot: false }));
+    expect(readRefereePrefs().autopilot).toBe(false);
+    store.set(PREFS_FILE, JSON.stringify({ v: 1, muted: false, autopilot: true }));
+    expect(readRefereePrefs().autopilot).toBe(true);
+  });
+
+  it("does not arm autopilot off the back of a damaged file", () => {
+    for (const damaged of ["{{{", JSON.stringify({ v: 2, autopilot: true }), "", "[]"]) {
+      store.set(PREFS_FILE, damaged);
+      expect(readRefereePrefs().autopilot).toBe(false);
+    }
+  });
+
+  it("does not arm autopilot off the back of a disk error", () => {
+    store.set(PREFS_FILE, "__throws__");
+    expect(readRefereePrefs().autopilot).toBe(false);
+  });
+
+  it("does not smuggle the new default into a legacy file on a mute toggle", () => {
+    // The irreversible one: writeRefereePrefs persists all three keys, so if a
+    // legacy read inherited autopilot:true, one tap on the mute control would
+    // freeze it there and make it indistinguishable from consent forever.
+    store.set(PREFS_FILE, JSON.stringify({ v: 1, muted: false }));
+    writeAnnouncementsMuted(true);
+    expect(store.get(PREFS_FILE)).toBe(
+      JSON.stringify({ v: 1, muted: true, autopilot: false, autopilotDisclosed: false }),
+    );
+  });
+
+  it("round-trips the disclosure flag", () => {
+    writeAutopilotDisclosed(true);
+    expect(readAutopilotDisclosed()).toBe(true);
+    expect(readRefereePrefs().autopilot).toBe(true);
   });
 });

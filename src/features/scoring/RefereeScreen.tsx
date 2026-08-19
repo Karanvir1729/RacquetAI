@@ -44,7 +44,12 @@ import { selection as selectionHaptic } from "@/lib/haptics";
 import { colors, spacing, type } from "@/theme/tokens";
 
 import { AppealSheet } from "./AppealSheet";
-import { AUTOPILOT_TAG, countdownLabel } from "./autopilot";
+import {
+  AUTOPILOT_ARMED_CALL,
+  AUTOPILOT_ON_NOTE,
+  AUTOPILOT_TAG,
+  countdownLabel,
+} from "./autopilot";
 import { NewMatchSheet } from "./NewMatchSheet";
 import { proposalCall, proposalLevel } from "./proposal";
 import { ProposalPrompt } from "./ProposalPrompt";
@@ -61,6 +66,8 @@ import { VideoResultBand } from "./VideoResultBand";
 import { NoticeBanner } from "./WatchControls";
 import { WatchPanel } from "./WatchPanel";
 import { LetRuling, OTHER_SIDE, Side } from "./types";
+import { playbackLoadCall } from "./videoPlayback";
+import { VideoRefereePlayer } from "./VideoRefereePlayer";
 import { toScoreEvents } from "./videoReferee";
 import { listVideoSources, VideoSource } from "./videoSources";
 
@@ -83,6 +90,12 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
   const [setupOpen, setSetupOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [sources, setSources] = useState<VideoSource[]>([]);
+  /**
+   * Set the moment a human corrects anything while a video is playing. From
+   * then on the playhead stops writing to the score — otherwise the next rally
+   * crossing silently reinstates the rally they just corrected.
+   */
+  const [detached, setDetached] = useState(false);
   // Whether the point now on the board was put there by autopilot rather than
   // by a thumb. Shown beside the call so a player scrolling back can tell
   // which points nobody confirmed.
@@ -93,12 +106,17 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
   // undoable, correctable on the same buttons, and persisted like any other.
   const video = useVideoReferee({
     names: match.names,
-    onLoad: (setup, result) => {
+    onLoad: (setup, result, playable) => {
       setPickerOpen(false);
+      setDetached(false);
+      // With footage there is nothing to fold yet: the board starts at 0-0 and
+      // the rallies land as the playhead reaches them. Without it, the whole
+      // reconstruction arrives at once and is read out as a summary — the way
+      // this feature worked before it could play anything.
       match.loadMatch(
         { names: setup.names, firstServer: setup.firstServer },
-        toScoreEvents(result),
-        videoLoadCall(result, setup.names),
+        playable ? [] : toScoreEvents(result),
+        playable ? playbackLoadCall(result.rallies.length) : videoLoadCall(result, setup.names),
       );
     },
   });
@@ -133,6 +151,22 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
       setLastByAutopilot(true);
     },
   });
+
+  // Say it out loud once per watching session that STARTS armed. The toggle
+  // speaks when somebody arms it mid-match; a user who never touched the
+  // switch — which is now the common case — would otherwise be told nothing
+  // audible, and two players at the back of the court cannot see the screen.
+  const warnedFor = useRef(false);
+  const { autopilot: armed, say: sayLine } = match;
+  useEffect(() => {
+    if (!live.watching) {
+      warnedFor.current = false;
+      return;
+    }
+    if (!armed || warnedFor.current) return;
+    warnedFor.current = true;
+    sayLine(AUTOPILOT_ARMED_CALL);
+  }, [armed, live.watching, sayLine]);
 
   // Ask each question out loud exactly ONCE. Keyed on the arrival time rather
   // than on the object, because the proposal is rebuilt whenever the player
@@ -169,16 +203,25 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
   // Every path that settles a rally also closes the question, whether it agreed
   // with it or not. A question left standing over a scored point would invite a
   // second tap and a phantom point.
+  // Any manual scoring action while a video is playing takes the pen off it.
+  // One place, so no path can correct the score and leave playback still
+  // writing to it.
+  const takeOver = () => {
+    if (video.result !== null) setDetached(true);
+  };
+
   const award = (winner: Side) => {
     live.clearProposal();
     match.awardRally(winner);
     setLastByAutopilot(false);
+    takeOver();
   };
 
   const undo = () => {
     live.clearProposal();
     match.undo();
     setLastByAutopilot(false);
+    takeOver();
   };
 
   const openAppeal = () => {
@@ -191,6 +234,7 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
     setAppealOpen(false);
     live.clearProposal();
     match.ruleAppeal(appealer, ruling);
+    takeOver();
   };
 
   // Listing analyses reads the disk, so it happens on the tap that asks for the
@@ -203,6 +247,38 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
       setSources([]);
     }
     setPickerOpen(true);
+  };
+
+  /**
+   * The first live session on a phone where autopilot is armed by DEFAULT.
+   *
+   * The switch's caption carries the error rate, but a user who never touched
+   * the switch never read the caption — so this is the one place the person
+   * about to be refereed by a machine is told what it does, in words, before
+   * it does it. Once per install, on the tap that starts watching, never at
+   * launch and never on mount.
+   */
+  const startWatching = () => {
+    if (!match.autopilot || match.autopilotDisclosed) {
+      live.start();
+      return;
+    }
+    Alert.alert("Autopilot is on", AUTOPILOT_ON_NOTE, [
+      {
+        text: "I'll tap each point",
+        onPress: () => {
+          match.acknowledgeAutopilot(false);
+          live.start();
+        },
+      },
+      {
+        text: "Keep autopilot on",
+        onPress: () => {
+          match.acknowledgeAutopilot(true);
+          live.start();
+        },
+      },
+    ]);
   };
 
   const openSetup = () => {
@@ -261,6 +337,23 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
         </View>
       ) : video.result !== null ? (
         <View style={styles.strip}>
+          {/* Footage present: watch it referee itself. Footage absent (the
+              bundled demo, an import that never adopted a copy of the clip):
+              the one-pass reconstruction, which is what this did before it
+              could play anything. */}
+          {video.source?.videoUri == null ? null : (
+            <VideoRefereePlayer
+              videoUri={video.source.videoUri}
+              result={video.result}
+              names={match.names}
+              watchSpeech={match.watchSpeech}
+              muted={match.muted}
+              detached={detached}
+              compact={compact}
+              onReattach={() => setDetached(false)}
+              onSync={match.syncVideoEvents}
+            />
+          )}
           <VideoResultBand
             result={video.result}
             names={match.names}
@@ -268,6 +361,7 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
             onSwapPlayers={video.swapPlayers}
             onSetFirstServer={video.setFirstServer}
             onClear={video.clear}
+            compact={video.source?.videoUri != null}
           />
         </View>
       ) : (
@@ -284,7 +378,7 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
               liveAvailable={live.available}
               autopilot={match.autopilot}
               starting={live.starting}
-              onWatchLive={live.start}
+              onWatchLive={startWatching}
               onScoreVideo={openVideoPicker}
             />
             {/* Only where it can apply: autopilot is about the live camera

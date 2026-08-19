@@ -165,14 +165,51 @@ export function writeStoredMatch(match: StoredMatch): void {
 export interface RefereePrefs {
   muted: boolean;
   /**
-   * Autopilot: the camera scores the rally itself instead of asking. OFF by
-   * default and deliberately so — at the measured 72.7% ceiling it will put
-   * points on the wrong side, so a human has to choose to hand it the pen.
+   * Autopilot: the camera scores the rally itself instead of asking.
+   *
+   * ON for a new install — the app is meant to referee, and a scoreboard that
+   * needs a tap after every rally is a scoreboard somebody has to stand next
+   * to. It is armed, not hidden: the switch is on the entry screen, the pill
+   * is in the courtside row, the countdown is on screen for every rally it
+   * scores, and `autopilotDisclosed` guarantees the first-time user is told in
+   * words what it is about to do before it does it.
+   *
+   * NOT on for someone who already has this app. See `readRefereePrefs`.
    */
   autopilot: boolean;
+  /**
+   * Has this user been shown what autopilot does? False until the disclosure
+   * has been through, and persisted so it happens exactly once.
+   *
+   * It exists because the default is ON: a user who never touched the switch
+   * never saw the switch's caption, so the one place the error rate can still
+   * reach them is a disclosure before the first watched rally.
+   */
+  autopilotDisclosed: boolean;
 }
 
-export const DEFAULT_PREFS: RefereePrefs = { muted: false, autopilot: false };
+/** A fresh install. */
+export const DEFAULT_PREFS: RefereePrefs = {
+  muted: false,
+  autopilot: true,
+  autopilotDisclosed: false,
+};
+
+/**
+ * What an EXISTING user gets for keys their prefs file does not mention.
+ *
+ * Autopilot shipped off, and a file written by that build has no `autopilot`
+ * key at all. Folding such a file onto the new defaults would arm autopilot on
+ * somebody who has been using this app for weeks — without a tap, a prompt or
+ * a word — and the next mute toggle would persist that inherited `true`,
+ * making it indistinguishable from consent forever after. So a file that
+ * exists but is silent about autopilot means NO.
+ */
+const LEGACY_PREFS: RefereePrefs = {
+  muted: false,
+  autopilot: false,
+  autopilotDisclosed: false,
+};
 
 /** Pure: narrow the prefs file. Unreadable or unknown-version yields null. */
 export function parseRefereePrefs(raw: string): Partial<RefereePrefs> | null {
@@ -186,6 +223,9 @@ export function parseRefereePrefs(raw: string): Partial<RefereePrefs> | null {
   const prefs: Partial<RefereePrefs> = {};
   if (typeof data.muted === "boolean") prefs.muted = data.muted;
   if (typeof data.autopilot === "boolean") prefs.autopilot = data.autopilot;
+  if (typeof data.autopilotDisclosed === "boolean") {
+    prefs.autopilotDisclosed = data.autopilotDisclosed;
+  }
   return prefs;
 }
 
@@ -195,16 +235,25 @@ export function parseMutedPref(raw: string): boolean | null {
 }
 
 /**
- * Every preference, with defaults filled in. Announcements default to ON — the
- * whole point of the screen is that it speaks — and autopilot to OFF.
+ * Every preference, with defaults filled in.
+ *
+ * Which defaults depends on whether this user is new, and that distinction is
+ * the whole point: a MISSING file is a fresh install and gets `DEFAULT_PREFS`
+ * (autopilot on); a file that EXISTS is somebody who already had opinions
+ * about this screen, and anything it does not mention falls back to
+ * `LEGACY_PREFS` (autopilot off) rather than to the new default.
+ *
+ * A file that cannot be read or parsed is treated as legacy too. Arming
+ * autopilot off the back of a filesystem error would be the one bug in this
+ * feature with no visible cause.
  */
 export function readRefereePrefs(): RefereePrefs {
   try {
     const file = new File(Paths.document, PREFS_FILE_NAME);
     if (!file.exists) return DEFAULT_PREFS;
-    return { ...DEFAULT_PREFS, ...parseRefereePrefs(file.textSync()) };
+    return { ...LEGACY_PREFS, ...parseRefereePrefs(file.textSync()) };
   } catch {
-    return DEFAULT_PREFS;
+    return LEGACY_PREFS;
   }
 }
 
@@ -213,7 +262,14 @@ export function writeRefereePrefs(prefs: RefereePrefs): void {
   try {
     const file = new File(Paths.document, PREFS_FILE_NAME);
     if (!file.exists) file.create();
-    file.write(JSON.stringify({ v: 1, muted: prefs.muted, autopilot: prefs.autopilot }));
+    file.write(
+      JSON.stringify({
+        v: 1,
+        muted: prefs.muted,
+        autopilot: prefs.autopilot,
+        autopilotDisclosed: prefs.autopilotDisclosed,
+      }),
+    );
   } catch {
     // A forgotten preference is a shrug; a crash on a toggle is not.
   }
@@ -233,11 +289,20 @@ export function writeAnnouncementsMuted(muted: boolean): void {
   writeRefereePrefs({ ...readRefereePrefs(), muted });
 }
 
-/** Is autopilot armed? Defaults to FALSE — see `RefereePrefs.autopilot`. */
+/** Is autopilot armed? On for a new install — see `RefereePrefs.autopilot`. */
 export function readAutopilot(): boolean {
   return readRefereePrefs().autopilot;
 }
 
 export function writeAutopilot(autopilot: boolean): void {
   writeRefereePrefs({ ...readRefereePrefs(), autopilot });
+}
+
+/** Has the user been told what autopilot does? */
+export function readAutopilotDisclosed(): boolean {
+  return readRefereePrefs().autopilotDisclosed;
+}
+
+export function writeAutopilotDisclosed(disclosed: boolean): void {
+  writeRefereePrefs({ ...readRefereePrefs(), autopilotDisclosed: disclosed });
 }

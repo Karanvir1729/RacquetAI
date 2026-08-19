@@ -102,8 +102,10 @@ jest.mock("../videoSources", () => {
   const actual = jest.requireActual("../videoSources");
   return {
     ...actual,
+    // The bundled demo: an analysis with no footage, so this file drives the
+    // one-pass path. The played path is RefereeScreen.playback.test.ts.
     listVideoSources: () => [
-      { id: "demo", kind: "demo", createdAt: null, durationSec: null },
+      { id: "demo", kind: "demo", createdAt: null, durationSec: null, videoUri: null },
     ],
     loadVideoAnalysis: () => mockSources.analysis,
   };
@@ -116,6 +118,7 @@ const { __store: store } = jest.requireMock("expo-file-system") as { __store: Ma
 const speech = jest.requireMock("expo-speech") as { __spoken: string[]; stop: jest.Mock };
 
 const MATCH_FILE = "referee-match.json";
+const PREFS_FILE = "referee-prefs.json";
 const PICK_VIDEO = "Score a video that has already been analysed";
 const PICK_DEMO = "Score Demo match";
 const SWAP = "Swap which player the video calls A — mirrors the whole scoreline";
@@ -124,6 +127,12 @@ const UNDO = "Undo";
 
 beforeEach(() => {
   store.clear();
+  // Autopilot is about the live camera, which this binary does not have; the
+  // seed keeps the first-run alert out of the way of the video path.
+  store.set(
+    PREFS_FILE,
+    JSON.stringify({ v: 1, muted: false, autopilot: false, autopilotDisclosed: true }),
+  );
   speech.__spoken.length = 0;
   mockSources.analysis = analysisWith(shotsFrom(["BA", "BA", "AB"]));
 });
