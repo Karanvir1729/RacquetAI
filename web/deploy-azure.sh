@@ -41,7 +41,15 @@ az staticwebapp show -n "$APP" -g "$RG" -o none 2>/dev/null \
   || az staticwebapp create -n "$APP" -g "$RG" -l "$LOC" --sku Free -o none
 
 echo "==> Building web/dist"
-npm run build --prefix "$SCRIPT_DIR"
+# Bake the analysis server's public HTTPS URL (same subscription-hash label
+# scheme as analysis/deploy-azure.sh) so the live site works out of the box;
+# visitors can still point elsewhere at runtime from the Analyze page.
+SUB_ID=$(az account show --query id -o tsv)
+SUFFIX=$(printf "%s" "$SUB_ID" | shasum | cut -c1-6)
+ACI_LOC="${RACQUETIQ_AZ_LOCATION:-eastus}"
+API_BASE="${RACQUETIQ_WEB_API:-https://racquetiq-${SUFFIX}.${ACI_LOC}.azurecontainer.io}"
+echo "    VITE_ANALYSIS_API=${API_BASE}"
+VITE_ANALYSIS_API="$API_BASE" npm run build --prefix "$SCRIPT_DIR"
 
 echo "==> Uploading dist via the SWA CLI"
 TOKEN=$(az staticwebapp secrets list -n "$APP" -g "$RG" --query properties.apiKey -o tsv)

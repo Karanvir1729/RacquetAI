@@ -75,12 +75,15 @@ iOS app ────────┘   + platform_api.py  └─ Stripe (products
 4. Stripe vs App Store: real iOS releases selling digital unlocks must use IAP
    (RevenueCat scaffolding already exists) — browser-Stripe on iOS is a
    sandbox/dev convenience, not a shippable purchase path.
-5. Azure: the live ACI predates billing; redeploy with
-   `bash analysis/deploy-azure.sh` (now ships `analysis/.env` as secure env
-   vars and copies `platform_api.py` into the image) — and note the ACI is
-   plain HTTP, so real secrets/tokens should not ride it for long. TLS in
-   front of the server (or moving to Container Apps) should come before any
-   real user sends a Supabase token or admin credentials over it.
+5. Azure: `bash analysis/deploy-azure.sh` deploys a two-container group —
+   the Flask server plus a Caddy sidecar that terminates TLS on 443 with an
+   automatic Let's Encrypt certificate for the group's FQDN
+   (`https://racquetiq-a7682a.eastus.azurecontainer.io`). Secrets ride as ACI
+   secure env vars; plain :8082 stays exposed for app builds that predate
+   the https default. The live site (Azure Static Web Apps) is built with
+   `VITE_ANALYSIS_API` pointing at that https URL (web/deploy-azure.sh), and
+   checkout redirects pick the caller's origin from the `WEB_ORIGINS`
+   allowlist — live site returns to the live site, localhost to localhost.
 6. Entitlement is display-only today: a Stripe Pro subscription does not yet
    gate anything, because the iOS quota gate reads only RevenueCat (which is
    unconfigured and fails open) and `/jobs` on the analysis server is

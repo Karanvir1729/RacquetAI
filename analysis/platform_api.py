@@ -15,7 +15,9 @@ local override file (KEY=VALUE lines; never committed — see .gitignore):
   STRIPE_WEBHOOK_SECRET       optional; webhook endpoint is disabled without it
   STRIPE_PRICE_MONTHLY        price id for RacquetIQ Pro monthly
   STRIPE_PRICE_YEARLY         price id for RacquetIQ Pro yearly
-  WEB_ORIGIN                  checkout redirect target (default http://localhost:5183)
+  WEB_ORIGINS                 comma-separated allowlist of web-app origins for
+                              checkout redirects; first entry is the default
+                              (legacy WEB_ORIGIN honoured when unset)
   ADMIN_USERNAME / ADMIN_PASSWORD   admin metrics basic auth (default admin/admin)
 """
 import collections
@@ -23,6 +25,7 @@ import datetime
 import hmac
 import json
 import os
+from urllib.parse import quote
 
 import requests
 import stripe
@@ -50,7 +53,12 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "")
 WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
-WEB_ORIGIN = os.environ.get("WEB_ORIGIN", "http://localhost:5183").rstrip("/")
+# Comma-separated allowlist of web-app origins checkout may return to. The
+# first entry is the default when a request carries no (allowlisted) Origin.
+_RAW_ORIGINS = (os.environ.get("WEB_ORIGINS")
+                or os.environ.get("WEB_ORIGIN")  # pre-allowlist deployments
+                or "http://localhost:5183")
+WEB_ORIGINS = [o.strip().rstrip("/") for o in _RAW_ORIGINS.split(",") if o.strip()]
 ADMIN_USER = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASS = os.environ.get("ADMIN_PASSWORD", "admin")
 PRICES = {
@@ -63,6 +71,16 @@ platform_bp = Blueprint("platform", __name__)
 
 def _configured():
     return bool(SUPABASE_URL and SERVICE_KEY and stripe.api_key)
+
+
+def _web_origin(candidate=None):
+    """An allowlisted web origin: the candidate (or the request's Origin
+    header) when allowlisted, else the first configured origin. Everything
+    that builds a redirect goes through here so a tampered `origin` query
+    param can never turn /billing/success into an open redirect."""
+    value = (candidate if candidate is not None
+             else request.headers.get("Origin", "")).rstrip("/")
+    return value if value in WEB_ORIGINS else WEB_ORIGINS[0]
 
 
 # ---------------------------------------------------------------- supabase
@@ -214,16 +232,20 @@ def billing_checkout():
         return jsonify({"error": "You already have an active subscription."}), 409
     # Success bounces through THIS server first (/billing/success) so the
     # purchase is recorded even when the browser that pays holds no Supabase
-    # session — the iOS flow pays in Safari, signed out.
+    # session. The caller's origin rides along (validated on both ends), so
+    # local dev returns to localhost and the live site returns to itself.
     server_base = request.host_url.rstrip("/")
+    origin = _web_origin()
+    success = (f"{server_base}/billing/success"
+               f"?session_id={{CHECKOUT_SESSION_ID}}&origin={quote(origin, safe='')}")
     try:
         session = stripe.checkout.Session.create(
             mode="subscription",
             line_items=[{"price": PRICES[plan], "quantity": 1}],
             client_reference_id=user["id"],
             customer_email=user.get("email"),
-            success_url=f"{server_base}/billing/success?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{WEB_ORIGIN}/upgrade?canceled=1",
+            success_url=success,
+            cancel_url=f"{origin}/upgrade?canceled=1",
             metadata={"platform": platform, "plan": plan},
         )
     except stripe.StripeError as e:
@@ -250,8 +272,9 @@ def billing_success():
                 recorded = True
         except stripe.StripeError:
             pass
+    origin = _web_origin(request.args.get("origin", ""))
     suffix = f"?session_id={session_id}&recorded={'1' if recorded else '0'}"
-    return redirect(f"{WEB_ORIGIN}/checkout/success{suffix}", code=302)
+    return redirect(f"{origin}/checkout/success{suffix}", code=302)
 
 
 @platform_bp.route("/billing/confirm", methods=["POST"])

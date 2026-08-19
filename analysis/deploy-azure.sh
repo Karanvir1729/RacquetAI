@@ -22,10 +22,12 @@ ACR="${ACR}${SUFFIX}"
 DNS_LABEL="racquetiq-${SUFFIX}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+FQDN="${DNS_LABEL}.${LOC}.azurecontainer.io"
+
 if [[ "${1:-}" == "--status" ]]; then
   az container show -g "$RG" -n "$CONTAINER" \
     --query "{state:instanceView.state, fqdn:ipAddress.fqdn, ip:ipAddress.ip}" -o table
-  echo "URL: http://${DNS_LABEL}.${LOC}.azurecontainer.io:8082"
+  echo "URL: https://${FQDN}  (plain http on :8082 kept for older app builds)"
   exit 0
 fi
 
@@ -41,35 +43,96 @@ az group create -n "$RG" -l "$LOC" -o none
 echo "==> Container registry $ACR"
 az acr create -n "$ACR" -g "$RG" --sku Basic --admin-enabled true -o none 2>/dev/null || true
 
-echo "==> Building image in Azure (a few minutes)"
-az acr build -r "$ACR" -t "$IMAGE_TAG" "$SCRIPT_DIR" -o none
+# Caddy comes from OUR registry: anonymous ACI pulls from Docker Hub get
+# rate-limited ("RegistryErrorResponse"), which killed a deploy mid-recreate.
+if ! az acr repository show -n "$ACR" --image caddy:2 -o none 2>/dev/null; then
+  echo "==> Importing caddy:2 into $ACR"
+  az acr import -n "$ACR" --source docker.io/library/caddy:2 --image caddy:2 -o none
+fi
 
-echo "==> Starting container ($CPU vCPU / ${MEMORY}GB)"
+echo "==> Building image in Azure (a few minutes)"
+# Stage only what the Dockerfile needs: az acr build uploads the whole
+# context dir before .dockerignore applies, which used to mean hundreds of
+# MB of local job artifacts — and the .env file — riding along.
+BUILD_CTX=$(mktemp -d)
+GROUP_YAML=""
+trap 'rm -rf "$BUILD_CTX"; rm -f "$GROUP_YAML"' EXIT
+cp "$SCRIPT_DIR/Dockerfile" "$SCRIPT_DIR/requirements.txt" \
+   "$SCRIPT_DIR/analyze.py" "$SCRIPT_DIR/server.py" "$SCRIPT_DIR/platform_api.py" \
+   "$BUILD_CTX/"
+cp -R "$SCRIPT_DIR/tools" "$BUILD_CTX/tools"
+az acr build -r "$ACR" -t "$IMAGE_TAG" "$BUILD_CTX" -o none
+
+echo "==> Starting container group ($CPU vCPU / ${MEMORY}GB + TLS sidecar)"
 ACR_USER=$(az acr credential show -n "$ACR" --query username -o tsv)
 ACR_PASS=$(az acr credential show -n "$ACR" --query 'passwords[0].value' -o tsv)
+
 # Platform secrets (Stripe billing + admin metrics) ride along from
 # analysis/.env when it exists; without it the /billing and /admin endpoints
 # answer 503 and the analysis endpoints work exactly as before.
-PLATFORM_ENV_ARGS=()
+ENV_YAML=""
 if [[ -f "$SCRIPT_DIR/.env" ]]; then
-  PLATFORM_ENV_ARGS+=(--secure-environment-variables)
   while IFS='=' read -r key value; do
-    [[ "$key" =~ ^[A-Z_]+$ && -n "$value" ]] && PLATFORM_ENV_ARGS+=("${key}=${value}")
+    [[ "$key" =~ ^[A-Z_]+$ && -n "$value" ]] || continue
+    ENV_YAML="${ENV_YAML}
+        - name: ${key}
+          secureValue: '${value}'"
   done < "$SCRIPT_DIR/.env"
 fi
 
-az container create -g "$RG" -n "$CONTAINER" \
-  --image "${ACR}.azurecr.io/${IMAGE_TAG}" \
-  --registry-login-server "${ACR}.azurecr.io" \
-  --registry-username "$ACR_USER" --registry-password "$ACR_PASS" \
-  --cpu "$CPU" --memory "$MEMORY" --ports 8082 --os-type Linux \
-  --dns-name-label "$DNS_LABEL" --restart-policy Always \
-  "${PLATFORM_ENV_ARGS[@]}" -o none
+# Two containers, one group: the Flask server, and a Caddy sidecar that
+# terminates TLS on 443 with an automatic Let's Encrypt certificate for the
+# group's own FQDN. HTTPS matters because the live site is HTTPS and browsers
+# refuse mixed-content calls to plain http. Port 8082 stays public so app
+# builds that predate the https default keep working.
+GROUP_YAML=$(mktemp)
+cat > "$GROUP_YAML" <<EOF
+apiVersion: '2021-10-01'
+location: ${LOC}
+name: ${CONTAINER}
+properties:
+  osType: Linux
+  restartPolicy: Always
+  imageRegistryCredentials:
+    - server: ${ACR}.azurecr.io
+      username: ${ACR_USER}
+      password: '${ACR_PASS}'
+  ipAddress:
+    type: Public
+    dnsNameLabel: ${DNS_LABEL}
+    ports:
+      - { protocol: TCP, port: 80 }
+      - { protocol: TCP, port: 443 }
+      - { protocol: TCP, port: 8082 }
+  containers:
+    - name: analysis
+      properties:
+        image: ${ACR}.azurecr.io/${IMAGE_TAG}
+        ports:
+          - { protocol: TCP, port: 8082 }
+        resources:
+          requests: { cpu: $((CPU - 1)), memoryInGB: $((MEMORY - 1)) }
+        environmentVariables:${ENV_YAML}
+    - name: tls
+      properties:
+        image: ${ACR}.azurecr.io/caddy:2
+        command: ['caddy', 'reverse-proxy', '--from', '${FQDN}', '--to', 'localhost:8082']
+        ports:
+          - { protocol: TCP, port: 80 }
+          - { protocol: TCP, port: 443 }
+        resources:
+          requests: { cpu: 1, memoryInGB: 1 }
+EOF
 
-URL="http://${DNS_LABEL}.${LOC}.azurecontainer.io:8082"
+# The group spec changes shape (single container -> sidecar pair), and ACI
+# can't mutate a running group's containers — recreate it.
+az container delete -g "$RG" -n "$CONTAINER" --yes -o none 2>/dev/null || true
+az container create -g "$RG" --file "$GROUP_YAML" -o none
+
+URL="https://${FQDN}"
 echo
 echo "==> Deployed. Analysis server URL (paste into the app's Settings):"
 echo "    $URL"
-echo "==> Health check:"
-curl -s --max-time 20 "$URL/health" || echo "(container still starting — retry in ~1 min)"
+echo "==> Health check (first hit can wait on the Let's Encrypt issuance):"
+curl -s --max-time 60 "$URL/health" || echo "(container still starting — retry in ~1 min)"
 echo

@@ -18,13 +18,13 @@
 import { COURT_CELLS, type CourtCell } from "./types";
 
 /**
- * Where the server fallback points when nothing is stored. There is no
- * settings UI to change it — analysis runs on-device by default and only
- * falls back here when the native analyzer is unavailable, so the default has
- * to be a host a phone can actually reach (localhost is a dev-machine-only
- * address and left the fallback dead on device).
+ * Where the server engine points when nothing is stored (changeable from the
+ * Account tab's Analysis engine card). Must be a host a phone can actually
+ * reach (localhost is a dev-machine-only address and left the fallback dead
+ * on device). HTTPS since the Caddy sidecar landed — the plain :8082 port
+ * still exists for builds that predate it.
  */
-export const DEFAULT_SERVER_BASE_URL = "http://racquetiq-a7682a.eastus.azurecontainer.io:8082";
+export const DEFAULT_SERVER_BASE_URL = "https://racquetiq-a7682a.eastus.azurecontainer.io";
 
 /** The five server-side job states, in flow order. */
 export const JOB_STATUSES = [
