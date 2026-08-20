@@ -8,10 +8,6 @@
     "scheme": "racquetai",
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#06130E",
-    "notification": {
-      "icon": "./assets/brand/notification-icon.png",
-      "color": "#7CBF3F"
-    },
     "ios": {
       "bundleIdentifier": "com.racquetai.app",
       "supportsTablet": true,
