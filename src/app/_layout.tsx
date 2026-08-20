@@ -102,7 +102,11 @@ export default function RootLayout() {
           <Tabs
             screenOptions={{
               headerShown: false,
-              tabBarActiveTintColor: colors.accent,
+              // accentText, not accent: Optic is a fill, never ink (tokens.ts).
+              // Raw accent measures 2.1:1 on the light canvas — docs/04-branding
+              // marks that combination "never", and this is the only affordance
+              // showing which tab is current, on every screen.
+              tabBarActiveTintColor: colors.accentText,
               tabBarInactiveTintColor: colors.textDim,
               tabBarStyle: {
                 backgroundColor: colors.panel,

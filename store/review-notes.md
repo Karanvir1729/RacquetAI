@@ -29,8 +29,10 @@ THE REFEREE TAB, AND WHY YOU CANNOT FULLY REPRODUCE IT AT A DESK
 The Referee tab is a tap-driven squash scoreboard that announces the score out loud. It can
 also watch a match and score rallies itself, two ways:
 - "Score a video": pick an analysed match; the app plays the footage, highlights both
-  players, and calls each rally as the playhead reaches it. The demo account has analysed
-  matches ready for this — open Referee → Score a video and pick the top row.
+  players, and calls each rally as the playhead reaches it. To try this, first import one of
+  the sample clips supplied with this submission (Library → "Import & analyze"), then open
+  Referee → "Score a video" and pick it. Analyses are stored on the device, so a freshly
+  signed-in account starts with none, and the bundled "Sample" demo has no video attached.
 - "Watch live": the camera watches a real squash court and scores after a visible 4-second
   countdown a tap always beats. This needs a real court; an attached demo video shows the
   full flow (see App Review Attachment).
@@ -114,66 +116,48 @@ placement/coverage/predictability ones only.
 
 These are blockers, in the order they will bite.
 
-### 1. In-app purchases are not configured — the paywall cannot be reviewed
+### 1. ~~In-app purchases are not configured~~ — RESOLVED
 
-`src/lib/subscription.ts` reads the RevenueCat key from `EXPO_PUBLIC_REVENUECAT_IOS_KEY` or
-`extra.revenueCatIosKey`. **Neither is set** — `app.json` `extra` contains only `router` and
-`eas`, and the env var appears nowhere in the repo.
+`extra.revenueCatIosKey` is set in `app.json` (`appl_QrVQ…`), so `readApiKey()` returns a key,
+`configure()` succeeds and the quota gate fires. Still verify one sandbox purchase end to end
+before submitting — the key existing is not proof the products are attached.
 
-With no key the chain is:
+### 2. ~~The paywall's Terms and Privacy links are dead~~ — RESOLVED
 
-`readApiKey()` → `null` → `configure()` → `false` → entitlement `"unknown"` →
-`canStartAnalysis()` returns `true` for everyone (the deliberate fail-open) → **the quota gate
-never fires and the paywall is never reached.** The paywall itself, if opened, shows
-"In-app purchases aren't available in this build yet. Nothing is locked."
+`src/lib/legalLinks.ts` now points both rows at live pages, verified returning HTTP 200:
 
-A reviewer cannot buy the subscription, so the products stay in "Waiting for Review" and the
-build is rejected under Guideline 2.1. **Set the key and verify a sandbox purchase end to end
-before submitting.**
+```
+https://kind-sea-0e4afca0f.7.azurestaticapps.net/legal/terms-of-use
+https://kind-sea-0e4afca0f.7.azurestaticapps.net/legal/privacy-policy
+```
 
-### 2. The paywall's Terms and Privacy links are dead
+### 3. Subscription prices must be set in App Store Connect — STILL OPEN
 
-`src/lib/legalLinks.ts` has `TERMS_OF_USE.url = null` and `PRIVACY_POLICY.url = null`. The
-paywall renders both rows struck through and inert, with the note "These pages go live before
-the App Store release; the links are disabled until then."
+The Paid Applications Agreement must be signed before the pricing API accepts anything. Until
+prices exist the products cannot be submitted. `store/listing.md`, `paywallCopy.ts` and the
+App Store Connect products **must all agree** ($9.99/month, $79.99/year) or it is a 3.1.2
+rejection.
 
-Guideline 3.1.2 requires **functional** links to an EULA and a privacy policy on the
-subscription screen. Shipping visibly disabled links is a direct rejection. The pages are
-drafted in `docs/legal/`; GitHub Pages is not switched on yet.
+### 4. ~~Library copy contradicts the privacy policy~~ — RESOLVED IN CODE
 
-### 3. Subscription prices are not set in App Store Connect
+The "Import & analyze" caption no longer claims the video is sent to a server; it is now
+engine-neutral, matching the on-device default. The privacy policy was corrected to match and
+is live.
 
-Known and expected — the Paid Applications Agreement is unsigned, so the pricing API rejects.
-Until prices exist, the products cannot be submitted. The description in `store/listing.md`
-states $9.99/month and $79.99/year to match `paywallCopy.ts`; **these three places must
-agree** or it is a 3.1.2 rejection.
+**Screenshot `store/screenshots/04-library.png` still shows the OLD string and must be
+recaptured** before upload, or the screenshot contradicts both the app and the policy.
 
-### 4. Library copy contradicts the privacy policy
-
-The "Import & analyze" card reads _"Pick a match video from your library and send it to your
-analysis server."_ (`src/features/recording/ImportAnalysisCard.tsx:87`). Analysis actually
-runs **on device** by default; the server is a fallback. The privacy policy leads with
-"Match analysis normally runs entirely on your phone."
-
-This string is visible in `store/screenshots/04-library.png`. A reviewer comparing the
-screenshot to the privacy policy has a fair question. Fixing the copy means recapturing that
-one screenshot.
-
-### 5. The reviewer needs sample clips, or they cannot reach the paywall
+### 5. The reviewer needs sample clips, or they cannot reach the paywall — STILL OPEN
 
 The paywall only appears after **three completed analyses of the user's own video**, and
-`recordFreeAnalysisUsed()` is called only once an analysis is written to disk
-(`useDeviceImportFlow.ts:117`) — so a clip the app fails to analyse does not consume the
-allowance. A reviewer with no squash footage has no realistic route to the purchase screen.
+`recordFreeAnalysisUsed()` is called only once an analysis is written to disk, so a clip the
+app fails to analyse does not consume the allowance. A reviewer with no squash footage has no
+realistic route to the purchase screen.
 
-The App Review notes above therefore promise **three sample squash clips**. You must actually
-supply them: attach them in App Store Connect › App Review Information, or host them and put
-the link in the notes. `analysis/samples/` has suitable footage, but those files are 37–54 MB
-each — trim them to the shortest clip that still yields a full analysis.
-
-If that is impractical, the alternative is a review-only route to the paywall — but that is
-app work, and a hidden entry point needs to be explained in the notes or it looks like
-concealed functionality.
+The notes above promise **three sample squash clips**. You must actually supply them: attach
+them in App Store Connect › App Review Information, or host them and link them in the notes.
+`analysis/samples/` has suitable footage, but those files are 37–54 MB each — trim them to the
+shortest clip that still yields a full analysis.
 
 ### 6. Placeholders that must be resolved
 
