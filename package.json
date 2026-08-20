@@ -1,7 +1,7 @@
 {
   "name": "racquetai",
   "main": "expo-router/entry",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
     "@supabase/supabase-js": "^2.112.3",
