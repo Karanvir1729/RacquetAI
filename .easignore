@@ -1,10 +1,27 @@
-# Keep EAS build uploads to the iOS app only. None of these ship in the binary,
-# and analysis/out + web/ alone are tens of MB of tracked artifacts.
+# EAS uses this file INSTEAD of .gitignore when it exists, so everything heavy
+# has to be named here explicitly — including things .gitignore already covers.
+# Together these are several GB of local-only artifacts, large enough to fail
+# the upload with ENOSPC while EAS clones the project.
+
+# Dependencies — reinstalled on the builder from the lockfiles.
+node_modules/
+web/node_modules/
+
+# Xcode derived output and CocoaPods: EAS runs `pod install` on the builder,
+# so Pods is regenerated there (Podfile + Podfile.lock are kept). ios/build is
+# pure compilation cache — this is what blew up the first attempt at 3 GB.
+ios/build/
+ios/Pods/
+
+# Not part of the iOS app.
 analysis/
 web/
 docs/
 reports/
 store/
+dist/
+
+# Local scratch: git worktrees, agent state, VCS.
 .worktrees/
 .claude/
-dist/
+.git/
