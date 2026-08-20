@@ -1,4 +1,4 @@
-# App Privacy questionnaire — RacquetIQ
+# App Privacy questionnaire — RacketIQ
 
 The exact selections to make in App Store Connect › App Privacy, matching
 `docs/legal/privacy-policy.md` (updated 19 August 2026) and the shipped code: the app

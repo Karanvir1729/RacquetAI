@@ -1,14 +1,14 @@
 ---
-title: RacquetIQ Privacy Policy
+title: RacketIQ Privacy Policy
 permalink: /legal/privacy-policy/
 ---
 
-# RacquetIQ — Privacy Policy
+# RacketIQ — Privacy Policy
 
 **Last updated:** 18 August 2026
-**Applies to:** the RacquetIQ iOS app (bundle identifier `com.racquetai.app`), version 1.0 and later.
+**Applies to:** the RacketIQ iOS app (bundle identifier `com.racquetai.app`), version 1.0 and later.
 
-RacquetIQ is made by **Daybot Solutions Inc.** ("we", "us").
+RacketIQ is made by **Daybot Solutions Inc.** ("we", "us").
 Questions about this policy: **prokaranvir@gmail.com**.
 
 This policy describes exactly what the app does with your video, your audio, and your data. It is
@@ -95,7 +95,7 @@ record only your engine choice and the server address you typed — no informati
 
 ## 3. When video *does* leave your phone: the analysis server fallback
 
-RacquetIQ has two analysis engines:
+RacketIQ has two analysis engines:
 
 **On-device (the default and normal path).** A native analyser bundled inside the app decodes the
 video, runs Apple's on-device Vision pose detection, and measures the audio track locally. Nothing is
@@ -141,7 +141,7 @@ and to contact us if you see an analysis reported as running on the server.
 
 ## 4. Other people in your videos
 
-A squash video normally shows at least one other person. RacquetIQ does not identify anyone: it
+A squash video normally shows at least one other person. RacketIQ does not identify anyone: it
 detects human body poses to measure movement, and it does not perform face recognition, does not
 build a profile of any player, and cannot tell one match's players from another's. You are
 nonetheless responsible for having the right to film the people in your footage — see the
@@ -159,7 +159,7 @@ entirely your decision. The file contains a programming error message, not your 
 
 ## 6. Subscriptions and payments
 
-RacquetIQ Pro is an auto-renewable subscription sold through the App Store.
+RacketIQ Pro is an auto-renewable subscription sold through the App Store.
 
 - **Apple processes the payment.** We never see and never receive your card details, your Apple
   Account credentials, or your billing address. Apple's handling of that data is governed by
@@ -235,7 +235,7 @@ asked us to perform the analysis for you.
 
 ## 9. Children
 
-RacquetIQ is not directed at children under 13 and we do not knowingly collect personal information
+RacketIQ is not directed at children under 13 and we do not knowingly collect personal information
 from them.
 
 ## 10. Retention

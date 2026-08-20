@@ -1,4 +1,4 @@
-# App Store listing — RacquetIQ
+# App Store listing — RacketIQ
 
 Copy-paste source for App Store Connect. Character limits are Apple's; the count after each
 field is the actual length of the text below it (verified with `store/check-lengths.py`).
@@ -12,11 +12,11 @@ tracking, coaching advice, scoring, or any sport other than squash.
 ## App Name — 30 max
 
 ```
-RacquetIQ: Squash Analysis
+RacketIQ: Squash Analysis
 ```
 
 `26 characters.` Putting "Squash" in the name is worth more for search than keeping the name
-bare. If you prefer clean branding, `RacquetIQ` (9) also works — then move `squash` into the
+bare. If you prefer clean branding, `RacketIQ` (9) also works — then move `squash` into the
 keyword field, which currently omits it because the name already covers it.
 
 ## Subtitle — 30 max
@@ -61,9 +61,9 @@ Deliberate choices:
 `2404 characters.`
 
 ```
-RacquetIQ turns a video of your squash match into a clear picture of how you actually played.
+RacketIQ turns a video of your squash match into a clear picture of how you actually played.
 
-Prop your phone up at the back of the court, film a match, then import the clip. RacquetIQ finds the rallies, counts the shots, works out where each one landed, tracks how much of the court each player covered, and measures how predictable their shot patterns were.
+Prop your phone up at the back of the court, film a match, then import the clip. RacketIQ finds the rallies, counts the shots, works out where each one landed, tracks how much of the court each player covered, and measures how predictable their shot patterns were.
 
 WHAT YOU GET
 
@@ -86,7 +86,7 @@ The Referee tab keeps a proper PAR-11 squash score and announces it out loud in 
 
 WHAT RACQUETIQ IS NOT
 
-It is not a coach and it does not follow the ball. The analysis reports what it measured; the Referee keeps a PAR-11 score you can always correct — when it scores a rally itself it says so, tells you up front it gets roughly one rally in four wrong, and every call is one tap to fix. Nothing RacquetIQ produces is an official result. It is built for squash and nothing else.
+It is not a coach and it does not follow the ball. The analysis reports what it measured; the Referee keeps a PAR-11 score you can always correct — when it scores a rally itself it says so, tells you up front it gets roughly one rally in four wrong, and every call is one tap to fix. Nothing RacketIQ produces is an official result. It is built for squash and nothing else.
 
 THE FOOTAGE DECIDES THE QUALITY
 
@@ -96,7 +96,7 @@ FREE AND PRO
 
 Recording, your library, the built-in demo analysis and your first three analyses are free.
 
-RacquetIQ Pro removes the analysis limit:
+RacketIQ Pro removes the analysis limit:
 
 • Monthly — $9.99 per month
 • Annual — $79.99 per year
@@ -121,7 +121,7 @@ release-notes field for 1.0.
 ```
 First public release.
 
-Film a squash match from the back of the court, import the clip, and RacquetIQ measures it on your phone: shot placement, shot types, court coverage, time at the T, rally stats and how predictable your patterns are — with the match video played back under a pose skeleton.
+Film a squash match from the back of the court, import the clip, and RacketIQ measures it on your phone: shot placement, shot types, court coverage, time at the T, rally stats and how predictable your patterns are — with the match video played back under a pose skeleton.
 
 Your first three analyses are free.
 ```

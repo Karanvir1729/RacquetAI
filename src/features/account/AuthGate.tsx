@@ -45,7 +45,7 @@ export function AuthGateScreen() {
         automaticallyAdjustKeyboardInsets
       >
         <View style={styles.column}>
-          <Text style={styles.title}>RacquetIQ</Text>
+          <Text style={styles.title}>RacketIQ</Text>
           <Text style={styles.caption}>
             Sign in to record, analyse and referee your matches. Your account keeps them yours.
           </Text>

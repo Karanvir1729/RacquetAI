@@ -27,11 +27,11 @@ import { Stat } from "@/components/ui/Stat";
 import { HERO_MATCH } from "@/data/heroMatch";
 
 /**
- * The RacquetIQ landing page.
+ * The RacketIQ landing page.
  *
  * Structure follows Daybot's section rhythm — alternating --rq-bg / --rq-panel
  * bands separated by a hairline, generous padding, one uniform card recipe —
- * with RacquetIQ's palette and one hard rule of its own: nothing on this page
+ * with RacketIQ's palette and one hard rule of its own: nothing on this page
  * claims a capability the pipeline does not have. The "Limits" band is not an
  * apology, it is the product's argument.
  */
@@ -95,7 +95,7 @@ const READOUT = [
 const LIMITS = [
   {
     title: "No live tracking",
-    body: "RacquetIQ reads a file after the match. There is no real-time mode, no camera feed, nothing to wear, and no line-calling.",
+    body: "RacketIQ reads a file after the match. There is no real-time mode, no camera feed, nothing to wear, and no line-calling.",
   },
   {
     title: "Shot detection is approximate",
@@ -107,7 +107,7 @@ const LIMITS = [
   },
   {
     title: "Squash, and no coaching",
-    body: "The court model is a squash court — no tennis, no padel, no badminton. RacquetIQ reports what it measured and stops there; what to do about it is between you and your coach.",
+    body: "The court model is a squash court — no tennis, no padel, no badminton. RacketIQ reports what it measured and stops there; what to do about it is between you and your coach.",
   },
 ];
 
@@ -134,7 +134,7 @@ const FAQ: Array<{ q: string; a: ReactNode }> = [
   },
   {
     q: "Is this the same thing as the iOS app?",
-    a: "Same pipeline, same analysis file format. RacquetIQ started on iOS; this is that analysis in a browser, on whatever machine you already have the footage on.",
+    a: "Same pipeline, same analysis file format. RacketIQ started on iOS; this is that analysis in a browser, on whatever machine you already have the footage on.",
   },
 ];
 
@@ -244,7 +244,7 @@ export default function Landing() {
             </div>
 
             <p className="rq-lead mt-6 max-w-2xl">
-              Upload a match filmed from the balcony, mark the four floor corners, and RacquetIQ
+              Upload a match filmed from the balcony, mark the four floor corners, and RacketIQ
               reads it back to you — where each player stood, where the ball landed, and how
               predictable the pattern was.
             </p>
@@ -406,7 +406,7 @@ export default function Landing() {
         <Reveal>
           <SectionHead
             eyebrow="Limits"
-            title="What RacquetIQ will not tell you."
+            title="What RacketIQ will not tell you."
             body="Vision on club footage is genuinely hard, and a confidently wrong number is worse than no number. So here is the honest edge of the thing."
           />
         </Reveal>

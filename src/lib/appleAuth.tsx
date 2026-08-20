@@ -124,8 +124,8 @@ export async function nativeAppleSignIn(): Promise<AppleSignInResult> {
 function appleFailureMessage(code: unknown, error: unknown): string {
   if (code === "ERR_REQUEST_UNKNOWN" || code === "ERR_REQUEST_FAILED") {
     return (
-      "Apple wouldn't complete the sign-in. If you've used Apple with RacquetIQ before, " +
-      "open Settings → your name → Sign in with Apple → RacquetIQ → Stop Using Apple ID, " +
+      "Apple wouldn't complete the sign-in. If you've used Apple with RacketIQ before, " +
+      "open Settings → your name → Sign in with Apple → RacketIQ → Stop Using Apple ID, " +
       "then try again. Otherwise check that this Apple ID has two-factor turned on, or use email."
     );
   }

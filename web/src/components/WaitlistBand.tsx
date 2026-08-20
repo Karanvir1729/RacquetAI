@@ -37,7 +37,7 @@ export function WaitlistBand() {
           align="center"
           eyebrow="Early access"
           title="Hosted analysis is coming. Get on the list."
-          body="Today this site sends your video to an analysis server you point it at. Next comes one that RacquetIQ runs for you — no setup, upload and done. Leave an email, and your club if you play at one, and you'll hear the moment it's your turn."
+          body="Today this site sends your video to an analysis server you point it at. Next comes one that RacketIQ runs for you — no setup, upload and done. Leave an email, and your club if you play at one, and you'll hear the moment it's your turn."
         />
       </Reveal>
 

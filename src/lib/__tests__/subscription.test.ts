@@ -75,7 +75,7 @@ const YEARLY_PACKAGE: SubscriptionPackage = {
   id: "$rc_annual",
   productId: "racquetiq_pro_yearly",
   priceString: "$79.99",
-  title: "RacquetIQ Pro (Yearly)",
+  title: "RacketIQ Pro (Yearly)",
   period: "yearly",
   fromOffering: true,
   native: { identifier: "$rc_annual" },

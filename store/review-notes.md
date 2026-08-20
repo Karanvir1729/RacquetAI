@@ -1,4 +1,4 @@
-# App Review notes — RacquetIQ
+# App Review notes — RacketIQ
 
 Two documents in one file:
 
@@ -12,7 +12,7 @@ Two documents in one file:
 ## Notes for App Review
 
 ```
-RacquetIQ analyses a video of a squash match that the user has already filmed, and keeps
+RacketIQ analyses a video of a squash match that the user has already filmed, and keeps
 score with a correctable, spoken PAR-11 scoreboard (the Referee tab). The app never follows
 the ball; every machine-made call is a suggestion a human can beat or correct with one tap.
 
@@ -39,7 +39,7 @@ also watch a match and score rallies itself, two ways:
 Automatic scoring is measured at roughly 73% per rally and the app SAYS SO before it scores
 anything: a first-run alert, the caption on the switch, and a spoken warning at the start of
 every armed session. It is off for any user who declines, every call is correctable in one
-tap, and nothing RacquetIQ produces is presented as an official result.
+tap, and nothing RacketIQ produces is presented as an official result.
 
 NO FILMING IS NEEDED TO REVIEW THE APP
 Open the Library tab and tap "Demo match analysis" (marked "Sample"). It opens a complete
@@ -71,7 +71,7 @@ container. Account, billing, and subscription traffic is HTTPS (Supabase, Revenu
 FREE TIER AND SUBSCRIPTION
 Recording, the library and the bundled demo analysis are always free, as are the user's first
 3 analyses of their own videos. After that, starting a 4th analysis opens the paywall
-(RacquetIQ Pro — monthly or annual auto-renewable). Subscribing is optional; nothing already
+(RacketIQ Pro — monthly or annual auto-renewable). Subscribing is optional; nothing already
 analysed is ever taken away.
 
 SANDBOX ACCOUNT FOR TESTING THE SUBSCRIPTION
@@ -167,12 +167,12 @@ signed for distribution, Apple Sign In entitlement present, all four permission
 strings present, `ITSAppUsesNonExemptEncryption=false`.
 
 One known defect: `NSPhotoLibraryUsageDescription` reads Expo's default
-*"Allow RacquetIQ to access your photos"* rather than the string in `app.json`.
+*"Allow RacketIQ to access your photos"* rather than the string in `app.json`.
 A generic purpose string is a Guideline 5.1.1 rejection RISK (it names the app
 and the resource but not the reason). Accepted for now because the EAS free-tier
 iOS build quota is exhausted until **1 Sep 2026**.
 
-`ios/RacquetIQ/Info.plist` has already been patched locally with the correct
+`ios/RacketIQ/Info.plist` has already been patched locally with the correct
 string, so **the next build — local or after the quota resets — picks it up with
 no further action**. `ios/` is gitignored (Expo CNG), so if the native project
 is ever regenerated with `expo prebuild`, the string comes from `app.json`,
@@ -205,7 +205,7 @@ Store size, uploaded as-is with no scaling).
 | `02-shot-types-placement.png`            | The shot-type breakdown in full, with rally stat tiles above and Player A's four shot-placement quadrants below (11 front-left 7%, 15 front-right 10%, 66 back-left 42%, 64 back-right 41%)                                                                                                                                                     |
 | `03-coverage-heatmap-predictability.png` | Player A's placement quadrants, the 12 × 8 court-coverage heatmap with the "Brighter = more time spent there" key, and the Predictability card — 25%, most common pattern "Back right -> Back right"                                                                                                                                            |
 | `04-library.png`                         | The Library tab: the "Demo match analysis / Sample" card, the "Import & analyze" card, an imported analysis row, and the two-tab bar (Record, Library)                                                                                                                                                                                          |
-| `05-tutorial.png`                        | Page 1 of 5 of the first-run tutorial, "What RacquetIQ does", listing the four things the app measures                                                                                                                                                                                                                                          |
+| `05-tutorial.png`                        | Page 1 of 5 of the first-run tutorial, "What RacketIQ does", listing the four things the app measures                                                                                                                                                                                                                                          |
 
 ### How these were captured
 

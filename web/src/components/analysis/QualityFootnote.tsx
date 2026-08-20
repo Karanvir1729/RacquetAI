@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/Card";
  * footage was actually measured, the audio caveat when rally boundaries had no
  * sound to lean on, and whatever notes the pipeline attached.
  *
- * It also carries the two limits that are true of every RacquetIQ analysis and
+ * It also carries the two limits that are true of every RacketIQ analysis and
  * are easy to forget once you are looking at a page of confident numbers: shot
  * detection was audited at 63% precision, and shot classes come from body pose
  * on 854-pixel-wide footage with no ball tracking, so many of them are not

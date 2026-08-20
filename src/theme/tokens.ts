@@ -1,5 +1,5 @@
 /**
- * RacquetIQ design tokens — final palette. See docs/04-branding.md.
+ * RacketIQ design tokens — final palette. See docs/04-branding.md.
  *
  * The pattern is inherited from a prior App-Store-shipped app (see docs/02): every colour
  * is a dark/light `DynamicColorIOS` pair, so iOS resolves the theme natively.
@@ -107,7 +107,7 @@ export const radius = {
 } as const;
 
 /** Type scale — the platform UI face (SF on iOS, Roboto on Android) at weights
- *  400 / 600 / 800. RacquetIQ ships no custom font; see docs/04-branding.md. */
+ *  400 / 600 / 800. RacketIQ ships no custom font; see docs/04-branding.md. */
 export const type = {
   display: { fontSize: 34, fontWeight: "800" as const, letterSpacing: -1.2, lineHeight: 36 },
   title: { fontSize: 26, fontWeight: "800" as const, letterSpacing: -0.8 },

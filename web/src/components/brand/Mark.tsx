@@ -3,7 +3,7 @@ import { useId } from "react";
 import { cn } from "@/lib/cn";
 
 /**
- * The RacquetIQ mark — "Ace Spark". Geometry is a straight copy of the
+ * The RacketIQ mark — "Ace Spark". Geometry is a straight copy of the
  * canonical block between the `@mark-geometry` markers in
  * `assets/brand/src/mark.svg`; if that file changes, mirror it here.
  *
@@ -23,7 +23,7 @@ export function Mark({ size = 32, className }: { size?: number; className?: stri
       viewBox="0 0 512 512"
       className={className}
       role="img"
-      aria-label="RacquetIQ"
+      aria-label="RacketIQ"
       focusable="false"
     >
       <defs>

@@ -70,7 +70,7 @@ export default function Upgrade() {
   return (
     <Section divider={false} className="flex-1">
       <SectionHead
-        eyebrow="RacquetIQ Pro"
+        eyebrow="RacketIQ Pro"
         title="Your first 3 analyses are free"
         body="After that, Pro keeps the analyses coming. Payments run through Stripe — in test mode today, so use card 4242 4242 4242 4242."
         align="center"

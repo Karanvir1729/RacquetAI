@@ -392,7 +392,7 @@ export function useEntitlement(): EntitlementState {
  *
  * Subscribing, cancelling and expiring all happen OUTSIDE this app — in
  * Settings › Subscriptions, or on another device — and that trip backgrounds
- * RacquetIQ without ever unfocusing the screen the user left, so a focus effect
+ * RacketIQ without ever unfocusing the screen the user left, so a focus effect
  * never fires on the way back. Without this, a subscription bought in Settings
  * stays invisible (and a cancelled one stays honoured) until a relaunch.
  *

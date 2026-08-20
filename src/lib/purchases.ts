@@ -24,7 +24,7 @@ export type EntitlementState = "unknown" | "free" | "pro";
 /** RevenueCat entitlement identifier configured for the paid tier. */
 export const PRO_ENTITLEMENT_ID = "pro";
 
-/** App Store Connect product ids (subscription group "RacquetIQ Pro"). */
+/** App Store Connect product ids (subscription group "RacketIQ Pro"). */
 export const PRO_MONTHLY_PRODUCT_ID = "racquetiq_pro_monthly";
 export const PRO_YEARLY_PRODUCT_ID = "racquetiq_pro_yearly";
 

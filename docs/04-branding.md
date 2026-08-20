@@ -1,9 +1,9 @@
 # 04 — Branding
 
-The RacquetIQ identity: palette, mark, type, and the asset pipeline that turns
+The RacketIQ identity: palette, mark, type, and the asset pipeline that turns
 four SVGs into every PNG the app ships.
 
-The product ships as **RacquetIQ** (`expo.name`, the web wordmark). The repo,
+The product ships as **RacketIQ** (`expo.name`, the web wordmark). The repo,
 the Expo `slug` and the URL `scheme` are all still `racquetai` and are staying
 that way — they are load-bearing for EAS builds and store linkage, and renaming
 them buys nothing a user can see.
@@ -213,7 +213,7 @@ Its shape: display/title are weight 800 with tight negative tracking (−1.2 /
 600. Scores and timers should use the display and title steps — the tabular
 feel comes from the weight and tracking, not from a different family.
 
-**The wordmark** is "RacquetIQ" — the name the product ships under (`expo.name`
+**The wordmark** is "RacketIQ" — the name the product ships under (`expo.name`
 in app.json, and what `web/src/components/brand/Mark.tsx` renders). It is the
 same face at weight 800, tracked ≈ −0.035 em, which sets the name as one word.
 "Racquet" takes `text` and "IQ" takes `accentText`, so the accent half deepens
@@ -238,7 +238,7 @@ All generated from `assets/brand/src/` into `assets/brand/`.
 | `mark-mono.svg` | One flat colour, no string bed. Android monochrome, notification silhouette, embroidery, 1-bit print. |
 | `icon.svg` | App-icon composition: Court Ink field lit from the top, one Optic bloom behind the sweet spot, mark at 72% ink. |
 | `splash.svg` | Splash composition: mark at 64% ink with a soft Optic halo that fades to alpha 0 inside the canvas. |
-| `wordmark.svg` | Horizontal lockup, mark + "RacquetIQ". |
+| `wordmark.svg` | Horizontal lockup, mark + "RacketIQ". |
 
 An SVG cannot reference a shape in another file (librsvg will not resolve
 cross-document references), so four of these embed a **copy** of the mark's

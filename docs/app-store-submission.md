@@ -1,6 +1,6 @@
-# App Store submission — RacquetIQ 1.0 (subscription release)
+# App Store submission — RacketIQ 1.0 (subscription release)
 
-**Status: not started.** This is the ordered list of everything still required to submit RacquetIQ
+**Status: not started.** This is the ordered list of everything still required to submit RacketIQ
 **1.0 as a paid-subscription app**. It assumes the app record already exists
 (`ascAppId 6802102279`, bundle `com.racquetai.app`) and that TestFlight has been used, which is true
 today.
@@ -92,7 +92,7 @@ but leaving `NSAllowsArbitraryLoads` on in a submitted binary occasionally draws
 
 Guideline 3.1.2 requires that the purchase screen itself shows: the subscription **title**, its
 **length**, its **price per period**, what it unlocks, plus **tappable links to the Terms of Use and
-the Privacy Policy**, plus a **Restore Purchases** control. RacquetIQ has no Settings tab any more,
+the Privacy Policy**, plus a **Restore Purchases** control. RacketIQ has no Settings tab any more,
 so the paywall is the only place these can live.
 
 `src/features/subscription/paywallCopy.ts` already carries the prices and period labels, and
@@ -124,23 +124,23 @@ verify all six items on the built screen **before** capturing screenshots.
 
 ## 2. Subscription product metadata (both products are in MISSING_METADATA)
 
-Group **"RacquetIQ Pro"** (id `22316619`) already exists, with:
+Group **"RacketIQ Pro"** (id `22316619`) already exists, with:
 
 | Product ID | Plan | Price |
 |---|---|---|
 | `racquetiq_pro_monthly` | 1 month | US$9.99 |
 | `racquetiq_pro_yearly` | 1 year | US$79.99 |
 
-For **each** product, App Store Connect → Monetization → Subscriptions → RacquetIQ Pro:
+For **each** product, App Store Connect → Monetization → Subscriptions → RacketIQ Pro:
 
-- [ ] **Reference Name** (internal, ≤64 chars, never shown to users) — e.g. `RacquetIQ Pro Monthly`.
+- [ ] **Reference Name** (internal, ≤64 chars, never shown to users) — e.g. `RacketIQ Pro Monthly`.
 - [ ] **Duration** — 1 Month / 1 Year. Cannot be changed after the product is approved.
 - [ ] **🚨 Subscription Prices** — this is the field that keeps them in MISSING_METADATA. Pick
       **US$9.99** and **US$79.99** as the base price; Apple generates every other territory's price
       automatically. Review the generated table before saving, and set the start date.
 - [ ] **Localizations (English (U.S.) at minimum)**:
       - **Subscription Display Name** — shown in the purchase sheet and in the user's Subscriptions
-        list. Short (~30 chars): `RacquetIQ Pro Monthly` / `RacquetIQ Pro Yearly`.
+        list. Short (~30 chars): `RacketIQ Pro Monthly` / `RacketIQ Pro Yearly`.
       - **Description** — ~45 chars, e.g. `Unlimited match analyses. Billed monthly.` /
         `Unlimited match analyses. Best value.`
 - [ ] **Review Screenshot** — required per product, and a common cause of "Missing Metadata"
@@ -154,7 +154,7 @@ For **each** product, App Store Connect → Monetization → Subscriptions → R
       easy, turning it off later disrupts existing subscribers.
 - [ ] **Subscription group level / ranking** — put **Yearly above Monthly** in the group so moving
       monthly → yearly is treated as an upgrade (immediate) rather than a crossgrade.
-- [ ] **Group localization** — the group's own display name ("RacquetIQ Pro") and, if you use one,
+- [ ] **Group localization** — the group's own display name ("RacketIQ Pro") and, if you use one,
       the group's app-name-override. Users see this in Settings → Subscriptions.
 - [ ] Both products reach **Ready to Submit**.
 
@@ -233,7 +233,7 @@ Defaults to unanswered, and unanswered blocks submission. The answers below foll
 
 - [ ] Re-open the questionnaire and answer **every** question, even if it was answered before — Apple
       adds questions (a previously-passing app was blocked by newly added social/UGC questions).
-- [ ] Expected result: **4+**, everything No. RacquetIQ has no UGC sharing, no web view, no contests,
+- [ ] Expected result: **4+**, everything No. RacketIQ has no UGC sharing, no web view, no contests,
       no gambling, no user communication.
 - [ ] If sharing features are ever added, this answer changes and Guideline 1.2 applies.
 
@@ -257,7 +257,7 @@ Rules unchanged from [07-app-store-prep.md](07-app-store-prep.md) §6; what chan
 
 | Field | Limit | Notes |
 |---|---|---|
-| App Name | 30 | `RacquetIQ` |
+| App Name | 30 | `RacketIQ` |
 | Subtitle | 30 | e.g. `Squash match analysis` |
 | Keywords | 100 total | comma-separated, **no spaces after commas** (they consume characters); do not repeat words already in the name/subtitle |
 | Promotional Text | 170 | editable without a new build |
@@ -279,7 +279,7 @@ here is what turns an ordinary review into a 2.3.1 "app does not perform as adve
 
 Draft notes (2,054 characters as written — recount after editing; the limit is 4,000):
 
-> RacquetIQ analyses squash match video and reports shot placement, court coverage, time at the T,
+> RacketIQ analyses squash match video and reports shot placement, court coverage, time at the T,
 > shot types and a predictability score.
 >
 > SIGN-IN REQUIRED. Demo account: webtest@racquetiq.dev (password in the App Review
@@ -299,7 +299,7 @@ Draft notes (2,054 characters as written — recount after editing; the limit is
 > when asked → the analysis runs ON DEVICE (no network needed) and takes a couple of minutes for a
 > six-minute match. Your first three analyses are free, so this can be tested without purchasing.
 >
-> SUBSCRIPTION: after three free analyses, further analyses of your own videos require RacquetIQ Pro
+> SUBSCRIPTION: after three free analyses, further analyses of your own videos require RacketIQ Pro
 > (US$9.99/month or US$79.99/year, auto-renewable). Recording, the library, existing analyses and
 > the demo analysis all stay free. The paywall shows price, duration, Restore Purchases, and links
 > to our Terms of Use and Privacy Policy.

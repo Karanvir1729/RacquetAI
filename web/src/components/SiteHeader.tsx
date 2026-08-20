@@ -17,7 +17,7 @@ const NAV = [
 ];
 
 /**
- * Sticky, blurred header — Daybot's shape, RacquetIQ's mark.
+ * Sticky, blurred header — Daybot's shape, RacketIQ's mark.
  *
  * The nav collapses into a disclosure below `md` rather than disappearing:
  * a phone visitor still needs to reach the limits section, and every row in
@@ -58,7 +58,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-shell items-center justify-between gap-3 px-5 py-3 sm:px-6 lg:px-8">
         <Link
           to="/"
-          aria-label="RacquetIQ home"
+          aria-label="RacketIQ home"
           className="flex min-h-[44px] shrink-0 items-center"
         >
           <Wordmark />

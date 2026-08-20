@@ -71,7 +71,7 @@ describe("the gate's three states", () => {
     authState.ready = true;
     const tree = await mount(createElement(AuthGateScreen));
     const rendered = text(tree);
-    expect(rendered).toContain("RacquetIQ");
+    expect(rendered).toContain("RacketIQ");
     expect(rendered).toContain("Email");
     expect(rendered).toContain("Password");
     expect(rendered).toContain("Create an account");

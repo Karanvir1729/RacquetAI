@@ -43,15 +43,15 @@ import { fetchBillingStatus, type BillingStatus, type Plan } from "./billingClie
 type Pending = "apple" | "email" | null;
 
 const PLAN_LABEL: Record<Plan, string> = {
-  monthly: "RacquetIQ Pro — $9.99 / month",
-  yearly: "RacquetIQ Pro — $79.99 / year",
+  monthly: "RacketIQ Pro — $9.99 / month",
+  yearly: "RacketIQ Pro — $79.99 / year",
 };
 
 export function AccountScreen() {
   const session = useAuthSession();
   return (
     <Screen scroll>
-      <ScreenHeader title="Account" subtitle={session ? "Signed in" : "Sign in to RacquetIQ"} />
+      <ScreenHeader title="Account" subtitle={session ? "Signed in" : "Sign in to RacketIQ"} />
       {session ? <SignedInCard email={session.user.email ?? "Signed in"} /> : <SignInCard />}
       {/* Engine choice is device-level, not account-level — always shown.
           Cross-feature import documented in EngineSettingsCard's header. */}
@@ -226,7 +226,7 @@ function SignedInCard({ email }: { email: string }) {
           {isPro
             ? billing?.active && billing.plan !== null
               ? PLAN_LABEL[billing.plan]
-              : "RacquetIQ Pro — active"
+              : "RacketIQ Pro — active"
             : checked
               ? "Free — 3 analyses of your own videos included."
               : "Checking your plan…"}

@@ -143,7 +143,7 @@ export default function RootLayout() {
             <Tabs.Screen name="analysis" options={{ href: null }} />
             {/* Import & analyze flow — reached from the Library's import card. */}
             <Tabs.Screen name="import-analysis" options={{ href: null }} />
-            {/* RacquetIQ Pro — pushed from the import card once the free
+            {/* RacketIQ Pro — pushed from the import card once the free
                 analyses are spent; never a tab of its own. */}
             <Tabs.Screen name="paywall" options={{ href: null }} />
           </Tabs>

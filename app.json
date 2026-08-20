@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "RacquetIQ",
+    "name": "RacketIQ",
     "slug": "racquetai",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -63,15 +63,15 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "RacquetIQ uses the camera to record your matches, and to watch the court live so it can suggest the score for you to confirm.",
-          "microphonePermission": "RacquetIQ listens for the sound of ball strikes \u2014 that is how it finds your shots and rallies, both in a recording and while watching a match live."
+          "cameraPermission": "RacketIQ uses the camera to record your matches, and to watch the court live so it can suggest the score for you to confirm.",
+          "microphonePermission": "RacketIQ listens for the sound of ball strikes \u2014 that is how it finds your shots and rallies, both in a recording and while watching a match live."
         }
       ],
       [
         "expo-media-library",
         {
-          "savePhotosPermission": "RacquetIQ saves finished match recordings to your photo library so your footage stays yours outside the app.",
-          "photosPermission": "RacquetIQ reads your photo library only when you choose a match video to import for analysis. It never scans your library on its own."
+          "savePhotosPermission": "RacketIQ saves finished match recordings to your photo library so your footage stays yours outside the app.",
+          "photosPermission": "RacketIQ reads your photo library only when you choose a match video to import for analysis. It never scans your library on its own."
         }
       ],
       "expo-video"

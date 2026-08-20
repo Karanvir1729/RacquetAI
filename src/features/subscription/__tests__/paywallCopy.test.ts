@@ -20,7 +20,7 @@ import {
 } from "../paywallCopy";
 
 describe("the products match App Store Connect", () => {
-  it("uses the exact product ids from the RacquetIQ Pro group", () => {
+  it("uses the exact product ids from the RacketIQ Pro group", () => {
     expect(MONTHLY_PLAN.id).toBe("racquetiq_pro_monthly");
     expect(YEARLY_PLAN.id).toBe("racquetiq_pro_yearly");
   });

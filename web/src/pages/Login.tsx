@@ -81,7 +81,7 @@ export default function Login() {
       <div className="mx-auto max-w-md">
         <p className="rq-eyebrow text-center">Your account</p>
         <h1 className="rq-h2 mt-3 text-center">
-          {mode === "signin" ? "Sign in to RacquetIQ" : "Create your account"}
+          {mode === "signin" ? "Sign in to RacketIQ" : "Create your account"}
         </h1>
 
         <Card className="mt-8 p-6 sm:p-8">

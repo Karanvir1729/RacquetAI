@@ -10,7 +10,7 @@ import {
 } from "@/lib/subscription";
 
 /**
- * RacquetIQ Pro — thin route; the screen lives in features/subscription and the
+ * RacketIQ Pro — thin route; the screen lives in features/subscription and the
  * store plumbing in lib/subscription. Hidden from the tab bar (`href: null` in
  * _layout) and reached from the Library's import card once the free analyses
  * are spent, or from the paywall link on it.

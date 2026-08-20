@@ -10,8 +10,8 @@ import { fetchBillingStatus, type BillingStatus } from "@/lib/billing";
 import { trackEvent } from "@/lib/events";
 
 const PLAN_LABEL: Record<string, string> = {
-  monthly: "RacquetIQ Pro — $9.99 / month",
-  yearly: "RacquetIQ Pro — $79.99 / year",
+  monthly: "RacketIQ Pro — $9.99 / month",
+  yearly: "RacketIQ Pro — $79.99 / year",
 };
 
 /** Signed-in home: who you are, what you're subscribed to, and the exits. */
@@ -99,7 +99,7 @@ export default function Account() {
                   </span>
                 ) : null}
                 {billing !== null && billing.active
-                  ? PLAN_LABEL[billing.plan ?? ""] ?? "RacquetIQ Pro — active"
+                  ? PLAN_LABEL[billing.plan ?? ""] ?? "RacketIQ Pro — active"
                   : null}
                 {billing !== null && !billing.active
                   ? "Free — recording, the library, and 3 analyses of your own videos."
