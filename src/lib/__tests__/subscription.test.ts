@@ -9,7 +9,9 @@
  */
 import {
   configure,
+  forgetUser,
   getEntitlement,
+  identifyUser,
   isSubscriptionConfigured,
   loadPackages,
   purchase,
@@ -358,5 +360,58 @@ describe("loadPackages", () => {
     configure(fakeSdk(), API_KEY);
     const result = await loadPackages();
     expect(result.status).toBe("failed");
+  });
+});
+
+/**
+ * Binding the store to the signed-in account. Without this a subscription
+ * belongs to the DEVICE: user A buys Pro, signs out, user B signs in on the
+ * same phone and inherits it. The SDK members are optional on purpose (old
+ * SDKs, Expo Go, the doubles above), so every path here must also survive
+ * their absence rather than throwing on the sign-in path.
+ */
+describe("binding the entitlement to an account", () => {
+  it("identifies the user with the store and re-reads their entitlement", async () => {
+    const logIn = jest.fn(() => Promise.resolve({}));
+    const sdk = fakeSdk({ logIn, getCustomerInfo: () => Promise.resolve(PRO_INFO) });
+    configure(sdk, API_KEY);
+
+    expect(await identifyUser("user-abc")).toBe("pro");
+    expect(logIn).toHaveBeenCalledWith("user-abc");
+  });
+
+  it("logs out so the next account cannot inherit the previous user's Pro", async () => {
+    const logOut = jest.fn(() => Promise.resolve({}));
+    const sdk = fakeSdk({ logOut, getCustomerInfo: () => Promise.resolve(FREE_INFO) });
+    configure(sdk, API_KEY);
+
+    expect(await forgetUser()).toBe("free");
+    expect(logOut).toHaveBeenCalled();
+  });
+
+  it("still reports the entitlement when the SDK has no logIn/logOut", async () => {
+    // fakeSdk() deliberately omits both — the shape an older SDK presents.
+    const sdk = fakeSdk({ getCustomerInfo: () => Promise.resolve(PRO_INFO) });
+    configure(sdk, API_KEY);
+
+    expect(await identifyUser("user-abc")).toBe("pro");
+    expect(await forgetUser()).toBe("pro");
+  });
+
+  it("does not let a rejected logIn break sign-in", async () => {
+    const sdk = fakeSdk({
+      logIn: () => Promise.reject(new Error("network")),
+      getCustomerInfo: () => Promise.resolve(FREE_INFO),
+    });
+    configure(sdk, API_KEY);
+
+    // Resolves to a real entitlement rather than rejecting.
+    expect(await identifyUser("user-abc")).toBe("free");
+  });
+
+  it("is a safe no-op when purchases are unconfigured", async () => {
+    expect(await identifyUser("user-abc")).toBe("unknown");
+    expect(await forgetUser()).toBe("unknown");
+    expect(getEntitlement()).toBe("unknown");
   });
 });
