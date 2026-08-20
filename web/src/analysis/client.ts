@@ -13,6 +13,8 @@
  * "where does my video go?" is "to a server you point this at" — this site
  * does not host one.
  */
+import { supabase } from "@/lib/supabase";
+
 import {
   parseJobId,
   parseJobState,
@@ -82,6 +84,25 @@ async function readError(response: Response, fallback: string): Promise<Analysis
 }
 
 /** Where the reference frame lives. `bust` re-fetches after a re-upload. */
+/**
+ * The signed-in user's access token, for the Authorization header.
+ *
+ * Every /jobs route is authenticated: the analysis server used to accept an
+ * upload from anyone who knew the hostname, which meant a stranger could spend
+ * the operator's compute and read back any job by guessing its id. Returns null
+ * when signed out, and the caller lets the server answer 401 rather than
+ * guessing at the reason locally.
+ */
+export async function authHeader(): Promise<Record<string, string>> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
+}
+
 export function frameUrl(base: string, jobId: string, bust?: number): string {
   const suffix = bust === undefined ? "" : `?t=${bust}`;
   return `${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}/frame.jpg${suffix}`;
@@ -126,6 +147,8 @@ export function uploadVideo(
   const promise = new Promise<string>((resolve, reject) => {
     request.open("POST", `${normalizeBase(base)}/jobs`);
     request.responseType = "json";
+    // Authorization is set below, after the token resolves; open() has already
+    // been called so setRequestHeader is legal from the async continuation.
     // The server keys the extension off the content type for raw bodies:
     // "quicktime" means .mov, everything else .mp4.
     request.setRequestHeader("Content-Type", file.type || "video/mp4");
@@ -164,7 +187,14 @@ export function uploadVideo(
     request.onabort = () => reject(new AnalysisServerError("Upload cancelled."));
     request.ontimeout = () => reject(new AnalysisServerError("The upload timed out."));
 
-    request.send(file);
+    // Resolve the token first, THEN send. /jobs is authenticated, and sending
+    // a multi-hundred-MB body that is certain to 401 would waste the whole
+    // upload before the server could refuse it.
+    void authHeader().then((headers) => {
+      const auth = headers.Authorization;
+      if (auth !== undefined) request.setRequestHeader("Authorization", auth);
+      request.send(file);
+    });
   });
 
   return { promise, cancel: () => request.abort() };
@@ -186,6 +216,7 @@ export async function fetchJobState(
   signal?: AbortSignal,
 ): Promise<JobState> {
   const response = await fetch(`${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}`, {
+    headers: await authHeader(),
     signal,
   });
   if (!response.ok) throw await readError(response, `Could not read the job (HTTP ${response.status}).`);
@@ -210,7 +241,7 @@ export async function submitCorners(
   };
   const response = await fetch(`${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}/corners`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeader()) },
     body: JSON.stringify(body),
   });
   if (!response.ok) {
@@ -225,7 +256,7 @@ export async function fetchAnalysis(
 ): Promise<MatchAnalysis> {
   const response = await fetch(
     `${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}/analysis.json`,
-    { signal },
+    { signal, headers: await authHeader() },
   );
   if (!response.ok) {
     throw await readError(response, `Could not download the analysis (HTTP ${response.status}).`);

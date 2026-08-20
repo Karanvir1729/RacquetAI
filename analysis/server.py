@@ -40,7 +40,7 @@ import uuid
 
 from flask import Flask, jsonify, request, send_file
 
-from platform_api import platform_bp
+from platform_api import _auth_user, _configured, platform_bp
 
 ANALYSIS_DIR = os.path.dirname(os.path.abspath(__file__))
 JOBS_DIR = os.path.join(ANALYSIS_DIR, "jobs")
@@ -80,6 +80,9 @@ def _new_job(job_id, source_name):
         "status": "queued",
         "message": None,
         "sourceName": source_name,
+        # Set by create_job from the verified token; persisted in state.json so a
+        # restarted server still knows whose job this is.
+        "ownerId": None,
         "createdAt": time.time(),
         # filled in during "preparing"
         "videoW": None, "videoH": None, "durationSec": None, "refTimeSec": None,
@@ -281,6 +284,71 @@ def _get_job(job_id):
         return jobs.get(job_id)
 
 
+# ---------------------------------------------------------------- job auth
+#
+# Every /jobs route is authenticated. Before this, the whole analysis API was
+# open to anyone who knew the hostname: a stranger could POST a 4 GB video and
+# spend the operator's Azure compute, and could read back any job's reference
+# frame and analysis by guessing an id.
+#
+# FAIL CLOSED is the point. If the platform is not configured (no
+# SUPABASE_URL / service key) there is no way to verify a token, so jobs are
+# refused rather than waved through — the previous behaviour is exactly the
+# hole being closed. A LAN/desktop install that genuinely has no accounts opts
+# in explicitly with ALLOW_ANONYMOUS_JOBS=1.
+ALLOW_ANONYMOUS_JOBS = os.environ.get("ALLOW_ANONYMOUS_JOBS", "") == "1"
+
+
+def _require_user():
+    """
+    (user_id, None) when the caller may use /jobs, else (None, response).
+
+    `user_id` is None in the explicitly-opted-in anonymous mode, which also
+    disables the per-owner checks below — one trusted user on a LAN.
+    """
+    if ALLOW_ANONYMOUS_JOBS:
+        return None, None
+    if not _configured():
+        return None, (jsonify({
+            "error": "This analysis server is not configured for accounts, so it "
+                     "cannot accept uploads. Set SUPABASE_URL and "
+                     "SUPABASE_SERVICE_ROLE_KEY, or run it with "
+                     "ALLOW_ANONYMOUS_JOBS=1 on a trusted network."
+        }), 503)
+    user = _auth_user()
+    if user is None:
+        return None, (jsonify({"error": "Sign in to analyse a video."}), 401)
+    return user.get("id"), None
+
+
+def _owns(job, user_id):
+    """
+    May this caller see this job?
+
+    Anonymous mode has no owners. Otherwise a job is visible only to the
+    account that created it — a guessed job id must not hand over someone
+    else's court footage.
+    """
+    if ALLOW_ANONYMOUS_JOBS:
+        return True
+    return job.get("ownerId") is not None and job.get("ownerId") == user_id
+
+
+def _guard_job(job_id):
+    """(job, user_id, None) or (None, None, response). Used by every read route."""
+    user_id, denied = _require_user()
+    if denied is not None:
+        return None, None, denied
+    job = _get_job(job_id)
+    if job is None:
+        return None, None, (jsonify({"error": "unknown job"}), 404)
+    if not _owns(job, user_id):
+        # 404, not 403: a stranger probing ids learns nothing about which ones
+        # exist.
+        return None, None, (jsonify({"error": "unknown job"}), 404)
+    return job, user_id, None
+
+
 @app.route("/health")
 def health():
     return jsonify({"ok": True, "service": "racquetai-analysis", "port": PORT})
@@ -288,6 +356,12 @@ def health():
 
 @app.route("/jobs", methods=["POST"])
 def create_job():
+    # Authenticate BEFORE reading the body: a rejected upload must cost the
+    # server nothing, and Flask has not spooled the file at this point.
+    owner_id, denied = _require_user()
+    if denied is not None:
+        return denied
+
     # Two upload shapes: multipart field "video" (curl, older app builds) or a
     # raw video/* body (app build 11+). Raw exists because expo's iOS multipart
     # implementation buffers the whole file in memory before sending — a match
@@ -320,6 +394,9 @@ def create_job():
 
     job = _new_job(job_id, os.path.basename(src_name))
     job["inputPath"] = input_path
+    # Bound to the account that uploaded it. Every read route checks this, so a
+    # guessed job id cannot hand someone else's footage or analysis over.
+    job["ownerId"] = owner_id
     with jobs_lock:
         jobs[job_id] = job
     _persist(job)
@@ -329,9 +406,9 @@ def create_job():
 
 @app.route("/jobs/<job_id>")
 def job_status(job_id):
-    job = _get_job(job_id)
-    if job is None:
-        return jsonify({"error": "unknown job"}), 404
+    job, _user, denied = _guard_job(job_id)
+    if denied is not None:
+        return denied
     with jobs_lock:
         snapshot = dict(job)
     return jsonify({"status": snapshot["status"],
@@ -341,9 +418,9 @@ def job_status(job_id):
 
 @app.route("/jobs/<job_id>/frame.jpg")
 def job_frame(job_id):
-    job = _get_job(job_id)
-    if job is None:
-        return jsonify({"error": "unknown job"}), 404
+    job, _user, denied = _guard_job(job_id)
+    if denied is not None:
+        return denied
     path = os.path.join(_job_dir(job_id), "frame.jpg")
     if job["status"] in ("queued", "preparing") or not os.path.exists(path):
         return jsonify({"error": "frame not ready (available from corners_needed)"}), 409
@@ -352,9 +429,9 @@ def job_frame(job_id):
 
 @app.route("/jobs/<job_id>/corners", methods=["POST"])
 def job_corners(job_id):
-    job = _get_job(job_id)
-    if job is None:
-        return jsonify({"error": "unknown job"}), 404
+    job, _user, denied = _guard_job(job_id)
+    if denied is not None:
+        return denied
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         return jsonify({"error": "JSON body required"}), 400
@@ -400,9 +477,9 @@ def job_corners(job_id):
 
 @app.route("/jobs/<job_id>/analysis.json")
 def job_analysis(job_id):
-    job = _get_job(job_id)
-    if job is None:
-        return jsonify({"error": "unknown job"}), 404
+    job, _user, denied = _guard_job(job_id)
+    if denied is not None:
+        return denied
     path = os.path.join(_job_dir(job_id), "out", "analysis.json")
     if job["status"] != "done" or not os.path.exists(path):
         return jsonify({"error": f'analysis not ready (job is "{job["status"]}")'}), 409

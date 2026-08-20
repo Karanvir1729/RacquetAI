@@ -21,6 +21,8 @@ import {
   type JobStatus,
 } from "./jobContract";
 
+import { supabase } from "@/lib/supabaseClient";
+
 /** A failure whose `message` is written for the user, not a stack trace. */
 export class ImportServerError extends Error {}
 
@@ -32,11 +34,14 @@ export type UploadTask = FileSystem.UploadTask;
  * when the total size is unknown. Callers start it with `task.uploadAsync()`
  * and cancel with `task.cancelAsync()` on unmount.
  */
-export function createVideoUploadTask(
+export async function createVideoUploadTask(
   baseUrl: string,
   videoUri: string,
   onProgress: (fraction: number | null) => void,
-): UploadTask {
+): Promise<UploadTask> {
+  // Resolved before the task is built: /jobs is authenticated, and starting a
+  // multi-hundred-MB upload that is certain to 401 wastes the whole transfer.
+  const authHeaders = await authHeader();
   return FileSystem.createUploadTask(
     jobsUrl(baseUrl),
     videoUri,
@@ -51,6 +56,7 @@ export function createVideoUploadTask(
       headers: {
         "Content-Type": videoMimeType(videoUri),
         "X-Filename": uploadFileName(videoUri),
+        ...authHeaders,
       },
       // Foreground-only: the flow screen owns the task lifecycle; a background
       // iOS session would outlive the screen that reports its progress.
@@ -60,6 +66,24 @@ export function createVideoUploadTask(
       onProgress(totalBytesExpectedToSend > 0 ? totalBytesSent / totalBytesExpectedToSend : null);
     },
   );
+}
+
+/**
+ * The signed-in user's access token as an Authorization header.
+ *
+ * Every /jobs route on the analysis server is authenticated — it previously
+ * accepted an upload from anyone who knew the hostname, and served any job's
+ * frame and analysis to a guessed id. Empty when signed out; the server then
+ * answers 401 and the flow surfaces its message rather than guessing here.
+ */
+async function authHeader(): Promise<Record<string, string>> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
 }
 
 async function fetchText(url: string, init?: RequestInit): Promise<string> {
@@ -79,7 +103,7 @@ async function fetchText(url: string, init?: RequestInit): Promise<string> {
 
 /** GET /jobs/{id} → parsed status. */
 export async function fetchJobStatus(baseUrl: string, jobId: string): Promise<JobStatus> {
-  const body = await fetchText(jobUrl(baseUrl, jobId));
+  const body = await fetchText(jobUrl(baseUrl, jobId), { headers: await authHeader() });
   const status = parseJobStatus(body);
   if (status === null) {
     throw new ImportServerError("The analysis server sent a status this app version can't read.");
@@ -95,12 +119,12 @@ export async function postCorners(
 ): Promise<void> {
   await fetchText(cornersUrl(baseUrl, jobId), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeader()) },
     body: cornersBody(corners),
   });
 }
 
 /** GET /jobs/{id}/analysis.json → the raw JSON text (validated by the caller). */
 export async function fetchAnalysisText(baseUrl: string, jobId: string): Promise<string> {
-  return fetchText(analysisUrl(baseUrl, jobId));
+  return fetchText(analysisUrl(baseUrl, jobId), { headers: await authHeader() });
 }

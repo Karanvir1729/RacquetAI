@@ -60,7 +60,19 @@ _RAW_ORIGINS = (os.environ.get("WEB_ORIGINS")
                 or "http://localhost:5183")
 WEB_ORIGINS = [o.strip().rstrip("/") for o in _RAW_ORIGINS.split(",") if o.strip()]
 ADMIN_USER = os.environ.get("ADMIN_USERNAME", "admin")
-ADMIN_PASS = os.environ.get("ADMIN_PASSWORD", "admin")
+# NO DEFAULT PASSWORD, and "admin" is refused outright.
+#
+# This shipped as `os.environ.get("ADMIN_PASSWORD", "admin")` with
+# ADMIN_PASSWORD=admin in the deployed .env, which meant /admin/metrics —
+# every user's email address, their signup provider, and the Stripe customer
+# and subscription ids, all read with the Supabase SERVICE ROLE key — was
+# readable from the open internet by anyone who tried admin/admin.
+#
+# An unset or obviously-default password now disables the endpoint instead of
+# weakly protecting it: a 503 is a bug report, a leak is not.
+ADMIN_PASS = os.environ.get("ADMIN_PASSWORD", "")
+_WEAK_ADMIN_PASSWORDS = {"", "admin", "password", "changeme", "racquetiq", "racketiq"}
+ADMIN_ENABLED = ADMIN_PASS.lower() not in _WEAK_ADMIN_PASSWORDS
 PRICES = {
     "monthly": os.environ.get("STRIPE_PRICE_MONTHLY", ""),
     "yearly": os.environ.get("STRIPE_PRICE_YEARLY", ""),
@@ -336,10 +348,24 @@ def billing_webhook():
 
 # ---------------------------------------------------------------- admin
 def _admin_authed():
+    # Fail closed: with no ADMIN_PASSWORD set, or a default-ish one, there is no
+    # credential worth checking and the endpoint is off.
+    if not ADMIN_ENABLED:
+        return False
     auth = request.authorization
     return (auth is not None and auth.type == "basic"
             and hmac.compare_digest(auth.username or "", ADMIN_USER)
             and hmac.compare_digest(auth.password or "", ADMIN_PASS))
+
+
+def _mask_email(email):
+    """`karanvir@example.com` -> `k••••••r@example.com`. None stays None."""
+    if not email or "@" not in email:
+        return email
+    local, _, domain = email.partition("@")
+    if len(local) <= 2:
+        return f"{local[:1]}•@{domain}"
+    return f"{local[0]}{'•' * (len(local) - 2)}{local[-1]}@{domain}"
 
 
 def _day(ts):
@@ -358,9 +384,16 @@ def _daily_series(rows, days=30):
 
 @platform_bp.route("/admin/metrics")
 def admin_metrics():
+    # Distinguish "off" from "wrong password" for the operator, without telling
+    # an anonymous prober anything they can use.
+    if not ADMIN_ENABLED:
+        return jsonify({
+            "error": "Admin metrics are disabled: set ADMIN_PASSWORD to a strong, "
+                     "non-default value and redeploy."
+        }), 503
     if not _admin_authed():
         return (jsonify({"error": "unauthorized"}), 401,
-                {"WWW-Authenticate": 'Basic realm="racquetiq-admin"'})
+                {"WWW-Authenticate": 'Basic realm="racketiq-admin"'})
     if not _configured():
         return jsonify({"error": "platform not configured on this server"}), 503
 
@@ -405,7 +438,11 @@ def admin_metrics():
         "eventsByPlatform": [{"platform": k, "count": v}
                              for k, v in by_platform.most_common()],
         "recentEvents": events[:50],
-        "recentUsers": [{"id": u.get("id"), "email": u.get("email"),
+        # Emails are MASKED. A signup dashboard needs to show that an account
+        # exists and roughly who it is, not to hand the full address list to
+        # anything that reaches this endpoint. Full addresses live in Supabase,
+        # behind the service-role key, for the one operator who needs them.
+        "recentUsers": [{"id": u.get("id"), "email": _mask_email(u.get("email")),
                          "createdAt": u.get("created_at"),
                          "provider": ((u.get("app_metadata") or {})
                                       .get("provider"))}

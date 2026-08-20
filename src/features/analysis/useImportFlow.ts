@@ -161,9 +161,10 @@ function useServerImportFlow(videoUri: string | null): ImportFlow {
       safeSetState({ phase: "compressing" });
       uploadUri = await compressForUpload(videoUri);
       if (cancelled) return;
-      task = createVideoUploadTask(baseUrl, uploadUri, (progress) => {
+      task = await createVideoUploadTask(baseUrl, uploadUri, (progress) => {
         safeSetState({ phase: "uploading", progress });
       });
+      if (cancelled) return;
       task
         .uploadAsync()
         .then((result) => {
