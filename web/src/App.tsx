@@ -14,6 +14,7 @@ import Demo from "@/pages/Demo";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
+import Referee from "@/pages/Referee";
 import Upgrade from "@/pages/Upgrade";
 
 /**
@@ -69,6 +70,8 @@ export default function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/analyze" element={<Analyze />} />
               <Route path="/demo" element={<Demo />} />
+
+              <Route path="/referee" element={<Referee />} />
               <Route path="/login" element={<Login />} />
               <Route path="/account" element={<Account />} />
               <Route path="/upgrade" element={<Upgrade />} />

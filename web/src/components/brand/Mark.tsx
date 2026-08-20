@@ -68,7 +68,7 @@ export function Mark({ size = 32, className }: { size?: number; className?: stri
 }
 
 /**
- * The horizontal lockup. "Racquet" in text colour, "IQ" in accent text —
+ * The horizontal lockup. "Racket" in text colour, "IQ" in accent text —
  * the colour break is the only separation, no space and no second capital
  * (the wordmark rule, carried over from assets/brand/src/wordmark.svg).
  */
@@ -80,7 +80,7 @@ export function Wordmark({ className, markSize = 30 }: { className?: string; mar
         className="text-[21px] font-extrabold"
         style={{ letterSpacing: "-0.035em", color: "var(--rq-text)" }}
       >
-        Racquet<span style={{ color: "var(--rq-accent-text)" }}>IQ</span>
+        Racket<span style={{ color: "var(--rq-accent-text)" }}>IQ</span>
       </span>
     </span>
   );

@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1123" height="369" viewBox="0 0 1123 369" role="img" aria-label="RacquetIQ">
-  <title>RacquetIQ</title>
+<svg xmlns="http://www.w3.org/2000/svg" width="1123" height="369" viewBox="0 0 1123 369" role="img" aria-label="RacketIQ">
+  <title>RacketIQ</title>
   <!--
-    RacquetIQ — horizontal lockup (mark + wordmark).
+    RacketIQ — horizontal lockup (mark + wordmark).
     
     Every number below is derived from the mark, not eyeballed. The mark is
     nested at 288 units, so its ink box is 126 x 225.
@@ -15,8 +15,8 @@
                     the mark's ink box
     
     TYPE: the platform UI face, SF Pro Display Bold on Apple platforms,
-    Helvetica Neue / Arial elsewhere, tracked -6 so “RacquetIQ” sets as one
-    word. “Racquet” is Chalk, “IQ” is Optic; the colour break is the only
+    Helvetica Neue / Arial elsewhere, tracked -6 so “RacketIQ” sets as one
+    word. “Racket” is Chalk, “IQ” is Optic; the colour break is the only
     separation, no space and no second capital.
 
     Optic on the “IQ” assumes this lockup sits on Court Ink (16:1). On a light
@@ -48,5 +48,5 @@
     </g>
     <!-- @mark-geometry:end -->
   </svg>
-  <text x="270" y="227" font-family="-apple-system, SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif" font-size="168" font-weight="700" letter-spacing="-6" fill="#FFFFFF">Racquet<tspan fill="#7CBF3F">IQ</tspan></text>
+  <text x="270" y="227" font-family="-apple-system, SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif" font-size="168" font-weight="700" letter-spacing="-6" fill="#FFFFFF">Racket<tspan fill="#7CBF3F">IQ</tspan></text>
 </svg>

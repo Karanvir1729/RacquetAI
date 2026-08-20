@@ -11,7 +11,7 @@ export function SiteFooter() {
         <div className="flex items-center gap-2.5">
           <Mark size={22} />
           <span className="rq-label" style={{ color: "var(--rq-text)" }}>
-            Racquet<span style={{ color: "var(--rq-accent-text)" }}>IQ</span>
+            Racket<span style={{ color: "var(--rq-accent-text)" }}>IQ</span>
           </span>
           <span className="rq-caption">· squash match analysis</span>
         </div>

@@ -22,8 +22,13 @@
     "types": ["vite/client"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@app/*": ["../src/*"]
     }
   },
+  // Only web's own sources are listed. The shared scoring modules are reached
+  // through the `@app/*` path mapping and typechecked as imports — listing the
+  // directory would also drag in its React Native components and jest suites,
+  // which belong to the app's tsconfig, not this one.
   "include": ["src", "vite.config.ts"]
 }

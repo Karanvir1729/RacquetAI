@@ -104,7 +104,11 @@ function gameWinner(before: SquashScore, after: SquashScore): Side | null {
 function sentence(parts: readonly string[]): string {
   return parts
     .filter((part) => part.length > 0)
-    .map((part) => `${part[0].toUpperCase()}${part.slice(1)}.`)
+    // charAt, not part[0]: the non-empty filter above already guarantees an
+    // index 0, but the web app compiles this same file under
+    // noUncheckedIndexedAccess, where the indexed read is `string | undefined`.
+    // charAt is total and reads the same.
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}.`)
     .join(" ");
 }
 
