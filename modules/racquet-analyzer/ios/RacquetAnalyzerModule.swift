@@ -43,6 +43,29 @@ public class RacquetAnalyzerModule: Module {
 
     /// Camera/microphone authorization WITHOUT triggering a system prompt, so
     /// a screen can render the right call-to-action before it asks.
+    /// Make the app audible when the hardware ring/silent switch is on.
+    ///
+    /// Nothing else in this app ever touched AVAudioSession, so iOS left it on
+    /// the default `soloAmbient` category — which obeys the silent switch. A
+    /// referee that announces the score is useless to someone who carries a
+    /// phone to a club on silent, and the failure is invisible: the board
+    /// updates and the speaker icon still reads unmuted. `.playback` is the
+    /// category for content the user expects to hear regardless of the switch.
+    ///
+    /// `mixWithOthers` so we duck alongside music rather than killing it, and
+    /// the whole thing is best-effort: a session we cannot configure must never
+    /// stop the app from scoring.
+    Function("configureAudioSessionForSpeech") { () -> Bool in
+      do {
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.playback, mode: .spokenAudio, options: [.mixWithOthers, .duckOthers])
+        try session.setActive(true, options: [])
+        return true
+      } catch {
+        return false
+      }
+    }
+
     Function("liveRefereePermissions") { () -> [String: Any] in
       liveAuthorizationSnapshot()
     }

@@ -122,6 +122,23 @@ function eventBase(): { id: string; at: number } {
   return { id: `${at}-${eventSeq}`, at };
 }
 
+/**
+ * Are two event lists the same run of rallies?
+ *
+ * Compared by id, which `eventBase()` mints uniquely per event, so this is an
+ * identity check and not a deep compare — cheap enough for the playback ticks
+ * it runs on, where the common case is "nothing changed" and the first length
+ * test short-circuits.
+ */
+function sameEvents(a: ScoreEvent[], b: ScoreEvent[]): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i].id !== b[i].id) return false;
+  }
+  return true;
+}
+
 /** A blank match with the default names, ready to score immediately. */
 function createStoredMatch(setup?: MatchSetup): StoredMatch {
   return {
@@ -272,9 +289,12 @@ export function useRefereeMatch(): RefereeMatch {
   const syncVideoEvents = useCallback(
     (events: ScoreEvent[], line: string | null) => {
       const current = matchRef.current;
-      // The prefix only ever grows or shrinks; comparing lengths is enough and
-      // costs nothing on the ticks (the majority) where nothing has changed.
-      if (current.events.length === events.length) return;
+      // Length is NOT enough. A manual action mid-playback replaces an event
+      // rather than adding one — rule a let, or correct a rally — so the video
+      // prefix and the live match can have the same COUNT and different
+      // contents. Returning early there dropped the next rally on the floor
+      // silently, and permanently when it was the last one. Compare contents.
+      if (sameEvents(current.events, events)) return;
       commit({ ...current, events }, line);
     },
     [commit],

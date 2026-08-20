@@ -67,6 +67,12 @@ jest.mock("react-native-safe-area-context", () => ({
 
 jest.mock("expo-router", () => ({
   router: { canGoBack: () => true, back: jest.fn(), replace: jest.fn() },
+  // The screen holds a keep-awake for as long as it is focused; under the test
+  // renderer there is no navigator, so run the effect once and keep its cleanup.
+  useFocusEffect: (effect: () => void | (() => void)) => {
+    const { useEffect } = require("react") as typeof import("react");
+    useEffect(() => effect(), [effect]);
+  },
 }));
 
 jest.mock("expo-keep-awake", () => ({
@@ -295,6 +301,37 @@ describe("the score follows the playhead", () => {
     await seek(callAt(3));
     expect(speech.__spoken.at(-1)).toContain("Hand out");
     expect(saved()?.events ?? []).toHaveLength(3);
+  });
+
+  it("still calls the next rally after a Let, which is a same-length edit", async () => {
+    // Regression: syncVideoEvents compared the video prefix to the live match
+    // BY ARRAY LENGTH. A Let appends an event WITHOUT changing the score, so
+    // after handing the pen back the two lists can have the same count and
+    // different contents — and the next rally was dropped in silence, for good
+    // if it was the last one.
+    const tree = await mount();
+    await watchVideo(tree);
+
+    await seek(callAt(1));
+    await seek(callAt(2));
+    expect(saved()?.events ?? []).toHaveLength(2);
+
+    // Let: +1 event, score unchanged. Now 3 events, and the video's prefix at
+    // rally 3 is also 3 — the exact collision the length check could not see.
+    await press(tree, "Let…");
+    await press(tree, "Let. Rally replayed — no point, same server");
+    expect(saved()?.events ?? []).toHaveLength(3);
+    await press(tree, HAND_BACK);
+
+    const before = speech.__spoken.length;
+    await seek(callAt(3));
+    // Handing the pen back gives the video the scoreline, so rally 3 REPLACES
+    // the Let rather than stacking on it — the count stays 3. What must not
+    // happen is silence: the rally has to be folded in and called.
+    const events = saved()?.events ?? [];
+    expect(events).toHaveLength(3);
+    expect(events.at(-1)?.kind).toBe("rally");
+    expect(speech.__spoken.length).toBeGreaterThan(before);
   });
 
   it("says nothing between rallies", async () => {

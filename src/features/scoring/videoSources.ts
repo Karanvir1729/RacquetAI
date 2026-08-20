@@ -93,7 +93,13 @@ export function listVideoSources(): VideoSource[] {
   }
 
   sources.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
-  sources.push(DEMO_SOURCE);
+  // The bundled demo is deliberately NOT offered here. It has no video file
+  // (`DEMO_SOURCE.videoUri` is null, so no player can ever mount) and its shots
+  // list is trimmed to 40 entries for bundle size — which folds to 2 rallies of
+  // the 16 its own data records, i.e. a wrong scoreline for a 7.5-minute match.
+  // Pinning it into this picker meant the one source on a fresh device was a
+  // videoless screen reading 2-0. It stays available in the Library, where it
+  // is what it claims to be: a stats sample.
   return sources;
 }
 
