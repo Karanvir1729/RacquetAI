@@ -12,6 +12,17 @@ import { Alert } from "react-native";
 
 const FILE_NAME = "last-fatal-error.json";
 
+/**
+ * Whether to SURFACE a captured crash to the person holding the phone. Off by
+ * default, so an App Store customer never gets a stack-trace alert after a
+ * crash. TestFlight / internal builds opt in with EXPO_PUBLIC_CRASH_ALERTS=1
+ * (inlined by Metro at build time). Capture always happens in release; only the
+ * alert is gated — the file is still read and cleared either way.
+ */
+function crashAlertsEnabled(): boolean {
+  return process.env.EXPO_PUBLIC_CRASH_ALERTS === "1";
+}
+
 interface RNErrorUtils {
   getGlobalHandler(): ((error: unknown, isFatal?: boolean) => void) | null;
   setGlobalHandler(handler: (error: unknown, isFatal?: boolean) => void): void;
@@ -55,6 +66,9 @@ export function reportLastFatalError(): void {
     // process must not survive to silently re-fail on every future launch.
     const raw = file.textSync();
     file.delete();
+    // Read-and-cleared above regardless; only the visible alert is gated, so a
+    // stale crash never re-fires and shipping customers see nothing.
+    if (!crashAlertsEnabled()) return;
     const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== "object" || parsed === null) return;
     const record = parsed as { at?: unknown; message?: unknown; stack?: unknown };

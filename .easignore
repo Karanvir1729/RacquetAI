@@ -1,0 +1,10 @@
+# Keep EAS build uploads to the iOS app only. None of these ship in the binary,
+# and analysis/out + web/ alone are tens of MB of tracked artifacts.
+analysis/
+web/
+docs/
+reports/
+store/
+.worktrees/
+.claude/
+dist/

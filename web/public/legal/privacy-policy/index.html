@@ -102,14 +102,15 @@ uploaded so that it can be analysed.</p>
 </tr>
 </tbody></table>
 <p>We do not have access to any of it.</p>
-<p>There are <strong>no user-adjustable privacy settings</strong> in this version: the app has two screens, Record
-and Library, and no settings screen. Anything the app decides about analysis — which engine runs, and
-where the fallback sends a video — it decides for itself, on the rules described in
-<a href="#3-when-video-does-leave-your-phone-the-analysis-server-fallback">section 3</a>. Nothing on this page
-is something you can switch off inside the app.</p>
-<p>(The app still <em>reads</em> two small configuration files, <code>analysis-backend.json</code> and
-<code>analysis-server.json</code>, if a beta build left them on your device. No released version can create or
-change them, and they hold no information about you.)</p>
+<p><strong>By default, analysis runs entirely on your device and no video leaves your phone.</strong> The one
+privacy-relevant choice you can make lives under <strong>Account → Analysis engine</strong>: you may switch
+analysis from on-device to a server and set that server's address, which is the only situation in which a
+video is uploaded (see
+<a href="#3-when-video-does-leave-your-phone-the-analysis-server-fallback">section 3</a>). The most private
+option — on-device — is the default, so you never have to change anything to keep your video on your phone.</p>
+<p>(The app reads and writes two small configuration files, <code>analysis-backend.json</code> and
+<code>analysis-server.json</code>, when you change the analysis engine under <strong>Account → Analysis engine</strong>.
+They record only your engine choice and the server address you typed — no information about you.)</p>
 <h2>2. Camera, microphone, and photo library</h2>
 <ul>
 <li><strong>Camera and microphone.</strong> Used while you are recording a match in the app, and while the
@@ -152,14 +153,11 @@ tap.</li>
 <li><strong>What is <em>not</em> sent:</strong> no name, no email address, no account identifier, no device identifier and
 no advertising identifier is attached to the upload. The job itself is identified by a random
 string generated on the server.</li>
-<li><strong>Where it goes:</strong> a server we operate at <code>racquetiq-a7682a.eastus.azurecontainer.io</code> (port 8082),
+<li><strong>Where it goes:</strong> a server we operate at <code>racquetiq-a7682a.eastus.azurecontainer.io</code>,
 hosted on Microsoft Azure in the East US region. <strong>Your video is therefore processed in the United
 States.</strong></li>
-<li><strong>How it is protected in transit:</strong> the app currently connects to that server over plain HTTP,
-which means <strong>the upload is not encrypted in transit</strong>.
-<em>(Editorial note for the operator, delete this parenthesis before publishing: this bullet is
-accurate today and must stay until the analysis server is served over HTTPS — see
-<a href="README.md">README.md</a> §0.)</em></li>
+<li><strong>How it is protected in transit:</strong> the app connects to that server over <strong>HTTPS (TLS)</strong>,
+so the upload is <strong>encrypted in transit</strong>.</li>
 <li><strong>What the server keeps:</strong> the uploaded video, a downscaled copy of it, an extracted audio track, a
 single reference frame image, the resulting analysis file, and a small job record that includes
 <strong>the filename you sent</strong> and the time the job was created. These are kept in a per-job folder.

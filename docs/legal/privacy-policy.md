@@ -63,15 +63,17 @@ uploaded so that it can be analysed.
 
 We do not have access to any of it.
 
-There are **no user-adjustable privacy settings** in this version: the app has two screens, Record
-and Library, and no settings screen. Anything the app decides about analysis — which engine runs, and
-where the fallback sends a video — it decides for itself, on the rules described in
-[section 3](#3-when-video-does-leave-your-phone-the-analysis-server-fallback). Nothing on this page
-is something you can switch off inside the app.
+**By default, analysis runs entirely on your device and no video leaves your phone.** The one
+privacy-relevant choice you can make lives under **Account → Analysis engine**: you may switch
+analysis from on-device to a server and set that server's address, which is the only situation in
+which a video is uploaded (see
+[section 3](#3-when-video-does-leave-your-phone-the-analysis-server-fallback)). The most private
+option — on-device — is the default, so you never have to change anything to keep your video on your
+phone.
 
-(The app still *reads* two small configuration files, `analysis-backend.json` and
-`analysis-server.json`, if a beta build left them on your device. No released version can create or
-change them, and they hold no information about you.)
+(The app reads and writes two small configuration files, `analysis-backend.json` and
+`analysis-server.json`, when you change the analysis engine under **Account → Analysis engine**. They
+record only your engine choice and the server address you typed — no information about you.)
 
 ## 2. Camera, microphone, and photo library
 
@@ -118,14 +120,11 @@ upload, so it is important that you know what it involves:
 - **What is *not* sent:** no name, no email address, no account identifier, no device identifier and
   no advertising identifier is attached to the upload. The job itself is identified by a random
   string generated on the server.
-- **Where it goes:** a server we operate at `racquetiq-a7682a.eastus.azurecontainer.io` (port 8082),
+- **Where it goes:** a server we operate at `racquetiq-a7682a.eastus.azurecontainer.io`,
   hosted on Microsoft Azure in the East US region. **Your video is therefore processed in the United
   States.**
-- **How it is protected in transit:** the app currently connects to that server over plain HTTP,
-  which means **the upload is not encrypted in transit**.
-  *(Editorial note for the operator, delete this parenthesis before publishing: this bullet is
-  accurate today and must stay until the analysis server is served over HTTPS — see
-  [README.md](README.md) §0.)*
+- **How it is protected in transit:** the app connects to that server over **HTTPS (TLS)**, so the
+  upload is **encrypted in transit**.
 - **What the server keeps:** the uploaded video, a downscaled copy of it, an extracted audio track, a
   single reference frame image, the resulting analysis file, and a small job record that includes
   **the filename you sent** and the time the job was created. These are kept in a per-job folder.

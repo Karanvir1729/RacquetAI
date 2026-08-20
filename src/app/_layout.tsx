@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ComponentProps, useCallback, useEffect, useState } from "react";
+import { ComponentProps, useCallback, useEffect, useRef, useState } from "react";
 import { ColorValue, Platform, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -10,11 +10,13 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthGateScreen, useAuthGate } from "@/features/account/AuthGate";
 import { TutorialScreen } from "@/features/onboarding/TutorialScreen";
 import { trackEvent } from "@/lib/appEvents";
-import { initAuth } from "@/lib/auth";
+import { initAuth, useAuthSession } from "@/lib/auth";
 import { installCrashGuard, reportLastFatalError } from "@/lib/crashGuard";
 import { hasSeenTutorial, markTutorialSeen } from "@/lib/onboarding";
 import {
   configure as configureSubscriptions,
+  forgetUser,
+  identifyUser,
   refresh as refreshEntitlement,
 } from "@/lib/subscription";
 import { colors } from "@/theme/tokens";
@@ -66,6 +68,24 @@ export default function RootLayout() {
   useEffect(() => {
     if (configureSubscriptions()) void refreshEntitlement();
   }, []);
+
+  // Bind the store to the signed-in account so Pro follows the user, not the
+  // device: identify on sign-in, and return to an anonymous app-user only when
+  // a real user signs OUT (never on the initial null while the session
+  // restores, which would reject logOut on an already-anonymous user). No-op in
+  // any build without purchases configured.
+  const session = useAuthSession();
+  const userId = session?.user.id ?? null;
+  const hadUser = useRef(false);
+  useEffect(() => {
+    if (userId !== null) {
+      hadUser.current = true;
+      void identifyUser(userId);
+    } else if (hadUser.current) {
+      hadUser.current = false;
+      void forgetUser();
+    }
+  }, [userId]);
 
   // Supabase session restore + the one metrics ping per cold start. Both are
   // fire-and-forget: an unreachable network leaves the app signed out and

@@ -13,30 +13,48 @@ import { File, Paths } from "expo-file-system";
 
 const SESSION_FILE_NAME = "auth-session.json";
 
-function sessionFile(): File {
-  return new File(Paths.document, SESSION_FILE_NAME);
+/**
+ * Pinned so the session's slot never moves. auth-js derives its default key
+ * from the project URL, and this file is what that key maps to.
+ */
+const STORAGE_KEY = "sb-racquetiq-auth-token";
+
+/**
+ * One file per storage key.
+ *
+ * The first version of this adapter ignored the key and pointed every slot at
+ * the one session file, which meant any key auth-js cleaned up took the
+ * session with it: a failed write calls removeItem("<key>-code-verifier"),
+ * and that deleted the live session. The session keeps its historical
+ * filename so upgrading an install does not sign anyone out.
+ */
+function slotFile(key: string): File {
+  return new File(
+    Paths.document,
+    key === STORAGE_KEY ? SESSION_FILE_NAME : `auth-${encodeURIComponent(key)}.json`,
+  );
 }
 
 const fileStorage = {
-  getItem(_key: string): string | null {
+  getItem(key: string): string | null {
     try {
-      const file = sessionFile();
+      const file = slotFile(key);
       return file.exists ? file.textSync() : null;
     } catch {
       return null;
     }
   },
-  setItem(_key: string, value: string): void {
+  setItem(key: string, value: string): void {
     try {
-      sessionFile().write(value);
+      slotFile(key).write(value);
     } catch {
       // Not being able to persist the session is survivable — the user just
       // signs in again next launch.
     }
   },
-  removeItem(_key: string): void {
+  removeItem(key: string): void {
     try {
-      const file = sessionFile();
+      const file = slotFile(key);
       if (file.exists) file.delete();
     } catch {
       // Already gone is fine.
@@ -62,6 +80,7 @@ const SUPABASE_KEY = pick(
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
     storage: fileStorage,
+    storageKey: STORAGE_KEY,
     persistSession: true,
     autoRefreshToken: true,
     // No OAuth redirects land in a native app's URL bar.

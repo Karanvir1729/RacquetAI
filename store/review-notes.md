@@ -177,15 +177,17 @@ concealed functionality.
 
 ### 6. Placeholders that must be resolved
 
-| Placeholder                                                                    | Where                                                                |
-| ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
-| `TODO_SANDBOX_APPLE_ID` / `TODO_SANDBOX_PASSWORD`                              | this file — create in App Store Connect › Users and Access › Sandbox |
-| `TODO_OPERATOR_SUPPORT_EMAIL`                                                  | this file, `docs/legal/privacy-policy.md`                            |
-| `TODO_SUPPORT_URL`, `TODO_PRIVACY_URL`, `TODO_TERMS_URL`, `TODO_MARKETING_URL` | `store/listing.md`                                                   |
-| `TODO_OPERATOR_LEGAL_ENTITY`, `TODO_OPERATOR_POSTAL_ADDRESS`                   | `docs/legal/privacy-policy.md`                                       |
+| Placeholder                                        | Status                                                                                   |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Legal entity                                       | ✅ **Daybot Solutions Inc.** — set in the legal docs and `store/listing.md`               |
+| Support email                                      | ✅ **prokaranvir@gmail.com** — set in the legal docs and the support page                 |
+| Support / Privacy / Terms / Marketing URLs         | ✅ Live on Azure SWA — see `store/listing.md` › URLs (verified 2026-08-19)                |
+| `TODO_SANDBOX_APPLE_ID` / `TODO_SANDBOX_PASSWORD`  | ⛔ **YOU must create** in App Store Connect › Users and Access › Sandbox, then paste here |
+| Operator postal address (custom-EULA requirement)  | ⛔ **YOU must supply** — Daybot Solutions Inc.'s registered address; add to the Terms      |
 
-The sandbox credentials are yours to create — I have not created an account, and I will not
-enter credentials anywhere on your behalf.
+Two items are genuinely yours and I have not touched them: the sandbox credentials (I do not create
+accounts or enter credentials on your behalf) and the postal address (I will not invent an address
+into a legal document). Everything else in this table is resolved in the repo.
 
 ---
 

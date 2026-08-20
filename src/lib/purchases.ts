@@ -45,6 +45,13 @@ export interface PurchasesSdk {
   restorePurchases(): Promise<unknown>;
   /** Present since v4, but treated as optional — it is a nice-to-have. */
   addCustomerInfoUpdateListener?(listener: (info: unknown) => void): void;
+  /**
+   * Bind / unbind the store to a stable app-user id, so a subscription follows
+   * the signed-in account rather than the device. Optional: absent on old SDKs
+   * and on the module shapes the tests inject, so every caller guards on type.
+   */
+  logIn?(appUserID: string): Promise<unknown>;
+  logOut?(): Promise<unknown>;
 }
 
 export type PurchasesLoader = () => unknown;
