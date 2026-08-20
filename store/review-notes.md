@@ -159,7 +159,26 @@ them in App Store Connect › App Review Information, or host them and link them
 `analysis/samples/` has suitable footage, but those files are 37–54 MB each — trim them to the
 shortest clip that still yields a full analysis.
 
-### 6. Placeholders that must be resolved
+### 6. Build 29 ships a generic photo-library purpose string — KNOWN, ACCEPTED
+
+The submission candidate is **EAS build 29, v1.0.0**
+(`18e8b6f7-8550-4fa9-90a4-2a98aeda060e`). Verified inside the IPA: correctly
+signed for distribution, Apple Sign In entitlement present, all four permission
+strings present, `ITSAppUsesNonExemptEncryption=false`.
+
+One known defect: `NSPhotoLibraryUsageDescription` reads Expo's default
+*"Allow RacquetIQ to access your photos"* rather than the string in `app.json`.
+A generic purpose string is a Guideline 5.1.1 rejection RISK (it names the app
+and the resource but not the reason). Accepted for now because the EAS free-tier
+iOS build quota is exhausted until **1 Sep 2026**.
+
+`ios/RacquetIQ/Info.plist` has already been patched locally with the correct
+string, so **the next build — local or after the quota resets — picks it up with
+no further action**. `ios/` is gitignored (Expo CNG), so if the native project
+is ever regenerated with `expo prebuild`, the string comes from `app.json`,
+which is already correct. Both paths converge; only build 29 itself is affected.
+
+### 7. Placeholders that must be resolved
 
 | Placeholder                                        | Status                                                                                   |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
