@@ -25,18 +25,19 @@ export interface LegalLink {
 
 // Published 2026-08-19 from docs/legal/ to the product's Static Web App
 // (web/public/legal/, deployed by web/deploy-azure.sh — the same app that
-// serves the marketing site's Azure copy). The azurestaticapps host rather
-// than racquetiq.app because that domain currently fronts a separate Vercel
-// deployment; move these when the domains are consolidated, and verify both
-// in a private window after any change. No trailing slash — the CDN 308s the
-// slash form.
+// serves the marketing site's Azure copy). Now on the real domain: www, not
+// the bare apex, because get.tech's DNS has no ALIAS/ANAME record type and
+// Azure Static Web Apps has no static IP, so racketiq.tech itself does not
+// resolve. Both URLs verified live (HTTP 200) at the time of this change; App
+// Review opens the privacy one, so re-verify in a private window after any
+// domain move. No trailing slash — the CDN 308s the slash form.
 export const TERMS_OF_USE: LegalLink = {
   label: "Terms of Use (EULA)",
-  url: "https://kind-sea-0e4afca0f.7.azurestaticapps.net/legal/terms-of-use",
+  url: "https://www.racketiq.tech/legal/terms-of-use",
 };
 export const PRIVACY_POLICY: LegalLink = {
   label: "Privacy Policy",
-  url: "https://kind-sea-0e4afca0f.7.azurestaticapps.net/legal/privacy-policy",
+  url: "https://www.racketiq.tech/legal/privacy-policy",
 };
 
 /** Both links, in the order the paywall shows them. */

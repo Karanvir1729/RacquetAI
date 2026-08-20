@@ -103,8 +103,8 @@ RacketIQ Pro removes the analysis limit:
 
 Payment is charged to your Apple Account at confirmation of purchase. The subscription renews automatically at the same price and duration unless you cancel at least 24 hours before the end of the current period. Manage or cancel it any time in Settings › your name › Subscriptions.
 
-Terms of Use (EULA): https://kind-sea-0e4afca0f.7.azurestaticapps.net/legal/terms-of-use
-Privacy Policy: https://kind-sea-0e4afca0f.7.azurestaticapps.net/legal/privacy-policy
+Terms of Use (EULA): https://www.racketiq.tech/legal/terms-of-use
+Privacy Policy: https://www.racketiq.tech/legal/privacy-policy
 ```
 
 > **The two prices above are not yet set in App Store Connect.** They match
@@ -132,9 +132,9 @@ Your first three analyses are free.
 
 | Field                             | Value                                                                   | Status                      |
 | --------------------------------- | ----------------------------------------------------------------------- | --------------------------- |
-| Support URL (**required**)        | `https://kind-sea-0e4afca0f.7.azurestaticapps.net/support`              | Live (verified 2026-08-19)  |
-| Marketing URL (optional)          | `https://kind-sea-0e4afca0f.7.azurestaticapps.net/`                     | Live                        |
-| Privacy Policy URL (**required**) | `https://kind-sea-0e4afca0f.7.azurestaticapps.net/legal/privacy-policy` | Live (verified 2026-08-19)  |
+| Support URL (**required**)        | `https://www.racketiq.tech/support`              | Live (verified 2026-08-19)  |
+| Marketing URL (optional)          | `https://www.racketiq.tech/`                     | Live                        |
+| Privacy Policy URL (**required**) | `https://www.racketiq.tech/legal/privacy-policy` | Live (verified 2026-08-19)  |
 
 The legal pages ship as static HTML under `web/public/legal/` and the support page under
 `web/public/support/`, published on Azure Static Web Apps (the same host as the marketing site).

@@ -127,8 +127,8 @@ before submitting — the key existing is not proof the products are attached.
 `src/lib/legalLinks.ts` now points both rows at live pages, verified returning HTTP 200:
 
 ```
-https://kind-sea-0e4afca0f.7.azurestaticapps.net/legal/terms-of-use
-https://kind-sea-0e4afca0f.7.azurestaticapps.net/legal/privacy-policy
+https://www.racketiq.tech/legal/terms-of-use
+https://www.racketiq.tech/legal/privacy-policy
 ```
 
 ### 3. Subscription prices must be set in App Store Connect — STILL OPEN

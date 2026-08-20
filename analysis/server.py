@@ -486,7 +486,100 @@ def job_analysis(job_id):
     return send_file(path, mimetype="application/json")
 
 
+# ---------------------------------------------------------------- retention
+#
+# Nothing used to delete a job, ever. Each one keeps the upload, a downscaled
+# copy, an extracted wav, a reference frame and the analysis — hundreds of MB
+# for a full match — so the disk grew until the container died. Uploads are
+# authenticated now, which bounds who can add to it, but not how much.
+#
+# Two limits, whichever bites first: age, and total bytes (newest kept).
+JOB_TTL_HOURS = float(os.environ.get("JOB_TTL_HOURS", "48"))
+JOB_STORE_MAX_GB = float(os.environ.get("JOB_STORE_MAX_GB", "20"))
+_SWEEP_EVERY_SEC = 30 * 60
+
+
+def _dir_size(path):
+    total = 0
+    for root, _dirs, files in os.walk(path):
+        for name in files:
+            try:
+                total += os.path.getsize(os.path.join(root, name))
+            except OSError:
+                pass
+    return total
+
+
+def _forget_job(job_id):
+    """Drop a job from memory and disk. Best effort; never raises."""
+    with jobs_lock:
+        jobs.pop(job_id, None)
+    shutil.rmtree(_job_dir(job_id), ignore_errors=True)
+
+
+def _sweep_jobs():
+    """One retention pass. Returns (removed_count, freed_bytes) for the log."""
+    if not os.path.isdir(JOBS_DIR):
+        return 0, 0
+    now = time.time()
+    entries = []
+    for job_id in os.listdir(JOBS_DIR):
+        d = os.path.join(JOBS_DIR, job_id)
+        if not os.path.isdir(d):
+            continue
+        with jobs_lock:
+            job = jobs.get(job_id)
+        # An in-flight job is never swept, however old the directory looks.
+        if job is not None and job.get("status") in ("queued", "preparing", "analyzing"):
+            continue
+        created = (job or {}).get("createdAt")
+        if not isinstance(created, (int, float)):
+            try:
+                created = os.path.getmtime(d)
+            except OSError:
+                created = now
+        entries.append((created, job_id, d))
+
+    removed = freed = 0
+    survivors = []
+    for created, job_id, d in entries:
+        if (now - created) > JOB_TTL_HOURS * 3600:
+            size = _dir_size(d)
+            _forget_job(job_id)
+            removed += 1
+            freed += size
+        else:
+            survivors.append((created, job_id, d, _dir_size(d)))
+
+    # Still over the byte cap? Drop oldest-first until under it.
+    cap = JOB_STORE_MAX_GB * 1024 ** 3
+    total = sum(s[3] for s in survivors)
+    for created, job_id, _d, size in sorted(survivors):
+        if total <= cap:
+            break
+        _forget_job(job_id)
+        removed += 1
+        freed += size
+        total -= size
+    return removed, freed
+
+
+def _retention_loop():
+    while True:
+        try:
+            removed, freed = _sweep_jobs()
+            if removed:
+                print(f"[retention] removed {removed} job(s), freed "
+                      f"{freed / 1024 ** 3:.2f} GB", flush=True)
+        except Exception as exc:  # never let the sweeper kill the server
+            print(f"[retention] sweep failed: {exc}", flush=True)
+        time.sleep(_SWEEP_EVERY_SEC)
+
+
 if __name__ == "__main__":
     os.makedirs(JOBS_DIR, exist_ok=True)
     _load_existing_jobs()
+    # Sweep once at boot (a container that restarts daily would otherwise never
+    # reach the first interval), then every 30 minutes.
+    threading.Thread(target=_retention_loop, daemon=True).start()
     app.run(host="0.0.0.0", port=PORT, threaded=True)
