@@ -33,10 +33,24 @@ function ScrollToTarget() {
 
   useEffect(() => {
     if (hash) {
-      const target = document.querySelector(hash);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-        return;
+      // querySelector THROWS on anything that is not a valid selector, and this
+      // effect sits outside the ErrorBoundary (which wraps only the route), so
+      // a throw here unmounts the whole React root and the site goes blank.
+      //
+      // That is not hypothetical: Supabase returns an OAuth session in the
+      // fragment — `#access_token=eyJ...&expires_in=3600` — so EVERY Google
+      // sign-in landed on a blank page. A numeric anchor like `#2024` does it
+      // too. Anchors are scrolled to on a best-effort basis; nothing here is
+      // worth taking the page down for.
+      try {
+        const target = document.querySelector(hash);
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+      } catch {
+        // Not an anchor — an auth fragment, or a malformed one. Fall through
+        // and let supabase-js consume it.
       }
     }
     window.scrollTo({ top: 0 });
