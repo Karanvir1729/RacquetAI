@@ -9,6 +9,7 @@ import { Hairline } from "@/components/ui/Card";
 import { useAuth } from "@/lib/auth";
 
 const NAV = [
+  { href: "/record", label: "Film a match" },
   { href: "/referee", label: "Referee" },
   { href: "/library", label: "Your matches" },
   { href: "/#how", label: "How it works" },

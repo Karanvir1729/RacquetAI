@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { formatBytes } from "@/analysis/format";
 import { saveToHistory } from "@/analysis/history";
+import { takePendingUpload } from "@/record/pendingUpload";
 import { useJobFlow, type FlowStage } from "@/analysis/useJobFlow";
 import { CornerPicker } from "@/components/analysis/CornerPicker";
 import { ProgressPanel, StepRail } from "@/components/analysis/FlowProgress";
@@ -122,6 +123,20 @@ export default function Analyze() {
     },
     [localVideo],
   );
+  // A take handed over from /record starts analysing on arrival — the visitor
+  // already pressed "Analyze this match", and the file lives in memory, not
+  // anywhere a file dialog could reach. Reading the slot clears it, so a back
+  // button does not re-upload the same take.
+  useEffect(() => {
+    if (resumedRef.current) return;
+    if (stage.kind !== "idle") return;
+    const handedOver = takePendingUpload();
+    if (handedOver === null) return;
+    resumedRef.current = true; // and do not then chase a job id in the URL
+    start(handedOver);
+  }, [stage.kind, start]);
+
+
 
   if (stage.kind === "done") {
     return (

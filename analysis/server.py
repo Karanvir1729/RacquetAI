@@ -54,7 +54,12 @@ FFPROBE = shutil.which("ffprobe") or "/opt/homebrew/bin/ffprobe"
 
 PORT = int(os.environ.get("RACQUET_ANALYSIS_PORT", "8082"))
 DOWNSCALE_W = 854
-ALLOWED_EXT = {".mp4", ".mov"}
+# .webm is here for browser recordings: MediaRecorder produces VP8/VP9+Opus in
+# a WebM container on Chrome and Firefox (Safari gives mp4). Nothing downstream
+# reads the container — the prepare step transcodes every upload to h264/aac at
+# <=854px before anything looks at a frame — so accepting it costs nothing and
+# refusing it would mean a browser could film a match it could not analyse.
+ALLOWED_EXT = {".mp4", ".mov", ".webm"}
 CORNER_KEYS = ("frontLeft", "frontRight", "backLeft", "backRight")
 COURT_W, COURT_L = 6.4, 9.75
 
@@ -373,12 +378,17 @@ def create_job():
         ext = os.path.splitext(src_name)[1].lower() or ".mp4"
     elif ctype.startswith("video/"):
         src_name = request.headers.get("X-Filename") or "upload"
-        ext = ".mov" if "quicktime" in ctype else ".mp4"
+        if "quicktime" in ctype:
+            ext = ".mov"
+        elif "webm" in ctype:
+            ext = ".webm"
+        else:
+            ext = ".mp4"
     else:
-        return jsonify({"error": 'multipart field "video" (mp4/mov) or a raw '
+        return jsonify({"error": 'multipart field "video" (mp4/mov/webm) or a raw '
                                  "video/* body is required"}), 400
     if ext not in ALLOWED_EXT:
-        return jsonify({"error": f"unsupported extension {ext}; use mp4 or mov"}), 400
+        return jsonify({"error": f"unsupported extension {ext}; use mp4, mov or webm"}), 400
 
     job_id = uuid.uuid4().hex[:12]
     d = _job_dir(job_id)

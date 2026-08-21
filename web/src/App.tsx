@@ -15,6 +15,7 @@ import Landing from "@/pages/Landing";
 import Library from "@/pages/Library";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
+import Record from "@/pages/Record";
 import Referee from "@/pages/Referee";
 import Upgrade from "@/pages/Upgrade";
 
@@ -25,7 +26,7 @@ import Upgrade from "@/pages/Upgrade";
  * — against an analysis server the visitor points it at. `/demo` is the same
  * read-out fed by the bundled sample, so the site is worth visiting with no
  * server running at all. `/library` is this browser's own history of finished
- * analyses. `/login`, `/account`, `/upgrade` and
+ * analyses, and `/record` films one from a camera on the machine. `/login`, `/account`, `/upgrade` and
  * `/checkout/success` are the account + subscription surface (Supabase +
  * Stripe); `/admin` is the operator metrics dashboard.
  */
@@ -87,6 +88,7 @@ export default function App() {
               <Route path="/analyze" element={<Analyze />} />
               <Route path="/demo" element={<Demo />} />
               <Route path="/library" element={<Library />} />
+              <Route path="/record" element={<Record />} />
 
               <Route path="/referee" element={<Referee />} />
               <Route path="/login" element={<Login />} />
