@@ -87,6 +87,52 @@ dig +short @1.1.1.1 racketiq.tech NS
 whois racketiq.tech | grep -i "name server"
 ```
 
+## The API hostname, and the certificate quota that forced it
+
+The analysis server is reached at **`api.racketiq.tech`**, a CNAME in this zone
+pointing at the ACI FQDN. Caddy serves both names. The site is built against
+the `api.` name (`web/deploy-azure.sh` sets `VITE_ANALYSIS_API`).
+
+A CNAME rather than an A record, for the same reason the apex is an alias: the
+ACI public IP is not stable. On 2026-08-21 it moved three times in a day
+(`20.121.77.189` → `4.156.106.211` → `4.157.21.151`) as the container group was
+recreated. An address record would go stale on the very next deploy.
+
+**Let's Encrypt issues at most 5 certificates per exact hostname per 168 hours.**
+Until Caddy's `/data` was persisted, every deploy recreated the sidecar with
+empty storage, so it asked for a brand-new certificate each time. Five deploys
+in a week exhausted the quota for `racquetiq-a7682a.eastus.azurecontainer.io`,
+and a completely healthy analysis server became unreachable from an HTTPS page
+— `429 ... too many certificates already issued for this exact set of
+identifiers`. Nothing was wrong with the server; it simply had no certificate.
+
+Two changes fix it, and they only work together:
+
+- Caddy's `/data` and `/config` are Azure Files shares (`caddy-data`,
+  `caddy-config` on storage account `racquetiqa7682a`), so a recreate REUSES
+  the certificate instead of requesting one.
+- `api.racketiq.tech` is a second hostname with its own untouched quota.
+
+If the API is unreachable over HTTPS but `http://<aci-ip>:8082/health` answers,
+this is the failure. Check Caddy: `az container logs -g racquetiq-rg -n
+racquetiq-analysis --container-name tls | tail`. A 429 there is a wait, not a
+bug — Caddy retries in the background and heals itself once the window opens.
+
+`RACQUETIQ_SKIP_BUILD=1` recreates the container group from the image already
+in ACR, for sidecar or YAML-only changes where rebuilding an unchanged image is
+pure waiting.
+
+## Adding a module to the analysis server
+
+`analysis/deploy-azure.sh` stages an explicit list of files into the build
+context and the Dockerfile does `COPY *.py`, so **the staging list in the deploy
+script is the only list**. It did not used to be: the Dockerfile carried a
+second explicit `COPY analyze.py server.py platform_api.py`, and adding
+`coach_api.py` to neither shipped an image that raised ImportError on boot and
+CrashLoopBackOffed — after every local test had passed, because locally the file
+is simply present. If a new module ever fails to import in the container, that
+staging list is the first thing to check.
+
 ## Operations
 
 ```bash
