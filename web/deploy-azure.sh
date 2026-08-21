@@ -45,13 +45,13 @@ az staticwebapp show -n "$APP" -g "$RG" -o none 2>/dev/null \
   || az staticwebapp create -n "$APP" -g "$RG" -l "$LOC" --sku Free -o none
 
 echo "==> Building web/dist"
-# Bake the analysis server's public HTTPS URL (same subscription-hash label
-# scheme as analysis/deploy-azure.sh) so the live site works out of the box;
-# visitors can still point elsewhere at runtime from the Analyze page.
-SUB_ID=$(az account show --query id -o tsv)
-SUFFIX=$(printf "%s" "$SUB_ID" | shasum | cut -c1-6)
-ACI_LOC="${RACQUETIQ_AZ_LOCATION:-eastus}"
-API_BASE="${RACQUETIQ_WEB_API:-https://racquetiq-${SUFFIX}.${ACI_LOC}.azurecontainer.io}"
+# Bake the analysis server's public HTTPS URL so the live site works out of
+# the box; visitors can still point elsewhere at runtime from the Analyze
+# page. api.racketiq.tech is a CNAME (Azure DNS) to the ACI FQDN and Caddy
+# serves both names — see analysis/deploy-azure.sh for why the site stopped
+# using the raw azurecontainer.io hostname (Let's Encrypt's 5-certs-a-week
+# limit on it, 2026-08-21).
+API_BASE="${RACQUETIQ_WEB_API:-https://api.racketiq.tech}"
 echo "    VITE_ANALYSIS_API=${API_BASE}"
 VITE_ANALYSIS_API="$API_BASE" npm run build --prefix "$SCRIPT_DIR"
 
