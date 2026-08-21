@@ -60,7 +60,16 @@ export function scoreWord(points: number): string {
 export function scoreCall(score: SquashScore): string {
   const serverPoints = score.points[score.server];
   const receiverPoints = score.points[OTHER_SIDE[score.server]];
-  if (serverPoints === receiverPoints) return `${scoreWord(serverPoints)} all`;
+  if (serverPoints === receiverPoints) {
+    // At 10-10 (and every tie above it) the game no longer ends at 11, and a
+    // marker says so — it is the most-argued moment of a game and the one place
+    // an unqualified "ten all" reads like the app lost track. Below the
+    // tie-break there is nothing to qualify: "four all" is complete.
+    const tieBreak = serverPoints >= score.config.pointsPerGame - 1;
+    return tieBreak
+      ? `${scoreWord(serverPoints)} all, a player must win by two points`
+      : `${scoreWord(serverPoints)} all`;
+  }
   return `${scoreWord(serverPoints)}, ${scoreWord(receiverPoints)}`;
 }
 
