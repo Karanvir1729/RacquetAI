@@ -19,7 +19,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
 
-    "types": ["vite/client"],
+    // "jest" is here for src/analysis/__tests__ only: the web app has no test
+    // runner of its own, so those suites run under the Expo app's jest (whose
+    // testMatch reaches the whole repo) while still being typechecked here.
+    "types": ["vite/client", "jest"],
     "baseUrl": ".",
     "paths": {
       "@/features/*": ["../src/features/*"],

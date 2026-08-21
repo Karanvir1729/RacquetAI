@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { formatBytes } from "@/analysis/format";
+import { saveToHistory } from "@/analysis/history";
 import { useJobFlow, type FlowStage } from "@/analysis/useJobFlow";
 import { CornerPicker } from "@/components/analysis/CornerPicker";
 import { ProgressPanel, StepRail } from "@/components/analysis/FlowProgress";
@@ -55,6 +56,7 @@ export default function Analyze() {
   const [params, setParams] = useSearchParams();
   const [localVideo, setLocalVideo] = useState<{ url: string; name: string } | null>(null);
   const resumedRef = useRef(false);
+  const savedRef = useRef<string | null>(null);
 
   useDocumentTitle(stage.kind === "done" ? "Your analysis" : "Analyze a match");
 
@@ -76,12 +78,29 @@ export default function Analyze() {
     setParams({ job: jobId }, { replace: true });
   }, [jobId, jobParam, setParams]);
 
+  // Keep the finished read-out on this browser, so a refresh does not throw
+  // away a match that took minutes of CPU to measure. Keyed by job id: the
+  // effect re-runs on every render while the flow sits in `done`, and rejoining
+  // the same job in a new tab must update the entry rather than stack a copy.
+  useEffect(() => {
+    if (stage.kind !== "done") return;
+    const key = stage.jobId;
+    if (savedRef.current === key) return;
+    savedRef.current = key;
+    saveToHistory(stage.analysis, {
+      jobId: stage.jobId,
+      title: localVideo?.name ?? "Match analysis",
+      now: new Date(),
+    });
+  }, [stage, localVideo]);
+
   const startOver = useCallback(() => {
     setLocalVideo((current) => {
       if (current !== null) URL.revokeObjectURL(current.url);
       return null;
     });
     resumedRef.current = true; // don't re-resume the job we just abandoned
+    savedRef.current = null;
     setParams({}, { replace: true });
     flow.reset();
   }, [flow, setParams]);
@@ -113,8 +132,8 @@ export default function Analyze() {
         title={localVideo?.name ?? "Match analysis"}
         caption={
           localVideo === null
-            ? "Playing back the video needs the original file, which stays on the device that uploaded it — this tab rejoined the job by id, so only the measurements are here."
-            : "Played from your own copy of the file. The overlay is drawn from the analysis, not baked into the video."
+            ? "Playing back the video needs the original file, which stays on the device that uploaded it — this tab rejoined the job by id, so only the measurements are here. Kept under Your matches on this browser."
+            : "Played from your own copy of the file. The overlay is drawn from the analysis, not baked into the video. The read-out is kept under Your matches on this browser."
         }
         action={{ to: "/analyze", label: "Analyze another" }}
       >
