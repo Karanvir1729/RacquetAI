@@ -14,7 +14,9 @@ import Demo from "@/pages/Demo";
 import Landing from "@/pages/Landing";
 import Library from "@/pages/Library";
 import Login from "@/pages/Login";
+import Coach from "@/pages/Coach";
 import NotFound from "@/pages/NotFound";
+import Profile from "@/pages/Profile";
 import Record from "@/pages/Record";
 import Referee from "@/pages/Referee";
 import Upgrade from "@/pages/Upgrade";
@@ -26,7 +28,9 @@ import Upgrade from "@/pages/Upgrade";
  * — against an analysis server the visitor points it at. `/demo` is the same
  * read-out fed by the bundled sample, so the site is worth visiting with no
  * server running at all. `/library` is this browser's own history of finished
- * analyses, and `/record` films one from a camera on the machine. `/login`, `/account`, `/upgrade` and
+ * analyses, and `/record` films one from a camera on the machine.
+ * `/coach` and `/profile` are the coaching surface: a player profile, and a
+ * conversation that reads it alongside the most recent analysed match. `/login`, `/account`, `/upgrade` and
  * `/checkout/success` are the account + subscription surface (Supabase +
  * Stripe); `/admin` is the operator metrics dashboard.
  */
@@ -89,6 +93,8 @@ export default function App() {
               <Route path="/demo" element={<Demo />} />
               <Route path="/library" element={<Library />} />
               <Route path="/record" element={<Record />} />
+              <Route path="/coach" element={<Coach />} />
+              <Route path="/profile" element={<Profile />} />
 
               <Route path="/referee" element={<Referee />} />
               <Route path="/login" element={<Login />} />

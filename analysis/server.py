@@ -41,6 +41,7 @@ import uuid
 from flask import Flask, jsonify, request, send_file
 
 from platform_api import _auth_user, _configured, platform_bp
+from coach_api import coach_bp
 
 ANALYSIS_DIR = os.path.dirname(os.path.abspath(__file__))
 JOBS_DIR = os.path.join(ANALYSIS_DIR, "jobs")
@@ -69,6 +70,7 @@ PROGRESS_RE = re.compile(r"\.\.\.\s*([\d.]+)s\s*/\s*([\d.]+)s")
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 4 * 1024 * 1024 * 1024  # 4 GB uploads
 app.register_blueprint(platform_bp)  # /billing/* + /admin/* (platform_api.py)
+app.register_blueprint(coach_bp)     # /coach/*            (coach_api.py)
 
 jobs = {}          # jobId -> dict (see _new_job)
 jobs_lock = threading.Lock()

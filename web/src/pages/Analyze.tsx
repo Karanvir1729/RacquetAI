@@ -10,6 +10,7 @@ import { CornerPicker } from "@/components/analysis/CornerPicker";
 import { ProgressPanel, StepRail } from "@/components/analysis/FlowProgress";
 import { ResultsView } from "@/components/analysis/ResultsView";
 import { UploadPanel } from "@/components/analysis/UploadPanel";
+import { CoachFeedbackPanel } from "@/components/analysis/CoachFeedbackPanel";
 import { VideoRefereePanel } from "@/components/analysis/VideoRefereePanel";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -154,6 +155,7 @@ export default function Analyze() {
       >
         {/* Refereeing needs the footage, and the server never sends it back —
             so this only appears in the tab that uploaded the file. */}
+        <CoachFeedbackPanel analysis={stage.analysis} />
         {localVideo === null ? null : (
           <VideoRefereePanel analysis={stage.analysis} videoSrc={localVideo.url} />
         )}

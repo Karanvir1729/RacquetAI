@@ -11,6 +11,7 @@ import {
 } from "@/analysis/history";
 import { formatClock } from "@/analysis/format";
 import type { MatchAnalysis } from "@/analysis/types";
+import { CoachFeedbackPanel } from "@/components/analysis/CoachFeedbackPanel";
 import { ResultsView } from "@/components/analysis/ResultsView";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -80,7 +81,9 @@ export default function Library() {
         title={open.summary.title}
         caption="Saved on this browser. The footage stayed on the machine that uploaded it, so this is the measurements only — analyse the file again to watch it back with the overlay."
         action={{ to: "/library", label: "All matches" }}
-      />
+      >
+        <CoachFeedbackPanel analysis={open.analysis} />
+      </ResultsView>
     );
   }
 
