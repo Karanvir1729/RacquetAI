@@ -13,7 +13,12 @@ RUN python -m venv .venv \
   && .venv/bin/pip install --no-cache-dir -U pip \
   && .venv/bin/pip install --no-cache-dir -r requirements.txt
 
-COPY analyze.py server.py platform_api.py ./
+# Whatever deploy-azure.sh staged into the build context. It used to be a
+# second explicit list here, which meant adding a module needed editing two
+# files; forgetting either ships an image that ImportErrors on boot and
+# CrashLoopBackOffs, having passed every local test, because locally the file
+# is simply present. The staging list in deploy-azure.sh is now the only one.
+COPY *.py ./
 COPY tools ./tools
 
 # Pre-download the RTMPose ONNX weights so the first uploaded job does not pay
