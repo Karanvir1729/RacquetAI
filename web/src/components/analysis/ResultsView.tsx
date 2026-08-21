@@ -9,6 +9,8 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Reveal } from "@/components/ui/Reveal";
+import type { ReactNode } from "react";
+
 import { Section } from "@/components/ui/Section";
 import { Stat } from "@/components/ui/Stat";
 
@@ -31,6 +33,7 @@ export function ResultsView({
   title,
   caption,
   action,
+  children,
 }: {
   analysis: MatchAnalysis;
   videoSrc: string | null;
@@ -39,6 +42,8 @@ export function ResultsView({
   /** Provenance line under the player. */
   caption?: string;
   action?: { to: string; label: string };
+  /** Extra panels below the read-out — the video referee, when footage is local. */
+  children?: ReactNode;
 }) {
   const { video, rallies, shots, players, quality } = analysis;
 
@@ -106,6 +111,8 @@ export function ResultsView({
             </Reveal>
           ))}
         </div>
+
+        {children}
 
         <div className="mt-6">
           <QualityFootnote quality={quality} />

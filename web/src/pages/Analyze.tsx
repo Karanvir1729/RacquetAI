@@ -8,6 +8,7 @@ import { CornerPicker } from "@/components/analysis/CornerPicker";
 import { ProgressPanel, StepRail } from "@/components/analysis/FlowProgress";
 import { ResultsView } from "@/components/analysis/ResultsView";
 import { UploadPanel } from "@/components/analysis/UploadPanel";
+import { VideoRefereePanel } from "@/components/analysis/VideoRefereePanel";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Section } from "@/components/ui/Section";
@@ -116,7 +117,13 @@ export default function Analyze() {
             : "Played from your own copy of the file. The overlay is drawn from the analysis, not baked into the video."
         }
         action={{ to: "/analyze", label: "Analyze another" }}
-      />
+      >
+        {/* Refereeing needs the footage, and the server never sends it back —
+            so this only appears in the tab that uploaded the file. */}
+        {localVideo === null ? null : (
+          <VideoRefereePanel analysis={stage.analysis} videoSrc={localVideo.url} />
+        )}
+      </ResultsView>
     );
   }
 

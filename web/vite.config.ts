@@ -16,6 +16,11 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      // Order matters: the more specific prefix must win. The shared scoring
+      // modules import "@/features/analysis/types" using the APP's alias, and
+      // web/src has no features/ directory, so pointing that one prefix at the
+      // app's src is unambiguous.
+      "@/features": `${appSrcDir.replace(/\/$/, "")}/features`,
       "@": srcDir.replace(/\/$/, ""),
       "@app": appSrcDir.replace(/\/$/, ""),
     },
