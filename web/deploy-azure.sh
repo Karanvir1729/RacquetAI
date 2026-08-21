@@ -7,6 +7,10 @@
 #   bash web/deploy-azure.sh            # build + deploy / update
 #   bash web/deploy-azure.sh --status   # show state + URL
 #   bash web/deploy-azure.sh --down     # delete the static web app
+#
+# The site serves at https://racketiq.tech and https://www.racketiq.tech. DNS
+# is Azure DNS, not the registrar, and the apex is an ALIAS record targeting
+# this app — see docs/10-domain-and-dns.md before touching either.
 set -euo pipefail
 
 RG="racquetiq-rg"
