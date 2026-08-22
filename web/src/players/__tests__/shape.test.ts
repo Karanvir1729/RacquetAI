@@ -254,6 +254,7 @@ describe("row narrowing", () => {
       id: "p-1",
       name: "Asha",
       hand: "left",
+      shareToken: null,
       notes: "",
       createdAt: "2026-08-01T09:00:00+00:00",
       updatedAt: "2026-08-02T09:00:00+00:00",

@@ -143,6 +143,11 @@ export default function RootLayout() {
             <Tabs.Screen name="analysis" options={{ href: null }} />
             {/* Import & analyze flow — reached from the Library's import card. */}
             <Tabs.Screen name="import-analysis" options={{ href: null }} />
+            {/* Player profiles — the roster and one player's page, reached from
+                the Library's Players card and from a named side on a read-out;
+                never tabs (href: null keeps the bar unchanged). */}
+            <Tabs.Screen name="players" options={{ href: null }} />
+            <Tabs.Screen name="player/[id]" options={{ href: null }} />
             {/* RacketIQ Pro — pushed from the import card once the free
                 analyses are spent; never a tab of its own. */}
             <Tabs.Screen name="paywall" options={{ href: null }} />

@@ -46,6 +46,7 @@ const SAMPLE_PLAYER: Player = {
   id: "sample",
   name: "Sample player",
   hand: null,
+  shareToken: null,
   notes:
     "Built from four archive.org club matches (CC BY-NC 4.0). Name your own players on any read-out to build a real profile.",
   createdAt: "2026-06-01T00:00:00.000Z",
