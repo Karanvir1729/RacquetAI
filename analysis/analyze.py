@@ -237,14 +237,44 @@ def available_cpus():
         return os.cpu_count() or 1
 
 
+def available_memory_gb():
+    """Memory this process may use, container limit first. Same trap as the CPU
+    count: /proc/meminfo describes the host, not the cgroup."""
+    for path in ("/sys/fs/cgroup/memory.max",                       # cgroup v2
+                 "/sys/fs/cgroup/memory/memory.limit_in_bytes"):    # cgroup v1
+        try:
+            raw = open(path).read().strip()
+            if raw == "max":
+                continue
+            limit = int(raw)
+            # cgroup v1 writes a sentinel near 2^63 when there is no limit.
+            if 0 < limit < (1 << 62):
+                return limit / 1024 ** 3
+        except (OSError, ValueError):
+            continue
+    try:
+        return (os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")) / 1024 ** 3
+    except (ValueError, OSError, AttributeError):
+        return 8.0
+
+
 def default_workers():
-    """One worker per usable core, capped: past ~4 the chunks get short and each
-    one pays another model load. `RACQUETIQ_WORKERS` overrides without a
-    rebuild, which is how to tune this on the container."""
+    """One worker per usable core, bounded by memory rather than a guess.
+
+    Deliberately NOT capped at a small constant. The scan is ~98% of an
+    analysis — with the pose cache warm the entire rest of the pipeline runs in
+    about a second — so wall time tracks 1/cores almost linearly and a cap is
+    the thing that stops a bigger machine from paying for itself.
+
+    Each worker holds its own detector and pose model at roughly 350 MB
+    resident, so memory is the real bound; leave a gigabyte for the parent and
+    the OS. `RACQUETIQ_WORKERS` overrides for tuning without a rebuild.
+    """
     override = os.environ.get("RACQUETIQ_WORKERS", "").strip()
     if override.isdigit() and int(override) > 0:
         return int(override)
-    return max(1, min(available_cpus(), 4))
+    by_memory = int(max(1.0, available_memory_gb() - 1.0) / 0.40)
+    return max(1, min(available_cpus(), by_memory))
 
 
 def _pin_onnxruntime(threads):
