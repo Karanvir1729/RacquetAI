@@ -87,6 +87,25 @@ cell, and each cell's tooltip lists the recordings. Levels are relative to the
 busiest day so a profile with four recordings still lights up; the grid
 scrolls inside its own container on a phone rather than widening the page.
 
+## Clicking a day, and the movement chart
+
+Every cell in the recordings calendar is a button: click it and a panel under
+the grid lists that day's recordings (title, which side, duration, shots,
+T-time, predictability), with "Open in library" when the clip is on this
+browser and "Show in list", which scrolls to and highlights the row in the
+recordings list. Only days with recordings are tab stops; the selected day is
+outlined in the ink accent; Escape closes the panel. On iOS a tapped cell opens
+the same panel in the same card.
+
+"Court movement across recordings" (`movementProfile` in
+`src/features/players/aggregate.ts`) reads each clip's coverage heatmap and
+splits the player's time into depth thirds (front / middle / back — row 0 of
+the heatmap is the front wall, so the bars draw front at the top, like the
+court plan) and width bands (left / centre / right, 3-2-3 on the 8-column
+grid), plus "spread" — the share of court cells holding at least a tenth of
+the busiest cell's time. One stacked bar per recording, chronological, then a
+time-weighted "All" bar. All of it is position-based — measured, not inferred.
+
 ## The first profile
 
 The plumbing test was a "Mohamed ElShorbagy" profile in the owner's roster

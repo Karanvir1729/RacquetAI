@@ -8,6 +8,8 @@ import { PlacementGrid } from "@/components/analysis/PlacementGrid";
 import { ShotTypeBars } from "@/components/analysis/ShotTypeBars";
 import { CourtPlan } from "@/components/CourtPlan";
 import { ContributionGrid, formatIsoDay } from "@/components/players/ContributionGrid";
+import { DayRecordings } from "@/components/players/DayRecordings";
+import { MovementChart } from "@/components/players/MovementChart";
 import { ScoutingNotes } from "@/components/players/ScoutingNotes";
 import { TrendSparkline } from "@/components/players/TrendSparkline";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -17,7 +19,7 @@ import { Field } from "@/components/ui/Field";
 import { Reveal } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { Meter, Stat } from "@/components/ui/Stat";
-import { buildProfileStats, scoutingNotes, sortChronologically } from "@/players/aggregate";
+import { buildProfileStats, clipsOnDay, scoutingNotes, sortChronologically } from "@/players/aggregate";
 import { shareUrl } from "@/players/store";
 import {
   HANDS,
@@ -40,7 +42,14 @@ import {
  * same court plan, placement grid and shot mix a single read-out draws, over
  * the pooled numbers); then the scouting notes, which are the point; then the
  * trend and the recordings themselves, so every claim can be traced to the
- * clips it came from.
+ * clips it came from. Between the tendencies and the notes sits the movement
+ * chart — the tendencies recording by recording — because "has this moved"
+ * is the question a coach asks right after "where do they live".
+ *
+ * A calendar cell opens that day's recordings under the grid ("by clicking
+ * on the github box I should be able to tell what video it was"); "Show in
+ * list" from there scrolls to the clip's row and lights it for a moment, so
+ * the eye lands where the edits are.
  *
  * The maths is all in players/aggregate.ts — this file lays it out and, when
  * not read-only, offers the edits (rename, hand, notes, delete; re-date or
@@ -82,6 +91,9 @@ export interface PlayerProfileViewProps {
 
 /** How long "Copied" stands on the copy button before it reads "Copy link" again. */
 const COPIED_MS = 2000;
+
+/** How long a recording row stays outlined after "Show in list" points at it. */
+const FLASH_MS = 1600;
 
 const HAND_LABELS: Record<Hand, string> = { right: "Right-handed", left: "Left-handed" };
 
@@ -180,6 +192,44 @@ export function PlayerProfileView({
   const mix = useMemo(() => shotTypeCounts(stats.shotTypes), [stats.shotTypes]);
   // Newest first for reading; the aggregate sorts oldest first for the maths.
   const recent = useMemo(() => sortChronologically(clips).reverse(), [clips]);
+
+  // --- the open calendar day -----------------------------------------------
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const dayClips = useMemo(
+    () => (selectedDay === null ? [] : clipsOnDay(clips, selectedDay)),
+    [clips, selectedDay],
+  );
+  // The clips changed under the panel (a re-date, an untag): what it showed
+  // may no longer be true, so it closes rather than show a stale day.
+  // Close the open day only when the SET of recordings changes (a tag added or
+  // removed, a clip re-dated) — not on every re-read of the same clips after a
+  // rename or a share toggle, which would snap the panel shut under the reader.
+  const clipsKey = useMemo(() => clips.map((clip) => `${clip.id}@${clip.playedAt}`).join("\n"), [clips]);
+  useEffect(() => {
+    setSelectedDay(null);
+  }, [clipsKey]);
+
+  const [flashClipId, setFlashClipId] = useState<string | null>(null);
+  const flashTimer = useRef<number | null>(null);
+  useEffect(() => {
+    return () => {
+      if (flashTimer.current !== null) window.clearTimeout(flashTimer.current);
+    };
+  }, []);
+
+  // Scroll the recordings list to the clip's row, focus it, and outline it
+  // for a moment. Focus without scrolling, or it would cut the smooth scroll
+  // short; and no smooth scroll for anyone who asked for less motion.
+  const showInList = (clipId: string) => {
+    const row = document.getElementById(`clip-${clipId}`);
+    if (row === null) return;
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    row.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+    row.focus({ preventScroll: true });
+    setFlashClipId(clipId);
+    if (flashTimer.current !== null) window.clearTimeout(flashTimer.current);
+    flashTimer.current = window.setTimeout(() => setFlashClipId(null), FLASH_MS);
+  };
 
   // --- header edits ------------------------------------------------------
   const [editing, setEditing] = useState(false);
@@ -556,7 +606,26 @@ export function PlayerProfileView({
         ) : (
           <>
             <Card className="mt-8 p-5 sm:p-7">
-              <ContributionGrid clips={clips} heading="Recordings calendar" />
+              <ContributionGrid
+                clips={clips}
+                heading="Recordings calendar"
+                selectedDay={selectedDay}
+                onSelectDay={setSelectedDay}
+              />
+              {selectedDay !== null ? (
+                <div className="mt-5">
+                  <Hairline />
+                  <div className="mt-5">
+                    <DayRecordings
+                      date={selectedDay}
+                      clips={dayClips}
+                      libraryIds={libraryIds}
+                      onClose={() => setSelectedDay(null)}
+                      onShowInList={showInList}
+                    />
+                  </div>
+                </div>
+              ) : null}
             </Card>
 
             {/* The four headline figures ride in the same band as the
@@ -703,6 +772,10 @@ export function PlayerProfileView({
               </Reveal>
             </div>
 
+            <Reveal className="mt-6">
+              <MovementChart clips={clips} />
+            </Reveal>
+
             <div className="mt-14">
               <p className="rq-eyebrow">What to exploit</p>
               <h2 className="rq-h3 mt-3">Scouting notes</h2>
@@ -755,8 +828,17 @@ export function PlayerProfileView({
                   const confirming = confirmUntag === clip.id;
                   const working = clipBusy === clip.id;
                   return (
-                    <li key={clip.id}>
-                      <Card className="p-4 sm:p-5">
+                    // id + tabIndex -1: "Show in list" on the calendar panel
+                    // scrolls here and hands the row focus.
+                    <li key={clip.id} id={`clip-${clip.id}`} tabIndex={-1}>
+                      <Card
+                        className="p-4 sm:p-5"
+                        style={
+                          flashClipId === clip.id
+                            ? { outline: "2px solid var(--rq-accent-text)", outlineOffset: 2 }
+                            : undefined
+                        }
+                      >
                         <div className="flex flex-wrap items-start justify-between gap-4">
                           <div className="min-w-[12rem] flex-1">
                             <p className="truncate text-[15px] font-semibold text-rq-text">

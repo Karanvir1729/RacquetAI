@@ -629,3 +629,145 @@ export function calendarWeeks(clips: readonly PlayerClip[], today: Date, weeks =
   }
   return { weeks: columns, months, max, inWindow };
 }
+
+// ------------------------------------------------------------- court movement
+
+/**
+ * Where on the court a player's time went, recording by recording — the
+ * "meta" view of movement that a single heatmap cannot give: a coach wants
+ * to see whether someone has drifted deeper over a season, whether they
+ * live on one side, and how much of the court they actually use.
+ *
+ * Everything here is read off the per-clip coverage heatmap (row 0 = the
+ * front wall, columns left to right as the camera sees the court — the
+ * contract in analysis/types.ts). Depth is split into thirds of the rows;
+ * width into left / centre / right with the outer bands taking 3/8 of the
+ * columns each (3-2-3 on the standard 8-column grid). Per-clip maps are
+ * normalised to their busiest cell, so a region's SHARE of the map's total
+ * is still its share of the player's time — the scale factor cancels.
+ *
+ * "Spread" is the share of cells holding at least a tenth of the busiest
+ * cell's time: a crude but honest measure of how much of the court they
+ * covered. All of this is position-based — measured, not inferred.
+ */
+export interface RegionShares {
+  front: number;
+  middle: number;
+  back: number;
+  left: number;
+  centre: number;
+  right: number;
+  /** 0..1 — share of cells at or above SPREAD_THRESHOLD of the peak. */
+  spread: number;
+}
+
+export const SPREAD_THRESHOLD = 0.1;
+
+export interface MovementPoint extends RegionShares {
+  clipId: string;
+  playedAt: string;
+  title: string;
+  durationSec: number;
+  tTimePct: number;
+}
+
+export interface MovementProfile {
+  /** Chronological; only clips that carry a coverage map. */
+  points: MovementPoint[];
+  /** Time-weighted over `points`; null when there are none. */
+  pooled: RegionShares | null;
+  clipsWithoutCoverage: number;
+}
+
+/** Region shares of one coverage map, or null when it holds no time at all. */
+export function regionShares(coverage: CoverageHeatmap): RegionShares | null {
+  const { rows, cols, values } = coverage;
+  if (rows < 1 || cols < 1) return null;
+  let total = 0;
+  for (const value of values) total += value;
+  if (total <= 0) return null;
+
+  const frontEnd = rows / 3;
+  const middleEnd = (2 * rows) / 3;
+  // Outer bands: 3/8 of the columns each, at least one column; whatever is
+  // left is the centre (zero on a very narrow grid — then "centre" is empty
+  // and the split is simply left/right).
+  const side = Math.max(1, Math.floor((cols * 3) / 8));
+  const leftEnd = cols < 2 ? cols : Math.min(side, Math.floor(cols / 2));
+  const rightStart = cols < 2 ? cols : Math.max(leftEnd, cols - side);
+
+  let front = 0;
+  let middle = 0;
+  let back = 0;
+  let left = 0;
+  let centre = 0;
+  let right = 0;
+  let lit = 0;
+  for (let index = 0; index < rows * cols; index += 1) {
+    const value = values[index] ?? 0;
+    const row = Math.floor(index / cols);
+    const col = index % cols;
+    // A cell straddling a third boundary belongs to the third its centre is in.
+    const rowCentre = row + 0.5;
+    if (rowCentre < frontEnd) front += value;
+    else if (rowCentre < middleEnd) middle += value;
+    else back += value;
+    if (col < leftEnd) left += value;
+    else if (col >= rightStart) right += value;
+    else centre += value;
+    if (value >= SPREAD_THRESHOLD) lit += 1;
+  }
+  return {
+    front: front / total,
+    middle: middle / total,
+    back: back / total,
+    left: left / total,
+    centre: centre / total,
+    right: right / total,
+    spread: lit / (rows * cols),
+  };
+}
+
+export function movementProfile(input: readonly PlayerClip[]): MovementProfile {
+  const clips = sortChronologically(input);
+  const points: MovementPoint[] = [];
+  let clipsWithoutCoverage = 0;
+  for (const clip of clips) {
+    const coverage = clip.summary.me.coverage;
+    const shares = coverage === null ? null : regionShares(coverage);
+    if (shares === null) {
+      clipsWithoutCoverage += 1;
+      continue;
+    }
+    points.push({
+      ...shares,
+      clipId: clip.id,
+      playedAt: clip.playedAt,
+      title: clip.title,
+      durationSec: clip.summary.durationSec,
+      tTimePct: clip.summary.me.tTimePct,
+    });
+  }
+  if (points.length === 0) return { points, pooled: null, clipsWithoutCoverage };
+
+  // Time-weighted, like T-time and the pooled court plan — a long recording
+  // says more about where someone lives than a short one.
+  const keys = ["front", "middle", "back", "left", "centre", "right", "spread"] as const;
+  const sums: Record<(typeof keys)[number], number> = {
+    front: 0, middle: 0, back: 0, left: 0, centre: 0, right: 0, spread: 0,
+  };
+  let weights = 0;
+  for (const point of points) {
+    const weight = Math.max(point.durationSec, 1);
+    weights += weight;
+    for (const key of keys) sums[key] += point[key] * weight;
+  }
+  const pooled = {} as RegionShares;
+  for (const key of keys) pooled[key] = sums[key] / weights;
+  return { points, pooled, clipsWithoutCoverage };
+}
+
+/** The clips played on one calendar day, oldest tag first — what a calendar cell opens. */
+export function clipsOnDay(clips: readonly PlayerClip[], date: string): PlayerClip[] {
+  return sortChronologically(clips).filter((clip) => clip.playedAt === date);
+}

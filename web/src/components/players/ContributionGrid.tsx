@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, type CSSProperties, type KeyboardEvent } from "react";
 
+import { cn } from "@/lib/cn";
 import { calendarWeeks, type CalendarDay } from "@/players/aggregate";
 import type { PlayerClip } from "@/players/shape";
 
@@ -20,6 +21,17 @@ import type { PlayerClip } from "@/players/shape";
  * — and scrolls inside its own box on a phone, never the page. It opens
  * scrolled to the right-hand end because the recent weeks are the ones a
  * coach is looking for.
+ *
+ * A cell is a button when the caller wants to know which day was pressed
+ * ("by clicking on the github box I should be able to tell what video it
+ * was"): the caller owns the selection and renders the day's recordings
+ * underneath. Tab stops rove — only lit days (and the open one) are in the
+ * tab order, because 364 stops for 364 empty days would make the keyboard
+ * useless; the empty days stay clickable so a pointer can still ask "nothing
+ * that day?". Escape on a cell closes the open day, and when the open day is
+ * closed from the panel below with focus inside it (Escape, its close
+ * button), focus comes back to its cell so a keyboard user is not dropped on
+ * the page body.
  */
 
 const CELL = 11;
@@ -61,6 +73,12 @@ function cellLabel(day: CalendarDay): string {
   return `${when} — ${recordings} · ${minutes}${titles}`;
 }
 
+/**
+ * The lit cells carry their opacity as a custom property rather than a plain
+ * inline `opacity`, so the hover bump can be a class (`hover:opacity-100`)
+ * — an inline opacity would beat any hover rule, and a JS hover state for
+ * 364 cells is the wrong tool.
+ */
 function cellStyle(day: CalendarDay): CSSProperties {
   if (!day.inRange) return { width: CELL, height: CELL, background: "transparent" };
   if (day.level === 0) return { width: CELL, height: CELL, background: "var(--rq-line)" };
@@ -68,29 +86,70 @@ function cellStyle(day: CalendarDay): CSSProperties {
     width: CELL,
     height: CELL,
     background: "var(--rq-data)",
-    opacity: LEVEL_OPACITY[day.level],
-  };
+    "--rq-cell-opacity": LEVEL_OPACITY[day.level],
+  } as CSSProperties;
 }
+
+/** The selection outline is the site's ink ring, tight to the cell; it sits inside the 3px gap. */
+const SELECTED_STYLE: CSSProperties = {
+  outline: "2px solid var(--rq-accent-text)",
+  outlineOffset: 1,
+};
 
 export function ContributionGrid({
   clips,
   heading = "Recordings",
   today,
+  selectedDay = null,
+  onSelectDay,
 }: {
   clips: readonly PlayerClip[];
   /** The micro label over the grid. */
   heading?: string;
   /** Injectable for tests and the sample; defaults to now. */
   today?: Date;
+  /** The day whose recordings are open below the grid (YYYY-MM-DD); null = none. */
+  selectedDay?: string | null;
+  /**
+   * A cell was pressed: its day, or null when the open day is pressed again.
+   * Without it the cells are plain pictures, as they were.
+   */
+  onSelectDay?: (date: string | null) => void;
 }) {
   const calendar = useMemo(() => calendarWeeks(clips, today ?? new Date()), [clips, today]);
   const scroller = useRef<HTMLDivElement | null>(null);
+  const cells = useRef<HTMLDivElement | null>(null);
+  const previousSelected = useRef<string | null>(selectedDay);
+  const interactive = onSelectDay !== undefined;
 
   // Open on the recent end. `scrollLeft` past the max clamps, so no measuring.
   useEffect(() => {
     const node = scroller.current;
     if (node !== null) node.scrollLeft = node.scrollWidth;
   }, [calendar]);
+
+  // The open day closed (Escape or the close button in the panel below, which
+  // unmounts with the focus in it): if focus went with the panel, put it back
+  // on the cell it came from. Only then — a selection cleared while focus is
+  // elsewhere (the clips changed under an edit in the recordings list) must
+  // not pull it up to the calendar — and with `preventScroll`, because the
+  // cell is right above the panel and the page must not jump.
+  useEffect(() => {
+    const previous = previousSelected.current;
+    previousSelected.current = selectedDay;
+    if (selectedDay !== null || previous === null) return;
+    const active = document.activeElement;
+    if (active !== null && active !== document.body) return;
+    const cell = cells.current?.querySelector<HTMLButtonElement>(`[data-date="${previous}"]`);
+    cell?.focus({ preventScroll: true });
+  }, [selectedDay]);
+
+  const onCellsKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape" && selectedDay !== null && onSelectDay !== undefined) {
+      event.preventDefault();
+      onSelectDay(null);
+    }
+  };
 
   const columns = calendar.weeks.length;
   const gridWidth = columns * CELL + Math.max(0, columns - 1) * GAP;
@@ -146,6 +205,7 @@ export function ContributionGrid({
             </div>
 
             <div
+              ref={cells}
               className="grid"
               style={{
                 gridTemplateColumns: `repeat(${columns}, ${CELL}px)`,
@@ -154,22 +214,59 @@ export function ContributionGrid({
                 gap: GAP,
                 width: gridWidth,
               }}
+              onKeyDown={interactive ? onCellsKeyDown : undefined}
             >
               {calendar.weeks.map((week) =>
-                week.map((day) =>
-                  day.inRange ? (
-                    <span
+                week.map((day) => {
+                  if (!day.inRange) {
+                    return <span key={day.date} aria-hidden="true" className="block" style={cellStyle(day)} />;
+                  }
+                  if (!interactive) {
+                    return (
+                      <span
+                        key={day.date}
+                        role="img"
+                        title={cellLabel(day)}
+                        aria-label={cellLabel(day)}
+                        className={cn("block rounded-[2px]", day.level > 0 && "opacity-[var(--rq-cell-opacity)]")}
+                        style={cellStyle(day)}
+                      />
+                    );
+                  }
+                  const selected = day.date === selectedDay;
+                  return (
+                    <button
                       key={day.date}
-                      role="img"
+                      type="button"
+                      data-date={day.date}
                       title={cellLabel(day)}
                       aria-label={cellLabel(day)}
-                      className="block rounded-[2px]"
-                      style={cellStyle(day)}
-                    />
-                  ) : (
-                    <span key={day.date} aria-hidden="true" className="block" style={cellStyle(day)} />
-                  ),
-                ),
+                      aria-pressed={selected}
+                      // Roving: lit days and the open day are the tab stops.
+                      tabIndex={day.count > 0 || selected ? 0 : -1}
+                      onClick={() => onSelectDay(selected ? null : day.date)}
+                      // The button itself stays at full opacity: element opacity
+                      // would dim the selection outline and the focus ring with
+                      // the fill (a 35% ring is a pale line). The level opacity
+                      // lives on the inner fill, as the iOS grid does it.
+                      className="group relative block cursor-pointer rounded-[2px] border-0 bg-transparent p-0"
+                      style={
+                        selected
+                          ? { width: CELL, height: CELL, ...SELECTED_STYLE }
+                          : { width: CELL, height: CELL }
+                      }
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          "absolute inset-0 block rounded-[2px] transition-opacity duration-150",
+                          day.level > 0 && "opacity-[var(--rq-cell-opacity)] group-hover:opacity-100",
+                        )}
+                        style={cellStyle(day)}
+                      />
+                    </button>
+                  );
+                }),
               )}
             </div>
           </div>
@@ -183,7 +280,7 @@ export function ContributionGrid({
         {([0, 1, 2, 3, 4] as const).map((level) => (
           <span
             key={level}
-            className="block rounded-[2px]"
+            className={cn("block rounded-[2px]", level > 0 && "opacity-[var(--rq-cell-opacity)]")}
             style={cellStyle({
               date: "",
               count: level,
