@@ -7,5 +7,13 @@
       "/legal/*",
       "/sample/*"
     ]
+  },
+  "mimeTypes": {
+    ".mp4": "video/mp4",
+    ".webm": "video/webm",
+    ".mov": "video/quicktime",
+    ".json": "application/json",
+    ".svg": "image/svg+xml",
+    ".webmanifest": "application/manifest+json"
   }
 }
