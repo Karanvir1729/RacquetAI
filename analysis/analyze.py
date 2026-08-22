@@ -399,7 +399,7 @@ def _scan_range(task):
 
 
 def _scan_video(video, ref_path, n_sampled, stride, fps, duration,
-                det_every, workers, width, height):
+                det_every, workers, width, height, threads_per_worker=1):
     """Run _scan_range over the whole clip, on one process or several.
 
     Progress has to stay monotonic because the server scrapes it off stdout to
@@ -423,7 +423,7 @@ def _scan_video(video, ref_path, n_sampled, stride, fps, duration,
         min(n_sampled, (round(i * n_sampled / n_chunks) // det_every) * det_every)
         for i in range(1, n_chunks)})
     tasks = [(video, ref_path, edges[i], edges[i + 1], stride, fps, duration,
-              det_every, width, height, 1, False)
+              det_every, width, height, threads_per_worker, False)
              for i in range(len(edges) - 1) if edges[i + 1] > edges[i]]
     print(f"  scanning {n_sampled} frames on {workers} workers "
           f"({len(tasks)} chunks, detector every {det_every})", flush=True)
@@ -1254,6 +1254,12 @@ def main():
                          "detections the pose model is given boxes grown from the "
                          "previous frame's skeletons; a frame that loses a player "
                          "re-detects regardless.")
+    ap.add_argument("--threads-per-worker", type=int, default=1,
+                    help="ONNX Runtime threads inside each worker. 1 is right on "
+                         "a small box; on a many-core machine a few fatter "
+                         "workers can beat many thin ones, because processes do "
+                         "not share model weights and memory bandwidth binds "
+                         "before the cores do.")
     ap.add_argument("--workers", type=int, default=default_workers(),
                     help="processes to scan the video with (1 = in-process). "
                          "ONNX Runtime only gets 1.38x out of 3 threads, so the "
@@ -1339,7 +1345,8 @@ def main():
         cap.release()
         times, raw_frames, directs, steps = _scan_video(
             args.video, ref_path, n_sampled, stride, fps, duration,
-            max(1, int(args.det_every)), max(1, int(args.workers)), width, height)
+            max(1, int(args.det_every)), max(1, int(args.workers)), width, height,
+            max(1, int(args.threads_per_worker)))
         with open(cache_path, "wb") as f:
             pickle.dump({"times": times, "raw_frames": raw_frames,
                          "directs": directs, "steps": steps,
