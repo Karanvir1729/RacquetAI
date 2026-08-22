@@ -11,6 +11,9 @@ Bridges the Expo app to the offline pipeline (analyze.py). API contract
                                   "progressPct": number|null,
                                   "message": string|null}
   GET  /jobs/<id>/frame.jpg   mid-video reference frame (from corners_needed on)
+  GET  /jobs/<id>/video.mp4   the downscaled working copy, owner only — the
+                              fallback when a read-out is rejoined in a tab
+                              that never had the local file
   POST /jobs/<id>/corners     JSON {"frontLeft":[nx,ny], "frontRight":[nx,ny],
                                     "backLeft":[nx,ny], "backRight":[nx,ny]}
                               coords normalized relative to frame.jpg (origin
@@ -272,11 +275,18 @@ def _progress_pct(job):
 @app.after_request
 def _cors(resp):
     resp.headers["Access-Control-Allow-Origin"] = "*"
-    resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    # HEAD is here because the read-out asks how big a job's video is before
+    # deciding to pull it into memory. A preflighted HEAD that is not listed is
+    # simply dropped by the browser, with no error the page can catch.
+    resp.headers["Access-Control-Allow-Methods"] = "GET, HEAD, POST, OPTIONS"
     # X-Filename rides on the raw-body upload the web client uses; omitting it
     # here makes the browser preflight fail and every cross-origin upload dies.
     # Authorization carries Supabase tokens (/billing) and admin basic auth.
     resp.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Filename, Authorization"
+    # Cross-origin JavaScript cannot read Content-Length unless it is named
+    # here, so without this the size check above reads null and the caller
+    # cannot tell a small video from a huge one.
+    resp.headers["Access-Control-Expose-Headers"] = "Content-Length, Content-Range, Accept-Ranges"
     return resp
 
 
@@ -437,6 +447,34 @@ def job_frame(job_id):
     if job["status"] in ("queued", "preparing") or not os.path.exists(path):
         return jsonify({"error": "frame not ready (available from corners_needed)"}), 409
     return send_file(path, mimetype="image/jpeg")
+
+
+@app.route("/jobs/<job_id>/video.mp4")
+def job_video(job_id):
+    """The downscaled video this job was measured from, for its owner.
+
+    The read-out plays the LOCAL file the browser uploaded, which is the right
+    default — it is instant and the footage never has to travel. But that file
+    only exists in the tab that did the upload: rejoin a job by `?job=` in a
+    new tab, or reload, and the read-out has measurements and no picture. This
+    route is the fallback for exactly that case.
+
+    It gives nothing away that the server does not already hold. The upload is
+    on disk here because the pipeline cannot measure it otherwise, it is the
+    854px working copy rather than the original, `_guard_job` means only the
+    account that created the job can read it, and the retention sweeper deletes
+    it with everything else after JOB_TTL_HOURS.
+
+    `conditional=True` matters: it answers Range requests, so the player can
+    seek without pulling the whole file first.
+    """
+    job, _user, denied = _guard_job(job_id)
+    if denied is not None:
+        return denied
+    path = os.path.join(_job_dir(job_id), "video.mp4")
+    if not os.path.exists(path):
+        return jsonify({"error": "no video kept for this job"}), 404
+    return send_file(path, mimetype="video/mp4", conditional=True)
 
 
 @app.route("/jobs/<job_id>/corners", methods=["POST"])

@@ -2,6 +2,7 @@ import { AlertTriangle, ArrowLeft, PlayCircle } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { fetchJobVideo, readApiBase } from "@/analysis/client";
 import { formatBytes } from "@/analysis/format";
 import { saveToHistory } from "@/analysis/history";
 import { takePendingUpload } from "@/record/pendingUpload";
@@ -64,6 +65,13 @@ export default function Analyze() {
   // not store it) — the second handle a player tag can hang off, next to the
   // job id.
   const [historyId, setHistoryId] = useState<string | null>(null);
+  /**
+   * The video fetched back from the server, when this tab has no local copy.
+   * "unavailable" means the server kept none; a number means it kept one but
+   * it is that many bytes and too big to pull into memory unasked.
+   */
+  const [servedVideo, setServedVideo] =
+    useState<{ url: string } | "loading" | "unavailable" | { tooLarge: number } | null>(null);
 
   useDocumentTitle(stage.kind === "done" ? "Your analysis" : "Analyze a match");
 
@@ -132,6 +140,55 @@ export default function Analyze() {
     },
     [localVideo],
   );
+
+  /**
+   * Rejoining a job by `?job=` leaves the read-out with numbers and no picture,
+   * because the file being played is the one this browser uploaded. The server
+   * still holds its 854px working copy until the retention sweep, so ask for it
+   * rather than showing an empty frame — see GET /jobs/<id>/video.mp4.
+   *
+   * The guard is a ref, NOT the state this effect sets. Listing `servedVideo`
+   * as a dependency while also setting it to "loading" re-runs the effect
+   * immediately, and the cleanup aborts the fetch it just started — the
+   * request dies in flight and the panel waits forever. The object URL is
+   * revoked on unmount only, for the same reason.
+   */
+  const doneJobId = stage.kind === "done" ? stage.jobId : null;
+  const videoAskedFor = useRef<string | null>(null);
+  const servedObjectUrl = useRef<string | null>(null);
+
+  useEffect(
+    () => () => {
+      if (servedObjectUrl.current !== null) URL.revokeObjectURL(servedObjectUrl.current);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (doneJobId === null || localVideo !== null) return;
+    if (videoAskedFor.current === doneJobId) return;
+    videoAskedFor.current = doneJobId;
+    const controller = new AbortController();
+    setServedVideo("loading");
+
+    fetchJobVideo(readApiBase(), doneJobId, controller.signal).then(
+      (result) => {
+        if (controller.signal.aborted) return;
+        if (result === null) setServedVideo("unavailable");
+        else if ("tooLarge" in result) setServedVideo({ tooLarge: result.tooLarge });
+        else {
+          const url = URL.createObjectURL(result.blob);
+          servedObjectUrl.current = url;
+          setServedVideo({ url });
+        }
+      },
+      () => {
+        if (!controller.signal.aborted) setServedVideo("unavailable");
+      },
+    );
+
+    return () => controller.abort();
+  }, [doneJobId, localVideo]);
   // A take handed over from /record starts analysing on arrival — the visitor
   // already pressed "Analyze this match", and the file lives in memory, not
   // anywhere a file dialog could reach. Reading the slot clears it, so a back
@@ -148,17 +205,28 @@ export default function Analyze() {
 
 
   if (stage.kind === "done") {
+    const served =
+      servedVideo !== null && typeof servedVideo === "object" && "url" in servedVideo
+        ? servedVideo
+        : null;
+    const playable = localVideo?.url ?? served?.url ?? null;
+    const caption =
+      localVideo !== null
+        ? "Played from your own copy of the file. The overlay is drawn from the analysis, not baked into the video. The read-out is kept under Your matches on this browser."
+        : served !== null
+          ? "Played from the server's working copy of your upload — this tab rejoined the job by id, so it did not have your original. The overlay is drawn from the analysis, not baked into the video."
+          : servedVideo === "loading"
+            ? "Fetching the video back from the server…"
+            : servedVideo !== null && typeof servedVideo === "object" && "tooLarge" in servedVideo
+              ? `The server still has this match (${formatBytes(servedVideo.tooLarge)}) but it is too large to load into the page. Open the read-out in the tab that uploaded it to watch it.`
+              : "No video is attached to this analysis — the measurements below still apply. The server keeps an upload for 48 hours, and this one is past that.";
     return (
       <ResultsView
         analysis={stage.analysis}
-        videoSrc={localVideo?.url ?? null}
+        videoSrc={playable}
         eyebrow="Your analysis"
         title={localVideo?.name ?? "Match analysis"}
-        caption={
-          localVideo === null
-            ? "Playing back the video needs the original file, which stays on the device that uploaded it — this tab rejoined the job by id, so only the measurements are here. Kept under Your matches on this browser."
-            : "Played from your own copy of the file. The overlay is drawn from the analysis, not baked into the video. The read-out is kept under Your matches on this browser."
-        }
+        caption={caption}
         action={{ to: "/analyze", label: "Analyze another" }}
         clipRef={{
           jobId: stage.jobId,
@@ -167,11 +235,11 @@ export default function Analyze() {
           playedAt: isoDay(new Date()),
         }}
       >
-        {/* Refereeing needs the footage, and the server never sends it back —
-            so this only appears in the tab that uploaded the file. */}
+        {/* Refereeing needs the footage — the local file when this tab has it,
+            otherwise the copy fetched back from the job. */}
         <CoachFeedbackPanel analysis={stage.analysis} />
-        {localVideo === null ? null : (
-          <VideoRefereePanel analysis={stage.analysis} videoSrc={localVideo.url} />
+        {playable === null ? null : (
+          <VideoRefereePanel analysis={stage.analysis} videoSrc={playable} />
         )}
       </ResultsView>
     );

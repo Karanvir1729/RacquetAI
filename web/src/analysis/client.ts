@@ -108,6 +108,39 @@ export function frameUrl(base: string, jobId: string, bust?: number): string {
   return `${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}/frame.jpg${suffix}`;
 }
 
+/** Where the job's working copy of the video lives (owner only). */
+export function videoUrl(base: string, jobId: string): string {
+  return `${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}/video.mp4`;
+}
+
+/**
+ * The job's video, for a read-out that has no local file.
+ *
+ * Same trap as the reference frame: `<video src>` sends no Authorization
+ * header, so the bytes have to be fetched and handed over as an object URL.
+ * A HEAD first, because this is a whole match and not a single JPEG — over the
+ * cap the caller says so rather than pulling hundreds of megabytes into memory
+ * behind the user's back. Returns null when the server kept no video.
+ */
+export const MAX_INLINE_VIDEO_BYTES = 300 * 1024 * 1024;
+
+export async function fetchJobVideo(
+  base: string,
+  jobId: string,
+  signal?: AbortSignal,
+): Promise<{ blob: Blob } | { tooLarge: number } | null> {
+  const url = videoUrl(base, jobId);
+  const headers = await authHeader();
+  const head = await fetch(url, { method: "HEAD", headers, signal });
+  if (head.status === 404) return null;
+  if (!head.ok) throw await readError(head, "The server would not send the video.");
+  const size = Number(head.headers.get("content-length") ?? "0");
+  if (size > MAX_INLINE_VIDEO_BYTES) return { tooLarge: size };
+  const response = await fetch(url, { headers, signal });
+  if (!response.ok) throw await readError(response, "The server would not send the video.");
+  return { blob: await response.blob() };
+}
+
 /**
  * The reference frame itself, fetched rather than linked.
  *
