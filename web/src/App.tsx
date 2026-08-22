@@ -16,6 +16,8 @@ import Library from "@/pages/Library";
 import Login from "@/pages/Login";
 import Coach from "@/pages/Coach";
 import NotFound from "@/pages/NotFound";
+import PlayerPage from "@/pages/PlayerPage";
+import Players from "@/pages/Players";
 import Profile from "@/pages/Profile";
 import Record from "@/pages/Record";
 import Referee from "@/pages/Referee";
@@ -30,7 +32,10 @@ import Upgrade from "@/pages/Upgrade";
  * server running at all. `/library` is this browser's own history of finished
  * analyses, and `/record` films one from a camera on the machine.
  * `/coach` and `/profile` are the coaching surface: a player profile, and a
- * conversation that reads it alongside the most recent analysed match. `/login`, `/account`, `/upgrade` and
+ * conversation that reads it alongside the most recent analysed match.
+ * `/players` is the roster of people IN the footage — each `/players/:id`
+ * pools every clip that name was tagged on into one scouting profile, and
+ * `/players/sample` shows one on public footage. `/login`, `/account`, `/upgrade` and
  * `/checkout/success` are the account + subscription surface (Supabase +
  * Stripe); `/admin` is the operator metrics dashboard.
  */
@@ -95,6 +100,8 @@ export default function App() {
               <Route path="/record" element={<Record />} />
               <Route path="/coach" element={<Coach />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/players" element={<Players />} />
+              <Route path="/players/:id" element={<PlayerPage />} />
 
               <Route path="/referee" element={<Referee />} />
               <Route path="/login" element={<Login />} />

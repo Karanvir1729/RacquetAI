@@ -154,3 +154,75 @@ $$;
 
 revoke all on function public.delete_account() from public, anon;
 grant execute on function public.delete_account() to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- players + player_clips: the people IN the footage (player profiles).
+--
+-- A player is a name on someone's roster; a clip is one side of one analysed
+-- match tagged with that name, carrying a small JSON summary of that side's
+-- numbers (web/src/players/shape.ts defines it). The analysis itself stays in
+-- the browser that ran it — footage and pose track never come here — so a
+-- profile is readable from any machine without moving a match video.
+-- Every policy is auth.uid() = user_id: rosters are private to whoever built
+-- them (club-wide sharing is a later, deliberate step).
+-- ---------------------------------------------------------------------------
+create table if not exists public.players (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  name text not null check (char_length(btrim(name)) between 1 and 80),
+  hand text check (hand in ('right', 'left')),
+  notes text check (char_length(notes) <= 600),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists players_user_id_idx on public.players (user_id);
+-- One roster entry per name (case-insensitive) per user: naming the same
+-- opponent twice must not fork their profile. The client treats 23505 as
+-- "already have" and reuses the row.
+create unique index if not exists players_user_name_idx
+  on public.players (user_id, lower(btrim(name)));
+
+alter table public.players enable row level security;
+
+drop policy if exists "players: own rows" on public.players;
+create policy "players: own rows"
+  on public.players for all
+  to authenticated
+  using (auth.uid () = user_id)
+  with check (auth.uid () = user_id);
+
+create table if not exists public.player_clips (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  player_id uuid not null references public.players (id) on delete cascade,
+  side text not null check (side in ('A', 'B')),
+  title text not null default '' check (char_length(title) <= 200),
+  -- The analysis job (how a read-out finds its own tags) and this browser's
+  -- library id (so the recordings list can link back on that machine).
+  job_id text check (char_length(job_id) <= 120),
+  history_id text check (char_length(history_id) <= 120),
+  played_at date not null default current_date,
+  -- Denormalised from the summary so the roster list is one light query.
+  duration_sec real not null default 0 check (duration_sec >= 0),
+  shots integer not null default 0 check (shots >= 0),
+  summary jsonb not null check (jsonb_typeof(summary) = 'object'),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists player_clips_player_idx on public.player_clips (player_id, played_at);
+-- A read-out has exactly one Player A and one Player B: re-tagging a side
+-- replaces the earlier tag. Partial, because the demo read-out has no id.
+create unique index if not exists player_clips_job_side_idx
+  on public.player_clips (user_id, job_id, side) where job_id is not null;
+create unique index if not exists player_clips_history_side_idx
+  on public.player_clips (user_id, history_id, side) where history_id is not null;
+
+alter table public.player_clips enable row level security;
+
+drop policy if exists "player_clips: own rows" on public.player_clips;
+create policy "player_clips: own rows"
+  on public.player_clips for all
+  to authenticated
+  using (auth.uid () = user_id)
+  with check (auth.uid () = user_id);

@@ -16,6 +16,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Section } from "@/components/ui/Section";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
+import { isoDay } from "@/players/shape";
 
 /**
  * The whole journey on one route: upload → mark the court → wait → read-out.
@@ -59,6 +60,10 @@ export default function Analyze() {
   const [localVideo, setLocalVideo] = useState<{ url: string; name: string } | null>(null);
   const resumedRef = useRef(false);
   const savedRef = useRef<string | null>(null);
+  // The library id the read-out was saved under (null when this browser would
+  // not store it) — the second handle a player tag can hang off, next to the
+  // job id.
+  const [historyId, setHistoryId] = useState<string | null>(null);
 
   useDocumentTitle(stage.kind === "done" ? "Your analysis" : "Analyze a match");
 
@@ -89,11 +94,13 @@ export default function Analyze() {
     const key = stage.jobId;
     if (savedRef.current === key) return;
     savedRef.current = key;
-    saveToHistory(stage.analysis, {
-      jobId: stage.jobId,
-      title: localVideo?.name ?? "Match analysis",
-      now: new Date(),
-    });
+    setHistoryId(
+      saveToHistory(stage.analysis, {
+        jobId: stage.jobId,
+        title: localVideo?.name ?? "Match analysis",
+        now: new Date(),
+      }),
+    );
   }, [stage, localVideo]);
 
   const startOver = useCallback(() => {
@@ -103,6 +110,7 @@ export default function Analyze() {
     });
     resumedRef.current = true; // don't re-resume the job we just abandoned
     savedRef.current = null;
+    setHistoryId(null);
     setParams({}, { replace: true });
     flow.reset();
   }, [flow, setParams]);
@@ -152,6 +160,12 @@ export default function Analyze() {
             : "Played from your own copy of the file. The overlay is drawn from the analysis, not baked into the video. The read-out is kept under Your matches on this browser."
         }
         action={{ to: "/analyze", label: "Analyze another" }}
+        clipRef={{
+          jobId: stage.jobId,
+          historyId,
+          title: localVideo?.name ?? "Match analysis",
+          playedAt: isoDay(new Date()),
+        }}
       >
         {/* Refereeing needs the footage, and the server never sends it back —
             so this only appears in the tab that uploaded the file. */}

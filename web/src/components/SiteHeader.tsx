@@ -13,6 +13,7 @@ const NAV = [
   { href: "/record", label: "Film a match" },
   { href: "/referee", label: "Referee" },
   { href: "/library", label: "Your matches" },
+  { href: "/players", label: "Players" },
   { href: "/#how", label: "How it works" },
   { href: "/#readout", label: "What you get" },
   { href: "/#limits", label: "Limits" },

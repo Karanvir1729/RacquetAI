@@ -5,6 +5,7 @@ import type { MatchAnalysis } from "@/analysis/types";
 import { MatchPlayer } from "@/components/analysis/MatchPlayer";
 import { PlayerPanel } from "@/components/analysis/PlayerPanel";
 import { QualityFootnote } from "@/components/analysis/QualityFootnote";
+import { PlayerTagControl } from "@/components/players/PlayerTagControl";
 import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
@@ -13,6 +14,7 @@ import type { ReactNode } from "react";
 
 import { Section } from "@/components/ui/Section";
 import { Stat } from "@/components/ui/Stat";
+import type { ClipRef } from "@/players/shape";
 
 /**
  * The read-out: one analysis, rendered whole.
@@ -25,6 +27,8 @@ import { Stat } from "@/components/ui/Stat";
  *
  * Both `/analyze` and `/demo` end here; the demo passes the bundled sample and
  * a source note, a real job passes the server's analysis and its own video.
+ * A `clipRef` — the ids a read-out can be tagged against — adds the "name this
+ * player" control to each panel; the demo passes none, so it gets none.
  */
 export function ResultsView({
   analysis,
@@ -33,6 +37,7 @@ export function ResultsView({
   title,
   caption,
   action,
+  clipRef,
   children,
 }: {
   analysis: MatchAnalysis;
@@ -42,6 +47,8 @@ export function ResultsView({
   /** Provenance line under the player. */
   caption?: string;
   action?: { to: string; label: string };
+  /** What this read-out is, for tagging the people in it. Absent means no tagging (the demo). */
+  clipRef?: ClipRef;
   /** Extra panels below the read-out — the video referee, when footage is local. */
   children?: ReactNode;
 }) {
@@ -107,7 +114,15 @@ export function ResultsView({
         <div className="grid gap-6 xl:grid-cols-2">
           {players.map((player, index) => (
             <Reveal key={player.id} delay={index * 0.08}>
-              <PlayerPanel player={player} shots={shots} />
+              <PlayerPanel
+                player={player}
+                shots={shots}
+                headerExtra={
+                  clipRef === undefined ? undefined : (
+                    <PlayerTagControl side={player.id} clipRef={clipRef} analysis={analysis} />
+                  )
+                }
+              />
             </Reveal>
           ))}
         </div>

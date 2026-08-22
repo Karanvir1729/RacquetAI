@@ -1,6 +1,6 @@
-import { ArrowLeft, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Trash2, Upload, UsersRound } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import {
   clearHistory,
@@ -10,13 +10,16 @@ import {
   type HistorySummary,
 } from "@/analysis/history";
 import { formatClock } from "@/analysis/format";
-import type { MatchAnalysis } from "@/analysis/types";
+import { PLAYER_IDS, type MatchAnalysis } from "@/analysis/types";
 import { CoachFeedbackPanel } from "@/components/analysis/CoachFeedbackPanel";
 import { ResultsView } from "@/components/analysis/ResultsView";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Section } from "@/components/ui/Section";
+import { useAuth } from "@/lib/auth";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
+import { isoDay } from "@/players/shape";
+import { tagsForHistoryIds, type ClipTag } from "@/players/store";
 
 /**
  * Every match this browser has analysed.
@@ -27,16 +30,23 @@ import { useDocumentTitle } from "@/lib/useDocumentTitle";
  * and why.
  *
  * `?match=` opens one entry, so a saved read-out has a link of its own.
+ *
+ * Signed in, each row also says who was in it — the player tags live in the
+ * account, not the browser, so they are the one part of this list that does
+ * follow you to another machine.
  */
 export default function Library() {
+  const { session } = useAuth();
   const [params, setParams] = useSearchParams();
   const [entries, setEntries] = useState<HistorySummary[]>(() => listHistory());
   const [open, setOpen] = useState<{ summary: HistorySummary; analysis: MatchAnalysis } | null>(
     null,
   );
   const [missing, setMissing] = useState(false);
+  const [tags, setTags] = useState<Map<string, ClipTag[]>>(() => new Map());
 
   const openId = params.get("match");
+  const userId = session?.user.id ?? null;
 
   useDocumentTitle(open === null ? "Your matches" : open.summary.title);
 
@@ -56,6 +66,27 @@ export default function Library() {
     setMissing(false);
     setOpen({ summary, analysis });
   }, [openId, entries]);
+
+  // Who is in each saved match. Re-read whenever the list comes back into
+  // view (openId → null), because the read-out it came back from is where
+  // tags get made. A failed read is an empty map, never a broken list.
+  useEffect(() => {
+    if (userId === null || openId !== null) {
+      setTags(new Map());
+      return;
+    }
+    let live = true;
+    tagsForHistoryIds(entries.map((entry) => entry.id))
+      .then((found) => {
+        if (live) setTags(found);
+      })
+      .catch(() => {
+        if (live) setTags(new Map());
+      });
+    return () => {
+      live = false;
+    };
+  }, [userId, openId, entries]);
 
   const remove = useCallback(
     (id: string) => {
@@ -81,6 +112,12 @@ export default function Library() {
         title={open.summary.title}
         caption="Saved on this browser. The footage stayed on the machine that uploaded it, so this is the measurements only — analyse the file again to watch it back with the overlay."
         action={{ to: "/library", label: "All matches" }}
+        clipRef={{
+          jobId: open.summary.jobId,
+          historyId: open.summary.id,
+          title: open.summary.title,
+          playedAt: savedDay(open.summary.savedAt),
+        }}
       >
         <CoachFeedbackPanel analysis={open.analysis} />
       </ResultsView>
@@ -138,6 +175,7 @@ export default function Library() {
                         {entry.rallies} {entry.rallies === 1 ? "rally" : "rallies"} · {entry.shots}{" "}
                         shots
                       </p>
+                      <TagLine tags={tags.get(entry.id)} />
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
                       <ButtonLink to={`/library?match=${entry.id}`} variant="outline" size="sm">
@@ -165,6 +203,9 @@ export default function Library() {
               <ButtonLink to="/analyze" size="md">
                 <Upload className="h-4 w-4" /> Analyze another
               </ButtonLink>
+              <ButtonLink to="/players" variant="outline" size="md">
+                <UsersRound className="h-4 w-4" /> Players
+              </ButtonLink>
               <Button variant="outline" size="md" onClick={removeAll}>
                 Delete all
               </Button>
@@ -180,6 +221,48 @@ export default function Library() {
       </div>
     </Section>
   );
+}
+
+/**
+ * "Player A: Mohamed ElShorbagy · Player B: —" under a row, only once at least
+ * one side has a name; an untagged match says nothing rather than two dashes.
+ */
+function TagLine({ tags }: { tags: ClipTag[] | undefined }) {
+  if (tags === undefined || tags.length === 0) return null;
+  return (
+    <p className="rq-caption mt-1 flex flex-wrap gap-x-1">
+      {PLAYER_IDS.map((side, index) => {
+        const tag = tags.find((item) => item.side === side);
+        return (
+          <span key={side}>
+            {index > 0 ? <span aria-hidden="true"> · </span> : null}
+            Player {side}:{" "}
+            {tag === undefined ? (
+              "—"
+            ) : (
+              <Link
+                to={`/players/${tag.playerId}`}
+                className="font-semibold underline-offset-4 hover:underline"
+                style={{ color: "var(--rq-accent-text)" }}
+              >
+                {tag.playerName.length > 0 ? tag.playerName : "Unnamed player"}
+              </Link>
+            )}
+          </span>
+        );
+      })}
+    </p>
+  );
+}
+
+/**
+ * The day a match was saved, in this browser's own calendar — the default
+ * "played on" when one of its players is named. The stamp is UTC, so slicing
+ * it would put an evening save on tomorrow's date west of Greenwich.
+ */
+function savedDay(iso: string): string {
+  const when = new Date(iso);
+  return Number.isNaN(when.getTime()) ? iso.slice(0, 10) : isoDay(when);
 }
 
 /** "19 Aug 2026, 14:32" in the visitor's locale, or the raw stamp if unparseable. */
