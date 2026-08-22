@@ -224,7 +224,11 @@ def available_cpus():
                 period = int(open("/sys/fs/cgroup/cpu/cpu.cfs_period_us").read().strip())
                 quota = q / period
             if quota and quota >= 1:
-                return int(quota)
+                # ROUND, do not truncate. Azure Container Instances hands a
+                # 3-vCPU request a quota of 294117/100000 = 2.94 CPUs, and
+                # int() turned that into 2 — quietly running two workers on
+                # three cores and giving back a third of the speed-up.
+                return max(1, int(round(quota)))
         except (OSError, ValueError, ZeroDivisionError, IndexError):
             continue
     try:
