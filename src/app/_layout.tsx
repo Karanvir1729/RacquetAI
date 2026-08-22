@@ -148,6 +148,9 @@ export default function RootLayout() {
                 never tabs (href: null keeps the bar unchanged). */}
             <Tabs.Screen name="players" options={{ href: null }} />
             <Tabs.Screen name="player/[id]" options={{ href: null }} />
+            {/* One recording's stored read-out, opened from a profile's feed;
+                the same rule — a pushed route, never a tab. */}
+            <Tabs.Screen name="clip/[id]" options={{ href: null }} />
             {/* RacketIQ Pro — pushed from the import card once the free
                 analyses are spent; never a tab of its own. */}
             <Tabs.Screen name="paywall" options={{ href: null }} />

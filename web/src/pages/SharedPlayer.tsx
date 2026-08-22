@@ -22,7 +22,8 @@ import type { Player, PlayerClip } from "@/players/shape";
  * Same view as the owner's, read-only, under a banner that names what it is
  * and points at the limits page: a shared profile is read as a verdict on a
  * person by someone who did not see the footage, so the honesty copy matters
- * more here, not less.
+ * more here, not less. A card's "Show detailed analysis" opens the stored
+ * analysis at `/p/:token/clips/:clipId` — the read-out, never the footage.
  */
 export default function SharedPlayer() {
   const { token } = useParams<{ token: string }>();
@@ -84,6 +85,7 @@ export default function SharedPlayer() {
       <PlayerProfileView
         player={loaded.player}
         clips={loaded.clips}
+        basePath={`/p/${token ?? ""}`}
         readOnly
         banner={
           <Card featured className="flex gap-3 p-4 sm:p-5">

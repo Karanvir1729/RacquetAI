@@ -2,14 +2,28 @@ import { router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
+import { readAnalysisVideoRef } from "@/lib/analysisVideo";
 import { useAuthReady, useAuthSession } from "@/lib/auth";
 import { notifyWarning, selection as selectionHaptic } from "@/lib/haptics";
 import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens";
 
+// Cross-feature imports, documented (docs/01 rule 2): the poster that travels
+// with a tag is one frame of the recording's footage, and the only frame
+// grabber in the binary is the on-device analyser's reference-frame step; the
+// recording store is where an in-app take's footage lives.
+import { extractDeviceReferenceFrame, loadRacquetAnalyzer } from "../analysis/deviceClient";
 import type { MatchAnalysis, PlayerId } from "../analysis/types";
+import { listRecordings } from "../recording/storage";
 import { NamePlayerSheet, type NameChoice } from "./NamePlayerSheet";
 import type { ClipRef } from "./shape";
-import { createPlayer, tagClip, tagsForClip, untagClip, type ClipTag } from "./store";
+import {
+  createPlayer,
+  tagClip,
+  tagsForClip,
+  untagClip,
+  uploadClipMedia,
+  type ClipTag,
+} from "./store";
 import { invalidateRoster, useRoster } from "./useRoster";
 
 interface PlayerTagButtonProps {
@@ -126,6 +140,8 @@ export function PlayerTagButton({ side, clipRef, analysis }: PlayerTagButtonProp
         // Recording counts on the roster moved, and so did this side's tag.
         invalidateRoster();
         await refreshTag();
+        // The tag has landed; what travels with it goes after, unwaited.
+        void storeClipMedia(result.clipId, latestRef.current.historyId, analysis);
       } catch {
         setError("Something went wrong. Try again.");
       } finally {
@@ -257,6 +273,58 @@ export function PlayerTagButton({ side, clipRef, analysis }: PlayerTagButtonProp
       ) : null}
     </View>
   );
+}
+
+/**
+ * What travels with a tag besides the summary: the analysis itself (pose
+ * track stripped — so a profile on any device can open the full read-out) and,
+ * best effort, one still from the footage, so the profile's feed has a face
+ * for the recording. The phone ships no thumbnailer of its own; the on-device
+ * analyser's reference-frame step is the one thing in the binary that can
+ * hand back a JPEG of a video, so a build that carries it gets a poster — the
+ * mid-video frame it extracts — and a build without it (Expo Go, a
+ * server-only build) stores the analysis alone. Nothing here is awaited by
+ * the tag flow and nothing here may throw into it: a failed upload leaves the
+ * tag exactly as it landed, and the profile draws the court plan instead.
+ */
+async function storeClipMedia(
+  clipId: string,
+  recordingId: string | null,
+  analysis: MatchAnalysis,
+): Promise<void> {
+  let poster: { uri: string } | null = null;
+  if (recordingId !== null) {
+    try {
+      const analyzer = loadRacquetAnalyzer();
+      const videoUri = analyzer === null ? null : recordingVideoUri(recordingId);
+      if (videoUri !== null) {
+        const frame = await extractDeviceReferenceFrame(videoUri, analyzer);
+        poster = { uri: frame.uri };
+      }
+    } catch {
+      poster = null;
+    }
+  }
+  try {
+    await uploadClipMedia(clipId, { poster, analysis });
+  } catch {
+    /* best effort — the tag itself is already saved */
+  }
+}
+
+/**
+ * The footage behind a recording id, when this phone still has it: an
+ * import's adopted copy (or any analysis with a video ref), else an in-app
+ * take in the recordings store. Null means "no poster", never an error.
+ */
+function recordingVideoUri(recordingId: string): string | null {
+  try {
+    const ref = readAnalysisVideoRef(recordingId);
+    if (ref !== null) return ref;
+    return listRecordings().find((entry) => entry.meta.id === recordingId)?.videoUri ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /** "Change" / "Remove": a word, not a button-shaped button, so the tagged line reads as a line. */

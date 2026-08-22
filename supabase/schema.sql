@@ -268,3 +268,67 @@ $$;
 
 revoke all on function public.shared_player(text) from public;
 grant execute on function public.shared_player(text) to anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Clip media (added 2026-08-21): a poster frame and the full analysis (pose
+-- track stripped) per tagged clip, so a profile can show a feed of the
+-- recordings and open the complete read-out from any device.
+--
+-- The footage itself still never leaves the browser that ran the analysis —
+-- what travels is one JPEG frame (~40 KB, captured in that browser at tag
+-- time) and the read-out's numbers (~100 KB JSON). Objects live in the
+-- public bucket `profile-media` under <auth.uid()>/<clip id>/…. Reads go
+-- through Storage's public download route (/storage/v1/object/public/…),
+-- which does NOT evaluate RLS — so there is deliberately NO select policy:
+-- a holder of a full object path can download it, but nobody can LIST the
+-- bucket to discover other people's paths. (An earlier "public read" SELECT
+-- policy DID grant anon LIST — a walkable bucket of real match frames — so
+-- it was removed 2026-08-21; see docs/11.) Writes are the caller's own
+-- folder only, and only the two object names the app actually creates.
+-- ---------------------------------------------------------------------------
+alter table public.player_clips
+  add column if not exists poster_path text check (char_length(poster_path) <= 300),
+  add column if not exists analysis_path text check (char_length(analysis_path) <= 300);
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('profile-media', 'profile-media', true, 5242880,
+        array['image/jpeg', 'image/png', 'image/webp', 'application/json'])
+on conflict (id) do update
+  set public = excluded.public,
+      file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
+
+-- No SELECT policy on purpose: public downloads use the RLS-free public
+-- route; withholding SELECT is what stops the bucket being listed/walked.
+drop policy if exists "profile-media: public read" on storage.objects;
+
+-- Writes: the caller's own folder, and only the exact object names the app
+-- creates (<uid>/<clip-uuid>/poster.jpg | analysis.json) — so a signed-in
+-- account cannot dump arbitrary blobs into a world-readable bucket.
+drop policy if exists "profile-media: own folder insert" on storage.objects;
+create policy "profile-media: own folder insert"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'profile-media'
+    and name ~ ('^' || auth.uid()::text || '/[0-9a-f-]{36}/(poster\.jpg|analysis\.json)$')
+  );
+
+drop policy if exists "profile-media: own folder update" on storage.objects;
+create policy "profile-media: own folder update"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'profile-media'
+    and name ~ ('^' || auth.uid()::text || '/[0-9a-f-]{36}/(poster\.jpg|analysis\.json)$')
+  )
+  with check (
+    bucket_id = 'profile-media'
+    and name ~ ('^' || auth.uid()::text || '/[0-9a-f-]{36}/(poster\.jpg|analysis\.json)$')
+  );
+
+drop policy if exists "profile-media: own folder delete" on storage.objects;
+create policy "profile-media: own folder delete"
+  on storage.objects for delete
+  to authenticated
+  using (bucket_id = 'profile-media' and (storage.foldername(name))[1] = auth.uid()::text);

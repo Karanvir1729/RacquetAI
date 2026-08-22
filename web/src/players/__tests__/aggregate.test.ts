@@ -55,6 +55,8 @@ function clipOf(summary: ClipSummary, overrides: Partial<PlayerClip> = {}): Play
     durationSec: summary.durationSec,
     shots: summary.me.shots,
     summary,
+    posterPath: null,
+    analysisPath: null,
     createdAt: "2026-08-13T12:00:00.000Z",
     ...overrides,
   };

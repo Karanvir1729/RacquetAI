@@ -33,8 +33,10 @@ import type { Player, PlayerClip } from "@/players/shape";
  * each one rather than patching state by hand, so what is on screen is always
  * what the database holds.
  *
- * "Open in library" only appears for clips whose analysis is in THIS
- * browser's history; the profile itself reads fine from any machine.
+ * A card's "Show detailed analysis" opens the library entry when the analysis
+ * is in THIS browser's history, else the stored analysis at
+ * `/players/:id/clips/:clipId`; the profile itself reads fine from any
+ * machine.
  *
  * Sharing is wired the same way as the edits: mint or revoke through the
  * store, then re-read, so the token the view shows is the one the row holds.
@@ -53,6 +55,7 @@ function SampleProfile() {
       <PlayerProfileView
         player={SAMPLE_PLAYER}
         clips={SAMPLE_CLIPS}
+        basePath="/players/sample"
         readOnly
         banner={
           <Card featured className="flex gap-3 p-4 sm:p-5">
@@ -175,6 +178,7 @@ function OwnedProfile({ id }: { id: string }) {
       <PlayerProfileView
         player={loaded.player}
         clips={loaded.clips}
+        basePath={`/players/${id}`}
         libraryIds={libraryIds}
         onRename={(name) => updatePlayer(id, { name }).then(afterWrite)}
         onHand={(hand) => updatePlayer(id, { hand }).then(afterWrite)}

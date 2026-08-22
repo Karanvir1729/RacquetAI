@@ -28,6 +28,8 @@ function clipWith(summary: ClipSummary, overrides: Partial<PlayerClip> = {}): Pl
     durationSec: summary.durationSec,
     shots: summary.me.shots,
     summary,
+    posterPath: null,
+    analysisPath: null,
     createdAt: "2026-08-01T12:00:00.000Z",
     ...overrides,
   };

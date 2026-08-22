@@ -10,6 +10,7 @@ import Account from "@/pages/Account";
 import Admin from "@/pages/Admin";
 import Analyze from "@/pages/Analyze";
 import CheckoutSuccess from "@/pages/CheckoutSuccess";
+import ClipDetail from "@/pages/ClipDetail";
 import Demo from "@/pages/Demo";
 import Landing from "@/pages/Landing";
 import Library from "@/pages/Library";
@@ -38,7 +39,9 @@ import Upgrade from "@/pages/Upgrade";
  * pools every clip that name was tagged on into one scouting profile, and
  * `/players/sample` shows one on public footage; `/p/:token` is a profile its
  * owner chose to share — read-only, no sign-in, live only while the token
- * stands. `/login`, `/account`, `/upgrade` and
+ * stands. Under each of those three, `…/clips/:clipId` is one recording's
+ * full read-out from the analysis stored against it (the footage never
+ * travels; a poster frame stands in). `/login`, `/account`, `/upgrade` and
  * `/checkout/success` are the account + subscription surface (Supabase +
  * Stripe); `/admin` is the operator metrics dashboard.
  */
@@ -104,7 +107,17 @@ export default function App() {
               <Route path="/coach" element={<Coach />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/players" element={<Players />} />
+              {/* The sample's routes come before the parameterised ones so
+                  "sample" is never read as a roster id. */}
+              {/* No static "/players/sample" route: React Router v6 ranks static
+                  segments above ":id", so "/players/sample" reaches PlayerPage
+                  through "/players/:id" (id === "sample") and a static route here
+                  would instead match with NO param and blank the sample. The
+                  clip route stays explicit because it carries its own source. */}
+              <Route path="/players/sample/clips/:clipId" element={<ClipDetail source="sample" />} />
+              <Route path="/players/:id/clips/:clipId" element={<ClipDetail source="owned" />} />
               <Route path="/players/:id" element={<PlayerPage />} />
+              <Route path="/p/:token/clips/:clipId" element={<ClipDetail source="shared" />} />
               <Route path="/p/:token" element={<SharedPlayer />} />
 
               <Route path="/referee" element={<Referee />} />

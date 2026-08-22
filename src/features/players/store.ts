@@ -18,11 +18,14 @@
  * mirror; it is out of scope today and the header line above is the contract
  * until then.
  */
+import { File } from "expo-file-system";
+
 import { getSession } from "@/lib/auth";
 import { supabase } from "@/lib/supabaseClient";
 
-import type { MatchAnalysis, PlayerId } from "../analysis/types";
+import { parseAnalysis, type MatchAnalysis, type PlayerId } from "../analysis/types";
 import {
+  analysisForStorage,
   fromClipRow,
   fromPlayerRow,
   summarizeClip,
@@ -160,8 +163,13 @@ export async function updatePlayer(
 
 /** Deletes the player and, through the FK cascade, every clip tagged to them. */
 export async function deletePlayer(id: string): Promise<string | null> {
+  // The clips go with the row (cascade); their posters and stored analyses
+  // go after it — read the paths first, the rows are about to vanish.
+  const paths = storagePaths(await listClips(id));
   const { error } = await supabase.from("players").delete().eq("id", id);
-  return error === null ? null : error.message;
+  if (error !== null) return error.message;
+  await removeClipMedia(paths);
+  return null;
 }
 
 // ------------------------------------------------------------------- clips
@@ -182,8 +190,13 @@ export async function listClips(playerId: string): Promise<PlayerClip[]> {
 }
 
 export async function deleteClip(clipId: string): Promise<string | null> {
+  // What travelled with the tag — the still, the stored analysis — goes with
+  // it: paths first, then the row, then the objects, best effort.
+  const paths = await clipMediaPaths(clipId);
   const { error } = await supabase.from("player_clips").delete().eq("id", clipId);
-  return error === null ? null : error.message;
+  if (error !== null) return error.message;
+  await removeClipMedia(paths);
+  return null;
 }
 
 export async function updateClipDate(clipId: string, playedAt: string): Promise<string | null> {
@@ -283,4 +296,152 @@ export async function tagClip(opts: {
 
 export async function untagClip(clipId: string): Promise<string | null> {
   return deleteClip(clipId);
+}
+
+// -------------------------------------------------------------------- media
+
+/** The public bucket that holds poster frames and stored analyses. */
+export const MEDIA_BUCKET = "profile-media";
+
+/**
+ * A clip's poster or analysis as a fetchable URL. Storage paths
+ * ("<uid>/<clip>/poster.jpg") resolve to the bucket's public URL —
+ * `${SUPABASE_URL}/storage/v1/object/public/profile-media/<path>`, which is
+ * what the client's getPublicUrl spells out; a path that already starts with
+ * "/" (the web's bundled sample, which the phone never meets) or "http" is
+ * used as is.
+ */
+export function mediaUrl(path: string): string {
+  if (path.startsWith("/") || /^https?:\/\//.test(path)) return path;
+  return supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+/**
+ * Store a poster frame and/or the analysis (pose track stripped) against a
+ * clip the caller owns, under their own folder, then point the row at them.
+ * The phone hands over a file, not a Blob — the poster is a `file://` URI,
+ * read whole and sent as bytes with the content type set by hand — and the
+ * analysis goes as JSON text. Best effort and quiet: a poster that will not
+ * read is skipped and the analysis still goes; a failed upload leaves the tag
+ * exactly as it was, and the profile then shows a data-drawn poster and
+ * "detailed analysis" falls back to what the summary holds. Returns null on
+ * success, else a message.
+ */
+export async function uploadClipMedia(
+  clipId: string,
+  media: { poster?: { uri: string } | null; analysis?: MatchAnalysis | null },
+): Promise<string | null> {
+  const uid = userId();
+  if (uid === null) return SIGNED_OUT;
+  const patch: Record<string, string> = {};
+  const bucket = supabase.storage.from(MEDIA_BUCKET);
+  let problem: string | null = null;
+
+  if (media.poster !== null && media.poster !== undefined && media.poster.uri.length > 0) {
+    const bytes = await readPosterBytes(media.poster.uri);
+    // The phone hands back the analyser's full-resolution reference frame; a 4K
+    // still can pass the bucket's 5 MB limit. Skip an oversized one (the card
+    // falls back to the data poster) rather than fail the whole upload. A JS-side
+    // downscale to ~640 px, to match the web, is a follow-up (needs an image lib
+    // or a max-width on the native extractor).
+    const POSTER_MAX_BYTES = 4 * 1024 * 1024;
+    if (bytes === null) {
+      problem = "The poster frame could not be read.";
+    } else if (bytes.byteLength > POSTER_MAX_BYTES) {
+      problem = "The poster frame was too large to keep.";
+    } else {
+      const path = `${uid}/${clipId}/poster.jpg`;
+      const { error } = await bucket.upload(path, bytes, {
+        upsert: true,
+        contentType: "image/jpeg",
+        cacheControl: "31536000",
+      });
+      if (error !== null) problem = error.message;
+      else patch.poster_path = path;
+    }
+  }
+  if (media.analysis !== null && media.analysis !== undefined) {
+    const path = `${uid}/${clipId}/analysis.json`;
+    const body = JSON.stringify(analysisForStorage(media.analysis));
+    const { error } = await bucket.upload(path, body, {
+      upsert: true,
+      contentType: "application/json",
+      cacheControl: "3600",
+    });
+    if (error !== null) problem = error.message;
+    else patch.analysis_path = path;
+  }
+  // Apply whatever landed, so a good poster is not orphaned by a failed analysis.
+  if (Object.keys(patch).length === 0) return problem;
+  const { error } = await supabase.from("player_clips").update(patch).eq("id", clipId);
+  return error === null ? problem : error.message;
+}
+
+/**
+ * The storage objects behind clips — never a site path ("/sample/…") or a
+ * full URL, which are not objects in the bucket.
+ */
+function storagePaths(
+  clips: readonly { posterPath: string | null; analysisPath: string | null }[],
+): string[] {
+  const paths: string[] = [];
+  for (const clip of clips) {
+    for (const path of [clip.posterPath, clip.analysisPath]) {
+      if (path !== null && !path.startsWith("/") && !/^https?:\/\//.test(path)) paths.push(path);
+    }
+  }
+  return paths;
+}
+
+/** The paths one clip's row points at, read before the row goes. */
+async function clipMediaPaths(clipId: string): Promise<string[]> {
+  const { data } = await supabase
+    .from("player_clips")
+    .select("poster_path, analysis_path")
+    .eq("id", clipId)
+    .maybeSingle();
+  const row = data as { poster_path?: unknown; analysis_path?: unknown } | null;
+  return storagePaths([
+    {
+      posterPath: typeof row?.poster_path === "string" ? row.poster_path : null,
+      analysisPath: typeof row?.analysis_path === "string" ? row.analysis_path : null,
+    },
+  ]);
+}
+
+/**
+ * Remove clips' objects from the bucket, quietly: the rows are already gone,
+ * and an orphaned still is a tidiness problem, not one to fail an untag over.
+ */
+async function removeClipMedia(paths: readonly string[]): Promise<void> {
+  if (paths.length === 0) return;
+  try {
+    await supabase.storage.from(MEDIA_BUCKET).remove([...paths]);
+  } catch {
+    /* best effort */
+  }
+}
+
+/** The JPEG behind a `file://` URI, or null when it is missing, empty or unreadable. */
+async function readPosterBytes(uri: string): Promise<ArrayBuffer | null> {
+  try {
+    const bytes = await new File(uri).arrayBuffer();
+    return bytes.byteLength > 0 ? bytes : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The stored analysis for a clip, narrowed like any other analysis file —
+ * null when the path is dead or the file no longer reads.
+ */
+export async function fetchClipAnalysis(path: string): Promise<MatchAnalysis | null> {
+  try {
+    const response = await fetch(mediaUrl(path));
+    if (!response.ok) return null;
+    return parseAnalysis(await response.text());
+  } catch {
+    return null;
+  }
 }

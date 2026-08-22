@@ -166,6 +166,8 @@ export const SAMPLE_CLIPS: PlayerClip[] = [
         },
       },
     },
+    posterPath: "/sample/clips/1/poster.jpg",
+    analysisPath: "/sample/clips/1/analysis.json",
     createdAt: "2026-06-09T12:00:00.000Z",
   },
   {
@@ -301,6 +303,8 @@ export const SAMPLE_CLIPS: PlayerClip[] = [
         },
       },
     },
+    posterPath: "/sample/clips/2/poster.jpg",
+    analysisPath: "/sample/clips/2/analysis.json",
     createdAt: "2026-07-02T12:00:00.000Z",
   },
   {
@@ -437,6 +441,8 @@ export const SAMPLE_CLIPS: PlayerClip[] = [
         },
       },
     },
+    posterPath: "/sample/clips/3/poster.jpg",
+    analysisPath: "/sample/clips/3/analysis.json",
     createdAt: "2026-07-23T12:00:00.000Z",
   },
   {
@@ -573,6 +579,8 @@ export const SAMPLE_CLIPS: PlayerClip[] = [
         },
       },
     },
+    posterPath: "/sample/clips/4/poster.jpg",
+    analysisPath: "/sample/clips/4/analysis.json",
     createdAt: "2026-08-13T12:00:00.000Z",
   },
 ];

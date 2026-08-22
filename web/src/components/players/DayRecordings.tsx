@@ -20,8 +20,9 @@ import type { PlayerClip } from "@/players/shape";
  * Two ways out of a row: "Open in library" only for a recording whose
  * analysis is in THIS browser — the profile holds a summary, never the
  * footage, so a row from another machine cannot open anything here — and
- * "Show in list", which scrolls the recordings list to that clip's row,
- * where the edits (re-date, untag) live.
+ * "Show in list", which scrolls the recordings feed to that clip's card
+ * (ClipFeed gives each `id="clip-<id>"`), where the edits (re-date, untag)
+ * and "Show detailed analysis" live.
  */
 
 export function DayRecordings({
@@ -38,7 +39,7 @@ export function DayRecordings({
   /** History ids present in THIS browser — the only ones "Open in library" can honour. */
   libraryIds?: ReadonlySet<string>;
   onClose: () => void;
-  /** Scroll the recordings list to this clip's row and point at it. */
+  /** Scroll the recordings feed to this clip's card (`#clip-<id>`) and point at it. */
   onShowInList?: (clipId: string) => void;
 }) {
   const heading = useRef<HTMLParagraphElement | null>(null);

@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, Hairline } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
 import { useAuth } from "@/lib/auth";
+import { capturePoster, posterTime } from "@/players/poster";
 import { isIsoDay, PLAYER_NAME_MAX, validatePlayerName, type ClipRef } from "@/players/shape";
 import {
   createPlayer,
@@ -24,6 +25,7 @@ import {
   tagClip,
   tagsForClip,
   untagClip,
+  uploadClipMedia,
   type ClipTag,
   type RosterEntry,
 } from "@/players/store";
@@ -42,6 +44,13 @@ import {
  * Signed out it offers a text link to sign in and nothing more: the profile
  * is a convenience laid over the analysis, and nothing here may get in the
  * way of reading the analysis.
+ *
+ * A tag that lands also stores, quietly and after the fact, what a profile
+ * can show for this recording on any machine: the analysis minus its pose
+ * track, and — only when the footage is playing on this page — one poster
+ * frame drawn from it. The footage itself never goes anywhere (players/poster.ts
+ * says why one still is the most that does); a failed store leaves the tag
+ * exactly as it was and the profile draws the court plan instead.
  */
 
 // ----------------------------------------------------------------- roster
@@ -116,10 +125,13 @@ export function PlayerTagControl({
   side,
   clipRef,
   analysis,
+  videoSrc = null,
 }: {
   side: PlayerId;
   clipRef: ClipRef;
   analysis: MatchAnalysis;
+  /** The footage, when this page is playing it — the only source a poster frame can come from. */
+  videoSrc?: string | null;
 }) {
   const { session, loading } = useAuth();
   const location = useLocation();
@@ -200,6 +212,24 @@ export function PlayerTagControl({
     if (restoreFocus) triggerRef.current?.focus();
   }, []);
 
+  // What the profile keeps of this recording beyond the summary: always the
+  // analysis (a saved match has one even with no footage), the poster only
+  // when the video is on this page. Fire-and-forget — the tag is already
+  // saved, the UI has moved on, and a miss here costs the feed a still and
+  // nothing else, so it is logged, not shown.
+  const storeMedia = useCallback(
+    async (clipId: string) => {
+      try {
+        const poster = videoSrc !== null ? await capturePoster(videoSrc, posterTime(analysis)) : null;
+        const problem = await uploadClipMedia(clipId, { poster, analysis });
+        if (problem !== null) console.warn(`Could not store the clip's media: ${problem}`);
+      } catch (cause) {
+        console.warn("Could not store the clip's media.", cause);
+      }
+    },
+    [analysis, videoSrc],
+  );
+
   const save = useCallback(
     async (choice: Choice, playedAt: string) => {
       setBusy(true);
@@ -233,6 +263,9 @@ export function PlayerTagControl({
         focusNextRef.current = true;
         // Recording counts on the roster moved, and so did this side's tag.
         invalidateRoster();
+        // A new tag or a change alike: the poster and the stored analysis
+        // follow the row, whichever side of it this is.
+        void storeMedia(result.clipId);
         await refreshTag();
       } catch {
         setError("Something went wrong. Try again.");
@@ -240,7 +273,7 @@ export function PlayerTagControl({
         if (mountedRef.current) setBusy(false);
       }
     },
-    [analysis, close, refreshTag, side],
+    [analysis, close, refreshTag, side, storeMedia],
   );
 
   // One-click confirm: the first press only asks; a second within 3 s removes.

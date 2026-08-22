@@ -29,6 +29,12 @@ interface CourtPlanProps {
   className?: string;
   onFilled?: () => void;
   /**
+   * A picture of the data, not a live chart: skip the staggered fill and the
+   * forever-repeating T pulse. Set by DataPoster, where N of these tile a feed
+   * and N never-ending animations is waste (and a distraction).
+   */
+  still?: boolean;
+  /**
    * What the chart is, spoken. The default says nothing about WHERE the heat
    * sits, because that is the one thing this component cannot know — callers
    * with real data should pass a label derived from it.
@@ -42,9 +48,11 @@ export function CourtPlan({
   values,
   className,
   onFilled,
+  still = false,
   ariaLabel = "Court plan with the floor shaded where the player spent their time",
 }: CourtPlanProps) {
-  const reduced = useReducedMotion();
+  // A still poster and reduced-motion both mean "draw the end state, no motion".
+  const reduced = useReducedMotion() || still;
   const cellW = COURT_W / cols;
   const cellH = COURT_L / rows;
 
@@ -133,7 +141,7 @@ export function CourtPlan({
             strokeWidth="0.8"
             initial={{ scale: 1, opacity: 0.7 }}
             animate={{ scale: [1, 3.2], opacity: [0.6, 0] }}
-            transition={{ duration: 2.8, repeat: Infinity, ease: "easeOut", delay: 1.4 }}
+            transition={{ duration: 2.8, repeat: Number.POSITIVE_INFINITY, ease: "easeOut", delay: 1.4 }}
             style={{ transformOrigin: `${COURT_W / 2}px ${SHORT_LINE_Y}px` }}
           />
         )}

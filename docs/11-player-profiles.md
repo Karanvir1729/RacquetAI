@@ -106,6 +106,30 @@ grid), plus "spread" — the share of court cells holding at least a tenth of
 the busiest cell's time. One stacked bar per recording, chronological, then a
 time-weighted "All" bar. All of it is position-based — measured, not inferred.
 
+## The recordings feed, and "Show detailed analysis"
+
+The bottom of a profile is a feed of the recordings, newest first, each card
+led by a picture — a **still from the footage** when the clip was tagged in
+the browser that had the video (one JPEG, captured there at tag time, ~15–40
+KB), or a **data-drawn poster** (the court plan) when it was tagged from a
+saved match with no footage. The promise holds: the video itself never leaves
+the machine that ran the analysis; what travels is one frame and the read-out's
+numbers. At tag time the browser also stores the full analysis with the pose
+track stripped (`analysisForStorage`, ~15–40 KB JSON). Both live in the public
+Supabase Storage bucket `profile-media` under `<uid>/<clip id>/…` — anyone can
+read (a shared profile needs them without a session; the paths are uuids),
+only the owner can write, and only inside their own folder
+(`storage.objects` policies at the bottom of `supabase/schema.sql`).
+
+"Show detailed analysis" opens the full read-out: `/library?match=<id>` when
+the clip is in this browser's library; otherwise `/players/:id/clips/:clipId`
+(or the sample / shared equivalents) renders `ResultsView` from the stored
+analysis with the still where the video would be and a caption that says so.
+Clips tagged before this existed show "Numbers only". The bundled sample's
+posters and analyses are committed under `web/public/sample/clips/<n>/`;
+`scripts/seed-player-profile.ts --media --videos …` does the same for a
+seeded profile with ffmpeg.
+
 ## The first profile
 
 The plumbing test was a "Mohamed ElShorbagy" profile in the owner's roster

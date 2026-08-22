@@ -36,6 +36,7 @@ export function ResultsView({
   eyebrow,
   title,
   caption,
+  poster = null,
   action,
   clipRef,
   children,
@@ -46,7 +47,10 @@ export function ResultsView({
   title: string;
   /** Provenance line under the player. */
   caption?: string;
-  action?: { to: string; label: string };
+  /** A poster frame for when there is no video (a clip opened from a profile). */
+  poster?: string | null;
+  /** One way out of the read-out; the glyph defaults to Upload ("Analyse another match"). */
+  action?: { to: string; label: string; icon?: ReactNode };
   /** What this read-out is, for tagging the people in it. Absent means no tagging (the demo). */
   clipRef?: ClipRef;
   /** Extra panels below the read-out — the video referee, when footage is local. */
@@ -75,13 +79,13 @@ export function ResultsView({
           </div>
           {action !== undefined ? (
             <ButtonLink to={action.to} variant="outline" size="md">
-              <Upload className="h-4 w-4" /> {action.label}
+              {action.icon ?? <Upload className="h-4 w-4" />} {action.label}
             </ButtonLink>
           ) : null}
         </div>
 
         <div className="mt-9">
-          <MatchPlayer analysis={analysis} videoSrc={videoSrc} caption={caption} />
+          <MatchPlayer analysis={analysis} videoSrc={videoSrc} caption={caption} poster={poster} />
         </div>
 
         {/* Match totals ride in the same band as the video: they describe the
@@ -119,7 +123,12 @@ export function ResultsView({
                 shots={shots}
                 headerExtra={
                   clipRef === undefined ? undefined : (
-                    <PlayerTagControl side={player.id} clipRef={clipRef} analysis={analysis} />
+                    <PlayerTagControl
+                      side={player.id}
+                      clipRef={clipRef}
+                      analysis={analysis}
+                      videoSrc={videoSrc}
+                    />
                   )
                 }
               />

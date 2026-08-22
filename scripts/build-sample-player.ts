@@ -1,4 +1,7 @@
 /**
+ * Posters + track-stripped analyses for the sample live in web/public/sample/clips/<n>/
+ * (poster.jpg from ffmpeg at 25% of the clip, analysis.json from analysis/out/<run>/);
+ * this script only points at them.
  * Build the sample player profile from real pipeline outputs.
  *
  * Why this exists: the /players page needs something to show a visitor who
@@ -136,6 +139,8 @@ function main(): void {
       durationSec: summary.durationSec,
       shots: summary.me.shots,
       summary,
+      posterPath: `/sample/clips/${index + 1}/poster.jpg`,
+      analysisPath: `/sample/clips/${index + 1}/analysis.json`,
       createdAt: `${source.playedAt}T12:00:00.000Z`,
     };
   });

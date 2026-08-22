@@ -71,9 +71,11 @@ interface MatchPlayerProps {
   videoSrc: string | null;
   /** Shown under the frame — where the footage came from. */
   caption?: string;
+  /** A still from the footage, shown where the video would be when there is no video to play. */
+  poster?: string | null;
 }
 
-export function MatchPlayer({ analysis, videoSrc, caption }: MatchPlayerProps) {
+export function MatchPlayer({ analysis, videoSrc, caption, poster = null }: MatchPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const [boxRef, boxSize] = useElementSize<HTMLDivElement>();
@@ -221,6 +223,23 @@ export function MatchPlayer({ analysis, videoSrc, caption }: MatchPlayerProps) {
                   event.currentTarget.playbackRate = speed;
                 }}
               />
+            ) : poster !== null && !failed ? (
+              // A poster frame stands in for the footage: the one still that
+              // left the browser which analysed it. The caption says so rather
+              // than letting a frozen frame pass for a paused video.
+              <>
+                <img
+                  src={poster}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-contain"
+                  draggable={false}
+                />
+                <div className="absolute inset-x-0 bottom-0 p-3" style={{ background: "var(--rq-scrim)" }}>
+                  <p className="rq-caption text-center" style={{ color: "var(--rq-text)" }}>
+                    A still from the footage — the video itself stayed on the machine that analysed it.
+                  </p>
+                </div>
+              </>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
                 <p className="rq-caption max-w-sm">
@@ -295,7 +314,8 @@ export function MatchPlayer({ analysis, videoSrc, caption }: MatchPlayerProps) {
               step={0.05}
               value={time}
               onChange={(event) => seek(Number(event.target.value))}
-              aria-label="Seek through the match"
+              disabled={noVideo}
+              aria-label={noVideo ? "When each shot was detected across the match" : "Seek through the match"}
               aria-valuetext={formatClock(time)}
               style={{ "--rq-scrub-progress": `${progress * 100}%` } as CSSProperties}
             />
@@ -312,6 +332,11 @@ export function MatchPlayer({ analysis, videoSrc, caption }: MatchPlayerProps) {
         </div>
 
         {/* ---- transport --------------------------------------------------- */}
+        {/* No video to drive: the scrubber above stays as a static shot map, and
+            the transport is hidden rather than left live over a still. */}
+        {noVideo ? (
+          <div className="pb-4" />
+        ) : (
         <div className="flex flex-wrap items-center gap-2 px-4 pb-4 pt-2 sm:px-5">
           <TransportButton
             onClick={toggle}
@@ -376,6 +401,7 @@ export function MatchPlayer({ analysis, videoSrc, caption }: MatchPlayerProps) {
             </TransportButton>
           </div>
         </div>
+        )}
 
         {caption !== undefined ? (
           <>

@@ -119,6 +119,17 @@ export interface PlayerClip {
   durationSec: number;
   shots: number;
   summary: ClipSummary;
+  /**
+   * A poster frame (JPEG) captured in the browser that had the footage, and
+   * the full analysis minus the pose track (JSON) — both stored against the
+   * clip so a profile can show a feed and open the read-out anywhere. Either
+   * is a storage object path ("<uid>/<clip id>/poster.jpg" in the
+   * `profile-media` bucket) or, for the bundled sample, a site path starting
+   * with "/". Null when nothing was stored (tagged from a saved match with no
+   * footage, or before this existed).
+   */
+  posterPath: string | null;
+  analysisPath: string | null;
   createdAt: string;
 }
 
@@ -409,8 +420,30 @@ export function fromClipRow(row: unknown): PlayerClip | null {
     durationSec: asCount(row.duration_sec) ?? summary.durationSec,
     shots: asCount(row.shots) ?? summary.me.shots,
     summary,
+    posterPath: asMediaPath(row.poster_path),
+    analysisPath: asMediaPath(row.analysis_path),
     createdAt: asIsoStamp(row.created_at),
   };
+}
+
+/** A storage object path or a site path; anything else reads as "none". */
+function asMediaPath(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (trimmed.length === 0 || trimmed.length > 300) return null;
+  if (trimmed.includes("..") || /\s/.test(trimmed)) return null;
+  return trimmed;
+}
+
+/**
+ * The analysis as it is stored against a clip: everything except the pose
+ * track, which is the bulk of the file and only drives the skeleton overlay
+ * — there is no footage to overlay it on anywhere but the browser that
+ * analysed it. Same rule as the browser's own history (web history.ts).
+ */
+export function analysisForStorage(analysis: MatchAnalysis): Omit<MatchAnalysis, "tracks"> {
+  const { tracks: _tracks, ...rest } = analysis;
+  return rest;
 }
 
 // ----------------------------------------------------------------- validation

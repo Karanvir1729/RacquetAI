@@ -1,12 +1,13 @@
 import { ArrowUpRight, Check, Copy, Link2, MessageCircle, Pencil, Share2, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { formatClock, formatPercent, prettyPattern } from "@/analysis/format";
+import { formatPercent, prettyPattern } from "@/analysis/format";
 import type { ShotTypeCount } from "@/analysis/shots";
 import { SHOT_TYPES } from "@/analysis/types";
 import { PlacementGrid } from "@/components/analysis/PlacementGrid";
 import { ShotTypeBars } from "@/components/analysis/ShotTypeBars";
 import { CourtPlan } from "@/components/CourtPlan";
+import { ClipFeed, isPlausibleDay } from "@/components/players/ClipFeed";
 import { ContributionGrid, formatIsoDay } from "@/components/players/ContributionGrid";
 import { DayRecordings } from "@/components/players/DayRecordings";
 import { MovementChart } from "@/components/players/MovementChart";
@@ -24,7 +25,6 @@ import { shareUrl } from "@/players/store";
 import {
   HANDS,
   PLAYER_NOTES_MAX,
-  isIsoDay,
   validateNotes,
   validatePlayerName,
   type Hand,
@@ -48,8 +48,14 @@ import {
  *
  * A calendar cell opens that day's recordings under the grid ("by clicking
  * on the github box I should be able to tell what video it was"); "Show in
- * list" from there scrolls to the clip's row and lights it for a moment, so
- * the eye lands where the edits are.
+ * list" from there scrolls to the clip's card in the feed and lights it for
+ * a moment, so the eye lands where the edits are.
+ *
+ * The recordings themselves are a feed of cards (ClipFeed), each with a
+ * poster — the one still that travelled with the tag, or the clip's court
+ * plan drawn from its numbers — and a "Show detailed analysis" button to the
+ * fullest read-out that exists for it here. The footage never travels; the
+ * lead over the feed says so in one sentence.
  *
  * The maths is all in players/aggregate.ts — this file lays it out and, when
  * not read-only, offers the edits (rename, hand, notes, delete; re-date or
@@ -66,6 +72,11 @@ import {
 export interface PlayerProfileViewProps {
   player: Player;
   clips: readonly PlayerClip[];
+  /**
+   * Where this profile lives — "/players/<id>", "/players/sample" or
+   * "/p/<token>" — so a card's stored read-out can be addressed under it.
+   */
+  basePath: string;
   readOnly?: boolean;
   onRename?: (name: string) => Promise<string | null>;
   onHand?: (hand: Hand | null) => Promise<string | null>;
@@ -92,7 +103,7 @@ export interface PlayerProfileViewProps {
 /** How long "Copied" stands on the copy button before it reads "Copy link" again. */
 const COPIED_MS = 2000;
 
-/** How long a recording row stays outlined after "Show in list" points at it. */
+/** How long a recording card stays outlined after "Show in list" points at it. */
 const FLASH_MS = 1600;
 
 const HAND_LABELS: Record<Hand, string> = { right: "Right-handed", left: "Left-handed" };
@@ -103,7 +114,7 @@ const HAND_LABELS: Record<Hand, string> = { right: "Right-handed", left: "Left-h
  * `countShotTypes` in analysis/shots.ts applies to a single match, so the
  * profile's mix and a read-out's mix line up bar for bar.
  */
-function shotTypeCounts(counts: ShotTypeCounts): ShotTypeCount[] {
+export function shotTypeCounts(counts: ShotTypeCounts): ShotTypeCount[] {
   return SHOT_TYPES.filter((type) => counts[type] > 0)
     .map((type): ShotTypeCount => ({ type, count: counts[type] }))
     .sort((a, b) => {
@@ -113,16 +124,6 @@ function shotTypeCounts(counts: ShotTypeCounts): ShotTypeCount[] {
       if (a.count !== b.count) return b.count - a.count;
       return SHOT_TYPES.indexOf(a.type) - SHOT_TYPES.indexOf(b.type);
     });
-}
-
-/**
- * A date worth saving. `<input type="date">` fires change on every complete
- * value as the year is typed — "0002-08-21", "0020-08-21" — and each would
- * otherwise round-trip to the server. Nothing was filmed before the pipeline
- * existed, so anything earlier than this century is a keystroke, not a date.
- */
-function isPlausibleDay(value: string): boolean {
-  return isIsoDay(value) && value >= "2000-01-01";
 }
 
 /** "+4 pts vs opponents" — a real minus sign, and no colour: a delta is a fact, not a verdict. */
@@ -176,6 +177,7 @@ export function HandSelect({
 export function PlayerProfileView({
   player,
   clips,
+  basePath,
   readOnly = false,
   onRename,
   onHand,
@@ -217,15 +219,16 @@ export function PlayerProfileView({
     };
   }, []);
 
-  // Scroll the recordings list to the clip's row, focus it, and outline it
-  // for a moment. Focus without scrolling, or it would cut the smooth scroll
-  // short; and no smooth scroll for anyone who asked for less motion.
+  // Scroll the feed to the clip's card (ClipFeed gives each `id="clip-<id>"`),
+  // focus it, and outline it for a moment. Focus without scrolling, or it
+  // would cut the smooth scroll short; and no smooth scroll for anyone who
+  // asked for less motion.
   const showInList = (clipId: string) => {
-    const row = document.getElementById(`clip-${clipId}`);
-    if (row === null) return;
+    const card = document.getElementById(`clip-${clipId}`);
+    if (card === null) return;
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    row.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
-    row.focus({ preventScroll: true });
+    card.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+    card.focus({ preventScroll: true });
     setFlashClipId(clipId);
     if (flashTimer.current !== null) window.clearTimeout(flashTimer.current);
     flashTimer.current = window.setTimeout(() => setFlashClipId(null), FLASH_MS);
@@ -279,7 +282,8 @@ export function PlayerProfileView({
   };
 
   // --- clip edits --------------------------------------------------------
-  const [confirmUntag, setConfirmUntag] = useState<string | null>(null);
+  // The remove confirm lives on the card (ClipFeed); here is only what is in
+  // flight and what went wrong.
   const [clipBusy, setClipBusy] = useState<string | null>(null);
   const [clipFailure, setClipFailure] = useState<string | null>(null);
 
@@ -298,7 +302,6 @@ export function PlayerProfileView({
     setClipFailure(null);
     const message = await onUntagClip(clipId);
     setClipBusy(null);
-    setConfirmUntag(null);
     if (message !== null) setClipFailure(message);
   };
 
@@ -807,12 +810,19 @@ export function PlayerProfileView({
             ) : null}
 
             <div className={stats.trend.length >= 3 ? "mt-12" : undefined}>
-              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <h2 className="rq-h3">Recordings</h2>
+              <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+                <div className="min-w-0">
+                  <p className="rq-eyebrow">Recordings</p>
+                  <h2 className="rq-h3 mt-3">Every clip, newest first</h2>
+                </div>
                 <p className="rq-caption rq-num">
                   {stats.recordings} {stats.recordings === 1 ? "clip" : "clips"} · {minutes} min
                 </p>
               </div>
+              <p className="rq-lead-sm mt-3 max-w-2xl">
+                Where a still travelled it stands in for the footage, which never does — open any
+                card for the full read-out.
+              </p>
 
               {clipFailure !== null ? (
                 <p className="rq-lead-sm mt-4" role="alert" style={{ color: "var(--rq-danger)" }}>
@@ -820,103 +830,19 @@ export function PlayerProfileView({
                 </p>
               ) : null}
 
-              <ul className="mt-6 flex flex-col gap-3">
-                {recent.map((clip) => {
-                  const { me, opponent } = clip.summary;
-                  const inLibrary =
-                    clip.historyId !== null && libraryIds !== undefined && libraryIds.has(clip.historyId);
-                  const confirming = confirmUntag === clip.id;
-                  const working = clipBusy === clip.id;
-                  return (
-                    // id + tabIndex -1: "Show in list" on the calendar panel
-                    // scrolls here and hands the row focus.
-                    <li key={clip.id} id={`clip-${clip.id}`} tabIndex={-1}>
-                      <Card
-                        className="p-4 sm:p-5"
-                        style={
-                          flashClipId === clip.id
-                            ? { outline: "2px solid var(--rq-accent-text)", outlineOffset: 2 }
-                            : undefined
-                        }
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-4">
-                          <div className="min-w-[12rem] flex-1">
-                            <p className="truncate text-[15px] font-semibold text-rq-text">
-                              {clip.title.length > 0 ? clip.title : "Untitled recording"}
-                            </p>
-                            <p className="rq-caption rq-num mt-1">
-                              {formatIsoDay(clip.playedAt)} · as {me.label} ·{" "}
-                              {formatClock(clip.durationSec)} · {clip.shots}{" "}
-                              {clip.shots === 1 ? "shot" : "shots"}
-                            </p>
-                            <p className="rq-caption rq-num mt-0.5">
-                              T-time {me.tTimePct.toFixed(0)}% · predictability{" "}
-                              {formatPercent(me.predictability.score)}
-                              {opponent !== null ? ` · opponent T-time ${opponent.tTimePct.toFixed(0)}%` : ""}
-                            </p>
-                          </div>
-                          <div className="flex shrink-0 flex-wrap items-center gap-2">
-                            {inLibrary && clip.historyId !== null ? (
-                              <ButtonLink to={`/library?match=${clip.historyId}`} variant="outline" size="sm">
-                                Open in library <ArrowUpRight className="h-4 w-4" />
-                              </ButtonLink>
-                            ) : null}
-                            {!readOnly && onClipDate !== undefined ? (
-                              // Uncontrolled, keyed on the stored date: a save
-                              // that lands remounts it on the new value, and a
-                              // half-typed date never round-trips to the server.
-                              <input
-                                key={`${clip.id}-${clip.playedAt}`}
-                                type="date"
-                                aria-label={`Played on, for ${clip.title.length > 0 ? clip.title : "this recording"}`}
-                                defaultValue={clip.playedAt}
-                                disabled={working}
-                                onChange={(e) => {
-                                  const next = e.target.value;
-                                  if (next !== clip.playedAt && isPlausibleDay(next)) void redate(clip.id, next);
-                                }}
-                                className="rq-num min-h-[44px] rounded-rq-sm border px-3 text-[14px]"
-                                style={INPUT_STYLE}
-                              />
-                            ) : null}
-                            {!readOnly && onUntagClip !== undefined && !confirming ? (
-                              <button
-                                type="button"
-                                onClick={() => setConfirmUntag(clip.id)}
-                                disabled={working}
-                                aria-label={`Remove ${clip.title.length > 0 ? clip.title : "this recording"} from ${player.name}`}
-                                className="flex h-11 w-11 items-center justify-center rounded-rq-sm border transition-colors"
-                                style={{ borderColor: "var(--rq-line)", color: "var(--rq-text-dim)" }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            ) : null}
-                          </div>
-                        </div>
-                        {confirming ? (
-                          <div className="mt-4">
-                            <Hairline />
-                            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                              <p className="rq-caption">
-                                Remove this recording from {player.name}? The analysis stays in your
-                                library; only the name comes off.
-                              </p>
-                              <div className="flex gap-2">
-                                <Button variant="outline" size="sm" onClick={() => void untag(clip.id)} disabled={working}>
-                                  <Trash2 className="h-4 w-4" /> {working ? "Removing…" : "Remove"}
-                                </Button>
-                                <Button variant="ghost" size="sm" onClick={() => setConfirmUntag(null)} disabled={working}>
-                                  Keep
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ) : null}
-                      </Card>
-                    </li>
-                  );
-                })}
-              </ul>
+              <div className="mt-8">
+                <ClipFeed
+                  clips={recent}
+                  playerName={player.name}
+                  basePath={basePath}
+                  libraryIds={libraryIds}
+                  readOnly={readOnly}
+                  onRedate={!readOnly && onClipDate !== undefined ? redate : undefined}
+                  onUntag={!readOnly && onUntagClip !== undefined ? untag : undefined}
+                  flashClipId={flashClipId}
+                  busyClipId={clipBusy}
+                />
+              </div>
             </div>
 
             <p className="rq-caption mt-8 max-w-3xl">

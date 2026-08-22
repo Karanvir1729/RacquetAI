@@ -281,7 +281,7 @@ export function PlayerProfileScreen({ id }: PlayerProfileScreenProps) {
             </View>
             <ScoutingNotesList notes={notes} totalShots={stats.totalShots} recordings={stats.recordings} />
 
-            <RecordingsList playerName={player.name} clips={clips} onUntag={untag} />
+            <RecordingsList playerId={id} playerName={player.name} clips={clips} onUntag={untag} />
 
             <Text style={styles.caveat}>
               Coverage and T-time come from player position; placement is where each shot was

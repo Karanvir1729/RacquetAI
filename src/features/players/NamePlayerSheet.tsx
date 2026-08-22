@@ -214,6 +214,14 @@ export function NamePlayerSheet({
               </Text>
             ) : null}
 
+            {/* What a tag carries, said before Save: the numbers and the
+                analysis (no pose track) always; one still from the footage
+                when this phone can take one. Never the video. */}
+            <Text style={styles.caption}>
+              The match numbers and the analysis go with the tag, plus one still from the footage
+              when this phone can take one — the video itself stays here.
+            </Text>
+
             <Button
               label={busy ? "Saving…" : "Save"}
               onPress={submit}
