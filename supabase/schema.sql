@@ -226,3 +226,45 @@ create policy "player_clips: own rows"
   to authenticated
   using (auth.uid () = user_id)
   with check (auth.uid () = user_id);
+
+-- ---------------------------------------------------------------------------
+-- Share links for player profiles (added 2026-08-21).
+--
+-- The first step towards the club-wide ask, done the safe way round: nothing
+-- is shared by default, a profile's owner can mint a token that makes THAT
+-- profile readable by anyone holding the link, and revoking is clearing the
+-- token. There is no anon select policy on players/player_clips — the only
+-- read path for a non-owner is this one function, which returns exactly the
+-- profile behind one token and strips the owner's ids on the way out.
+-- ---------------------------------------------------------------------------
+alter table public.players
+  add column if not exists share_token text unique
+    check (char_length(share_token) between 16 and 64);
+
+create or replace function public.shared_player(token text)
+returns jsonb
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select jsonb_build_object(
+    'player', (
+      select to_jsonb(p) - 'user_id' - 'share_token'
+      from public.players p
+      where p.share_token = token
+    ),
+    'clips', coalesce((
+      select jsonb_agg((to_jsonb(c) - 'user_id' - 'job_id' - 'history_id') order by c.played_at, c.created_at)
+      from public.player_clips c
+      join public.players p on p.id = c.player_id
+      where p.share_token = token
+    ), '[]'::jsonb)
+  )
+  where token is not null
+    and char_length(token) between 16 and 64
+    and exists (select 1 from public.players p where p.share_token = token);
+$$;
+
+revoke all on function public.shared_player(text) from public;
+grant execute on function public.shared_player(text) to anon, authenticated;

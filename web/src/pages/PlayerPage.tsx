@@ -13,6 +13,8 @@ import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import {
   deleteClip,
   deletePlayer,
+  disableShare,
+  enableShare,
   getPlayer,
   listClips,
   updateClipDate,
@@ -33,6 +35,10 @@ import type { Player, PlayerClip } from "@/players/shape";
  *
  * "Open in library" only appears for clips whose analysis is in THIS
  * browser's history; the profile itself reads fine from any machine.
+ *
+ * Sharing is wired the same way as the edits: mint or revoke through the
+ * store, then re-read, so the token the view shows is the one the row holds.
+ * The sample profile has no share control — it is already public.
  */
 export default function PlayerPage() {
   const { id } = useParams<{ id: string }>();
@@ -180,6 +186,14 @@ function OwnedProfile({ id }: { id: string }) {
         }}
         onUntagClip={(clipId) => deleteClip(clipId).then(afterWrite)}
         onClipDate={(clipId, playedAt) => updateClipDate(clipId, playedAt).then(afterWrite)}
+        share={{
+          token: loaded.player.shareToken,
+          onEnable: async () => {
+            const result = await enableShare(id);
+            return afterWrite("error" in result ? result.error : null);
+          },
+          onDisable: () => disableShare(id).then(afterWrite),
+        }}
       />
       <BackLinks />
     </>

@@ -1,5 +1,5 @@
-import { ArrowUpRight, Check, Pencil, Trash2, X } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { ArrowUpRight, Check, Copy, Link2, MessageCircle, Pencil, Share2, Trash2, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { formatClock, formatPercent, prettyPattern } from "@/analysis/format";
 import type { ShotTypeCount } from "@/analysis/shots";
@@ -18,6 +18,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { Meter, Stat } from "@/components/ui/Stat";
 import { buildProfileStats, scoutingNotes, sortChronologically } from "@/players/aggregate";
+import { shareUrl } from "@/players/store";
 import {
   HANDS,
   PLAYER_NOTES_MAX,
@@ -44,8 +45,13 @@ import {
  * The maths is all in players/aggregate.ts — this file lays it out and, when
  * not read-only, offers the edits (rename, hand, notes, delete; re-date or
  * untag a clip) through callbacks that return an error message or null, the
- * store's own convention. The sample profile and a signed-out visitor get the
- * same view with the controls left off.
+ * store's own convention. The sample profile, a signed-out visitor and anyone
+ * opening a share link get the same view with the controls left off.
+ *
+ * Sharing sits in the header too, owner-only: a profile is private until its
+ * owner mints a link, and the panel that shows while one is live says in so
+ * many words what the link gives away (the name, the notes, the pooled
+ * numbers — never the footage, which never left the browser that ran it).
  */
 
 export interface PlayerProfileViewProps {
@@ -62,7 +68,20 @@ export interface PlayerProfileViewProps {
   libraryIds?: ReadonlySet<string>;
   /** A note over the profile — the sample's "not a real person". */
   banner?: ReactNode;
+  /**
+   * The share link, for the owner. `token` is what the row carries (null =
+   * private); the callbacks mint and revoke, returning an error message or
+   * null, and the page re-reads the player so `token` follows.
+   */
+  share?: {
+    token: string | null;
+    onEnable: () => Promise<string | null>;
+    onDisable: () => Promise<string | null>;
+  };
 }
+
+/** How long "Copied" stands on the copy button before it reads "Copy link" again. */
+const COPIED_MS = 2000;
 
 const HAND_LABELS: Record<Hand, string> = { right: "Right-handed", left: "Left-handed" };
 
@@ -154,6 +173,7 @@ export function PlayerProfileView({
   onClipDate,
   libraryIds,
   banner,
+  share,
 }: PlayerProfileViewProps) {
   const stats = useMemo(() => buildProfileStats(clips), [clips]);
   const notes = useMemo(() => scoutingNotes(stats), [stats]);
@@ -232,9 +252,64 @@ export function PlayerProfileView({
     if (message !== null) setClipFailure(message);
   };
 
+  // --- sharing -----------------------------------------------------------
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareFailure, setShareFailure] = useState<string | null>(null);
+  const [confirmStop, setConfirmStop] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const copiedTimer = useRef<number | null>(null);
+  const linkInput = useRef<HTMLInputElement>(null);
+
+  // The "Copied" state is on a timer; a page that unmounts first must not
+  // set state on a component that is gone.
+  useEffect(() => {
+    return () => {
+      if (copiedTimer.current !== null) window.clearTimeout(copiedTimer.current);
+    };
+  }, []);
+
+  const startSharing = async () => {
+    if (share === undefined) return;
+    setShareBusy(true);
+    setShareFailure(null);
+    const message = await share.onEnable();
+    setShareBusy(false);
+    if (message !== null) setShareFailure(message);
+  };
+
+  const stopSharing = async () => {
+    if (share === undefined) return;
+    setShareBusy(true);
+    setShareFailure(null);
+    const message = await share.onDisable();
+    setShareBusy(false);
+    setConfirmStop(false);
+    if (message !== null) setShareFailure(message);
+  };
+
+  const copyLink = async (url: string) => {
+    try {
+      if (typeof navigator.clipboard?.writeText !== "function") throw new Error("no clipboard");
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      if (copiedTimer.current !== null) window.clearTimeout(copiedTimer.current);
+      copiedTimer.current = window.setTimeout(() => setCopied(false), COPIED_MS);
+    } catch {
+      // No clipboard API (plain http, an old WebView, permission refused):
+      // leave the link selected so a long-press or ⌘C finishes the job.
+      linkInput.current?.focus();
+      linkInput.current?.select();
+    }
+  };
+
   const minutes = Math.round(stats.totalSec / 60);
   const canEdit = !readOnly && (onRename !== undefined || onHand !== undefined || onNotes !== undefined);
   const canDelete = !readOnly && onDelete !== undefined;
+  const canShare = !readOnly && share !== undefined;
+  // Pre-match scouting as a conversation: the coach reads this profile by id,
+  // which only resolves on the owner's roster — so owner-only, like sharing.
+  const canAskCoach = !readOnly;
+  const shareLink = canShare && share !== undefined && share.token !== null ? shareUrl(share.token) : null;
 
   return (
     <>
@@ -255,7 +330,7 @@ export function PlayerProfileView({
               <p className="rq-lead-sm mt-4 max-w-2xl whitespace-pre-line">{player.notes}</p>
             ) : null}
           </div>
-          {canEdit || canDelete ? (
+          {canEdit || canDelete || canShare || canAskCoach ? (
             <div className="flex flex-wrap items-center gap-2">
               {canEdit ? (
                 <Button
@@ -271,6 +346,16 @@ export function PlayerProfileView({
                   {editing ? "Cancel" : "Edit"}
                 </Button>
               ) : null}
+              {canShare && shareLink === null ? (
+                <Button variant="outline" size="sm" onClick={() => void startSharing()} disabled={shareBusy}>
+                  <Share2 className="h-4 w-4" /> {shareBusy ? "Creating link…" : "Share a link"}
+                </Button>
+              ) : null}
+              {canAskCoach ? (
+                <ButtonLink to={`/coach?scout=${encodeURIComponent(player.id)}`} variant="outline" size="sm">
+                  <MessageCircle className="h-4 w-4" /> Ask the coach how to play them
+                </ButtonLink>
+              ) : null}
               {canDelete && !confirmDelete ? (
                 <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(true)}>
                   <Trash2 className="h-4 w-4" /> Delete player
@@ -279,6 +364,71 @@ export function PlayerProfileView({
             </div>
           ) : null}
         </div>
+
+        {shareLink !== null ? (
+          <Card className="mt-6 p-4 sm:p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="shrink-0" style={{ color: "var(--rq-accent-text)" }} aria-hidden="true">
+                <Link2 className="h-4 w-4" />
+              </span>
+              {/* Read-only and select-all on focus: on a phone, tapping the
+                  field is how you get the whole link without dragging handles. */}
+              <input
+                ref={linkInput}
+                type="text"
+                readOnly
+                value={shareLink}
+                aria-label={`Share link for ${player.name}`}
+                onFocus={(e) => e.currentTarget.select()}
+                className="rq-num min-h-[44px] min-w-0 flex-1 basis-48 rounded-rq-sm border px-3 text-[14px]"
+                style={INPUT_STYLE}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void copyLink(shareLink)}
+                aria-live="polite"
+              >
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                {copied ? "Copied" : "Copy link"}
+              </Button>
+              {confirmStop ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void stopSharing()}
+                    disabled={shareBusy}
+                    style={{ color: "var(--rq-danger)", borderColor: "var(--rq-danger)" }}
+                  >
+                    {shareBusy ? "Stopping…" : "Stop sharing"}
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setConfirmStop(false)} disabled={shareBusy}>
+                    Keep
+                  </Button>
+                </>
+              ) : (
+                <Button variant="ghost" size="sm" onClick={() => setConfirmStop(true)} disabled={shareBusy}>
+                  Stop sharing
+                </Button>
+              )}
+            </div>
+            <p className="rq-caption mt-3">
+              Anyone with the link can read this profile — name, notes, the pooled numbers and the
+              list of recordings (titles and dates). Not the
+              footage.{confirmStop ? " Stopping makes the link go dead at once; sharing again mints a new one." : ""}
+            </p>
+            {shareFailure !== null ? (
+              <p className="rq-caption mt-2" role="alert" style={{ color: "var(--rq-danger)" }}>
+                {shareFailure}
+              </p>
+            ) : null}
+          </Card>
+        ) : shareFailure !== null ? (
+          <p className="rq-lead-sm mt-4" role="alert" style={{ color: "var(--rq-danger)" }}>
+            {shareFailure}
+          </p>
+        ) : null}
 
         {banner !== undefined ? <div className="mt-6">{banner}</div> : null}
 
@@ -380,18 +530,28 @@ export function PlayerProfileView({
         {clips.length === 0 ? (
           <Card className="mt-8 p-6 sm:p-8">
             <h2 className="rq-h3">No recordings yet</h2>
-            <p className="rq-lead-sm mt-3">
-              Name this player on any read-out — the Analyze page or Your matches — and it lands here.
-              Every clip they are named on adds to the same profile.
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <ButtonLink to="/library" variant="outline" size="md">
-                Your matches
-              </ButtonLink>
-              <ButtonLink to="/analyze" size="md">
-                Analyze a match
-              </ButtonLink>
-            </div>
+            {readOnly ? (
+              // A shared (or sample) profile with nothing tagged: the reader
+              // cannot add to it, so no "name this player" instructions.
+              <p className="rq-lead-sm mt-3">
+                Nothing has been tagged to this profile yet, so there are no numbers to show.
+              </p>
+            ) : (
+              <>
+                <p className="rq-lead-sm mt-3">
+                  Name this player on any read-out — the Analyze page or Your matches — and it lands
+                  here. Every clip they are named on adds to the same profile.
+                </p>
+                <div className="mt-7 flex flex-wrap gap-3">
+                  <ButtonLink to="/library" variant="outline" size="md">
+                    Your matches
+                  </ButtonLink>
+                  <ButtonLink to="/analyze" size="md">
+                    Analyze a match
+                  </ButtonLink>
+                </div>
+              </>
+            )}
           </Card>
         ) : (
           <>
@@ -598,7 +758,7 @@ export function PlayerProfileView({
                     <li key={clip.id}>
                       <Card className="p-4 sm:p-5">
                         <div className="flex flex-wrap items-start justify-between gap-4">
-                          <div className="min-w-0 flex-1">
+                          <div className="min-w-[12rem] flex-1">
                             <p className="truncate text-[15px] font-semibold text-rq-text">
                               {clip.title.length > 0 ? clip.title : "Untitled recording"}
                             </p>

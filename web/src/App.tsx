@@ -21,6 +21,7 @@ import Players from "@/pages/Players";
 import Profile from "@/pages/Profile";
 import Record from "@/pages/Record";
 import Referee from "@/pages/Referee";
+import SharedPlayer from "@/pages/SharedPlayer";
 import Upgrade from "@/pages/Upgrade";
 
 /**
@@ -35,7 +36,9 @@ import Upgrade from "@/pages/Upgrade";
  * conversation that reads it alongside the most recent analysed match.
  * `/players` is the roster of people IN the footage — each `/players/:id`
  * pools every clip that name was tagged on into one scouting profile, and
- * `/players/sample` shows one on public footage. `/login`, `/account`, `/upgrade` and
+ * `/players/sample` shows one on public footage; `/p/:token` is a profile its
+ * owner chose to share — read-only, no sign-in, live only while the token
+ * stands. `/login`, `/account`, `/upgrade` and
  * `/checkout/success` are the account + subscription surface (Supabase +
  * Stripe); `/admin` is the operator metrics dashboard.
  */
@@ -102,6 +105,7 @@ export default function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/players" element={<Players />} />
               <Route path="/players/:id" element={<PlayerPage />} />
+              <Route path="/p/:token" element={<SharedPlayer />} />
 
               <Route path="/referee" element={<Referee />} />
               <Route path="/login" element={<Login />} />

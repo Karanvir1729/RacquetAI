@@ -113,7 +113,16 @@ export async function createPlayer(
     return player === null ? { error: "The player was saved but could not be read back." } : { player };
   }
   if (error.code === UNIQUE_VIOLATION) {
-    const { data: rows } = await supabase.from("players").select("*").ilike("name", trimmed).limit(1);
+    // ilike treats % and _ as wildcards — "Jo_Anne" would also match "Jo Anne"
+    // and limit(1) could hand back the wrong profile. Escape them, and order so
+    // the answer is the same every time.
+    const literal = trimmed.replace(/[\\%_]/g, (c) => `\\${c}`);
+    const { data: rows } = await supabase
+      .from("players")
+      .select("*")
+      .ilike("name", literal)
+      .order("created_at", { ascending: true })
+      .limit(1);
     const existing = Array.isArray(rows) && rows.length > 0 ? fromPlayerRow(rows[0]) : null;
     if (existing !== null) return { player: existing };
   }
@@ -296,4 +305,81 @@ export async function tagClip(opts: {
 
 export async function untagClip(clipId: string): Promise<string | null> {
   return deleteClip(clipId);
+}
+
+// ----------------------------------------------------------------- sharing
+
+/**
+ * Share links — the first sharing model, done the safe way round. Nothing is
+ * shared until the owner asks; minting writes a token on their own row (the
+ * RLS policy is the only guard needed), and /p/<token> reads the profile back
+ * through the `shared_player` RPC, the one read path a non-owner has. Revoking
+ * is clearing the token: the link goes dead at once, nothing to propagate.
+ */
+
+/** 32 hex chars — the column takes 16..64; the UUID's dashes go so the URL reads as one word. */
+function mintToken(): string {
+  return crypto.randomUUID().replace(/-/g, "");
+}
+
+/**
+ * Turn sharing on and hand back the token. Re-enabling returns the token the
+ * row already carries rather than rotating it — a second click must not break
+ * a link the owner has already sent to someone.
+ */
+export async function enableShare(playerId: string): Promise<{ token: string } | { error: string }> {
+  const current = await getPlayer(playerId);
+  if (current === null) return { error: "That player isn't on your roster." };
+  if (current.shareToken !== null) return { token: current.shareToken };
+  const { data, error } = await supabase
+    .from("players")
+    .update({ share_token: mintToken() })
+    .eq("id", playerId)
+    .select("share_token")
+    .maybeSingle();
+  if (error !== null) return { error: error.message };
+  // Read the token back from the row rather than trusting the local value:
+  // an update that matched no row (not ours, or gone) returns null here.
+  const token = (data as { share_token?: unknown } | null)?.share_token;
+  return typeof token === "string" && token.length > 0
+    ? { token }
+    : { error: "The link could not be saved." };
+}
+
+/** Turn sharing off. The old link stops resolving; a later enable mints a new one. */
+export async function disableShare(playerId: string): Promise<string | null> {
+  const { error } = await supabase.from("players").update({ share_token: null }).eq("id", playerId);
+  return error === null ? null : error.message;
+}
+
+/**
+ * The profile behind a share link, or null when the link isn't live — unknown
+ * token, sharing revoked, or the player deleted. Anonymous: this is the read
+ * the shared page makes with no session at all. The RPC strips the owner's
+ * ids on the way out, and the row narrowing tolerates their absence.
+ */
+export async function fetchSharedProfile(
+  token: string,
+): Promise<{ player: Player; clips: PlayerClip[] } | null> {
+  // The RPC rejects these lengths itself; skipping the round-trip for a
+  // mangled URL keeps "not live" instant.
+  if (token.length < 16 || token.length > 64) return null;
+  const { data, error } = await supabase.rpc("shared_player", { token });
+  if (error !== null || typeof data !== "object" || data === null || Array.isArray(data)) return null;
+  const payload = data as { player?: unknown; clips?: unknown };
+  const player = fromPlayerRow(payload.player);
+  if (player === null) return null;
+  const clips: PlayerClip[] = [];
+  if (Array.isArray(payload.clips)) {
+    for (const row of payload.clips) {
+      const clip = fromClipRow(row);
+      if (clip !== null) clips.push(clip);
+    }
+  }
+  return { player, clips };
+}
+
+/** The link an owner copies — this origin, so a staging build shares staging. */
+export function shareUrl(token: string): string {
+  return `${window.location.origin}/p/${token}`;
 }
