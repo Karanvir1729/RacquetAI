@@ -83,7 +83,6 @@ async function readError(response: Response, fallback: string): Promise<Analysis
   return new AnalysisServerError(detail ?? fallback, response.status);
 }
 
-/** Where the reference frame lives. `bust` re-fetches after a re-upload. */
 /**
  * The signed-in user's access token, for the Authorization header.
  *
@@ -103,9 +102,39 @@ export async function authHeader(): Promise<Record<string, string>> {
   }
 }
 
+/** Where the reference frame lives. `bust` re-fetches after a re-upload. */
 export function frameUrl(base: string, jobId: string, bust?: number): string {
   const suffix = bust === undefined ? "" : `?t=${bust}`;
   return `${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}/frame.jpg${suffix}`;
+}
+
+/**
+ * The reference frame itself, fetched rather than linked.
+ *
+ * This must not be `<img src={frameUrl(...)}>`. Every /jobs route requires a
+ * bearer token, and an <img> cannot carry an Authorization header — so the
+ * browser asked anonymously, the server correctly answered 401, and the corner
+ * picker showed "the reference frame didn't load" for every signed-in user.
+ * That took the whole upload journey down while the server was working fine.
+ *
+ * Fetching the bytes with the session token and handing the picker an object
+ * URL is the only shape that works. `no-store` replaces the old `?t=` cache
+ * bust: a re-upload must never be marked up with an earlier job's frame.
+ */
+export async function fetchFrame(
+  base: string,
+  jobId: string,
+  signal?: AbortSignal,
+): Promise<Blob> {
+  const response = await fetch(frameUrl(base, jobId), {
+    signal,
+    cache: "no-store",
+    headers: await authHeader(),
+  });
+  if (!response.ok) {
+    throw await readError(response, "The server would not send the reference frame.");
+  }
+  return response.blob();
 }
 
 /**

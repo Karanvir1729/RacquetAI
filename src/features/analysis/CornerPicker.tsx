@@ -22,13 +22,20 @@ import { normalizedToView, tapToNormalized, type Point, type Size } from "./lett
 const MARKER_SIZE = 28;
 
 interface CornerPickerProps {
-  /** GET /jobs/{id}/frame.jpg on the configured server. */
+  /** GET /jobs/{id}/frame.jpg on the server, or a local file:// frame. */
   frameUri: string;
+  /**
+   * Sent with the frame request. The server flow needs the bearer token here:
+   * /jobs/{id}/frame.jpg is authenticated, and an image request carries no
+   * header unless one is handed to it — without this the picker renders an
+   * empty box over a 401. The device flow reads a file:// URI and passes none.
+   */
+  frameHeaders?: Record<string, string>;
   /** POST the corners; resolves false when the request failed. */
   onSubmit: (corners: CourtCorners) => Promise<boolean>;
 }
 
-export function CornerPicker({ frameUri, onSubmit }: CornerPickerProps) {
+export function CornerPicker({ frameUri, frameHeaders, onSubmit }: CornerPickerProps) {
   const [boxSize, setBoxSize] = useState<Size | null>(null);
   const [imageSize, setImageSize] = useState<Size | null>(null);
   /** Placed corners in CORNER_ORDER, as normalized frame coordinates. */
@@ -82,7 +89,7 @@ export function CornerPicker({ frameUri, onSubmit }: CornerPickerProps) {
       </Text>
       <View style={styles.frameBox} onLayout={handleLayout}>
         <Image
-          source={{ uri: frameUri }}
+          source={{ uri: frameUri, headers: frameHeaders }}
           style={styles.frame}
           contentFit="contain"
           onLoad={handleLoad}

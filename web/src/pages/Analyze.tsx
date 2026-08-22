@@ -224,6 +224,8 @@ export default function Analyze() {
           {stage.kind === "corners" ? (
             <CornerPicker
               frameSrc={stage.frameSrc}
+              frameError={stage.frameError}
+              onRetryFrame={flow.refreshFrame}
               submitting={stage.submitting}
               error={stage.error}
               onSubmit={flow.placeCorners}

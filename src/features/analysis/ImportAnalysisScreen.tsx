@@ -11,7 +11,7 @@
  */
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Button } from "@/components/Button";
@@ -23,6 +23,7 @@ import { selection as selectionHaptic } from "@/lib/haptics";
 import { colors, MIN_TOUCH_TARGET, radius, spacing, type } from "@/theme/tokens";
 
 import { CornerPicker } from "./CornerPicker";
+import { authHeader } from "./importClient";
 import type { ImportFlowState } from "./importFlowState";
 import { frameUrl } from "./jobContract";
 import { useImportFlow } from "./useImportFlow";
@@ -34,6 +35,23 @@ interface ImportAnalysisScreenProps {
 
 export function ImportAnalysisScreen({ videoUri }: ImportAnalysisScreenProps) {
   const { state, retry, submitCorners } = useImportFlow(videoUri);
+  /**
+   * Resolved once, up here, because the corner step needs it SYNCHRONOUSLY:
+   * the reference frame is an authenticated GET and the <Image> has to be
+   * handed the token with the request. Null means "not read yet", which the
+   * server branch below waits on rather than firing a request that 401s.
+   */
+  const [frameHeaders, setFrameHeaders] = useState<Record<string, string> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void authHeader().then((headers) => {
+      if (!cancelled) setFrameHeaders(headers);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (state.phase === "done") {
@@ -61,7 +79,12 @@ export function ImportAnalysisScreen({ videoUri }: ImportAnalysisScreenProps) {
       </Pressable>
       <ScreenHeader title="Import & analyze" subtitle="Match analysis from an imported video" />
       <View style={styles.body}>
-        <FlowStage state={state} retry={retry} submitCorners={submitCorners} />
+        <FlowStage
+          state={state}
+          retry={retry}
+          submitCorners={submitCorners}
+          frameHeaders={frameHeaders}
+        />
       </View>
     </Screen>
   );
@@ -71,9 +94,11 @@ interface FlowStageProps {
   state: ImportFlowState;
   retry: () => void;
   submitCorners: Parameters<typeof CornerPicker>[0]["onSubmit"];
+  /** Null until the session token has been read. */
+  frameHeaders: Record<string, string> | null;
 }
 
-function FlowStage({ state, retry, submitCorners }: FlowStageProps) {
+function FlowStage({ state, retry, submitCorners, frameHeaders }: FlowStageProps) {
   if (state.phase === "failed") {
     return (
       <View style={styles.centerFill}>
@@ -88,8 +113,16 @@ function FlowStage({ state, retry, submitCorners }: FlowStageProps) {
     );
   }
   if (state.phase === "job" && state.status.status === "corners_needed") {
+    // The frame is behind the same bearer token as the rest of /jobs, so the
+    // picker waits the moment it takes to read the session rather than
+    // rendering an <Image> that would be refused.
+    if (frameHeaders === null) return <LoadingState fill caption="Fetching the frame…" />;
     return (
-      <CornerPicker frameUri={frameUrl(state.baseUrl, state.jobId)} onSubmit={submitCorners} />
+      <CornerPicker
+        frameUri={frameUrl(state.baseUrl, state.jobId)}
+        frameHeaders={frameHeaders}
+        onSubmit={submitCorners}
+      />
     );
   }
   if (state.phase === "corners") {
