@@ -15,6 +15,7 @@
  */
 import { authHeader, defaultApiBase, readApiBase } from "@/analysis/client";
 import type { MatchAnalysis } from "@/analysis/types";
+import type { OpponentBrief } from "@/players/scout";
 
 export interface CoachTurn {
   role: "user" | "assistant";
@@ -86,12 +87,27 @@ export async function coachAvailable(): Promise<boolean> {
   }
 }
 
+/**
+ * The opponent brief rides along the same way the analysis does — per turn,
+ * stateless — and only when the page is scouting someone; the key is left out
+ * of the body entirely otherwise, so the server's "no opponent" path is the
+ * old path, byte for byte. The server re-validates every field before any of
+ * it reaches a prompt (see _narrow_opponent in analysis/coach_api.py).
+ */
+function withOpponent(body: Record<string, unknown>, opponent?: OpponentBrief): Record<string, unknown> {
+  return opponent === undefined ? body : { ...body, opponent };
+}
+
 export async function askCoach(
   message: string,
   history: CoachTurn[],
   analysis: MatchAnalysis | null,
+  opponent?: OpponentBrief,
 ): Promise<string> {
-  const body = await post("/coach/chat", { message, history, analysis: slim(analysis) });
+  const body = await post(
+    "/coach/chat",
+    withOpponent({ message, history, analysis: slim(analysis) }, opponent),
+  );
   const reply = body.reply;
   if (typeof reply !== "string" || reply.length === 0) {
     throw new CoachError("The coach replied with nothing. Try asking again.");
@@ -99,8 +115,11 @@ export async function askCoach(
   return reply;
 }
 
-export async function requestFeedback(analysis: MatchAnalysis): Promise<string> {
-  const body = await post("/coach/feedback", { analysis: slim(analysis) });
+export async function requestFeedback(
+  analysis: MatchAnalysis,
+  opponent?: OpponentBrief,
+): Promise<string> {
+  const body = await post("/coach/feedback", withOpponent({ analysis: slim(analysis) }, opponent));
   const feedback = body.feedback;
   if (typeof feedback !== "string" || feedback.length === 0) {
     throw new CoachError("The coach replied with nothing. Try again.");
