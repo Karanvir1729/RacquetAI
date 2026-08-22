@@ -13,6 +13,7 @@ import { formatClock } from "@/analysis/format";
 import { PLAYER_IDS, type MatchAnalysis } from "@/analysis/types";
 import { CoachFeedbackPanel } from "@/components/analysis/CoachFeedbackPanel";
 import { ResultsView } from "@/components/analysis/ResultsView";
+import { useJobAnalysis, useJobVideo } from "@/analysis/useJobVideo";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Section } from "@/components/ui/Section";
@@ -49,6 +50,16 @@ export default function Library() {
   const userId = session?.user.id ?? null;
 
   useDocumentTitle(open === null ? "Your matches" : open.summary.title);
+
+  // Hooks cannot sit behind the `open !== null` return below, so ask for the
+  // video up here; a null job id makes it a no-op.
+  const savedVideo = useJobVideo(open?.summary.jobId ?? null);
+  // A saved match keeps the numbers but not the pose samples; while the job
+  // lives, the server's copy still has them, so the overlay can come back.
+  const savedFull = useJobAnalysis(
+    open?.summary.jobId ?? null,
+    (open?.analysis.tracks?.length ?? 0) > 0,
+  );
 
   useEffect(() => {
     if (openId === null || openId.length === 0) {
@@ -104,13 +115,23 @@ export default function Library() {
   }, [setParams]);
 
   if (open !== null) {
+    // A saved match keeps only its numbers; the footage lives wherever it was
+    // uploaded from. The analysis server still has its working copy until the
+    // retention sweep, so a match saved in the last couple of days plays here.
+    const playable = savedVideo.kind === "ready" ? savedVideo.url : null;
     return (
       <ResultsView
-        analysis={open.analysis}
-        videoSrc={null}
+        analysis={savedFull ?? open.analysis}
+        videoSrc={playable}
         eyebrow={`Saved ${formatSavedAt(open.summary.savedAt)}`}
         title={open.summary.title}
-        caption="Saved on this browser. The footage stayed on the machine that uploaded it, so this is the measurements only — analyse the file again to watch it back with the overlay."
+        caption={
+          playable !== null
+            ? "Played from the analysis server's working copy of this upload. The overlay is drawn from the analysis, not baked into the video."
+            : savedVideo.kind === "loading"
+              ? "Saved on this browser. Fetching the footage back from the analysis server…"
+              : "Saved on this browser. The footage stayed on the machine that uploaded it and the server no longer keeps it, so this is the measurements only — analyse the file again to watch it back with the overlay."
+        }
         action={{ to: "/library", label: "All matches" }}
         clipRef={{
           jobId: open.summary.jobId,

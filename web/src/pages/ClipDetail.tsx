@@ -7,6 +7,7 @@ import type { MatchAnalysis } from "@/analysis/types";
 import { PlacementGrid } from "@/components/analysis/PlacementGrid";
 import { ResultsView } from "@/components/analysis/ResultsView";
 import { ShotTypeBars } from "@/components/analysis/ShotTypeBars";
+import { useJobAnalysis, useJobVideo } from "@/analysis/useJobVideo";
 import { formatIsoDay } from "@/components/players/ContributionGrid";
 import { shotTypeCounts } from "@/components/players/PlayerProfileView";
 import { ButtonLink } from "@/components/ui/Button";
@@ -173,6 +174,13 @@ function ClipReadout({ player, clip, basePath }: { player: Player; clip: PlayerC
   const eyebrow = `${player.name} · ${formatIsoDay(clip.playedAt)}`;
   const back = { to: basePath, label: `Back to ${player.name}` };
   const poster = clip.posterPath !== null ? mediaUrl(clip.posterPath) : null;
+  // The stored clip keeps a poster and the numbers, never the footage. The
+  // analysis server still has its working copy of the job for a couple of
+  // days, so a recently tagged clip can be watched here after all.
+  const jobVideo = useJobVideo(clip.jobId);
+  // The stored copy has no `tracks`, so the skeleton cannot be drawn from it.
+  // While the job lives, the server's copy still has them.
+  const fullAnalysis = useJobAnalysis(clip.jobId);
 
   useDocumentTitle(title);
 
@@ -220,15 +228,22 @@ function ClipReadout({ player, clip, basePath }: { player: Player; clip: PlayerC
   return (
     <>
       <ResultsView
-        analysis={analysis}
-        videoSrc={null}
+        analysis={fullAnalysis ?? analysis}
+        videoSrc={jobVideo.kind === "ready" ? jobVideo.url : null}
         poster={poster}
+        named={{ side: clip.side, name: player.name }}
         eyebrow={eyebrow}
         title={title}
         caption={
-          poster !== null
-            ? "The full read-out from the stored analysis. The footage itself stayed on the machine that analysed it — the still above is the one frame that travelled; there is no pose track to draw."
-            : "The full read-out from the stored analysis. The footage itself stayed on the machine that analysed it — no still travelled with this one, and there is no pose track to draw."
+          jobVideo.kind === "ready"
+            ? fullAnalysis !== null
+              ? `${player.name} is Player ${clip.side} here — the ${clip.side === "A" ? "first" : "second"} panel below. Played from the analysis server's copy of the job, with the pose overlay drawn over it.`
+              : `${player.name} is Player ${clip.side} here. Played from the analysis server's copy of the job; the stored clip keeps no pose track, so there is no overlay to draw.`
+            : jobVideo.kind === "loading"
+              ? `${player.name} is Player ${clip.side} here. Looking for the footage on the analysis server…`
+              : poster !== null
+                ? `${player.name} is Player ${clip.side} here. The footage itself stayed on the machine that analysed it — the still above is the one frame that travelled; there is no pose track to draw.`
+                : `${player.name} is Player ${clip.side} here. The footage itself stayed on the machine that analysed it — no still travelled with this one, and there is no pose track to draw.`
         }
         action={{ ...back, icon: <ArrowLeft className="h-4 w-4" /> }}
       />

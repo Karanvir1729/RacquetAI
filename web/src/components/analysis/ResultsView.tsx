@@ -37,6 +37,7 @@ export function ResultsView({
   title,
   caption,
   poster = null,
+  named = null,
   action,
   clipRef,
   children,
@@ -49,6 +50,14 @@ export function ResultsView({
   caption?: string;
   /** A poster frame for when there is no video (a clip opened from a profile). */
   poster?: string | null;
+  /**
+   * Who one of these two sides is, when the read-out was reached from that
+   * person's profile. "Player A" and "Player B" are positions in the footage,
+   * not names, so arriving from a profile and being shown two anonymous
+   * panels leaves the obvious question — which one am I looking at? — for the
+   * reader to guess.
+   */
+  named?: { side: "A" | "B"; name: string } | null;
   /** One way out of the read-out; the glyph defaults to Upload ("Analyse another match"). */
   action?: { to: string; label: string; icon?: ReactNode };
   /** What this read-out is, for tagging the people in it. Absent means no tagging (the demo). */
@@ -121,6 +130,7 @@ export function ResultsView({
               <PlayerPanel
                 player={player}
                 shots={shots}
+                namedAs={named !== null && named.side === player.id ? named.name : null}
                 headerExtra={
                   clipRef === undefined ? undefined : (
                     <PlayerTagControl

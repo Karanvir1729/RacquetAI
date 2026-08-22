@@ -46,6 +46,13 @@ interface ClipSpec {
   title: string;
   /** Local video the analysis was run on, when --videos names one. */
   video: string | null;
+  /**
+   * The analysis-server job this clip came from, when --job-ids names one.
+   * With it the read-out can fetch the footage and the pose track back while
+   * the job lives, so a seeded clip plays like a freshly tagged one instead of
+   * being a poster and a table.
+   */
+  jobId: string | null;
 }
 
 const MEDIA_BUCKET = "profile-media";
@@ -71,6 +78,7 @@ function parseArgs(argv: string[]) {
     clips: [] as ClipSpec[],
   };
   let videos: string[] | null = null;
+  let jobIds: string[] | null = null;
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]!;
     const next = () => argv[++i] ?? "";
@@ -81,6 +89,8 @@ function parseArgs(argv: string[]) {
     else if (arg === "--replace") out.replace = true;
     else if (arg === "--media") out.media = true;
     else if (arg === "--videos") videos = next().split(",").map((v) => v.trim());
+    // One per --clip, in order; "-" leaves a clip without a job.
+    else if (arg === "--job-ids") jobIds = next().split(",").map((v) => v.trim());
     else if (arg === "--clip") {
       const spec = next();
       // dir:side:date:title — the title may itself contain colons, so split 3 times only.
@@ -92,7 +102,7 @@ function parseArgs(argv: string[]) {
       if ((side !== "A" && side !== "B") || !isIsoDay(playedAt)) {
         throw new Error(`bad --clip spec: ${spec} (want dir:A|B:YYYY-MM-DD:title)`);
       }
-      out.clips.push({ dir, side, playedAt, title, video: null });
+      out.clips.push({ dir, side, playedAt, title, video: null, jobId: null });
     }
   }
   if (!out.email || !out.name || out.clips.length === 0) {
@@ -106,6 +116,14 @@ function parseArgs(argv: string[]) {
     }
     videos.forEach((video, i) => {
       out.clips[i]!.video = video === "" || video === "-" ? null : video;
+    });
+  }
+  if (jobIds !== null) {
+    if (jobIds.length !== out.clips.length) {
+      throw new Error(`--job-ids lists ${jobIds.length} id(s) for ${out.clips.length} --clip(s)`);
+    }
+    jobIds.forEach((jobId, i) => {
+      out.clips[i]!.jobId = jobId === "" || jobId === "-" ? null : jobId;
     });
   }
   return out;
@@ -268,7 +286,7 @@ async function main() {
       player_id: playerId,
       side: spec.side,
       title: spec.title.slice(0, 200),
-      job_id: null,
+      job_id: spec.jobId,
       history_id: null,
       played_at: spec.playedAt,
       duration_sec: summary.durationSec,
