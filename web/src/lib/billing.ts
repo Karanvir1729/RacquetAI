@@ -13,6 +13,9 @@ export type Plan = "monthly" | "yearly";
 export interface BillingStatus {
   active: boolean;
   plan: Plan | null;
+  /** Launch-trial expiry (ISO timestamp), sent only while the trial is what
+   *  carries Pro — the server nulls it once a real subscription exists. */
+  trialEndsAt: string | null;
 }
 
 export class BillingError extends Error {}
@@ -70,9 +73,10 @@ export async function fetchBillingStatus(): Promise<BillingStatus> {
   });
   if (!response.ok) throw new BillingError(`HTTP ${response.status}`);
   const payload: unknown = await response.json();
-  const record = payload as { active?: unknown; plan?: unknown };
+  const record = payload as { active?: unknown; plan?: unknown; trialEndsAt?: unknown };
   return {
     active: record.active === true,
     plan: record.plan === "monthly" || record.plan === "yearly" ? record.plan : null,
+    trialEndsAt: typeof record.trialEndsAt === "string" ? record.trialEndsAt : null,
   };
 }

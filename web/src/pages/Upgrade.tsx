@@ -72,7 +72,7 @@ export default function Upgrade() {
       <SectionHead
         eyebrow="RacketIQ Pro"
         title="Your first 3 analyses are free"
-        body="After that, Pro keeps the analyses coming. Payments run through Stripe — in test mode today, so use card 4242 4242 4242 4242."
+        body="New accounts also start with 3 days of Pro on the house. After that, Pro keeps the analyses coming. Payments run through Stripe — in test mode today, so use card 4242 4242 4242 4242."
         align="center"
       />
 

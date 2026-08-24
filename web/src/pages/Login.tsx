@@ -31,7 +31,11 @@ export default function Login() {
   const [params] = useSearchParams();
   const next = params.get("next") ?? "/account";
 
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  // The landing page's launch-offer links land here already on the signup
+  // face (?mode=signup) — one click fewer between the offer and the account.
+  const [mode, setMode] = useState<"signin" | "signup">(
+    params.get("mode") === "signup" ? "signup" : "signin",
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   // Which path is in flight, not merely whether one is: a single boolean would
@@ -156,7 +160,8 @@ export default function Login() {
         </Card>
 
         <p className="rq-caption mt-6 text-center" style={{ color: "var(--rq-text-dim)" }}>
-          Accounts power subscriptions and sync. Analysing a match still works without one.
+          Launch offer: new accounts start with 3 days of RacketIQ Pro, free — no card needed.
+          Analysing a match still works without an account.
         </p>
       </div>
     </Section>

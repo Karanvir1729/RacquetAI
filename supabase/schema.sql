@@ -31,11 +31,14 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, full_name)
+  insert into public.profiles (id, email, full_name, pro_trial_ends_at)
   values (
     new.id,
     new.email,
-    coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name')
+    coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name'),
+    -- Launch offer (2026-08-24): every new account starts with 3 days of Pro.
+    -- Entitlement is the timestamp alone — nothing to revoke, nothing to cron.
+    now() + interval '3 days'
   )
   on conflict (id) do update
     set email = excluded.email;
@@ -332,3 +335,22 @@ create policy "profile-media: own folder delete"
   on storage.objects for delete
   to authenticated
   using (bucket_id = 'profile-media' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ---------------------------------------------------------------------------
+-- Launch trial (added 2026-08-24): every NEW account starts with 3 days of
+-- Pro. The whole mechanism is one timestamp: handle_new_user() (above) stamps
+-- profiles.pro_trial_ends_at at signup, and /billing/status on the platform
+-- server reports it while it is still in the future. Nothing expires, nothing
+-- is revoked, no cron — a trial "ends" by the clock passing the timestamp.
+-- Existing accounts keep null (they did not sign up during the offer), and a
+-- real Stripe subscription always outranks the trial in the status payload.
+-- ---------------------------------------------------------------------------
+alter table public.profiles
+  add column if not exists pro_trial_ends_at timestamptz;
+
+-- The own-row UPDATE policy above would let a signed-in user extend their own
+-- trial (RLS filters rows, not columns). Column-level grants close that: the
+-- only column a client may write is full_name (the iOS Apple-name backfill,
+-- src/lib/auth.ts). The service role is unaffected.
+revoke update on table public.profiles from anon, authenticated;
+grant update (full_name) on table public.profiles to authenticated;

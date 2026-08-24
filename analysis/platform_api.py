@@ -220,6 +220,29 @@ def _active_purchase(user_id):
     return active, rows
 
 
+def _trial_ends_at(user_id):
+    """The launch trial: profiles.pro_trial_ends_at, stamped by the signup
+    trigger for accounts created during the offer. Returns the ISO timestamp
+    while it is still in the future, else None. Deliberately NOT part of
+    _active_purchase(): the checkout duplicate-guard must keep letting a
+    trial user subscribe."""
+    try:
+        rows = _sb_select("profiles", {
+            "id": f"eq.{user_id}", "select": "pro_trial_ends_at",
+        })
+    except requests.RequestException:
+        return None  # a missing column or a blip must not break /billing/status
+    ends = (rows[0].get("pro_trial_ends_at") if rows else None) or None
+    if not isinstance(ends, str):
+        return None
+    try:
+        when = datetime.datetime.fromisoformat(ends.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    now = datetime.datetime.now(datetime.timezone.utc)
+    return ends if when > now else None
+
+
 # ---------------------------------------------------------------- billing
 @platform_bp.route("/billing/<path:_sub>", methods=["OPTIONS"])
 @platform_bp.route("/admin/<path:_sub>", methods=["OPTIONS"])
@@ -323,8 +346,12 @@ def billing_status():
     if user is None:
         return jsonify({"error": "sign in required"}), 401
     active, rows = _active_purchase(user["id"])
+    # A paid subscription outranks the launch trial; clients get the trial
+    # timestamp only when it is what carries their Pro.
+    trial = _trial_ends_at(user["id"]) if active is None else None
     return jsonify({"active": active is not None,
                     "plan": active.get("plan") if active else None,
+                    "trialEndsAt": trial,
                     "purchases": rows})
 
 

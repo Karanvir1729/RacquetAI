@@ -12,9 +12,11 @@ import {
   PlayCircle,
   Repeat2,
   ScanLine,
+  Sparkles,
   Upload,
 } from "lucide-react";
 import { useCallback, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 import { HeroPlate } from "@/components/HeroPlate";
 import { WaitlistBand } from "@/components/WaitlistBand";
@@ -221,6 +223,34 @@ export default function Landing() {
 
   return (
     <>
+      {/* ── Launch offer ─────────────────────────────────────────────────── */}
+      {/* A slim announcement band, not a hero element: the trial is stamped at
+          signup by the platform (profiles.pro_trial_ends_at), so this line only
+          ever advertises what the database already does. */}
+      <div
+        className="border-b"
+        style={{ borderColor: "var(--rq-accent-line)", background: "var(--rq-accent-soft)" }}
+      >
+        <div className="mx-auto flex max-w-shell flex-wrap items-center justify-center gap-x-3 gap-y-1 px-5 py-3 text-center sm:px-6 lg:px-8">
+          <span
+            className="rq-label inline-flex items-center gap-1.5 text-[13px]"
+            style={{ color: "var(--rq-accent-text)" }}
+          >
+            <Sparkles className="h-4 w-4" /> Launch offer
+          </span>
+          <span className="rq-body-sm" style={{ color: "var(--rq-text)" }}>
+            Sign up now and get 3 days of RacketIQ Pro, free — no card needed.
+          </span>
+          <Link
+            to="/login?mode=signup"
+            className="rq-label inline-flex min-h-[32px] items-center gap-1 text-[13px] underline underline-offset-4 transition-colors duration-200 hover:opacity-80"
+            style={{ color: "var(--rq-accent-text)" }}
+          >
+            Create your account <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      </div>
+
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
         {/* One soft Optic bloom behind the plate. The page's only gradient. */}
@@ -465,6 +495,13 @@ export default function Landing() {
                 See a real analysis
               </ButtonLink>
             </div>
+            <Link
+              to="/login?mode=signup"
+              className="rq-caption mt-5 inline-flex min-h-[44px] items-center gap-1 transition-colors duration-200 hover:text-rq-text focus-visible:text-rq-text"
+            >
+              <Sparkles className="h-3.5 w-3.5" style={{ color: "var(--rq-accent-text)" }} />
+              Launch offer: every new account starts with 3 days of Pro, free
+            </Link>
           </div>
         </div>
       </Section>
