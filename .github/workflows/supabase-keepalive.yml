@@ -1,0 +1,55 @@
+name: Supabase keep-alive
+
+# Supabase pauses free-tier projects after ~7 days with no requests, which tears
+# down the project hostname entirely (it starts returning NXDOMAIN) and takes the
+# web app, the iOS account tab and /billing/* down with it. This job makes one
+# real PostgREST query a day so the project never looks idle.
+#
+# If this ever stops firing, the two usual causes are:
+#   1. `schedule` only runs from the repository's DEFAULT branch. This file has
+#      to be on main; a copy on a feature branch will never trigger.
+#   2. GitHub disables scheduled workflows in repos with no commits for 60 days.
+#      It emails first, and the "Enable workflow" button on the Actions tab
+#      brings it back.
+
+on:
+  schedule:
+    # 08:17 UTC daily. Deliberately off the hour: the shared scheduler is most
+    # congested at :00 and runs can be dropped outright under load. Daily (not
+    # weekly) so a few skipped runs still leave room inside the 7-day window.
+    - cron: "17 8 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query Supabase REST
+        env:
+          SUPABASE_URL: https://olljogfjesovpfjxraxf.supabase.co
+          # Publishable (anon) key. Public by design - row-level security is the
+          # actual gate - and already committed in web/src/lib/supabase.ts, so
+          # this is not a new disclosure and needs no repo secret.
+          SUPABASE_KEY: sb_publishable_Hj6dRUv2c0lPSUo81HFE0g_HSDk5mGd
+        run: |
+          set -uo pipefail
+          # `waitlist` is insert-only under RLS, so anon SELECT comes back as a
+          # 200 with an empty array. That is fine: the round trip still reaches
+          # Postgres, which is what counts as activity. Reading no rows keeps
+          # this ping from touching user data at all.
+          code=$(curl -sS -o /tmp/keepalive-body -w '%{http_code}' \
+                   --max-time 30 --retry 4 --retry-delay 15 --retry-connrefused \
+                   -H "apikey: ${SUPABASE_KEY}" \
+                   "${SUPABASE_URL}/rest/v1/waitlist?select=id&limit=1") || true
+          echo "HTTP ${code:-<none>}"
+          echo "body: $(cat /tmp/keepalive-body 2>/dev/null)"
+          if [ "${code:-}" != "200" ]; then
+            echo "::error::Supabase keep-alive failed (HTTP ${code:-none}). The project may be paused again - check https://supabase.com/dashboard/project/olljogfjesovpfjxraxf"
+            exit 1
+          fi
+          echo "Supabase project is awake."
