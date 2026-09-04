@@ -13,6 +13,8 @@
  * "where does my video go?" is "to a server you point this at" — this site
  * does not host one.
  */
+import { supabase } from "@/lib/supabase";
+
 import {
   parseJobId,
   parseJobState,
@@ -81,10 +83,91 @@ async function readError(response: Response, fallback: string): Promise<Analysis
   return new AnalysisServerError(detail ?? fallback, response.status);
 }
 
+/**
+ * The signed-in user's access token, for the Authorization header.
+ *
+ * Every /jobs route is authenticated: the analysis server used to accept an
+ * upload from anyone who knew the hostname, which meant a stranger could spend
+ * the operator's compute and read back any job by guessing its id. Returns null
+ * when signed out, and the caller lets the server answer 401 rather than
+ * guessing at the reason locally.
+ */
+export async function authHeader(): Promise<Record<string, string>> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
+}
+
 /** Where the reference frame lives. `bust` re-fetches after a re-upload. */
 export function frameUrl(base: string, jobId: string, bust?: number): string {
   const suffix = bust === undefined ? "" : `?t=${bust}`;
   return `${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}/frame.jpg${suffix}`;
+}
+
+/** Where the job's working copy of the video lives (owner only). */
+export function videoUrl(base: string, jobId: string): string {
+  return `${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}/video.mp4`;
+}
+
+/**
+ * The job's video, for a read-out that has no local file.
+ *
+ * Same trap as the reference frame: `<video src>` sends no Authorization
+ * header, so the bytes have to be fetched and handed over as an object URL.
+ * A HEAD first, because this is a whole match and not a single JPEG — over the
+ * cap the caller says so rather than pulling hundreds of megabytes into memory
+ * behind the user's back. Returns null when the server kept no video.
+ */
+export const MAX_INLINE_VIDEO_BYTES = 300 * 1024 * 1024;
+
+export async function fetchJobVideo(
+  base: string,
+  jobId: string,
+  signal?: AbortSignal,
+): Promise<{ blob: Blob } | { tooLarge: number } | null> {
+  const url = videoUrl(base, jobId);
+  const headers = await authHeader();
+  const head = await fetch(url, { method: "HEAD", headers, signal });
+  if (head.status === 404) return null;
+  if (!head.ok) throw await readError(head, "The server would not send the video.");
+  const size = Number(head.headers.get("content-length") ?? "0");
+  if (size > MAX_INLINE_VIDEO_BYTES) return { tooLarge: size };
+  const response = await fetch(url, { headers, signal });
+  if (!response.ok) throw await readError(response, "The server would not send the video.");
+  return { blob: await response.blob() };
+}
+
+/**
+ * The reference frame itself, fetched rather than linked.
+ *
+ * This must not be `<img src={frameUrl(...)}>`. Every /jobs route requires a
+ * bearer token, and an <img> cannot carry an Authorization header — so the
+ * browser asked anonymously, the server correctly answered 401, and the corner
+ * picker showed "the reference frame didn't load" for every signed-in user.
+ * That took the whole upload journey down while the server was working fine.
+ *
+ * Fetching the bytes with the session token and handing the picker an object
+ * URL is the only shape that works. `no-store` replaces the old `?t=` cache
+ * bust: a re-upload must never be marked up with an earlier job's frame.
+ */
+export async function fetchFrame(
+  base: string,
+  jobId: string,
+  signal?: AbortSignal,
+): Promise<Blob> {
+  const response = await fetch(frameUrl(base, jobId), {
+    signal,
+    cache: "no-store",
+    headers: await authHeader(),
+  });
+  if (!response.ok) {
+    throw await readError(response, "The server would not send the reference frame.");
+  }
+  return response.blob();
 }
 
 /**
@@ -126,6 +209,8 @@ export function uploadVideo(
   const promise = new Promise<string>((resolve, reject) => {
     request.open("POST", `${normalizeBase(base)}/jobs`);
     request.responseType = "json";
+    // Authorization is set below, after the token resolves; open() has already
+    // been called so setRequestHeader is legal from the async continuation.
     // The server keys the extension off the content type for raw bodies:
     // "quicktime" means .mov, everything else .mp4.
     request.setRequestHeader("Content-Type", file.type || "video/mp4");
@@ -164,7 +249,14 @@ export function uploadVideo(
     request.onabort = () => reject(new AnalysisServerError("Upload cancelled."));
     request.ontimeout = () => reject(new AnalysisServerError("The upload timed out."));
 
-    request.send(file);
+    // Resolve the token first, THEN send. /jobs is authenticated, and sending
+    // a multi-hundred-MB body that is certain to 401 would waste the whole
+    // upload before the server could refuse it.
+    void authHeader().then((headers) => {
+      const auth = headers.Authorization;
+      if (auth !== undefined) request.setRequestHeader("Authorization", auth);
+      request.send(file);
+    });
   });
 
   return { promise, cancel: () => request.abort() };
@@ -186,6 +278,7 @@ export async function fetchJobState(
   signal?: AbortSignal,
 ): Promise<JobState> {
   const response = await fetch(`${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}`, {
+    headers: await authHeader(),
     signal,
   });
   if (!response.ok) throw await readError(response, `Could not read the job (HTTP ${response.status}).`);
@@ -210,7 +303,7 @@ export async function submitCorners(
   };
   const response = await fetch(`${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}/corners`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeader()) },
     body: JSON.stringify(body),
   });
   if (!response.ok) {
@@ -225,7 +318,7 @@ export async function fetchAnalysis(
 ): Promise<MatchAnalysis> {
   const response = await fetch(
     `${normalizeBase(base)}/jobs/${encodeURIComponent(jobId)}/analysis.json`,
-    { signal },
+    { signal, headers: await authHeader() },
   );
   if (!response.ok) {
     throw await readError(response, `Could not download the analysis (HTTP ${response.status}).`);

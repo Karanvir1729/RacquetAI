@@ -74,6 +74,13 @@ describe("scoreCall", () => {
     expect(scoreCall(createSquashScore())).toBe("love all");
     expect(scoreCall(state(["A", "B", "A", "B", "A", "B", "A", "B"]))).toBe("four all");
   });
+
+  it("qualifies the tie-break, where the game no longer ends at eleven", () => {
+    // 10-10: twenty rallies, alternating, so both sides sit on ten.
+    const tenAll = state(Array.from({ length: 20 }, (_, i) => (i % 2 === 0 ? "A" : "B")));
+    expect(tenAll.points).toEqual({ A: 10, B: 10 });
+    expect(scoreCall(tenAll)).toBe("ten all, a player must win by two points");
+  });
 });
 
 describe("gameBallSide", () => {

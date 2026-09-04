@@ -38,6 +38,39 @@ T_POS = (MID_X, SHORT_Y)
 T_RADIUS = 1.5
 HEAT_ROWS, HEAT_COLS = 12, 8
 SAMPLE_FPS = 8.0
+# How often the PERSON DETECTOR runs, in sampled frames. Between detections the
+# pose model is handed boxes grown from the previous frame's skeleton.
+#
+# DEFAULT 1 — every frame — ON PURPOSE. The saving is real and large: the
+# detector is YOLOX-m at 640x640 and it is 76% of a frame's cost (131 ms of
+# 173 ms at 854x480; the pose model itself is only ~42 ms), so amortising it
+# over 4 frames measured 2.6x on the pose pass. It is off by default because of
+# what it costs, which is not what you would guess from keypoint error.
+#
+# Scored against eval/labels_v1.json (tools/score_detector.py, the same harness
+# behind the ~63%-precision claim), pooled over the three archive clips:
+#
+#   det-every   precision   recall   f1      striker attribution on TPs
+#   1           71.0%       86.4%    0.779   84.2%  (16/19)
+#   2           78.6%       86.4%    0.823   68.4%  (13/19)
+#   4           76.7%       90.9%    0.832   60.0%  (12/20)
+#
+# Shot DETECTION is unharmed. Striker ATTRIBUTION — which player hit it — falls
+# monotonically with the carry interval, and it feeds every per-player number:
+# shot counts, placement, shot mix, predictability. (Coverage and T-time come
+# from tracked positions and are untouched.) The sample is small at n~19, but
+# the dose-response across three settings has a mechanism behind it: comparing
+# the two pose caches joint by joint, carried boxes leave the median keypoint
+# 1.3 px out while wristR's p90 goes to 8.2 px against 3.0 px for shoulderR.
+# The error concentrates on the fast-moving joint at the instant of a swing —
+# exactly the signal attribution reads.
+#
+# So: opt in with --det-every when per-player attribution does not matter for
+# what you are measuring, and leave it alone otherwise.
+DET_EVERY = 1
+# Fraction of a carried box's own width/height added as slack on each side, to
+# cover how far a player moves between sampled frames (125 ms at 8 fps).
+DET_BOX_PAD = 0.35
 ONSET_MERGE_S = 0.35
 ONSET_HEIGHT_F = 1.0   # peak height above the median, in (p95 - median) units
 ONSET_PROM_F = 0.5     # minimum peak prominence, same units
@@ -165,6 +198,277 @@ def _fit_h(kp_a, desc_a, kp_b, desc_b, matcher):
     if not (0.25 < det < 4.0):
         return None, 0
     return H / H[2, 2], int(mask.sum())
+
+
+def available_cpus():
+    """Cores this process may actually use.
+
+    `os.cpu_count()` reports the HOST's cores, not the container's limit, so on
+    the 3-vCPU Azure container it happily answers with whatever the underlying
+    VM has. Starting that many workers on three vCPUs oversubscribes and loses
+    ground — three ONNX threads measured 201 ms/frame against 248 ms at eight.
+    So ask the cgroup first, and only fall back to the host count.
+    """
+    for path, parse in (
+        ("/sys/fs/cgroup/cpu.max", lambda t: None if t.split()[0] == "max"
+         else float(t.split()[0]) / float(t.split()[1])),                 # cgroup v2
+        ("/sys/fs/cgroup/cpu/cpu.cfs_quota_us", None),                    # cgroup v1
+    ):
+        try:
+            if parse is not None:
+                quota = parse(open(path).read().strip())
+            else:
+                q = int(open(path).read().strip())
+                if q <= 0:
+                    continue
+                period = int(open("/sys/fs/cgroup/cpu/cpu.cfs_period_us").read().strip())
+                quota = q / period
+            if quota and quota >= 1:
+                # ROUND, do not truncate. Azure Container Instances hands a
+                # 3-vCPU request a quota of 294117/100000 = 2.94 CPUs, and
+                # int() turned that into 2 — quietly running two workers on
+                # three cores and giving back a third of the speed-up.
+                return max(1, int(round(quota)))
+        except (OSError, ValueError, ZeroDivisionError, IndexError):
+            continue
+    try:
+        return len(os.sched_getaffinity(0))       # Linux; respects taskset/cpuset
+    except AttributeError:
+        return os.cpu_count() or 1
+
+
+def available_memory_gb():
+    """Memory this process may use, container limit first. Same trap as the CPU
+    count: /proc/meminfo describes the host, not the cgroup."""
+    for path in ("/sys/fs/cgroup/memory.max",                       # cgroup v2
+                 "/sys/fs/cgroup/memory/memory.limit_in_bytes"):    # cgroup v1
+        try:
+            raw = open(path).read().strip()
+            if raw == "max":
+                continue
+            limit = int(raw)
+            # cgroup v1 writes a sentinel near 2^63 when there is no limit.
+            if 0 < limit < (1 << 62):
+                return limit / 1024 ** 3
+        except (OSError, ValueError):
+            continue
+    try:
+        return (os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")) / 1024 ** 3
+    except (ValueError, OSError, AttributeError):
+        return 8.0
+
+
+def default_workers():
+    """One worker per usable core, bounded by memory rather than a guess.
+
+    Deliberately NOT capped at a small constant. The scan is ~98% of an
+    analysis — with the pose cache warm the entire rest of the pipeline runs in
+    about a second — so wall time tracks 1/cores almost linearly and a cap is
+    the thing that stops a bigger machine from paying for itself.
+
+    Each worker holds its own detector and pose model at roughly 350 MB
+    resident, so memory is the real bound; leave a gigabyte for the parent and
+    the OS. `RACQUETIQ_WORKERS` overrides for tuning without a rebuild.
+    """
+    override = os.environ.get("RACQUETIQ_WORKERS", "").strip()
+    if override.isdigit() and int(override) > 0:
+        return int(override)
+    by_memory = int(max(1.0, available_memory_gb() - 1.0) / 0.40)
+    return max(1, min(available_cpus(), by_memory))
+
+
+def _pin_onnxruntime(threads):
+    """Make every ONNX Runtime session in THIS process use `threads` threads.
+
+    rtmlib builds its sessions with `ort.InferenceSession(model, providers=...)`
+    and passes no SessionOptions, so there is no supported way in to ask for a
+    thread count — hence the wrapper. It matters because ORT scales badly here:
+    measured on the 854x480 pipeline input, one session goes 277 ms/frame at one
+    thread to 201 ms at three. That is 1.38x for 3x the cores, so three
+    single-threaded processes beat one three-threaded one, and leaving each
+    worker on the default (all cores) would oversubscribe and lose ground —
+    eight threads measured 248 ms, worse than three.
+    """
+    import onnxruntime as ort
+    original = ort.InferenceSession
+
+    def pinned(path_or_bytes=None, providers=None, sess_options=None, **kw):
+        # Defer to a caller that brought its own options rather than passing
+        # sess_options twice, which is a TypeError, not a merge.
+        if sess_options is None:
+            sess_options = ort.SessionOptions()
+            sess_options.intra_op_num_threads = threads
+            sess_options.inter_op_num_threads = 1
+            sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+        return original(path_or_bytes=path_or_bytes, sess_options=sess_options,
+                        providers=providers, **kw)
+
+    ort.InferenceSession = pinned
+
+
+def _scan_range(task):
+    """Pose + alignment observations for the sampled frames in [first, last).
+
+    The unit of parallelism. Each call owns its own capture, model and aligner,
+    so a chunk can run in its own process; `_scan_video` below either calls this
+    once inline or fans it out over a pool.
+
+    Chunks are contiguous and each one that does not start at zero decodes ONE
+    sampled frame before its range and throws the result away. That frame is not
+    wasted: FrameAligner chains a step homography to the previously seen frame,
+    so without it every chunk boundary would be a hole in the chain that
+    build_alignments has to bridge from an anchor.
+    """
+    (video, ref_path, first, last, stride, fps, duration,
+     det_every, width, height, threads, announce) = task
+
+    if threads:
+        _pin_onnxruntime(threads)
+    from rtmlib import Body
+
+    ref = cv2.imread(ref_path)
+    body = Body(mode="balanced", backend="onnxruntime", device="cpu")
+    aligner = FrameAligner(ref)
+
+    cap = cv2.VideoCapture(video)
+    prime = 1 if first > 0 else 0
+    if first - prime > 0:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, (first - prime) * stride)
+    # Trust the capture's own idea of where the seek landed rather than the
+    # frame we asked for: an inexact seek then shifts WHICH frames are sampled,
+    # which is harmless, instead of mislabelling their timestamps, which is not.
+    pos = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
+
+    times, raw_frames, directs, steps = [], [], [], []
+    prev_pose = None
+    while True:
+        ok, frame = cap.read()
+        if not ok:
+            break
+        idx, rem = divmod(pos, stride)
+        pos += 1
+        if rem or idx >= last:
+            if idx >= last:
+                break
+            continue
+        t = (idx * stride) / fps
+        if t > duration:
+            break
+
+        H_dir, n_dir, H_step = aligner.observe(frame)
+        if idx < first:
+            continue                      # the priming frame: aligner only
+
+        # Detect on schedule; between times, reuse the last skeletons as boxes.
+        # Losing a player is itself a trigger to detect, so someone entering,
+        # leaving or being occluded costs one frame rather than `det_every`.
+        # The schedule is keyed to the frame's own index in the whole clip, not
+        # to a counter inside this chunk. That is what makes the result
+        # independent of --workers: chunk edges are multiples of det_every, so
+        # every chunk opens on a frame that was going to be a detection anyway,
+        # and splitting the work cannot move a single detection.
+        if det_every > 1 and prev_pose is not None and (idx % det_every):
+            bboxes = boxes_from_keypoints(prev_pose[0], prev_pose[1], width, height)
+            if len(bboxes) < 2:
+                bboxes = body.det_model(frame)
+        else:
+            bboxes = body.det_model(frame)
+        kpts, scores = body.pose_model(frame, bboxes=bboxes)
+        prev_pose = (np.asarray(kpts), np.asarray(scores))
+
+        exposure = frame_exposure_ref(frame)
+        dets = []
+        for i in range(len(kpts)):
+            k, sc = kpts[i], scores[i]
+            tv = None
+            if all(sc[j] > KPT_CONF for j in (L_SHO, R_SHO, L_HIP, R_HIP)):
+                tx = int(np.mean([k[j][0] for j in (L_SHO, R_SHO, L_HIP, R_HIP)]))
+                ty = int(np.mean([k[j][1] for j in (L_SHO, R_SHO, L_HIP, R_HIP)]))
+                if 0 <= tx < width and 0 <= ty < height:
+                    tv = float(frame[ty, tx].mean())
+            dets.append({"kpts": k, "scores": sc, "torso_val": tv,
+                         "app": torso_appearance(frame, k, sc, exposure)})
+        times.append(t)
+        raw_frames.append(dets)
+        directs.append((H_dir, n_dir))
+        steps.append(H_step)
+        if announce and len(times) % 400 == 0:
+            print(f"  ... {t:.0f}s / {duration:.0f}s", flush=True)
+    cap.release()
+    return first, times, raw_frames, directs, steps
+
+
+def _scan_video(video, ref_path, n_sampled, stride, fps, duration,
+                det_every, workers, width, height, threads_per_worker=1):
+    """Run _scan_range over the whole clip, on one process or several.
+
+    Progress has to stay monotonic because the server scrapes it off stdout to
+    drive the progress bar, so chunks report on completion and the line is
+    driven by how many frames are finished — never by whichever worker happens
+    to be furthest ahead.
+    """
+    if workers <= 1:
+        _, times, raw, directs, steps = _scan_range(
+            (video, ref_path, 0, n_sampled, stride, fps, duration,
+             det_every, width, height, None, True))
+        return times, raw, directs, steps
+
+    import multiprocessing as mp
+    # More chunks than workers: it evens out a slow chunk and it makes the
+    # progress line move several times per worker instead of once.
+    n_chunks = max(workers, min(workers * 3, n_sampled // 40 or 1))
+    # Snap every edge onto the detector's schedule so each chunk starts on a
+    # frame that would have been a detection anyway — see _scan_range.
+    edges = sorted({0, n_sampled} | {
+        min(n_sampled, (round(i * n_sampled / n_chunks) // det_every) * det_every)
+        for i in range(1, n_chunks)})
+    tasks = [(video, ref_path, edges[i], edges[i + 1], stride, fps, duration,
+              det_every, width, height, threads_per_worker, False)
+             for i in range(len(edges) - 1) if edges[i + 1] > edges[i]]
+    print(f"  scanning {n_sampled} frames on {workers} workers "
+          f"({len(tasks)} chunks, detector every {det_every})", flush=True)
+
+    done_frames, results = 0, []
+    # "spawn": a forked child inherits this process's OpenCV and ONNX Runtime
+    # state, including their thread pools, which is a documented way to deadlock.
+    with mp.get_context("spawn").Pool(workers) as pool:
+        for out in pool.imap_unordered(_scan_range, tasks):
+            results.append(out)
+            done_frames += len(out[1])
+            print(f"  ... {duration * done_frames / max(n_sampled, 1):.0f}s / "
+                  f"{duration:.0f}s", flush=True)
+
+    results.sort(key=lambda r: r[0])
+    times, raw, directs, steps = [], [], [], []
+    for _, t, r, d, st in results:
+        times += t
+        raw += r
+        directs += d
+        steps += st
+    return times, raw, directs, steps
+
+
+def boxes_from_keypoints(kpts, scores, width, height, pad=DET_BOX_PAD):
+    """Person boxes implied by the previous frame's skeletons.
+
+    RTMPose is top-down: it needs a box, not a detection. On a fixed court the
+    two players are exactly where they were 125 ms ago plus a stride, so a box
+    grown around the last confident keypoints finds them again without paying
+    for a whole-image search. Returns an empty array when a skeleton is too
+    sparse to trust, which the caller reads as "detect properly this frame".
+    """
+    out = []
+    for k, s in zip(kpts, scores):
+        good = s > KPT_CONF
+        if int(good.sum()) < 4:
+            continue
+        pts = k[good]
+        x0, y0 = pts.min(axis=0)[:2]
+        x1, y1 = pts.max(axis=0)[:2]
+        bw, bh = max(float(x1 - x0), 1.0), max(float(y1 - y0), 1.0)
+        out.append([max(0.0, x0 - bw * pad), max(0.0, y0 - bh * pad),
+                    min(float(width), x1 + bw * pad), min(float(height), y1 + bh * pad)])
+    return np.array(out, dtype=np.float32) if out else np.zeros((0, 4), np.float32)
 
 
 class FrameAligner:
@@ -944,6 +1248,22 @@ def main():
     ap.add_argument("--corners", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--max-sec", type=float, default=None, help="analyze only first N seconds")
+    ap.add_argument("--det-every", type=int, default=DET_EVERY,
+                    help="run the person detector every N sampled frames "
+                         "(1 = every frame, the pre-2026-08-22 behaviour). Between "
+                         "detections the pose model is given boxes grown from the "
+                         "previous frame's skeletons; a frame that loses a player "
+                         "re-detects regardless.")
+    ap.add_argument("--threads-per-worker", type=int, default=1,
+                    help="ONNX Runtime threads inside each worker. 1 is right on "
+                         "a small box; on a many-core machine a few fatter "
+                         "workers can beat many thin ones, because processes do "
+                         "not share model weights and memory bandwidth binds "
+                         "before the cores do.")
+    ap.add_argument("--workers", type=int, default=default_workers(),
+                    help="processes to scan the video with (1 = in-process). "
+                         "ONNX Runtime only gets 1.38x out of 3 threads, so the "
+                         "cores are better spent on separate chunks.")
     ap.add_argument("--rally-gap", type=float, default=RALLY_GAP_S,
                     help="silence gap (s) between attributed shots that ends a rally")
     args = ap.parse_args()
@@ -979,9 +1299,21 @@ def main():
     # silently and quietly turn the tracker back into position-only.
     cache_path = os.path.join(args.out, "pose_cache_v3.pkl")
     legacy_path = os.path.join(args.out, "pose_cache_v2.pkl")
+    want_det_every = max(1, int(args.det_every))
+    cached = None
     if os.path.exists(cache_path):
         with open(cache_path, "rb") as f:
-            blob = pickle.load(f)
+            cached = pickle.load(f)
+        # A cache is only a cache of the settings that produced it. --det-every
+        # changes the keypoints, so re-using a cache written at a different
+        # setting would silently answer the wrong question — exactly the trap
+        # the v3 suffix already guards for the appearance descriptors.
+        if cached.get("detEvery", 1) != want_det_every:
+            print(f"pose cache was written with --det-every "
+                  f"{cached.get('detEvery', 1)}, want {want_det_every}: rescanning")
+            cached = None
+    if cached is not None:
+        blob = cached
         times, raw_frames = blob["times"], blob["raw_frames"]
         directs, steps = blob["directs"], blob["steps"]
         print(f"pose cache hit: {len(times)} frames")
@@ -996,51 +1328,29 @@ def main():
         print(f"pose cache v2 hit: {len(times)} frames; adding appearance ...")
         fill_appearance(args.video, times, raw_frames, fps, duration)
         with open(cache_path, "wb") as f:
+            # 1, not want_det_every: these keypoints predate --det-every and were
+            # produced by detecting on every frame. Stamping them with whatever
+            # was asked for this run would make the upgraded cache lie about
+            # itself, and the next run would trust it.
             pickle.dump({"times": times, "raw_frames": raw_frames,
-                         "directs": directs, "steps": steps}, f)
+                         "directs": directs, "steps": steps,
+                         "detEvery": 1}, f)
     else:
-        from rtmlib import Body
-        body = Body(mode="balanced", backend="onnxruntime", device="cpu")
-        aligner = FrameAligner(ref)
         stride = max(1, round(fps / SAMPLE_FPS))
-        times, raw_frames, directs, steps = [], [], [], []
-        idx = 0
-        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-        while True:
-            ok, frame = cap.read()
-            if not ok:
-                break
-            if idx % stride:
-                idx += 1
-                continue
-            t = idx / fps
-            if t > duration:
-                break
-            H_dir, n_dir, H_step = aligner.observe(frame)
-            kpts, scores = body(frame)
-            exposure = frame_exposure_ref(frame)
-            dets = []
-            for i in range(len(kpts)):
-                k, s = kpts[i], scores[i]
-                tv = None
-                if all(s[j] > KPT_CONF for j in (L_SHO, R_SHO, L_HIP, R_HIP)):
-                    tx = int(np.mean([k[j][0] for j in (L_SHO, R_SHO, L_HIP, R_HIP)]))
-                    ty = int(np.mean([k[j][1] for j in (L_SHO, R_SHO, L_HIP, R_HIP)]))
-                    if 0 <= tx < width and 0 <= ty < height:
-                        tv = float(frame[ty, tx].mean())
-                dets.append({"kpts": k, "scores": s, "torso_val": tv,
-                             "app": torso_appearance(frame, k, s, exposure)})
-            times.append(t)
-            raw_frames.append(dets)
-            directs.append((H_dir, n_dir))
-            steps.append(H_step)
-            idx += 1
-            if len(times) % 400 == 0:
-                print(f"  ... {t:.0f}s / {duration:.0f}s")
+        n_sampled = int(min(duration * fps, n_frames) // stride) + 1
+        # The workers need the same reference image the aligner was built from,
+        # and PNG so the ORB features are bit-identical to this process's.
+        ref_path = os.path.join(args.out, "_refframe.png")
+        cv2.imwrite(ref_path, ref)
         cap.release()
+        times, raw_frames, directs, steps = _scan_video(
+            args.video, ref_path, n_sampled, stride, fps, duration,
+            max(1, int(args.det_every)), max(1, int(args.workers)), width, height,
+            max(1, int(args.threads_per_worker)))
         with open(cache_path, "wb") as f:
             pickle.dump({"times": times, "raw_frames": raw_frames,
-                         "directs": directs, "steps": steps}, f)
+                         "directs": directs, "steps": steps,
+                         "detEvery": want_det_every}, f)
 
     # ---------------- pass 2: final alignment + court filter + tracking ----------------
     aligns, anchored_pct = build_alignments(directs, steps)

@@ -39,7 +39,15 @@ iOS app ────────┘   + platform_api.py  └─ Stripe (products
   bearer token → `{url}` (Stripe Checkout, test card `4242 4242 4242 4242`).
 - `POST /billing/confirm` `{sessionId}` + token — success-redirect fallback;
   the server re-reads the session from Stripe before recording anything.
-- `GET /billing/status` + token → `{active, plan, purchases}`.
+- `GET /billing/status` + token → `{active, plan, trialEndsAt, purchases}`.
+  `trialEndsAt` is the launch trial (added 2026-08-24): the signup trigger
+  stamps `profiles.pro_trial_ends_at = now() + 3 days` on every NEW account,
+  and this endpoint reports it while it is in the future — nulled once a real
+  subscription exists, and deliberately NOT part of `_active_purchase()`, so
+  the checkout duplicate-guard still lets a trial user subscribe. Clients may
+  not write the column (profiles UPDATE is column-granted to `full_name`
+  only). Ending the offer = removing the stamp from `handle_new_user()`;
+  already-granted trials then just run out on their own.
 - `POST /billing/webhook` — signature-verified; answers 501 until
   `STRIPE_WEBHOOK_SECRET` is set. `/billing/confirm` covers sandbox use.
 - `GET /admin/metrics` — basic auth; users/signups/events/purchases/revenue.

@@ -33,8 +33,9 @@
  * watching or not, so refereeing entirely by hand is not a fallback mode you
  * have to find — it is just what happens if you ignore the suggestions.
  */
-import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 import { Button } from "@/components/Button";
@@ -65,7 +66,7 @@ import { VideoPickerSheet } from "./VideoPickerSheet";
 import { VideoResultBand } from "./VideoResultBand";
 import { NoticeBanner } from "./WatchControls";
 import { WatchPanel } from "./WatchPanel";
-import { LetRuling, OTHER_SIDE, Side } from "./types";
+import { LetRuling, OTHER_SIDE, ServeBox, Side } from "./types";
 import { playbackLoadCall } from "./videoPlayback";
 import { VideoRefereePlayer } from "./VideoRefereePlayer";
 import { toScoreEvents } from "./videoReferee";
@@ -210,6 +211,20 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
     if (video.result !== null) setDetached(true);
   };
 
+  // Tap mode is two players and a phone propped on the floor between games —
+  // the screen must not lock mid-match. Recording and the live/video paths each
+  // held their own keep-awake; the DEFAULT mode, the one most people use, held
+  // none. Scoped to focus (not mount) because the tab navigator keeps this
+  // route mounted after you leave it.
+  useFocusEffect(
+    useCallback(() => {
+      void activateKeepAwakeAsync(REFEREE_KEEP_AWAKE_TAG).catch(() => {});
+      return () => {
+        void deactivateKeepAwake(REFEREE_KEEP_AWAKE_TAG).catch(() => {});
+      };
+    }, []),
+  );
+
   const award = (winner: Side) => {
     live.clearProposal();
     match.awardRally(winner);
@@ -237,16 +252,37 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
     takeOver();
   };
 
+  // Choosing the serve box is a manual scoring action like any other, and it
+  // was the one control that left playback still holding the pen — so the tap
+  // that corrects the box used to cost the user the next rally.
+  const chooseBox = (box: ServeBox) => {
+    match.chooseBox(box);
+    takeOver();
+  };
+
   // Listing analyses reads the disk, so it happens on the tap that asks for the
   // list — never on a render path, where a slow or broken directory would cost
   // a frame of the scoreboard.
   const openVideoPicker = () => {
-    try {
-      setSources(listVideoSources());
-    } catch {
-      setSources([]);
+    const show = () => {
+      try {
+        setSources(listVideoSources());
+      } catch {
+        setSources([]);
+      }
+      setPickerOpen(true);
+    };
+    // Picking a video calls loadMatch, which REPLACES the scoreline and
+    // overwrites the stored match — further past Undo's reach than "New match",
+    // which was already guarded. Same guard, same wording, same test.
+    if (!match.canUndo || matchOver) {
+      show();
+      return;
     }
-    setPickerOpen(true);
+    Alert.alert("Score a video instead?", "The current match and its score will be discarded.", [
+      { text: "Keep scoring", style: "cancel" },
+      { text: "Score a video", style: "destructive", onPress: show },
+    ]);
   };
 
   /**
@@ -407,7 +443,7 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
       {/* Takes the slack in both modes: whatever is left over on this screen
           belongs to the numerals, not to the video. */}
       <View style={styles.board}>
-        <ScoreBoard score={match.score} names={match.names} onChooseBox={match.chooseBox} />
+        <ScoreBoard score={match.score} names={match.names} onChooseBox={chooseBox} />
       </View>
 
       {proposal === null ? (
@@ -489,6 +525,9 @@ export function RefereeScreen({ fromLibrary = false }: RefereeScreenProps) {
     </Screen>
   );
 }
+
+/** Distinct from the recording and live tags so the holds never cancel each other. */
+const REFEREE_KEEP_AWAKE_TAG = "racquetiq-referee";
 
 const TAPPING_HINT = "Tap a player when they win a rally.";
 /** Says the quiet part: the taps are still yours, camera or no camera. */

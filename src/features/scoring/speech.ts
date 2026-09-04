@@ -49,6 +49,33 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/**
+ * Put the process on an audio category that ignores the ring/silent switch.
+ *
+ * Without this the app is SILENT on any phone carried to a club on silent —
+ * the one place this feature is used — while still drawing an unmuted speaker
+ * icon. The category is process-wide and sticky, so once per launch is enough;
+ * we run it lazily on the first speak rather than at import time so a build
+ * without the native module simply carries on mute-but-working.
+ *
+ * Entirely best-effort. Never throws, never blocks a call.
+ */
+let audioSessionReady = false;
+function ensureAudioSession(): void {
+  if (audioSessionReady) return;
+  audioSessionReady = true;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const native = require("racquet-analyzer") as unknown;
+    if (isRecord(native) && typeof native.configureAudioSessionForSpeech === "function") {
+      (native.configureAudioSessionForSpeech as () => boolean)();
+    }
+  } catch {
+    // No native module in this binary (Expo Go, a stripped build): the app
+    // still scores, it is just subject to the silent switch.
+  }
+}
+
 function narrowModule(value: unknown): SpeechModule | null {
   if (!isRecord(value)) return null;
   return typeof value.speak === "function" && typeof value.stop === "function"
@@ -170,6 +197,8 @@ export function createAnnouncer(module: SpeechModule | null = loadSpeech()): Ann
     say(text: string) {
       if (text.length === 0) return;
       try {
+        // Before the first word, not at import: see ensureAudioSession.
+        ensureAudioSession();
         module.stop();
         begin();
         module.speak(text, {

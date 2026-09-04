@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512" role="img" aria-label="RacquetAI">
-  <title>RacquetAI</title>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512" role="img" aria-label="RacketIQ">
+  <title>RacketIQ</title>
   <!--
-    RacquetAI — splash composition.
+    RacketIQ — splash composition.
     
     Transparent background on purpose: expo-splash-screen paints Court Ink
     behind this image, so one PNG covers every device size and can never show a

@@ -10,8 +10,8 @@ import { fetchBillingStatus, type BillingStatus } from "@/lib/billing";
 import { trackEvent } from "@/lib/events";
 
 const PLAN_LABEL: Record<string, string> = {
-  monthly: "RacquetIQ Pro — $9.99 / month",
-  yearly: "RacquetIQ Pro — $79.99 / year",
+  monthly: "RacketIQ Pro — $9.99 / month",
+  yearly: "RacketIQ Pro — $79.99 / year",
 };
 
 /** Signed-in home: who you are, what you're subscribed to, and the exits. */
@@ -75,6 +75,23 @@ export default function Account() {
       })
     : null;
 
+  // The server only sends trialEndsAt while it is in the future, but this page
+  // can sit open across that boundary — re-check at render so the card cannot
+  // claim a trial that lapsed since the fetch.
+  const trialEnds =
+    billing?.trialEndsAt && !billing.active ? new Date(billing.trialEndsAt) : null;
+  const onTrial = trialEnds !== null && trialEnds.getTime() > Date.now();
+  const trialEndsLabel =
+    trialEnds !== null && onTrial
+      ? trialEnds.toLocaleString(undefined, {
+          month: "long",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        })
+      : null;
+  const hasPro = billing?.active === true || onTrial;
+
   return (
     <Section divider={false} className="flex-1">
       <div className="mx-auto max-w-2xl">
@@ -85,9 +102,9 @@ export default function Account() {
           {joined ? ` · member since ${joined}` : ""}.
         </p>
 
-        <Card className="mt-8 p-6 sm:p-8" featured={billing?.active === true}>
+        <Card className="mt-8 p-6 sm:p-8" featured={hasPro}>
           <div className="flex items-start gap-4">
-            <IconChip>{billing?.active ? <BadgeCheck className="h-5 w-5" /> : <CreditCard className="h-5 w-5" />}</IconChip>
+            <IconChip>{hasPro ? <BadgeCheck className="h-5 w-5" /> : <CreditCard className="h-5 w-5" />}</IconChip>
             <div className="flex-1">
               <h2 className="rq-h3">Subscription</h2>
               <p className="rq-lead mt-2 text-[15px]">
@@ -99,9 +116,12 @@ export default function Account() {
                   </span>
                 ) : null}
                 {billing !== null && billing.active
-                  ? PLAN_LABEL[billing.plan ?? ""] ?? "RacquetIQ Pro — active"
+                  ? PLAN_LABEL[billing.plan ?? ""] ?? "RacketIQ Pro — active"
                   : null}
-                {billing !== null && !billing.active
+                {billing !== null && trialEndsLabel !== null
+                  ? `RacketIQ Pro — launch trial until ${trialEndsLabel}`
+                  : null}
+                {billing !== null && !hasPro
                   ? "Free — recording, the library, and 3 analyses of your own videos."
                   : null}
               </p>
@@ -110,7 +130,18 @@ export default function Account() {
                   Try again
                 </Button>
               ) : null}
-              {billing !== null && !billing.active ? (
+              {billing !== null && onTrial ? (
+                <>
+                  <p className="rq-caption mt-4" style={{ color: "var(--rq-text-dim)" }}>
+                    Your account came with 3 days of Pro. Subscribe any time — the paid plan simply
+                    takes over.
+                  </p>
+                  <ButtonLink to="/upgrade" size="md" className="mt-5">
+                    Keep Pro after the trial
+                  </ButtonLink>
+                </>
+              ) : null}
+              {billing !== null && !hasPro ? (
                 <ButtonLink to="/upgrade" size="md" className="mt-5">
                   Upgrade to Pro
                 </ButtonLink>

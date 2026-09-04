@@ -1,6 +1,6 @@
 # docs/legal — publishing the legal pages
 
-Two documents live here, and both must be reachable at a **public URL** before RacquetIQ can be
+Two documents live here, and both must be reachable at a **public URL** before RacketIQ can be
 submitted as a subscription app:
 
 | File | What it is | Where Apple wants it |
@@ -110,7 +110,7 @@ Fill these once the URLs resolve publicly.
 | **Version → App Review Information** | Notes | see [../app-store-submission.md](../app-store-submission.md) §8 |
 | **In the binary** (not ASC) | `src/lib/legalLinks.ts` | paste the two published URLs into `TERMS_OF_USE.url` and `PRIVACY_POLICY.url` — they are `null` today, which the paywall renders as a visibly disabled row |
 
-**The binary link requirement is not optional.** RacquetIQ has no Settings tab any more, so the
+**The binary link requirement is not optional.** RacketIQ has no Settings tab any more, so the
 paywall is the only screen that can carry these links; it already reads them from
 `src/lib/legalLinks.ts`, so publishing the pages and pasting the two URLs there is the whole job. A
 subscription screen without a working Terms and Privacy link is a Guideline 3.1.2 rejection.

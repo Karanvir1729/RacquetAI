@@ -5,12 +5,16 @@ import type { MatchAnalysis } from "@/analysis/types";
 import { MatchPlayer } from "@/components/analysis/MatchPlayer";
 import { PlayerPanel } from "@/components/analysis/PlayerPanel";
 import { QualityFootnote } from "@/components/analysis/QualityFootnote";
+import { PlayerTagControl } from "@/components/players/PlayerTagControl";
 import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Reveal } from "@/components/ui/Reveal";
+import type { ReactNode } from "react";
+
 import { Section } from "@/components/ui/Section";
 import { Stat } from "@/components/ui/Stat";
+import type { ClipRef } from "@/players/shape";
 
 /**
  * The read-out: one analysis, rendered whole.
@@ -23,6 +27,8 @@ import { Stat } from "@/components/ui/Stat";
  *
  * Both `/analyze` and `/demo` end here; the demo passes the bundled sample and
  * a source note, a real job passes the server's analysis and its own video.
+ * A `clipRef` — the ids a read-out can be tagged against — adds the "name this
+ * player" control to each panel; the demo passes none, so it gets none.
  */
 export function ResultsView({
   analysis,
@@ -30,7 +36,11 @@ export function ResultsView({
   eyebrow,
   title,
   caption,
+  poster = null,
+  named = null,
   action,
+  clipRef,
+  children,
 }: {
   analysis: MatchAnalysis;
   videoSrc: string | null;
@@ -38,7 +48,22 @@ export function ResultsView({
   title: string;
   /** Provenance line under the player. */
   caption?: string;
-  action?: { to: string; label: string };
+  /** A poster frame for when there is no video (a clip opened from a profile). */
+  poster?: string | null;
+  /**
+   * Who one of these two sides is, when the read-out was reached from that
+   * person's profile. "Player A" and "Player B" are positions in the footage,
+   * not names, so arriving from a profile and being shown two anonymous
+   * panels leaves the obvious question — which one am I looking at? — for the
+   * reader to guess.
+   */
+  named?: { side: "A" | "B"; name: string } | null;
+  /** One way out of the read-out; the glyph defaults to Upload ("Analyse another match"). */
+  action?: { to: string; label: string; icon?: ReactNode };
+  /** What this read-out is, for tagging the people in it. Absent means no tagging (the demo). */
+  clipRef?: ClipRef;
+  /** Extra panels below the read-out — the video referee, when footage is local. */
+  children?: ReactNode;
 }) {
   const { video, rallies, shots, players, quality } = analysis;
 
@@ -63,13 +88,13 @@ export function ResultsView({
           </div>
           {action !== undefined ? (
             <ButtonLink to={action.to} variant="outline" size="md">
-              <Upload className="h-4 w-4" /> {action.label}
+              {action.icon ?? <Upload className="h-4 w-4" />} {action.label}
             </ButtonLink>
           ) : null}
         </div>
 
         <div className="mt-9">
-          <MatchPlayer analysis={analysis} videoSrc={videoSrc} caption={caption} />
+          <MatchPlayer analysis={analysis} videoSrc={videoSrc} caption={caption} poster={poster} />
         </div>
 
         {/* Match totals ride in the same band as the video: they describe the
@@ -102,10 +127,26 @@ export function ResultsView({
         <div className="grid gap-6 xl:grid-cols-2">
           {players.map((player, index) => (
             <Reveal key={player.id} delay={index * 0.08}>
-              <PlayerPanel player={player} shots={shots} />
+              <PlayerPanel
+                player={player}
+                shots={shots}
+                namedAs={named !== null && named.side === player.id ? named.name : null}
+                headerExtra={
+                  clipRef === undefined ? undefined : (
+                    <PlayerTagControl
+                      side={player.id}
+                      clipRef={clipRef}
+                      analysis={analysis}
+                      videoSrc={videoSrc}
+                    />
+                  )
+                }
+              />
             </Reveal>
           ))}
         </div>
+
+        {children}
 
         <div className="mt-6">
           <QualityFootnote quality={quality} />

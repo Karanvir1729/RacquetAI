@@ -6,6 +6,11 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { EmptyState } from "@/components/EmptyState";
 import { Screen } from "@/components/Screen";
 import { ScreenHeader } from "@/components/ScreenHeader";
+// Cross-feature import, documented (docs/01 rule 2): a read-out's sides are
+// named INTO player profiles, so the player feature supplies the control and
+// the clip reference; the analysis feature only decides where it sits.
+import { clipRefForRecording } from "@/features/players/clipRef";
+import { PlayerTagButton } from "@/features/players/PlayerTagButton";
 import { readAnalysisVideoRef } from "@/lib/analysisVideo";
 import { formatClock } from "@/lib/format";
 import { selection as selectionHaptic } from "@/lib/haptics";
@@ -41,6 +46,12 @@ export function AnalysisScreen({ source, recordingId }: AnalysisScreenProps) {
   // The demo ships stats only; imported analyses may carry a copy of the clip.
   const videoUri = useMemo(
     () => (!isDemo && recordingId ? readAnalysisVideoRef(recordingId) : null),
+    [isDemo, recordingId],
+  );
+  // "Name this player" needs a recording to tag against; the bundled sample
+  // has no id of its own and is nobody's match, so it offers none.
+  const clipRef = useMemo(
+    () => (!isDemo && recordingId ? clipRefForRecording(recordingId) : null),
     [isDemo, recordingId],
   );
 
@@ -89,7 +100,16 @@ export function AnalysisScreen({ source, recordingId }: AnalysisScreenProps) {
           {videoUri !== null && <MatchVideoCard videoUri={videoUri} analysis={analysis} />}
           <RallyStatsRow rallies={analysis.rallies} />
           {analysis.players.map((player) => (
-            <PlayerSection key={player.id} player={player} shots={analysis.shots} />
+            <PlayerSection
+              key={player.id}
+              player={player}
+              shots={analysis.shots}
+              headerExtra={
+                clipRef !== null ? (
+                  <PlayerTagButton side={player.id} clipRef={clipRef} analysis={analysis} />
+                ) : undefined
+              }
+            />
           ))}
           <QualityFootnote quality={analysis.quality} />
         </ScrollView>

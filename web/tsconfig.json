@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
 
@@ -19,11 +19,20 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
 
-    "types": ["vite/client"],
+    // "jest" is here for src/analysis/__tests__ only: the web app has no test
+    // runner of its own, so those suites run under the Expo app's jest (whose
+    // testMatch reaches the whole repo) while still being typechecked here.
+    "types": ["vite/client", "jest"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/features/*": ["../src/features/*"],
+      "@/*": ["./src/*"],
+      "@app/*": ["../src/*"]
     }
   },
+  // Only web's own sources are listed. The shared scoring modules are reached
+  // through the `@app/*` path mapping and typechecked as imports — listing the
+  // directory would also drag in its React Native components and jest suites,
+  // which belong to the app's tsconfig, not this one.
   "include": ["src", "vite.config.ts"]
 }

@@ -231,7 +231,7 @@ describe("restoring", () => {
     const tree = render({ entitlement: "free", purchase: jest.fn(), restorePurchases });
     await press(tree, "Restore purchases");
     expect(restorePurchases).toHaveBeenCalled();
-    expect(textOf(tree)).toContain("No active RacquetIQ Pro subscription");
+    expect(textOf(tree)).toContain("No active RacketIQ Pro subscription");
   });
 
   it("surfaces a restore failure rather than swallowing it", async () => {

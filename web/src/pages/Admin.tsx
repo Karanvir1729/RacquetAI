@@ -168,7 +168,7 @@ export default function Admin() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="rq-eyebrow">Operators only</p>
-          <h1 className="rq-h2 mt-3">RacquetIQ metrics</h1>
+          <h1 className="rq-h2 mt-3">RacketIQ metrics</h1>
           <p className="rq-caption mt-2" style={{ color: "var(--rq-text-dim)" }}>
             Generated {when(metrics.generatedAt)} · Stripe test mode
           </p>

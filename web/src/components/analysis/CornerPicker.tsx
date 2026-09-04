@@ -1,4 +1,4 @@
-import { Check, CornerDownLeft, RotateCcw, Undo2 } from "lucide-react";
+import { Check, CornerDownLeft, LoaderCircle, RotateCcw, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 
 import { cellLabel } from "@/analysis/format";
@@ -51,14 +51,26 @@ const NUDGE = 0.0012;
 const NUDGE_COARSE = 0.012;
 
 interface CornerPickerProps {
+  /** Object URL for the frame, or "" while the flow is still fetching it. */
   frameSrc: string;
+  /** Non-null when the fetch failed — the retry below asks for it again. */
+  frameError: string | null;
+  /** Re-request the frame. Owned by the flow, because the fetch is. */
+  onRetryFrame: () => void;
   submitting: boolean;
   /** Non-null when the server refused the last submission. */
   error: string | null;
   onSubmit: (corners: CourtCorners) => void;
 }
 
-export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPickerProps) {
+export function CornerPicker({
+  frameSrc,
+  frameError,
+  onRetryFrame,
+  submitting,
+  error,
+  onSubmit,
+}: CornerPickerProps) {
   const [frameRef, frameSize] = useElementSize<HTMLDivElement>();
   const frameElementRef = useRef<HTMLDivElement | null>(null);
   const [imageSize, setImageSize] = useState<Size | null>(null);
@@ -73,6 +85,14 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
 
   const index = points.length;
   const nextCell = index < CORNER_ORDER.length ? CORNER_ORDER[index] : undefined;
+  /**
+   * The frame arrives over the network, so it has three states, not two: the
+   * flow is still fetching it (""), the fetch failed, or it is here. Showing
+   * the failure panel during the fetch is what made a working server look
+   * broken, so "not yet" and "not coming" are kept apart.
+   */
+  const frameFailed = imageFailed || frameError !== null;
+  const frameLoading = !frameFailed && frameSrc.length === 0;
   const ready = frameSize !== null && imageSize !== null;
   const complete = index === CORNER_ORDER.length;
 
@@ -180,17 +200,19 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
   };
 
   /**
-   * A dropped image request is not a dead end: polling has stopped by the time
-   * this step renders, so without a retry a multi-minute upload is stranded
-   * behind a Confirm that can never enable.
+   * A dropped frame is not a dead end: polling has stopped by the time this
+   * step renders, so without a retry a multi-minute upload is stranded behind
+   * a Confirm that can never enable.
    *
-   * The retry rides on a local counter rather than a cache-busted `frameSrc`
-   * because that is a PROP, and the effect above wipes every mark the moment it
-   * changes — a retry that touched it would silently clear the user's work.
+   * Two halves, because the frame arrives in two: the flow re-fetches the
+   * bytes, and the local counter remounts the <img> in case it was the decode
+   * that failed. Neither can wipe a placed mark — nothing is placeable until
+   * the frame has loaded, so `points` is always empty when this is reachable.
    */
   const retryFrame = () => {
     setImageFailed(false);
     setAttempt((current) => current + 1);
+    onRetryFrame();
   };
 
   const submit = () => {
@@ -275,16 +297,30 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
             className="relative w-full"
             style={{ aspectRatio: imageSize === null ? "16 / 9" : `${imageSize.width} / ${imageSize.height}` }}
           >
-            {imageFailed ? (
+            {frameFailed ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-rq-sm border p-6 text-center"
                 style={{ borderColor: "var(--rq-line)", background: "var(--rq-card)" }}>
                 <p className="rq-caption max-w-xs">
-                  The reference frame didn't load. Nothing is lost — the job is still on the
-                  server and the frame is still there to fetch.
+                  {frameError ??
+                    "The reference frame didn't load."}{" "}
+                  Nothing is lost — the job is still on the server and the frame is still
+                  there to fetch.
                 </p>
                 <Button size="sm" variant="outline" onClick={retryFrame}>
                   <RotateCcw className="h-4 w-4" /> Try the frame again
                 </Button>
+              </div>
+            ) : frameLoading ? (
+              <div
+                className="absolute inset-0 flex items-center justify-center gap-3 rounded-rq-sm border"
+                style={{ borderColor: "var(--rq-line)", background: "var(--rq-card)" }}
+                role="status"
+              >
+                <LoaderCircle
+                  className="h-5 w-5 animate-spin"
+                  style={{ color: "var(--rq-accent-text)" }}
+                />
+                <span className="rq-caption">Fetching the frame…</span>
               </div>
             ) : (
               <img
@@ -355,7 +391,7 @@ export function CornerPicker({ frameSrc, submitting, error, onSubmit }: CornerPi
 
           {/* Loupe. Pinned to a top corner, and it hops to the other side when
               the mark is under it, so the magnifier never hides its subject. */}
-          {activePoint !== null && ready && !imageFailed ? (
+          {activePoint !== null && ready && !frameFailed ? (
             <Loupe
               src={frameSrc}
               point={activePoint}

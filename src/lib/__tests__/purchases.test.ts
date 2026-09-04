@@ -177,7 +177,7 @@ describe("billingPeriod", () => {
 describe("package narrowing", () => {
   const product = {
     identifier: PRO_YEARLY_PRODUCT_ID,
-    title: "RacquetIQ Pro (Yearly)",
+    title: "RacketIQ Pro (Yearly)",
     priceString: "$79.99",
     price: 79.99,
   };
@@ -189,7 +189,7 @@ describe("package narrowing", () => {
       id: "$rc_annual",
       productId: PRO_YEARLY_PRODUCT_ID,
       priceString: "$79.99",
-      title: "RacquetIQ Pro (Yearly)",
+      title: "RacketIQ Pro (Yearly)",
       period: "yearly",
       fromOffering: true,
       native: pkg,

@@ -17,7 +17,7 @@ export default function NotFound() {
         </p>
         <div className="mt-8 flex justify-center">
           <ButtonLink to="/" size="lg">
-            <ArrowLeft className="h-5 w-5" /> Back to RacquetIQ
+            <ArrowLeft className="h-5 w-5" /> Back to RacketIQ
           </ButtonLink>
         </div>
       </div>

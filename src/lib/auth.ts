@@ -103,13 +103,41 @@ export async function signInWithApple(): Promise<AuthResult> {
     };
   }
   if (native.status === "failed") return { status: "failed", message: native.message };
-  const { error } = await supabase.auth.signInWithIdToken({
+  const { data, error } = await supabase.auth.signInWithIdToken({
     provider: "apple",
     token: native.identityToken,
   });
   if (error) return { status: "failed", message: error.message };
+  await rememberAppleName(data.user?.id, native.fullName);
   // No event here — the onAuthStateChange listener already logs the login.
   return { status: "ok" };
+}
+
+/**
+ * Persist the name Apple hands over on the first authorization and never again.
+ *
+ * It arrives beside the identity token, not inside it, so the signup trigger
+ * (which runs during the auth.users insert) has already written the profile
+ * row with a null name by the time we get here — hence an UPDATE, and hence
+ * only from this one call site. `profiles` carries select + update policies
+ * and no insert policy, so upsert would be rejected outright.
+ *
+ * Best effort in every direction: a name that fails to save is worth less than
+ * a session, so nothing in here may turn a good sign-in into a failed one.
+ *
+ * Deliberately a table write and NOT `auth.updateUser`. A failed updateUser
+ * makes auth-js clean up its PKCE slot, which the session storage adapter
+ * turns into a delete — and because Apple only sends a name on the first
+ * authorization, that call would run on exactly one flow: Apple signup. The
+ * account would be created and then instantly forgotten.
+ */
+async function rememberAppleName(
+  userId: string | undefined,
+  fullName: string | null,
+): Promise<void> {
+  if (fullName === null || typeof userId !== "string") return;
+  // Returns an error rather than throwing, so there is nothing here to catch.
+  await supabase.from("profiles").update({ full_name: fullName }).eq("id", userId);
 }
 
 export { isAppleSignInAvailable };

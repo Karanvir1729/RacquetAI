@@ -11,7 +11,7 @@ export function SiteFooter() {
         <div className="flex items-center gap-2.5">
           <Mark size={22} />
           <span className="rq-label" style={{ color: "var(--rq-text)" }}>
-            Racquet<span style={{ color: "var(--rq-accent-text)" }}>IQ</span>
+            Racket<span style={{ color: "var(--rq-accent-text)" }}>IQ</span>
           </span>
           <span className="rq-caption">· squash match analysis</span>
         </div>
@@ -35,7 +35,7 @@ export function SiteFooter() {
       </div>
       <div className="mx-auto max-w-shell px-5 pb-8 sm:px-6 lg:px-8">
         <p className="rq-caption max-w-3xl">
-          Sample footage is used under CC BY-NC 4.0 from archive.org. RacquetIQ measures squash
+          Sample footage is used under CC BY-NC 4.0 from archive.org. RacketIQ measures squash
           footage you supply; it is not affiliated with any tour, federation or club.
         </p>
       </div>

@@ -3,7 +3,7 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/theme/ThemeProvider";
 
 /**
- * The Sun/Moon switch. Dark is RacquetIQ's default, not a mode — match footage
+ * The Sun/Moon switch. Dark is RacketIQ's default, not a mode — match footage
  * lives better on ink — but light is fully specified, so the switch is real.
  */
 export function ThemeToggle() {

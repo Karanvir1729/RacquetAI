@@ -24,6 +24,8 @@ import { Card } from "@/components/Card";
 import { Screen } from "@/components/Screen";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { EngineSettingsCard } from "@/features/analysis/EngineSettingsCard";
+import { AppleSignInButton } from "@/lib/appleAuth";
+import { useEntitlement } from "@/lib/subscription";
 import {
   deleteAccount,
   isAppleSignInAvailable,
@@ -41,15 +43,15 @@ import { fetchBillingStatus, type BillingStatus, type Plan } from "./billingClie
 type Pending = "apple" | "email" | null;
 
 const PLAN_LABEL: Record<Plan, string> = {
-  monthly: "RacquetIQ Pro — $9.99 / month",
-  yearly: "RacquetIQ Pro — $79.99 / year",
+  monthly: "RacketIQ Pro — $9.99 / month",
+  yearly: "RacketIQ Pro — $79.99 / year",
 };
 
 export function AccountScreen() {
   const session = useAuthSession();
   return (
     <Screen scroll>
-      <ScreenHeader title="Account" subtitle={session ? "Signed in" : "Sign in to RacquetIQ"} />
+      <ScreenHeader title="Account" subtitle={session ? "Signed in" : "Sign in to RacketIQ"} />
       {session ? <SignedInCard email={session.user.email ?? "Signed in"} /> : <SignInCard />}
       {/* Engine choice is device-level, not account-level — always shown.
           Cross-feature import documented in EngineSettingsCard's header. */}
@@ -105,11 +107,14 @@ export function SignInCard() {
 
   return (
     <Card>
+      {/* Apple's own button, on Apple's terms — see AppleSignInButton. It has
+          no loading state of its own, so the in-flight tap is swallowed here
+          rather than shown, which is what the native sheet does anyway. */}
       {appleAvailable ? (
-        <Button
-          label=" Continue with Apple"
-          onPress={() => void runApple()}
-          loading={pending === "apple"}
+        <AppleSignInButton
+          onPress={() => {
+            if (pending === null) void runApple();
+          }}
         />
       ) : null}
 
@@ -172,6 +177,12 @@ function SignedInCard({ email }: { email: string }) {
   const router = useRouter();
   const [billing, setBilling] = useState<BillingStatus | null>(null);
   const [checked, setChecked] = useState(false);
+  // Two independent sources of truth for "is this account Pro": the App Store
+  // subscription (RevenueCat entitlement) and the web Stripe subscription
+  // (billing). A subscriber on EITHER platform is Pro — reading only one is how
+  // an App Store subscriber ended up shown "Free".
+  const entitlement = useEntitlement();
+  const isPro = entitlement === "pro" || billing?.active === true;
 
   const reload = useCallback(() => {
     void fetchBillingStatus().then((status) => {
@@ -212,28 +223,28 @@ function SignedInCard({ email }: { email: string }) {
       <Card>
         <Text style={styles.email}>{email}</Text>
         <Text style={styles.dim}>
-          {billing?.active
-            ? billing.plan !== null
+          {isPro
+            ? billing?.active && billing.plan !== null
               ? PLAN_LABEL[billing.plan]
-              : "RacquetIQ Pro — active"
+              : "RacketIQ Pro — active"
             : checked
               ? "Free — 3 analyses of your own videos included."
               : "Checking your plan…"}
         </Text>
-        {billing === null && checked ? (
+        {billing === null && checked && !isPro ? (
           <Text style={styles.dim}>
-            Billing server unreachable — plan status may be stale. It lives on the analysis
-            server (see Analysis engine below).
+            Web billing status is unavailable right now, so only your App Store subscription is
+            shown. An App Store Pro subscription is unaffected.
           </Text>
         ) : null}
       </Card>
 
-      {billing !== null && !billing.active ? (
+      {!isPro && checked ? (
         <Card>
           <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
           <Text style={styles.dim}>
-            Unlimited analyses, $9.99 a month or $79.99 a year, renewed through your App Store
-            account.
+            Unlimited analyses, renewed through your App Store account. See the paywall for current
+            pricing in your region.
           </Text>
           <Button label="See Pro plans" onPress={() => router.push("/paywall")} />
         </Card>

@@ -28,6 +28,7 @@
  * missing, and the failure is a phone that gets hot in somebody's bag.
  */
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
+import { useFocusEffect } from "expo-router";
 import { ComponentType, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState, Dimensions, StyleProp, ViewStyle } from "react-native";
 
@@ -273,8 +274,23 @@ export function useLiveReferee(): LiveWatch {
     void stopLiveReferee(native.module);
   }, [clearProposal, native.module, setWatchingBoth]);
 
-  // The safety net. Leaving the screen — back, a tab switch, a JS reload —
-  // must always release the camera, whatever state the session was in.
+  // Leaving the TAB must release the camera, and unmount is not that event:
+  // expo-router's bottom-tab navigator keeps a loaded route mounted after you
+  // navigate away (no `unmountOnBlur`, `freezeOnBlur` undefined), so the
+  // cleanup below never ran on a tab switch. The camera, the microphone and
+  // the keep-awake all stayed live behind the Library. AppState never sees
+  // "background" either — the app is still in the foreground. RecordScreen
+  // already scopes its capture to focus for exactly this reason.
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        if (wantsRef.current || watchingRef.current) stop();
+      },
+      [stop],
+    ),
+  );
+
+  // The safety net for everything that IS an unmount — back, a JS reload.
   useEffect(() => {
     mounted.current = true;
     return () => {

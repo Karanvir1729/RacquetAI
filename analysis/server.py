@@ -11,6 +11,9 @@ Bridges the Expo app to the offline pipeline (analyze.py). API contract
                                   "progressPct": number|null,
                                   "message": string|null}
   GET  /jobs/<id>/frame.jpg   mid-video reference frame (from corners_needed on)
+  GET  /jobs/<id>/video.mp4   the downscaled working copy, owner only — the
+                              fallback when a read-out is rejoined in a tab
+                              that never had the local file
   POST /jobs/<id>/corners     JSON {"frontLeft":[nx,ny], "frontRight":[nx,ny],
                                     "backLeft":[nx,ny], "backRight":[nx,ny]}
                               coords normalized relative to frame.jpg (origin
@@ -40,7 +43,8 @@ import uuid
 
 from flask import Flask, jsonify, request, send_file
 
-from platform_api import platform_bp
+from platform_api import _auth_user, _configured, platform_bp
+from coach_api import coach_bp
 
 ANALYSIS_DIR = os.path.dirname(os.path.abspath(__file__))
 JOBS_DIR = os.path.join(ANALYSIS_DIR, "jobs")
@@ -54,7 +58,12 @@ FFPROBE = shutil.which("ffprobe") or "/opt/homebrew/bin/ffprobe"
 
 PORT = int(os.environ.get("RACQUET_ANALYSIS_PORT", "8082"))
 DOWNSCALE_W = 854
-ALLOWED_EXT = {".mp4", ".mov"}
+# .webm is here for browser recordings: MediaRecorder produces VP8/VP9+Opus in
+# a WebM container on Chrome and Firefox (Safari gives mp4). Nothing downstream
+# reads the container — the prepare step transcodes every upload to h264/aac at
+# <=854px before anything looks at a frame — so accepting it costs nothing and
+# refusing it would mean a browser could film a match it could not analyse.
+ALLOWED_EXT = {".mp4", ".mov", ".webm"}
 CORNER_KEYS = ("frontLeft", "frontRight", "backLeft", "backRight")
 COURT_W, COURT_L = 6.4, 9.75
 
@@ -64,6 +73,7 @@ PROGRESS_RE = re.compile(r"\.\.\.\s*([\d.]+)s\s*/\s*([\d.]+)s")
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 4 * 1024 * 1024 * 1024  # 4 GB uploads
 app.register_blueprint(platform_bp)  # /billing/* + /admin/* (platform_api.py)
+app.register_blueprint(coach_bp)     # /coach/*            (coach_api.py)
 
 jobs = {}          # jobId -> dict (see _new_job)
 jobs_lock = threading.Lock()
@@ -80,6 +90,9 @@ def _new_job(job_id, source_name):
         "status": "queued",
         "message": None,
         "sourceName": source_name,
+        # Set by create_job from the verified token; persisted in state.json so a
+        # restarted server still knows whose job this is.
+        "ownerId": None,
         "createdAt": time.time(),
         # filled in during "preparing"
         "videoW": None, "videoH": None, "durationSec": None, "refTimeSec": None,
@@ -262,11 +275,18 @@ def _progress_pct(job):
 @app.after_request
 def _cors(resp):
     resp.headers["Access-Control-Allow-Origin"] = "*"
-    resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    # HEAD is here because the read-out asks how big a job's video is before
+    # deciding to pull it into memory. A preflighted HEAD that is not listed is
+    # simply dropped by the browser, with no error the page can catch.
+    resp.headers["Access-Control-Allow-Methods"] = "GET, HEAD, POST, OPTIONS"
     # X-Filename rides on the raw-body upload the web client uses; omitting it
     # here makes the browser preflight fail and every cross-origin upload dies.
     # Authorization carries Supabase tokens (/billing) and admin basic auth.
     resp.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Filename, Authorization"
+    # Cross-origin JavaScript cannot read Content-Length unless it is named
+    # here, so without this the size check above reads null and the caller
+    # cannot tell a small video from a huge one.
+    resp.headers["Access-Control-Expose-Headers"] = "Content-Length, Content-Range, Accept-Ranges"
     return resp
 
 
@@ -281,6 +301,71 @@ def _get_job(job_id):
         return jobs.get(job_id)
 
 
+# ---------------------------------------------------------------- job auth
+#
+# Every /jobs route is authenticated. Before this, the whole analysis API was
+# open to anyone who knew the hostname: a stranger could POST a 4 GB video and
+# spend the operator's Azure compute, and could read back any job's reference
+# frame and analysis by guessing an id.
+#
+# FAIL CLOSED is the point. If the platform is not configured (no
+# SUPABASE_URL / service key) there is no way to verify a token, so jobs are
+# refused rather than waved through — the previous behaviour is exactly the
+# hole being closed. A LAN/desktop install that genuinely has no accounts opts
+# in explicitly with ALLOW_ANONYMOUS_JOBS=1.
+ALLOW_ANONYMOUS_JOBS = os.environ.get("ALLOW_ANONYMOUS_JOBS", "") == "1"
+
+
+def _require_user():
+    """
+    (user_id, None) when the caller may use /jobs, else (None, response).
+
+    `user_id` is None in the explicitly-opted-in anonymous mode, which also
+    disables the per-owner checks below — one trusted user on a LAN.
+    """
+    if ALLOW_ANONYMOUS_JOBS:
+        return None, None
+    if not _configured():
+        return None, (jsonify({
+            "error": "This analysis server is not configured for accounts, so it "
+                     "cannot accept uploads. Set SUPABASE_URL and "
+                     "SUPABASE_SERVICE_ROLE_KEY, or run it with "
+                     "ALLOW_ANONYMOUS_JOBS=1 on a trusted network."
+        }), 503)
+    user = _auth_user()
+    if user is None:
+        return None, (jsonify({"error": "Sign in to analyse a video."}), 401)
+    return user.get("id"), None
+
+
+def _owns(job, user_id):
+    """
+    May this caller see this job?
+
+    Anonymous mode has no owners. Otherwise a job is visible only to the
+    account that created it — a guessed job id must not hand over someone
+    else's court footage.
+    """
+    if ALLOW_ANONYMOUS_JOBS:
+        return True
+    return job.get("ownerId") is not None and job.get("ownerId") == user_id
+
+
+def _guard_job(job_id):
+    """(job, user_id, None) or (None, None, response). Used by every read route."""
+    user_id, denied = _require_user()
+    if denied is not None:
+        return None, None, denied
+    job = _get_job(job_id)
+    if job is None:
+        return None, None, (jsonify({"error": "unknown job"}), 404)
+    if not _owns(job, user_id):
+        # 404, not 403: a stranger probing ids learns nothing about which ones
+        # exist.
+        return None, None, (jsonify({"error": "unknown job"}), 404)
+    return job, user_id, None
+
+
 @app.route("/health")
 def health():
     return jsonify({"ok": True, "service": "racquetai-analysis", "port": PORT})
@@ -288,6 +373,12 @@ def health():
 
 @app.route("/jobs", methods=["POST"])
 def create_job():
+    # Authenticate BEFORE reading the body: a rejected upload must cost the
+    # server nothing, and Flask has not spooled the file at this point.
+    owner_id, denied = _require_user()
+    if denied is not None:
+        return denied
+
     # Two upload shapes: multipart field "video" (curl, older app builds) or a
     # raw video/* body (app build 11+). Raw exists because expo's iOS multipart
     # implementation buffers the whole file in memory before sending — a match
@@ -299,12 +390,17 @@ def create_job():
         ext = os.path.splitext(src_name)[1].lower() or ".mp4"
     elif ctype.startswith("video/"):
         src_name = request.headers.get("X-Filename") or "upload"
-        ext = ".mov" if "quicktime" in ctype else ".mp4"
+        if "quicktime" in ctype:
+            ext = ".mov"
+        elif "webm" in ctype:
+            ext = ".webm"
+        else:
+            ext = ".mp4"
     else:
-        return jsonify({"error": 'multipart field "video" (mp4/mov) or a raw '
+        return jsonify({"error": 'multipart field "video" (mp4/mov/webm) or a raw '
                                  "video/* body is required"}), 400
     if ext not in ALLOWED_EXT:
-        return jsonify({"error": f"unsupported extension {ext}; use mp4 or mov"}), 400
+        return jsonify({"error": f"unsupported extension {ext}; use mp4, mov or webm"}), 400
 
     job_id = uuid.uuid4().hex[:12]
     d = _job_dir(job_id)
@@ -320,6 +416,9 @@ def create_job():
 
     job = _new_job(job_id, os.path.basename(src_name))
     job["inputPath"] = input_path
+    # Bound to the account that uploaded it. Every read route checks this, so a
+    # guessed job id cannot hand someone else's footage or analysis over.
+    job["ownerId"] = owner_id
     with jobs_lock:
         jobs[job_id] = job
     _persist(job)
@@ -329,9 +428,9 @@ def create_job():
 
 @app.route("/jobs/<job_id>")
 def job_status(job_id):
-    job = _get_job(job_id)
-    if job is None:
-        return jsonify({"error": "unknown job"}), 404
+    job, _user, denied = _guard_job(job_id)
+    if denied is not None:
+        return denied
     with jobs_lock:
         snapshot = dict(job)
     return jsonify({"status": snapshot["status"],
@@ -341,20 +440,48 @@ def job_status(job_id):
 
 @app.route("/jobs/<job_id>/frame.jpg")
 def job_frame(job_id):
-    job = _get_job(job_id)
-    if job is None:
-        return jsonify({"error": "unknown job"}), 404
+    job, _user, denied = _guard_job(job_id)
+    if denied is not None:
+        return denied
     path = os.path.join(_job_dir(job_id), "frame.jpg")
     if job["status"] in ("queued", "preparing") or not os.path.exists(path):
         return jsonify({"error": "frame not ready (available from corners_needed)"}), 409
     return send_file(path, mimetype="image/jpeg")
 
 
+@app.route("/jobs/<job_id>/video.mp4")
+def job_video(job_id):
+    """The downscaled video this job was measured from, for its owner.
+
+    The read-out plays the LOCAL file the browser uploaded, which is the right
+    default — it is instant and the footage never has to travel. But that file
+    only exists in the tab that did the upload: rejoin a job by `?job=` in a
+    new tab, or reload, and the read-out has measurements and no picture. This
+    route is the fallback for exactly that case.
+
+    It gives nothing away that the server does not already hold. The upload is
+    on disk here because the pipeline cannot measure it otherwise, it is the
+    854px working copy rather than the original, `_guard_job` means only the
+    account that created the job can read it, and the retention sweeper deletes
+    it with everything else after JOB_TTL_HOURS.
+
+    `conditional=True` matters: it answers Range requests, so the player can
+    seek without pulling the whole file first.
+    """
+    job, _user, denied = _guard_job(job_id)
+    if denied is not None:
+        return denied
+    path = os.path.join(_job_dir(job_id), "video.mp4")
+    if not os.path.exists(path):
+        return jsonify({"error": "no video kept for this job"}), 404
+    return send_file(path, mimetype="video/mp4", conditional=True)
+
+
 @app.route("/jobs/<job_id>/corners", methods=["POST"])
 def job_corners(job_id):
-    job = _get_job(job_id)
-    if job is None:
-        return jsonify({"error": "unknown job"}), 404
+    job, _user, denied = _guard_job(job_id)
+    if denied is not None:
+        return denied
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         return jsonify({"error": "JSON body required"}), 400
@@ -400,16 +527,109 @@ def job_corners(job_id):
 
 @app.route("/jobs/<job_id>/analysis.json")
 def job_analysis(job_id):
-    job = _get_job(job_id)
-    if job is None:
-        return jsonify({"error": "unknown job"}), 404
+    job, _user, denied = _guard_job(job_id)
+    if denied is not None:
+        return denied
     path = os.path.join(_job_dir(job_id), "out", "analysis.json")
     if job["status"] != "done" or not os.path.exists(path):
         return jsonify({"error": f'analysis not ready (job is "{job["status"]}")'}), 409
     return send_file(path, mimetype="application/json")
 
 
+# ---------------------------------------------------------------- retention
+#
+# Nothing used to delete a job, ever. Each one keeps the upload, a downscaled
+# copy, an extracted wav, a reference frame and the analysis — hundreds of MB
+# for a full match — so the disk grew until the container died. Uploads are
+# authenticated now, which bounds who can add to it, but not how much.
+#
+# Two limits, whichever bites first: age, and total bytes (newest kept).
+JOB_TTL_HOURS = float(os.environ.get("JOB_TTL_HOURS", "48"))
+JOB_STORE_MAX_GB = float(os.environ.get("JOB_STORE_MAX_GB", "20"))
+_SWEEP_EVERY_SEC = 30 * 60
+
+
+def _dir_size(path):
+    total = 0
+    for root, _dirs, files in os.walk(path):
+        for name in files:
+            try:
+                total += os.path.getsize(os.path.join(root, name))
+            except OSError:
+                pass
+    return total
+
+
+def _forget_job(job_id):
+    """Drop a job from memory and disk. Best effort; never raises."""
+    with jobs_lock:
+        jobs.pop(job_id, None)
+    shutil.rmtree(_job_dir(job_id), ignore_errors=True)
+
+
+def _sweep_jobs():
+    """One retention pass. Returns (removed_count, freed_bytes) for the log."""
+    if not os.path.isdir(JOBS_DIR):
+        return 0, 0
+    now = time.time()
+    entries = []
+    for job_id in os.listdir(JOBS_DIR):
+        d = os.path.join(JOBS_DIR, job_id)
+        if not os.path.isdir(d):
+            continue
+        with jobs_lock:
+            job = jobs.get(job_id)
+        # An in-flight job is never swept, however old the directory looks.
+        if job is not None and job.get("status") in ("queued", "preparing", "analyzing"):
+            continue
+        created = (job or {}).get("createdAt")
+        if not isinstance(created, (int, float)):
+            try:
+                created = os.path.getmtime(d)
+            except OSError:
+                created = now
+        entries.append((created, job_id, d))
+
+    removed = freed = 0
+    survivors = []
+    for created, job_id, d in entries:
+        if (now - created) > JOB_TTL_HOURS * 3600:
+            size = _dir_size(d)
+            _forget_job(job_id)
+            removed += 1
+            freed += size
+        else:
+            survivors.append((created, job_id, d, _dir_size(d)))
+
+    # Still over the byte cap? Drop oldest-first until under it.
+    cap = JOB_STORE_MAX_GB * 1024 ** 3
+    total = sum(s[3] for s in survivors)
+    for created, job_id, _d, size in sorted(survivors):
+        if total <= cap:
+            break
+        _forget_job(job_id)
+        removed += 1
+        freed += size
+        total -= size
+    return removed, freed
+
+
+def _retention_loop():
+    while True:
+        try:
+            removed, freed = _sweep_jobs()
+            if removed:
+                print(f"[retention] removed {removed} job(s), freed "
+                      f"{freed / 1024 ** 3:.2f} GB", flush=True)
+        except Exception as exc:  # never let the sweeper kill the server
+            print(f"[retention] sweep failed: {exc}", flush=True)
+        time.sleep(_SWEEP_EVERY_SEC)
+
+
 if __name__ == "__main__":
     os.makedirs(JOBS_DIR, exist_ok=True)
     _load_existing_jobs()
+    # Sweep once at boot (a container that restarts daily would otherwise never
+    # reach the first interval), then every 30 minutes.
+    threading.Thread(target=_retention_loop, daemon=True).start()
     app.run(host="0.0.0.0", port=PORT, threaded=True)

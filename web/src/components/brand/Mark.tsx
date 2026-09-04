@@ -3,7 +3,7 @@ import { useId } from "react";
 import { cn } from "@/lib/cn";
 
 /**
- * The RacquetIQ mark — "Ace Spark". Geometry is a straight copy of the
+ * The RacketIQ mark — "Ace Spark". Geometry is a straight copy of the
  * canonical block between the `@mark-geometry` markers in
  * `assets/brand/src/mark.svg`; if that file changes, mirror it here.
  *
@@ -23,7 +23,7 @@ export function Mark({ size = 32, className }: { size?: number; className?: stri
       viewBox="0 0 512 512"
       className={className}
       role="img"
-      aria-label="RacquetIQ"
+      aria-label="RacketIQ"
       focusable="false"
     >
       <defs>
@@ -68,7 +68,7 @@ export function Mark({ size = 32, className }: { size?: number; className?: stri
 }
 
 /**
- * The horizontal lockup. "Racquet" in text colour, "IQ" in accent text —
+ * The horizontal lockup. "Racket" in text colour, "IQ" in accent text —
  * the colour break is the only separation, no space and no second capital
  * (the wordmark rule, carried over from assets/brand/src/wordmark.svg).
  */
@@ -80,7 +80,7 @@ export function Wordmark({ className, markSize = 30 }: { className?: string; mar
         className="text-[21px] font-extrabold"
         style={{ letterSpacing: "-0.035em", color: "var(--rq-text)" }}
       >
-        Racquet<span style={{ color: "var(--rq-accent-text)" }}>IQ</span>
+        Racket<span style={{ color: "var(--rq-accent-text)" }}>IQ</span>
       </span>
     </span>
   );

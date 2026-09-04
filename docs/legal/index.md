@@ -1,9 +1,9 @@
 ---
-title: RacquetIQ legal
+title: RacketIQ legal
 permalink: /legal/
 ---
 
-# RacquetIQ
+# RacketIQ
 
 Squash match analysis for iPhone.
 

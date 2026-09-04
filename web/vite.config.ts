@@ -5,10 +5,25 @@ import react from "@vitejs/plugin-react";
 // modules (letterbox maths, the analysis contract) keep their import paths.
 const srcDir = new URL("./src/", import.meta.url).pathname;
 
+// `@app/…` resolves into the EXPO APP's src. The scoring engine (squash rules,
+// announcements, video playback) is pure TypeScript with no react-native or
+// expo imports, so the web referee runs the exact same code the phone does
+// rather than a port. web/src/analysis was ported by hand and drifted from its
+// app twin — sharing the source is how that does not happen twice.
+const appSrcDir = new URL("../src/", import.meta.url).pathname;
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: { "@": srcDir.replace(/\/$/, "") },
+    alias: {
+      // Order matters: the more specific prefix must win. The shared scoring
+      // modules import "@/features/analysis/types" using the APP's alias, and
+      // web/src has no features/ directory, so pointing that one prefix at the
+      // app's src is unambiguous.
+      "@/features": `${appSrcDir.replace(/\/$/, "")}/features`,
+      "@": srcDir.replace(/\/$/, ""),
+      "@app": appSrcDir.replace(/\/$/, ""),
+    },
   },
   server: {
     port: 5183,

@@ -2,7 +2,7 @@
  * Everything the paywall SAYS and every number it shows, kept out of the view
  * so it can be unit-tested. App Review reads this screen line by line, and the
  * prices here have to agree with App Store Connect (subscription group
- * "RacquetIQ Pro", id 22316619) or the app is rejected for misleading pricing.
+ * "RacketIQ Pro", id 22316619) or the app is rejected for misleading pricing.
  *
  * The saving is COMPUTED, never typed in: a badge claiming a discount the
  * arithmetic does not support is both a rejection and a refund request.
@@ -87,7 +87,7 @@ export function subscribeLabel(plan: PaywallPlan): string {
   return `Subscribe — ${plan.priceLabel} ${plan.periodLabel}`;
 }
 
-export const PAYWALL_TITLE = "RacquetIQ Pro";
+export const PAYWALL_TITLE = "RacketIQ Pro";
 export const PAYWALL_SUBTITLE = "Unlimited match analyses";
 
 export const PAYWALL_LEAD =
@@ -110,7 +110,7 @@ export const FREE_TIER_NOTE =
  * before the period ends, manageable in Apple ID settings.
  */
 export const RENEWAL_DISCLOSURE =
-  "RacquetIQ Pro is an auto-renewable subscription. Payment is charged to your Apple ID at confirmation of purchase. " +
+  "RacketIQ Pro is an auto-renewable subscription. Payment is charged to your Apple ID at confirmation of purchase. " +
   "It renews automatically at the same price and duration unless you cancel at least 24 hours before the end of the " +
   "current period, and your Apple ID is charged for the renewal within 24 hours of the period ending. " +
   "You can manage or cancel your subscription at any time in your Apple ID settings (Settings › your name › Subscriptions).";
@@ -118,7 +118,7 @@ export const RENEWAL_DISCLOSURE =
 /** Shown instead of a dead Subscribe button when the store isn't wired up. */
 export const PURCHASES_UNAVAILABLE =
   "In-app purchasing isn't available in this build — the App Store connection isn't configured yet. " +
-  "Nothing is locked: keep using RacquetIQ as normal.";
+  "Nothing is locked: keep using RacketIQ as normal.";
 
 /**
  * Shown the moment the store says a purchase completed, BEFORE (and regardless
@@ -131,12 +131,12 @@ export const PURCHASES_UNAVAILABLE =
  * and points at Restore as the way to settle anything that still looks locked.
  */
 export const PURCHASE_CONFIRMED =
-  "Purchase complete — thank you. RacquetIQ Pro is being applied to this Apple ID. " +
+  "Purchase complete — thank you. RacketIQ Pro is being applied to this Apple ID. " +
   "If anything still looks locked in a moment, tap Restore purchases below.";
 
 export const SUBSCRIBED_TITLE = "You're subscribed";
 export const SUBSCRIBED_BODY =
-  "RacquetIQ Pro is active on this Apple ID. Analyse as many matches as you like.";
+  "RacketIQ Pro is active on this Apple ID. Analyse as many matches as you like.";
 
 export const CHECKING_ENTITLEMENT = "Checking your subscription…";
 
@@ -147,9 +147,9 @@ export const LEGAL_PENDING_NOTE =
 export function restoreMessage(outcome: RestoreOutcome): string {
   switch (outcome.status) {
     case "restored":
-      return "Your RacquetIQ Pro subscription has been restored.";
+      return "Your RacketIQ Pro subscription has been restored.";
     case "none":
-      return "No active RacquetIQ Pro subscription was found on this Apple ID.";
+      return "No active RacketIQ Pro subscription was found on this Apple ID.";
     case "completed":
       return "Restore finished. Any subscription on this Apple ID has been applied.";
     case "unavailable":

@@ -1,9 +1,9 @@
 /**
- * RacquetIQ web design tokens.
+ * RacketIQ web design tokens.
  *
  * Structure is lifted from Daybot's storefront theming (frontend/LANDING_DESIGN.md):
  * every colour is a CSS custom property, switched by a `data-theme` attribute,
- * and **no component ever writes a literal colour**. The VALUES are RacquetIQ's
+ * and **no component ever writes a literal colour**. The VALUES are RacketIQ's
  * own — the dark/light pairs in `src/theme/tokens.ts` at the repo root, which
  * `docs/04-branding.md` documents hex for hex. Changing a colour here means
  * changing it there too; the two are expected to agree.

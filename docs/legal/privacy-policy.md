@@ -1,14 +1,14 @@
 ---
-title: RacquetIQ Privacy Policy
+title: RacketIQ Privacy Policy
 permalink: /legal/privacy-policy/
 ---
 
-# RacquetIQ — Privacy Policy
+# RacketIQ — Privacy Policy
 
 **Last updated:** 18 August 2026
-**Applies to:** the RacquetIQ iOS app (bundle identifier `com.racquetai.app`), version 1.0 and later.
+**Applies to:** the RacketIQ iOS app (bundle identifier `com.racquetai.app`), version 1.0 and later.
 
-RacquetIQ is made by **Daybot Solutions Inc.** ("we", "us").
+RacketIQ is made by **Daybot Solutions Inc.** ("we", "us").
 Questions about this policy: **prokaranvir@gmail.com**.
 
 This policy describes exactly what the app does with your video, your audio, and your data. It is
@@ -63,15 +63,17 @@ uploaded so that it can be analysed.
 
 We do not have access to any of it.
 
-There are **no user-adjustable privacy settings** in this version: the app has two screens, Record
-and Library, and no settings screen. Anything the app decides about analysis — which engine runs, and
-where the fallback sends a video — it decides for itself, on the rules described in
-[section 3](#3-when-video-does-leave-your-phone-the-analysis-server-fallback). Nothing on this page
-is something you can switch off inside the app.
+**By default, analysis runs entirely on your device and no video leaves your phone.** The one
+privacy-relevant choice you can make lives under **Account → Analysis engine**: you may switch
+analysis from on-device to a server and set that server's address, which is the only situation in
+which a video is uploaded (see
+[section 3](#3-when-video-does-leave-your-phone-the-analysis-server-fallback)). The most private
+option — on-device — is the default, so you never have to change anything to keep your video on your
+phone.
 
-(The app still *reads* two small configuration files, `analysis-backend.json` and
-`analysis-server.json`, if a beta build left them on your device. No released version can create or
-change them, and they hold no information about you.)
+(The app reads and writes two small configuration files, `analysis-backend.json` and
+`analysis-server.json`, when you change the analysis engine under **Account → Analysis engine**. They
+record only your engine choice and the server address you typed — no information about you.)
 
 ## 2. Camera, microphone, and photo library
 
@@ -93,7 +95,7 @@ change them, and they hold no information about you.)
 
 ## 3. When video *does* leave your phone: the analysis server fallback
 
-RacquetIQ has two analysis engines:
+RacketIQ has two analysis engines:
 
 **On-device (the default and normal path).** A native analyser bundled inside the app decodes the
 video, runs Apple's on-device Vision pose detection, and measures the audio track locally. Nothing is
@@ -118,14 +120,11 @@ upload, so it is important that you know what it involves:
 - **What is *not* sent:** no name, no email address, no account identifier, no device identifier and
   no advertising identifier is attached to the upload. The job itself is identified by a random
   string generated on the server.
-- **Where it goes:** a server we operate at `racquetiq-a7682a.eastus.azurecontainer.io` (port 8082),
+- **Where it goes:** a server we operate at `racquetiq-a7682a.eastus.azurecontainer.io`,
   hosted on Microsoft Azure in the East US region. **Your video is therefore processed in the United
   States.**
-- **How it is protected in transit:** the app currently connects to that server over plain HTTP,
-  which means **the upload is not encrypted in transit**.
-  *(Editorial note for the operator, delete this parenthesis before publishing: this bullet is
-  accurate today and must stay until the analysis server is served over HTTPS — see
-  [README.md](README.md) §0.)*
+- **How it is protected in transit:** the app connects to that server over **HTTPS (TLS)**, so the
+  upload is **encrypted in transit**.
 - **What the server keeps:** the uploaded video, a downscaled copy of it, an extracted audio track, a
   single reference frame image, the resulting analysis file, and a small job record that includes
   **the filename you sent** and the time the job was created. These are kept in a per-job folder.
@@ -142,7 +141,7 @@ and to contact us if you see an analysis reported as running on the server.
 
 ## 4. Other people in your videos
 
-A squash video normally shows at least one other person. RacquetIQ does not identify anyone: it
+A squash video normally shows at least one other person. RacketIQ does not identify anyone: it
 detects human body poses to measure movement, and it does not perform face recognition, does not
 build a profile of any player, and cannot tell one match's players from another's. You are
 nonetheless responsible for having the right to film the people in your footage — see the
@@ -160,7 +159,7 @@ entirely your decision. The file contains a programming error message, not your 
 
 ## 6. Subscriptions and payments
 
-RacquetIQ Pro is an auto-renewable subscription sold through the App Store.
+RacketIQ Pro is an auto-renewable subscription sold through the App Store.
 
 - **Apple processes the payment.** We never see and never receive your card details, your Apple
   Account credentials, or your billing address. Apple's handling of that data is governed by
@@ -236,7 +235,7 @@ asked us to perform the analysis for you.
 
 ## 9. Children
 
-RacquetIQ is not directed at children under 13 and we do not knowingly collect personal information
+RacketIQ is not directed at children under 13 and we do not knowingly collect personal information
 from them.
 
 ## 10. Retention

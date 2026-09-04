@@ -12,9 +12,11 @@ import {
   PlayCircle,
   Repeat2,
   ScanLine,
+  Sparkles,
   Upload,
 } from "lucide-react";
 import { useCallback, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 import { HeroPlate } from "@/components/HeroPlate";
 import { WaitlistBand } from "@/components/WaitlistBand";
@@ -27,11 +29,11 @@ import { Stat } from "@/components/ui/Stat";
 import { HERO_MATCH } from "@/data/heroMatch";
 
 /**
- * The RacquetIQ landing page.
+ * The RacketIQ landing page.
  *
  * Structure follows Daybot's section rhythm — alternating --rq-bg / --rq-panel
  * bands separated by a hairline, generous padding, one uniform card recipe —
- * with RacquetIQ's palette and one hard rule of its own: nothing on this page
+ * with RacketIQ's palette and one hard rule of its own: nothing on this page
  * claims a capability the pipeline does not have. The "Limits" band is not an
  * apology, it is the product's argument.
  */
@@ -95,7 +97,7 @@ const READOUT = [
 const LIMITS = [
   {
     title: "No live tracking",
-    body: "RacquetIQ reads a file after the match. There is no real-time mode, no camera feed, nothing to wear, and no line-calling.",
+    body: "RacketIQ reads a file after the match. There is no real-time mode, no camera feed, nothing to wear, and no line-calling.",
   },
   {
     title: "Shot detection is approximate",
@@ -107,7 +109,7 @@ const LIMITS = [
   },
   {
     title: "Squash, and no coaching",
-    body: "The court model is a squash court — no tennis, no padel, no badminton. RacquetIQ reports what it measured and stops there; what to do about it is between you and your coach.",
+    body: "The court model is a squash court — no tennis, no padel, no badminton. RacketIQ reports what it measured and stops there; what to do about it is between you and your coach.",
   },
 ];
 
@@ -134,7 +136,7 @@ const FAQ: Array<{ q: string; a: ReactNode }> = [
   },
   {
     q: "Is this the same thing as the iOS app?",
-    a: "Same pipeline, same analysis file format. RacquetIQ started on iOS; this is that analysis in a browser, on whatever machine you already have the footage on.",
+    a: "Same pipeline, same analysis file format. RacketIQ started on iOS; this is that analysis in a browser, on whatever machine you already have the footage on.",
   },
 ];
 
@@ -221,6 +223,34 @@ export default function Landing() {
 
   return (
     <>
+      {/* ── Launch offer ─────────────────────────────────────────────────── */}
+      {/* A slim announcement band, not a hero element: the trial is stamped at
+          signup by the platform (profiles.pro_trial_ends_at), so this line only
+          ever advertises what the database already does. */}
+      <div
+        className="border-b"
+        style={{ borderColor: "var(--rq-accent-line)", background: "var(--rq-accent-soft)" }}
+      >
+        <div className="mx-auto flex max-w-shell flex-wrap items-center justify-center gap-x-3 gap-y-1 px-5 py-3 text-center sm:px-6 lg:px-8">
+          <span
+            className="rq-label inline-flex items-center gap-1.5 text-[13px]"
+            style={{ color: "var(--rq-accent-text)" }}
+          >
+            <Sparkles className="h-4 w-4" /> Launch offer
+          </span>
+          <span className="rq-body-sm" style={{ color: "var(--rq-text)" }}>
+            Sign up now and get 3 days of RacketIQ Pro, free — no card needed.
+          </span>
+          <Link
+            to="/login?mode=signup"
+            className="rq-label inline-flex min-h-[32px] items-center gap-1 text-[13px] underline underline-offset-4 transition-colors duration-200 hover:opacity-80"
+            style={{ color: "var(--rq-accent-text)" }}
+          >
+            Create your account <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      </div>
+
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
         {/* One soft Optic bloom behind the plate. The page's only gradient. */}
@@ -244,7 +274,7 @@ export default function Landing() {
             </div>
 
             <p className="rq-lead mt-6 max-w-2xl">
-              Upload a match filmed from the balcony, mark the four floor corners, and RacquetIQ
+              Upload a match filmed from the balcony, mark the four floor corners, and RacketIQ
               reads it back to you — where each player stood, where the ball landed, and how
               predictable the pattern was.
             </p>
@@ -406,7 +436,7 @@ export default function Landing() {
         <Reveal>
           <SectionHead
             eyebrow="Limits"
-            title="What RacquetIQ will not tell you."
+            title="What RacketIQ will not tell you."
             body="Vision on club footage is genuinely hard, and a confidently wrong number is worse than no number. So here is the honest edge of the thing."
           />
         </Reveal>
@@ -465,6 +495,13 @@ export default function Landing() {
                 See a real analysis
               </ButtonLink>
             </div>
+            <Link
+              to="/login?mode=signup"
+              className="rq-caption mt-5 inline-flex min-h-[44px] items-center gap-1 transition-colors duration-200 hover:text-rq-text focus-visible:text-rq-text"
+            >
+              <Sparkles className="h-3.5 w-3.5" style={{ color: "var(--rq-accent-text)" }} />
+              Launch offer: every new account starts with 3 days of Pro, free
+            </Link>
           </div>
         </div>
       </Section>

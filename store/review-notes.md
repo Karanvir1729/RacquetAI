@@ -1,4 +1,4 @@
-# App Review notes — RacquetIQ
+# App Review notes — RacketIQ
 
 Two documents in one file:
 
@@ -12,7 +12,7 @@ Two documents in one file:
 ## Notes for App Review
 
 ```
-RacquetIQ analyses a video of a squash match that the user has already filmed, and keeps
+RacketIQ analyses a video of a squash match that the user has already filmed, and keeps
 score with a correctable, spoken PAR-11 scoreboard (the Referee tab). The app never follows
 the ball; every machine-made call is a suggestion a human can beat or correct with one tap.
 
@@ -29,15 +29,17 @@ THE REFEREE TAB, AND WHY YOU CANNOT FULLY REPRODUCE IT AT A DESK
 The Referee tab is a tap-driven squash scoreboard that announces the score out loud. It can
 also watch a match and score rallies itself, two ways:
 - "Score a video": pick an analysed match; the app plays the footage, highlights both
-  players, and calls each rally as the playhead reaches it. The demo account has analysed
-  matches ready for this — open Referee → Score a video and pick the top row.
+  players, and calls each rally as the playhead reaches it. To try this, first import one of
+  the sample clips supplied with this submission (Library → "Import & analyze"), then open
+  Referee → "Score a video" and pick it. Analyses are stored on the device, so a freshly
+  signed-in account starts with none, and the bundled "Sample" demo has no video attached.
 - "Watch live": the camera watches a real squash court and scores after a visible 4-second
   countdown a tap always beats. This needs a real court; an attached demo video shows the
   full flow (see App Review Attachment).
 Automatic scoring is measured at roughly 73% per rally and the app SAYS SO before it scores
 anything: a first-run alert, the caption on the switch, and a spoken warning at the start of
 every armed session. It is off for any user who declines, every call is correctable in one
-tap, and nothing RacquetIQ produces is presented as an official result.
+tap, and nothing RacketIQ produces is presented as an official result.
 
 NO FILMING IS NEEDED TO REVIEW THE APP
 Open the Library tab and tap "Demo match analysis" (marked "Sample"). It opens a complete
@@ -69,7 +71,7 @@ container. Account, billing, and subscription traffic is HTTPS (Supabase, Revenu
 FREE TIER AND SUBSCRIPTION
 Recording, the library and the bundled demo analysis are always free, as are the user's first
 3 analyses of their own videos. After that, starting a 4th analysis opens the paywall
-(RacquetIQ Pro — monthly or annual auto-renewable). Subscribing is optional; nothing already
+(RacketIQ Pro — monthly or annual auto-renewable). Subscribing is optional; nothing already
 analysed is ever taken away.
 
 SANDBOX ACCOUNT FOR TESTING THE SUBSCRIPTION
@@ -114,78 +116,81 @@ placement/coverage/predictability ones only.
 
 These are blockers, in the order they will bite.
 
-### 1. In-app purchases are not configured — the paywall cannot be reviewed
+### 1. ~~In-app purchases are not configured~~ — RESOLVED
 
-`src/lib/subscription.ts` reads the RevenueCat key from `EXPO_PUBLIC_REVENUECAT_IOS_KEY` or
-`extra.revenueCatIosKey`. **Neither is set** — `app.json` `extra` contains only `router` and
-`eas`, and the env var appears nowhere in the repo.
+`extra.revenueCatIosKey` is set in `app.json` (`appl_QrVQ…`), so `readApiKey()` returns a key,
+`configure()` succeeds and the quota gate fires. Still verify one sandbox purchase end to end
+before submitting — the key existing is not proof the products are attached.
 
-With no key the chain is:
+### 2. ~~The paywall's Terms and Privacy links are dead~~ — RESOLVED
 
-`readApiKey()` → `null` → `configure()` → `false` → entitlement `"unknown"` →
-`canStartAnalysis()` returns `true` for everyone (the deliberate fail-open) → **the quota gate
-never fires and the paywall is never reached.** The paywall itself, if opened, shows
-"In-app purchases aren't available in this build yet. Nothing is locked."
+`src/lib/legalLinks.ts` now points both rows at live pages, verified returning HTTP 200:
 
-A reviewer cannot buy the subscription, so the products stay in "Waiting for Review" and the
-build is rejected under Guideline 2.1. **Set the key and verify a sandbox purchase end to end
-before submitting.**
+```
+https://www.racketiq.tech/legal/terms-of-use
+https://www.racketiq.tech/legal/privacy-policy
+```
 
-### 2. The paywall's Terms and Privacy links are dead
+### 3. Subscription prices must be set in App Store Connect — STILL OPEN
 
-`src/lib/legalLinks.ts` has `TERMS_OF_USE.url = null` and `PRIVACY_POLICY.url = null`. The
-paywall renders both rows struck through and inert, with the note "These pages go live before
-the App Store release; the links are disabled until then."
+The Paid Applications Agreement must be signed before the pricing API accepts anything. Until
+prices exist the products cannot be submitted. `store/listing.md`, `paywallCopy.ts` and the
+App Store Connect products **must all agree** ($9.99/month, $79.99/year) or it is a 3.1.2
+rejection.
 
-Guideline 3.1.2 requires **functional** links to an EULA and a privacy policy on the
-subscription screen. Shipping visibly disabled links is a direct rejection. The pages are
-drafted in `docs/legal/`; GitHub Pages is not switched on yet.
+### 4. ~~Library copy contradicts the privacy policy~~ — RESOLVED IN CODE
 
-### 3. Subscription prices are not set in App Store Connect
+The "Import & analyze" caption no longer claims the video is sent to a server; it is now
+engine-neutral, matching the on-device default. The privacy policy was corrected to match and
+is live.
 
-Known and expected — the Paid Applications Agreement is unsigned, so the pricing API rejects.
-Until prices exist, the products cannot be submitted. The description in `store/listing.md`
-states $9.99/month and $79.99/year to match `paywallCopy.ts`; **these three places must
-agree** or it is a 3.1.2 rejection.
+**Screenshot `store/screenshots/04-library.png` still shows the OLD string and must be
+recaptured** before upload, or the screenshot contradicts both the app and the policy.
 
-### 4. Library copy contradicts the privacy policy
-
-The "Import & analyze" card reads _"Pick a match video from your library and send it to your
-analysis server."_ (`src/features/recording/ImportAnalysisCard.tsx:87`). Analysis actually
-runs **on device** by default; the server is a fallback. The privacy policy leads with
-"Match analysis normally runs entirely on your phone."
-
-This string is visible in `store/screenshots/04-library.png`. A reviewer comparing the
-screenshot to the privacy policy has a fair question. Fixing the copy means recapturing that
-one screenshot.
-
-### 5. The reviewer needs sample clips, or they cannot reach the paywall
+### 5. The reviewer needs sample clips, or they cannot reach the paywall — STILL OPEN
 
 The paywall only appears after **three completed analyses of the user's own video**, and
-`recordFreeAnalysisUsed()` is called only once an analysis is written to disk
-(`useDeviceImportFlow.ts:117`) — so a clip the app fails to analyse does not consume the
-allowance. A reviewer with no squash footage has no realistic route to the purchase screen.
+`recordFreeAnalysisUsed()` is called only once an analysis is written to disk, so a clip the
+app fails to analyse does not consume the allowance. A reviewer with no squash footage has no
+realistic route to the purchase screen.
 
-The App Review notes above therefore promise **three sample squash clips**. You must actually
-supply them: attach them in App Store Connect › App Review Information, or host them and put
-the link in the notes. `analysis/samples/` has suitable footage, but those files are 37–54 MB
-each — trim them to the shortest clip that still yields a full analysis.
+The notes above promise **three sample squash clips**. You must actually supply them: attach
+them in App Store Connect › App Review Information, or host them and link them in the notes.
+`analysis/samples/` has suitable footage, but those files are 37–54 MB each — trim them to the
+shortest clip that still yields a full analysis.
 
-If that is impractical, the alternative is a review-only route to the paywall — but that is
-app work, and a hidden entry point needs to be explained in the notes or it looks like
-concealed functionality.
+### 6. Build 29 ships a generic photo-library purpose string — KNOWN, ACCEPTED
 
-### 6. Placeholders that must be resolved
+The submission candidate is **EAS build 29, v1.0.0**
+(`18e8b6f7-8550-4fa9-90a4-2a98aeda060e`). Verified inside the IPA: correctly
+signed for distribution, Apple Sign In entitlement present, all four permission
+strings present, `ITSAppUsesNonExemptEncryption=false`.
 
-| Placeholder                                                                    | Where                                                                |
-| ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
-| `TODO_SANDBOX_APPLE_ID` / `TODO_SANDBOX_PASSWORD`                              | this file — create in App Store Connect › Users and Access › Sandbox |
-| `TODO_OPERATOR_SUPPORT_EMAIL`                                                  | this file, `docs/legal/privacy-policy.md`                            |
-| `TODO_SUPPORT_URL`, `TODO_PRIVACY_URL`, `TODO_TERMS_URL`, `TODO_MARKETING_URL` | `store/listing.md`                                                   |
-| `TODO_OPERATOR_LEGAL_ENTITY`, `TODO_OPERATOR_POSTAL_ADDRESS`                   | `docs/legal/privacy-policy.md`                                       |
+One known defect: `NSPhotoLibraryUsageDescription` reads Expo's default
+*"Allow RacketIQ to access your photos"* rather than the string in `app.json`.
+A generic purpose string is a Guideline 5.1.1 rejection RISK (it names the app
+and the resource but not the reason). Accepted for now because the EAS free-tier
+iOS build quota is exhausted until **1 Sep 2026**.
 
-The sandbox credentials are yours to create — I have not created an account, and I will not
-enter credentials anywhere on your behalf.
+`ios/RacketIQ/Info.plist` has already been patched locally with the correct
+string, so **the next build — local or after the quota resets — picks it up with
+no further action**. `ios/` is gitignored (Expo CNG), so if the native project
+is ever regenerated with `expo prebuild`, the string comes from `app.json`,
+which is already correct. Both paths converge; only build 29 itself is affected.
+
+### 7. Placeholders that must be resolved
+
+| Placeholder                                        | Status                                                                                   |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Legal entity                                       | ✅ **Daybot Solutions Inc.** — set in the legal docs and `store/listing.md`               |
+| Support email                                      | ✅ **prokaranvir@gmail.com** — set in the legal docs and the support page                 |
+| Support / Privacy / Terms / Marketing URLs         | ✅ Live on Azure SWA — see `store/listing.md` › URLs (verified 2026-08-19)                |
+| `TODO_SANDBOX_APPLE_ID` / `TODO_SANDBOX_PASSWORD`  | ⛔ **YOU must create** in App Store Connect › Users and Access › Sandbox, then paste here |
+| Operator postal address (custom-EULA requirement)  | ⛔ **YOU must supply** — Daybot Solutions Inc.'s registered address; add to the Terms      |
+
+Two items are genuinely yours and I have not touched them: the sandbox credentials (I do not create
+accounts or enter credentials on your behalf) and the postal address (I will not invent an address
+into a legal document). Everything else in this table is resolved in the repo.
 
 ---
 
@@ -200,7 +205,7 @@ Store size, uploaded as-is with no scaling).
 | `02-shot-types-placement.png`            | The shot-type breakdown in full, with rally stat tiles above and Player A's four shot-placement quadrants below (11 front-left 7%, 15 front-right 10%, 66 back-left 42%, 64 back-right 41%)                                                                                                                                                     |
 | `03-coverage-heatmap-predictability.png` | Player A's placement quadrants, the 12 × 8 court-coverage heatmap with the "Brighter = more time spent there" key, and the Predictability card — 25%, most common pattern "Back right -> Back right"                                                                                                                                            |
 | `04-library.png`                         | The Library tab: the "Demo match analysis / Sample" card, the "Import & analyze" card, an imported analysis row, and the two-tab bar (Record, Library)                                                                                                                                                                                          |
-| `05-tutorial.png`                        | Page 1 of 5 of the first-run tutorial, "What RacquetIQ does", listing the four things the app measures                                                                                                                                                                                                                                          |
+| `05-tutorial.png`                        | Page 1 of 5 of the first-run tutorial, "What RacketIQ does", listing the four things the app measures                                                                                                                                                                                                                                          |
 
 ### How these were captured
 

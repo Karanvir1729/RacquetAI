@@ -5,6 +5,8 @@ import { accentGlow, colors, MIN_TOUCH_TARGET, radius, spacing } from "@/theme/t
 
 interface ButtonProps {
   label: string;
+  /** A fuller accessible name when the visible label is generic ("Show…"). */
+  accessibilityLabel?: string;
   onPress: () => void;
   variant?: "primary" | "secondary" | "danger";
   loading?: boolean;
@@ -23,6 +25,7 @@ interface ButtonProps {
  */
 export function Button({
   label,
+  accessibilityLabel,
   onPress,
   variant = "primary",
   loading = false,
@@ -42,7 +45,7 @@ export function Button({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       onPress={handlePress}
       disabled={inactive}
       style={({ pressed }) => [

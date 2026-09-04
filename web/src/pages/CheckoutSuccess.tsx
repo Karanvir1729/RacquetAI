@@ -87,7 +87,7 @@ export default function CheckoutSuccess() {
               {phase.kind === "confirming"
                 ? "Confirming with Stripe…"
                 : phase.kind === "done"
-                  ? "You're on RacquetIQ Pro"
+                  ? "You're on RacketIQ Pro"
                   : "Purchase not confirmed"}
             </h1>
 

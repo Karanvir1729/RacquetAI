@@ -6,7 +6,7 @@ import { HERO_HEATMAP, HERO_MATCH, HERO_PLAYER } from "@/data/heroMatch";
 /**
  * The hero centrepiece: one real analysis, shown as the product shows it.
  *
- * RacquetIQ's brand has no mascot (docs/04-branding.md: "the mark is geometry,
+ * RacketIQ's brand has no mascot (docs/04-branding.md: "the mark is geometry,
  * not illustration"), so where Daybot puts a character, this puts the artefact
  * the product actually makes — a court plan with real coverage on it and the
  * read-outs beside it. Every number comes from HERO_MATCH / HERO_PLAYER, which

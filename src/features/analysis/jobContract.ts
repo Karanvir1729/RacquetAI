@@ -23,8 +23,14 @@ import { COURT_CELLS, type CourtCell } from "./types";
  * reach (localhost is a dev-machine-only address and left the fallback dead
  * on device). HTTPS since the Caddy sidecar landed — the plain :8082 port
  * still exists for builds that predate it.
+ *
+ * Our own hostname, not the container group's: the `*.azurecontainer.io`
+ * name ran into Let's Encrypt's 5-certificates-per-week limit on 2026-08-21
+ * (every redeploy re-issued), and a phone pointed at it got a TLS error.
+ * api.racketiq.tech is a CNAME to that same group and Caddy serves both
+ * (analysis/deploy-azure.sh), so this one survives redeploys and moves.
  */
-export const DEFAULT_SERVER_BASE_URL = "https://racquetiq-a7682a.eastus.azurecontainer.io";
+export const DEFAULT_SERVER_BASE_URL = "https://api.racketiq.tech";
 
 /** The five server-side job states, in flow order. */
 export const JOB_STATUSES = [

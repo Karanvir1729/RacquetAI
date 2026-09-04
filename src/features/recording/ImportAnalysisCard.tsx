@@ -82,9 +82,13 @@ export function ImportAnalysisCard() {
             Import & analyze
           </Text>
           <Text style={styles.caption} numberOfLines={2}>
+            {/* Deliberately engine-neutral: the default backend is "device"
+                (backend.ts), so promising the video is "sent to your analysis
+                server" was both wrong for most users and a contradiction of the
+                privacy policy's on-device promise. */}
             {locked
               ? "Subscribe for unlimited match analysis."
-              : "Pick a match video from your library and send it to your analysis server."}
+              : "Pick a match video from your library for shot placement, coverage and rally stats."}
           </Text>
           {/* Null for subscribers and for anyone whose entitlement could not be
               verified — a count means nothing when nothing is being enforced. */}

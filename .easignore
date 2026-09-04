@@ -1,0 +1,30 @@
+# EAS uses this file INSTEAD of .gitignore when it exists, so everything heavy
+# has to be named here explicitly — including things .gitignore already covers.
+#
+# EVERY PATH IS ANCHORED WITH A LEADING SLASH, DELIBERATELY. These are
+# gitignore semantics: an unanchored `analysis/` matches a directory of that
+# name at ANY depth, which silently excluded src/features/analysis/ and failed
+# the build with "Unable to resolve module @/features/analysis/...".
+# Only `node_modules/` is left unanchored, because nested copies should go too.
+
+# Dependencies — reinstalled on the builder from the lockfiles.
+node_modules/
+
+# Xcode derived output and CocoaPods: EAS runs `pod install` on the builder,
+# so Pods is regenerated there (Podfile + Podfile.lock are kept). /ios/build is
+# pure compilation cache — 3 GB of it failed the first upload with ENOSPC.
+/ios/build/
+/ios/Pods/
+
+# Not part of the iOS app.
+/analysis/
+/web/
+/docs/
+/reports/
+/store/
+/dist/
+
+# Local scratch: git worktrees, agent state, VCS.
+/.worktrees/
+/.claude/
+/.git/

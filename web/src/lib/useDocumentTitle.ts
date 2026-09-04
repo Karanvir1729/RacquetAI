@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const BASE_TITLE = "RacquetIQ — See what your squash match actually did";
+const BASE_TITLE = "RacketIQ — See what your squash match actually did";
 
 /**
  * Per-route document title. Pass nothing to restore the site title.
@@ -9,7 +9,7 @@ const BASE_TITLE = "RacquetIQ — See what your squash match actually did";
  */
 export function useDocumentTitle(title?: string) {
   useEffect(() => {
-    document.title = title ? `${title} · RacquetIQ` : BASE_TITLE;
+    document.title = title ? `${title} · RacketIQ` : BASE_TITLE;
     return () => {
       document.title = BASE_TITLE;
     };

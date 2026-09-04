@@ -60,7 +60,16 @@ export function scoreWord(points: number): string {
 export function scoreCall(score: SquashScore): string {
   const serverPoints = score.points[score.server];
   const receiverPoints = score.points[OTHER_SIDE[score.server]];
-  if (serverPoints === receiverPoints) return `${scoreWord(serverPoints)} all`;
+  if (serverPoints === receiverPoints) {
+    // At 10-10 (and every tie above it) the game no longer ends at 11, and a
+    // marker says so — it is the most-argued moment of a game and the one place
+    // an unqualified "ten all" reads like the app lost track. Below the
+    // tie-break there is nothing to qualify: "four all" is complete.
+    const tieBreak = serverPoints >= score.config.pointsPerGame - 1;
+    return tieBreak
+      ? `${scoreWord(serverPoints)} all, a player must win by two points`
+      : `${scoreWord(serverPoints)} all`;
+  }
   return `${scoreWord(serverPoints)}, ${scoreWord(receiverPoints)}`;
 }
 
@@ -104,7 +113,11 @@ function gameWinner(before: SquashScore, after: SquashScore): Side | null {
 function sentence(parts: readonly string[]): string {
   return parts
     .filter((part) => part.length > 0)
-    .map((part) => `${part[0].toUpperCase()}${part.slice(1)}.`)
+    // charAt, not part[0]: the non-empty filter above already guarantees an
+    // index 0, but the web app compiles this same file under
+    // noUncheckedIndexedAccess, where the indexed read is `string | undefined`.
+    // charAt is total and reads the same.
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}.`)
     .join(" ");
 }
 

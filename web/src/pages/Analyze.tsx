@@ -3,15 +3,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { formatBytes } from "@/analysis/format";
+import { useJobVideo } from "@/analysis/useJobVideo";
+import { saveToHistory } from "@/analysis/history";
+import { takePendingUpload } from "@/record/pendingUpload";
 import { useJobFlow, type FlowStage } from "@/analysis/useJobFlow";
 import { CornerPicker } from "@/components/analysis/CornerPicker";
 import { ProgressPanel, StepRail } from "@/components/analysis/FlowProgress";
 import { ResultsView } from "@/components/analysis/ResultsView";
 import { UploadPanel } from "@/components/analysis/UploadPanel";
+import { CoachFeedbackPanel } from "@/components/analysis/CoachFeedbackPanel";
+import { VideoRefereePanel } from "@/components/analysis/VideoRefereePanel";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Section } from "@/components/ui/Section";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
+import { isoDay } from "@/players/shape";
 
 /**
  * The whole journey on one route: upload → mark the court → wait → read-out.
@@ -54,6 +60,11 @@ export default function Analyze() {
   const [params, setParams] = useSearchParams();
   const [localVideo, setLocalVideo] = useState<{ url: string; name: string } | null>(null);
   const resumedRef = useRef(false);
+  const savedRef = useRef<string | null>(null);
+  // The library id the read-out was saved under (null when this browser would
+  // not store it) — the second handle a player tag can hang off, next to the
+  // job id.
+  const [historyId, setHistoryId] = useState<string | null>(null);
 
   useDocumentTitle(stage.kind === "done" ? "Your analysis" : "Analyze a match");
 
@@ -75,12 +86,32 @@ export default function Analyze() {
     setParams({ job: jobId }, { replace: true });
   }, [jobId, jobParam, setParams]);
 
+  // Keep the finished read-out on this browser, so a refresh does not throw
+  // away a match that took minutes of CPU to measure. Keyed by job id: the
+  // effect re-runs on every render while the flow sits in `done`, and rejoining
+  // the same job in a new tab must update the entry rather than stack a copy.
+  useEffect(() => {
+    if (stage.kind !== "done") return;
+    const key = stage.jobId;
+    if (savedRef.current === key) return;
+    savedRef.current = key;
+    setHistoryId(
+      saveToHistory(stage.analysis, {
+        jobId: stage.jobId,
+        title: localVideo?.name ?? "Match analysis",
+        now: new Date(),
+      }),
+    );
+  }, [stage, localVideo]);
+
   const startOver = useCallback(() => {
     setLocalVideo((current) => {
       if (current !== null) URL.revokeObjectURL(current.url);
       return null;
     });
     resumedRef.current = true; // don't re-resume the job we just abandoned
+    savedRef.current = null;
+    setHistoryId(null);
     setParams({}, { replace: true });
     flow.reset();
   }, [flow, setParams]);
@@ -103,20 +134,60 @@ export default function Analyze() {
     [localVideo],
   );
 
+  // Rejoining a job by `?job=` leaves this tab without the file it uploaded,
+  // so ask the server for its working copy. Skipped when the local file is here.
+  const doneJobId = stage.kind === "done" ? stage.jobId : null;
+  const servedVideo = useJobVideo(doneJobId, localVideo !== null);
+  // A take handed over from /record starts analysing on arrival — the visitor
+  // already pressed "Analyze this match", and the file lives in memory, not
+  // anywhere a file dialog could reach. Reading the slot clears it, so a back
+  // button does not re-upload the same take.
+  useEffect(() => {
+    if (resumedRef.current) return;
+    if (stage.kind !== "idle") return;
+    const handedOver = takePendingUpload();
+    if (handedOver === null) return;
+    resumedRef.current = true; // and do not then chase a job id in the URL
+    start(handedOver);
+  }, [stage.kind, start]);
+
+
+
   if (stage.kind === "done") {
+    const playable =
+      localVideo?.url ?? (servedVideo.kind === "ready" ? servedVideo.url : null);
+    const caption =
+      localVideo !== null
+        ? "Played from your own copy of the file. The overlay is drawn from the analysis, not baked into the video. The read-out is kept under Your matches on this browser."
+        : servedVideo.kind === "ready"
+          ? "Played from the server's working copy of your upload — this tab rejoined the job by id, so it did not have your original. The overlay is drawn from the analysis, not baked into the video."
+          : servedVideo.kind === "loading"
+            ? "Fetching the video back from the server…"
+            : servedVideo.kind === "tooLarge"
+              ? `The server still has this match (${formatBytes(servedVideo.bytes)}) but it is too large to load into the page. Open the read-out in the tab that uploaded it to watch it.`
+              : "No video is attached to this analysis — the measurements below still apply. The server keeps an upload for 48 hours, and this one is past that.";
     return (
       <ResultsView
         analysis={stage.analysis}
-        videoSrc={localVideo?.url ?? null}
+        videoSrc={playable}
         eyebrow="Your analysis"
         title={localVideo?.name ?? "Match analysis"}
-        caption={
-          localVideo === null
-            ? "Playing back the video needs the original file, which stays on the device that uploaded it — this tab rejoined the job by id, so only the measurements are here."
-            : "Played from your own copy of the file. The overlay is drawn from the analysis, not baked into the video."
-        }
+        caption={caption}
         action={{ to: "/analyze", label: "Analyze another" }}
-      />
+        clipRef={{
+          jobId: stage.jobId,
+          historyId,
+          title: localVideo?.name ?? "Match analysis",
+          playedAt: isoDay(new Date()),
+        }}
+      >
+        {/* Refereeing needs the footage — the local file when this tab has it,
+            otherwise the copy fetched back from the job. */}
+        <CoachFeedbackPanel analysis={stage.analysis} />
+        {playable === null ? null : (
+          <VideoRefereePanel analysis={stage.analysis} videoSrc={playable} />
+        )}
+      </ResultsView>
     );
   }
 
@@ -167,6 +238,8 @@ export default function Analyze() {
           {stage.kind === "corners" ? (
             <CornerPicker
               frameSrc={stage.frameSrc}
+              frameError={stage.frameError}
+              onRetryFrame={flow.refreshFrame}
               submitting={stage.submitting}
               error={stage.error}
               onSubmit={flow.placeCorners}

@@ -18,8 +18,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AnalysisServerError,
   fetchAnalysis,
+  fetchFrame,
   fetchJobState,
-  frameUrl,
   readApiBase,
   submitCorners,
   uploadVideo,
@@ -47,7 +47,13 @@ export type FlowStage =
   | {
       kind: "corners";
       jobId: string;
+      /**
+       * An object URL for the reference frame, or "" while it is still being
+       * fetched. It is deliberately not the server URL — see `fetchFrame`.
+       */
       frameSrc: string;
+      /** Non-null when the frame could not be fetched; the marks step waits. */
+      frameError: string | null;
       submitting: boolean;
       /** A rejected POST stays on this stage: the marks are still good. */
       error: string | null;
@@ -72,6 +78,8 @@ export interface JobFlow {
   /** Rejoin a job by id — used to restore from `?job=` on load. */
   resume: (jobId: string) => void;
   placeCorners: (corners: CourtCorners) => void;
+  /** Ask for the reference frame again after a dropped request. */
+  refreshFrame: () => void;
   /** Abort an in-flight upload, or clear a finished/failed run. */
   reset: () => void;
 }
@@ -80,17 +88,36 @@ export function useJobFlow(): JobFlow {
   const [stage, setStage] = useState<FlowStage>({ kind: "idle" });
   const [apiBase, setApiBase] = useState<string>(() => readApiBase());
   const uploadRef = useRef<UploadHandle | null>(null);
+  /** Bumped to re-request the reference frame. */
+  const [frameAttempt, setFrameAttempt] = useState(0);
+  /** The object URL currently handed to the picker, so it can be revoked. */
+  const frameObjectUrl = useRef<string | null>(null);
   // Guards every async continuation: a stale upload or fetch resolving after
   // the user hit "start over" must not resurrect the old job's UI.
   const runRef = useRef(0);
+
+  /** Hand the object URL back to the browser; safe to call twice. */
+  const releaseFrame = useCallback(() => {
+    if (frameObjectUrl.current === null) return;
+    URL.revokeObjectURL(frameObjectUrl.current);
+    frameObjectUrl.current = null;
+  }, []);
 
   useEffect(
     () => () => {
       runRef.current += 1;
       uploadRef.current?.cancel();
+      releaseFrame();
     },
-    [],
+    [releaseFrame],
   );
+
+  const refreshFrame = useCallback(() => {
+    setStage((current) =>
+      current.kind === "corners" ? { ...current, frameSrc: "", frameError: null } : current,
+    );
+    setFrameAttempt((current) => current + 1);
+  }, []);
 
   const start = useCallback(
     (file: File) => {
@@ -201,9 +228,10 @@ export function useJobFlow(): JobFlow {
           setStage({
             kind: "corners",
             jobId,
-            // Cache-bust per job: the browser must not reuse a frame from an
-            // earlier job at the same path when the dev server restarts.
-            frameSrc: frameUrl(apiBase, jobId, Date.now()),
+            // Empty until the authenticated fetch below lands — the picker
+            // shows a loading frame rather than a broken one.
+            frameSrc: "",
+            frameError: null,
             submitting: false,
             error: null,
           });
@@ -260,6 +288,58 @@ export function useJobFlow(): JobFlow {
     };
   }, [apiBase, jobId]);
 
+  // ---- the reference frame ------------------------------------------------
+  // Fetched here rather than linked from the picker's <img>, because the /jobs
+  // routes want a bearer token an <img> tag has no way to send. See fetchFrame.
+  const cornersJobId = stage.kind === "corners" ? stage.jobId : null;
+
+  useEffect(() => {
+    if (cornersJobId === null) return;
+    const controller = new AbortController();
+    let cancelled = false;
+
+    fetchFrame(apiBase, cornersJobId, controller.signal).then(
+      (blob) => {
+        if (cancelled) return;
+        // Replacing a frame frees the one it replaces; the picker is handed
+        // the new URL in the same commit, so nothing renders a dead one.
+        releaseFrame();
+        const src = URL.createObjectURL(blob);
+        frameObjectUrl.current = src;
+        setStage((current) =>
+          current.kind === "corners" && current.jobId === cornersJobId
+            ? { ...current, frameSrc: src, frameError: null }
+            : current,
+        );
+      },
+      (error: unknown) => {
+        if (cancelled || controller.signal.aborted) return;
+        setStage((current) =>
+          current.kind === "corners" && current.jobId === cornersJobId
+            ? {
+                ...current,
+                frameSrc: "",
+                frameError: errorMessage(error, "Could not load the reference frame."),
+              }
+            : current,
+        );
+      },
+    );
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [apiBase, cornersJobId, frameAttempt, releaseFrame]);
+
+  // Leaving the corners step frees the frame. Keyed on the job alone, so a
+  // retry (which bumps frameAttempt) does not revoke the URL out from under a
+  // picker that is still showing it.
+  useEffect(() => {
+    if (cornersJobId === null) return;
+    return releaseFrame;
+  }, [cornersJobId, releaseFrame]);
+
   // ---- the finished analysis ---------------------------------------------
   // Its own effect, with its own controller, keyed on being in the "fetching"
   // stage: two megabytes of pose data takes a moment, and the download must
@@ -291,5 +371,5 @@ export function useJobFlow(): JobFlow {
     };
   }, [apiBase, fetchingJobId]);
 
-  return { stage, apiBase, setApiBase, start, resume, placeCorners, reset };
+  return { stage, apiBase, setApiBase, start, resume, placeCorners, refreshFrame, reset };
 }

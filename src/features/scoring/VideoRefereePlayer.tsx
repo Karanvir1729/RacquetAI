@@ -180,6 +180,25 @@ export function VideoRefereePlayer({
   const calledRef = useRef(0);
   /** Where the playhead was last seen, so reattaching can resume from it. */
   const timeRef = useRef(0);
+
+  // A NEW result — "Swap players", or "X served first" — is a different
+  // scoreline over the same footage, and the parent clears the events to fold
+  // it again. `calledRef` is a ref, so it survived that and kept its old count:
+  // on a video already played to the end it stayed at the total, every
+  // `advance` and `playToEnd` early-returned, and the board sat at 0-0 forever
+  // while the caption still read "All N rallies called". Re-derive the count
+  // from where the playhead actually is whenever the result identity changes,
+  // and re-sync so the board matches immediately.
+  useEffect(() => {
+    calledRef.current = calledBy(result.rallies, timeRef.current);
+    setCalled(calledRef.current);
+    if (!detached) {
+      onSync(eventsAfter(result.rallies, calledRef.current), null);
+    }
+    // Keyed on the result identity alone: this must run when the scoreline is
+    // re-derived, not on every tick that changes `detached` or the callback.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result]);
   // The overlay pieces, the MatchVideoCard recipe: the measured box for
   // letterboxing, and an INDEX into the track samples rather than the raw
   // time, so a tick that lands on the same sample re-renders nothing. Seeded

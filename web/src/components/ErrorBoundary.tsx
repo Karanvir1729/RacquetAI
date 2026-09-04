@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<PropsWithChildren, ErrorBoundarySta
       <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col justify-center gap-4 px-5 py-16 text-center sm:px-6">
         <h1 className="rq-h3">Something broke</h1>
         <p className="rq-body" style={{ color: "var(--rq-text-dim)" }}>
-          RacquetIQ hit an unexpected error. Nothing you uploaded has gone anywhere — this is only
+          RacketIQ hit an unexpected error. Nothing you uploaded has gone anywhere — this is only
           a display problem.
         </p>
         <div className="mt-2 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center">

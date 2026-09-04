@@ -6,6 +6,7 @@ import { ShotTypeBars } from "@/components/analysis/ShotTypeBars";
 import { CourtPlan } from "@/components/CourtPlan";
 import { Card, Hairline } from "@/components/ui/Card";
 import { Meter, Stat } from "@/components/ui/Stat";
+import type { ReactNode } from "react";
 
 /**
  * Names the busiest cell of a coverage heatmap the way a coach would: row 0 is
@@ -50,9 +51,19 @@ function busiestRegion(rows: number, cols: number, values: readonly number[]): s
 export function PlayerPanel({
   player,
   shots,
+  namedAs = null,
+  headerExtra,
 }: {
   player: PlayerAnalysis;
   shots: readonly ShotEvent[];
+  /**
+   * The person this side was tagged as, when the read-out was opened from
+   * their profile. "Player A" is a position in the footage, not a name — this
+   * is what answers "which of these two am I looking at?".
+   */
+  namedAs?: string | null;
+  /** Rendered after the heading — the "name this player" control, when the read-out has an id to tag against. */
+  headerExtra?: ReactNode;
 }) {
   const counts = countShotTypes(shots, player.id);
   const { predictability, coverageHeatmap } = player;
@@ -69,12 +80,30 @@ export function PlayerPanel({
   return (
     <Card className="flex flex-col p-5 sm:p-6">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <div className="flex items-center gap-2.5">
-          <span
-            className="inline-block h-2.5 w-2.5 rounded-full"
-            style={{ background: player.id === "A" ? "var(--rq-data)" : "var(--rq-text)" }}
-          />
-          <h3 className="rq-h3">{player.label}</h3>
+        {/* Heading and whatever rides with it wrap as a unit, so at 375px the
+            extra drops under the name rather than pushing the shot count off
+            the row. */}
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+          <div className="flex items-center gap-2.5">
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-full"
+              style={{ background: player.id === "A" ? "var(--rq-data)" : "var(--rq-text)" }}
+            />
+            <h3 className="rq-h3">{namedAs ?? player.label}</h3>
+            {namedAs === null || namedAs === undefined ? null : (
+              <span
+                className="rq-caption whitespace-nowrap rounded-full px-2 py-0.5"
+                style={{
+                  color: "var(--rq-accent-text)",
+                  background: "var(--rq-accent-soft)",
+                  border: "1px solid var(--rq-accent-line)",
+                }}
+              >
+                {player.label}
+              </span>
+            )}
+          </div>
+          {headerExtra}
         </div>
         <p className="rq-num text-[13px]" style={{ color: "var(--rq-text-dim)" }}>
           {player.shots} shots

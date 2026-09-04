@@ -25,7 +25,7 @@ export interface TutorialStep {
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   {
     icon: "analytics",
-    title: "What RacquetIQ does",
+    title: "What RacketIQ does",
     lead: "It watches your squash match and tells you how you actually played.",
     points: [
       "Where every one of your shots landed — front, back, left, right",

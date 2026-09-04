@@ -60,7 +60,19 @@ _RAW_ORIGINS = (os.environ.get("WEB_ORIGINS")
                 or "http://localhost:5183")
 WEB_ORIGINS = [o.strip().rstrip("/") for o in _RAW_ORIGINS.split(",") if o.strip()]
 ADMIN_USER = os.environ.get("ADMIN_USERNAME", "admin")
-ADMIN_PASS = os.environ.get("ADMIN_PASSWORD", "admin")
+# NO DEFAULT PASSWORD, and "admin" is refused outright.
+#
+# This shipped as `os.environ.get("ADMIN_PASSWORD", "admin")` with
+# ADMIN_PASSWORD=admin in the deployed .env, which meant /admin/metrics —
+# every user's email address, their signup provider, and the Stripe customer
+# and subscription ids, all read with the Supabase SERVICE ROLE key — was
+# readable from the open internet by anyone who tried admin/admin.
+#
+# An unset or obviously-default password now disables the endpoint instead of
+# weakly protecting it: a 503 is a bug report, a leak is not.
+ADMIN_PASS = os.environ.get("ADMIN_PASSWORD", "")
+_WEAK_ADMIN_PASSWORDS = {"", "admin", "password", "changeme", "racquetiq", "racketiq"}
+ADMIN_ENABLED = ADMIN_PASS.lower() not in _WEAK_ADMIN_PASSWORDS
 PRICES = {
     "monthly": os.environ.get("STRIPE_PRICE_MONTHLY", ""),
     "yearly": os.environ.get("STRIPE_PRICE_YEARLY", ""),
@@ -208,6 +220,29 @@ def _active_purchase(user_id):
     return active, rows
 
 
+def _trial_ends_at(user_id):
+    """The launch trial: profiles.pro_trial_ends_at, stamped by the signup
+    trigger for accounts created during the offer. Returns the ISO timestamp
+    while it is still in the future, else None. Deliberately NOT part of
+    _active_purchase(): the checkout duplicate-guard must keep letting a
+    trial user subscribe."""
+    try:
+        rows = _sb_select("profiles", {
+            "id": f"eq.{user_id}", "select": "pro_trial_ends_at",
+        })
+    except requests.RequestException:
+        return None  # a missing column or a blip must not break /billing/status
+    ends = (rows[0].get("pro_trial_ends_at") if rows else None) or None
+    if not isinstance(ends, str):
+        return None
+    try:
+        when = datetime.datetime.fromisoformat(ends.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    now = datetime.datetime.now(datetime.timezone.utc)
+    return ends if when > now else None
+
+
 # ---------------------------------------------------------------- billing
 @platform_bp.route("/billing/<path:_sub>", methods=["OPTIONS"])
 @platform_bp.route("/admin/<path:_sub>", methods=["OPTIONS"])
@@ -311,8 +346,12 @@ def billing_status():
     if user is None:
         return jsonify({"error": "sign in required"}), 401
     active, rows = _active_purchase(user["id"])
+    # A paid subscription outranks the launch trial; clients get the trial
+    # timestamp only when it is what carries their Pro.
+    trial = _trial_ends_at(user["id"]) if active is None else None
     return jsonify({"active": active is not None,
                     "plan": active.get("plan") if active else None,
+                    "trialEndsAt": trial,
                     "purchases": rows})
 
 
@@ -336,10 +375,24 @@ def billing_webhook():
 
 # ---------------------------------------------------------------- admin
 def _admin_authed():
+    # Fail closed: with no ADMIN_PASSWORD set, or a default-ish one, there is no
+    # credential worth checking and the endpoint is off.
+    if not ADMIN_ENABLED:
+        return False
     auth = request.authorization
     return (auth is not None and auth.type == "basic"
             and hmac.compare_digest(auth.username or "", ADMIN_USER)
             and hmac.compare_digest(auth.password or "", ADMIN_PASS))
+
+
+def _mask_email(email):
+    """`karanvir@example.com` -> `k••••••r@example.com`. None stays None."""
+    if not email or "@" not in email:
+        return email
+    local, _, domain = email.partition("@")
+    if len(local) <= 2:
+        return f"{local[:1]}•@{domain}"
+    return f"{local[0]}{'•' * (len(local) - 2)}{local[-1]}@{domain}"
 
 
 def _day(ts):
@@ -358,9 +411,16 @@ def _daily_series(rows, days=30):
 
 @platform_bp.route("/admin/metrics")
 def admin_metrics():
+    # Distinguish "off" from "wrong password" for the operator, without telling
+    # an anonymous prober anything they can use.
+    if not ADMIN_ENABLED:
+        return jsonify({
+            "error": "Admin metrics are disabled: set ADMIN_PASSWORD to a strong, "
+                     "non-default value and redeploy."
+        }), 503
     if not _admin_authed():
         return (jsonify({"error": "unauthorized"}), 401,
-                {"WWW-Authenticate": 'Basic realm="racquetiq-admin"'})
+                {"WWW-Authenticate": 'Basic realm="racketiq-admin"'})
     if not _configured():
         return jsonify({"error": "platform not configured on this server"}), 503
 
@@ -405,7 +465,11 @@ def admin_metrics():
         "eventsByPlatform": [{"platform": k, "count": v}
                              for k, v in by_platform.most_common()],
         "recentEvents": events[:50],
-        "recentUsers": [{"id": u.get("id"), "email": u.get("email"),
+        # Emails are MASKED. A signup dashboard needs to show that an account
+        # exists and roughly who it is, not to hand the full address list to
+        # anything that reaches this endpoint. Full addresses live in Supabase,
+        # behind the service-role key, for the one operator who needs them.
+        "recentUsers": [{"id": u.get("id"), "email": _mask_email(u.get("email")),
                          "createdAt": u.get("created_at"),
                          "provider": ((u.get("app_metadata") or {})
                                       .get("provider"))}

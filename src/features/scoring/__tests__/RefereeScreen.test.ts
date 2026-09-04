@@ -52,6 +52,12 @@ jest.mock("react-native-safe-area-context", () => ({
 
 jest.mock("expo-router", () => ({
   router: { canGoBack: () => true, back: jest.fn(), replace: jest.fn() },
+  // The screen holds a keep-awake for as long as it is focused; under the test
+  // renderer there is no navigator, so run the effect once and keep its cleanup.
+  useFocusEffect: (effect: () => void | (() => void)) => {
+    const { useEffect } = require("react") as typeof import("react");
+    useEffect(() => effect(), [effect]);
+  },
 }));
 
 jest.mock("expo-speech", () => {

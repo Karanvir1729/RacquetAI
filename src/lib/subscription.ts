@@ -228,6 +228,44 @@ export async function refresh(): Promise<EntitlementState> {
   return next;
 }
 
+/**
+ * Bind the store to the signed-in user so a subscription follows the account,
+ * not the device. Called when a session appears. A no-op — and never throws —
+ * when purchases are unconfigured or the SDK predates logIn (Expo Go, a build
+ * without the pod, the injected test doubles). Re-reads the entitlement after,
+ * because logIn returns the newly-identified user's CustomerInfo.
+ */
+export async function identifyUser(userId: string): Promise<EntitlementState> {
+  const active = activeSdk();
+  if (active !== null && typeof active.logIn === "function") {
+    try {
+      await active.logIn(userId);
+    } catch {
+      // A failed identify leaves the anonymous app-user in place; refresh()
+      // still reports whatever entitlement that user has. Never blocks sign-in.
+    }
+  }
+  return refresh();
+}
+
+/**
+ * Return the store to a fresh anonymous app-user on sign-out, so the next
+ * account on a shared or resold phone cannot inherit the previous user's Pro.
+ * A no-op — and never throws — when unconfigured or on an SDK without logOut
+ * (RevenueCat also rejects logOut for an already-anonymous user; swallowed).
+ */
+export async function forgetUser(): Promise<EntitlementState> {
+  const active = activeSdk();
+  if (active !== null && typeof active.logOut === "function") {
+    try {
+      await active.logOut();
+    } catch {
+      // Best effort; refresh() re-reads whatever user is now active.
+    }
+  }
+  return refresh();
+}
+
 // ---------------------------------------------------------------------------
 // Offerings
 // ---------------------------------------------------------------------------
@@ -354,7 +392,7 @@ export function useEntitlement(): EntitlementState {
  *
  * Subscribing, cancelling and expiring all happen OUTSIDE this app — in
  * Settings › Subscriptions, or on another device — and that trip backgrounds
- * RacquetIQ without ever unfocusing the screen the user left, so a focus effect
+ * RacketIQ without ever unfocusing the screen the user left, so a focus effect
  * never fires on the way back. Without this, a subscription bought in Settings
  * stays invisible (and a cancelled one stays honoured) until a relaunch.
  *
